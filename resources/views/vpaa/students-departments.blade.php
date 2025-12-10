@@ -60,16 +60,5 @@
 </div>
 @endsection
 
-@push('scripts')
-<script>
- document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('#department-selection .subject-card[data-url]').forEach(card => {
-        card.addEventListener('click', () => {
-            window.location.href = card.dataset.url;
-        });
-    });
- });
-</script>
-@endpush
-
 {{-- Styles: resources/css/vpaa/cards.css --}}
+{{-- JavaScript: resources/js/pages/vpaa/students-departments.js --}}

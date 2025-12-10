@@ -151,36 +151,5 @@
         </div>
     @endif
 </div>
-
-@push('scripts')
-<script>
-    function updateCourses() {
-        const departmentId = document.getElementById('department_id').value;
-        const courseSelect = document.getElementById('course_id');
-        
-        if (departmentId) {
-            // Fetch courses for the selected department
-            fetch(`/api/departments/${departmentId}/courses`)
-                .then(response => response.json())
-                .then(data => {
-                    courseSelect.innerHTML = '<option value="">Select Course</option>';
-                    data.forEach(course => {
-                        const option = document.createElement('option');
-                        option.value = course.id;
-                        option.textContent = `${course.course_code} - ${course.name}`;
-                        courseSelect.appendChild(option);
-                    });
-                    courseSelect.disabled = false;
-                })
-                .catch(error => {
-                    console.error('Error fetching courses:', error);
-                    courseSelect.innerHTML = '<option value="">Error loading courses</option>';
-                });
-        } else {
-            courseSelect.innerHTML = '<option value="">Select Course</option>';
-            courseSelect.disabled = true;
-        }
-    }
-</script>
-@endpush
+{{-- JavaScript: resources/js/pages/vpaa/grades.js --}}
 @endsection

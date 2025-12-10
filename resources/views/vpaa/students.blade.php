@@ -106,24 +106,5 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const departmentSelect = document.getElementById('department_id');
-        const courseSelect = document.getElementById('course_id');
-        
-        departmentSelect.addEventListener('change', function() {
-            if (this.value) {
-                // Enable course select and fetch courses for the selected department
-                courseSelect.disabled = false;
-            } else {
-                // Disable and reset course select if no department is selected
-                courseSelect.disabled = true;
-                courseSelect.innerHTML = '<option value="">All Courses</option>';
-            }
-        });
-    });
-</script>
-@endpush
+{{-- JavaScript: resources/js/pages/vpaa/students.js --}}
 @endsection

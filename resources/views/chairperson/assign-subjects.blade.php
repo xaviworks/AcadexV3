@@ -265,51 +265,8 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-    function openConfirmUnassignModal(subjectId, subjectName) {
-        document.getElementById('unassign_subject_id').value = subjectId;
-        const modal = document.getElementById('confirmUnassignModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('d-flex');
-    }
-
-    function closeConfirmUnassignModal() {
-        const modal = document.getElementById('confirmUnassignModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('d-flex');
-    }
-
-    function openConfirmAssignModal(subjectId, subjectName) {
-        document.getElementById('assign_subject_id').value = subjectId;
-        const modal = document.getElementById('confirmAssignModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('d-flex');
-    }
-
-    function closeConfirmAssignModal() {
-        const modal = document.getElementById('confirmAssignModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('d-flex');
-    }
-
-    function toggleViewMode() {
-        const mode = document.getElementById('viewMode').value;
-        const yearView = document.getElementById('yearView');
-        const fullView = document.getElementById('fullView');
-
-        if (mode === 'full') {
-            yearView.classList.add('d-none');
-            fullView.classList.remove('d-none');
-        } else {
-            yearView.classList.remove('d-none');
-            fullView.classList.add('d-none');
-        }
-    }
-</script>
-@endpush
 {{-- Styles: resources/css/chairperson/common.css --}}
+{{-- JavaScript: resources/js/pages/chairperson/assign-subjects.js --}}
 
     </div>
 </div>

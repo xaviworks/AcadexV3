@@ -165,26 +165,5 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const yearFilter = document.getElementById('yearFilter');
-    const table = document.getElementById('studentsTable');
-    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-
-    yearFilter.addEventListener('change', function() {
-        const selectedYear = this.value;
-        
-        for (let row of rows) {
-            if (!selectedYear || row.getAttribute('data-year') === selectedYear) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        }
-    });
-});
-</script>
-@endpush
+{{-- JavaScript: resources/js/pages/gecoordinator/students-by-year.js --}}
 @endsection

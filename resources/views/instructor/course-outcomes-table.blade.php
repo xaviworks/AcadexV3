@@ -467,42 +467,15 @@
 @endsection
 
 @push('scripts')
-<!-- Include external course outcomes table JavaScript -->
-<script src="{{ asset('js/course-outcomes-table.js') }}"></script>
-
-<!-- Pass PHP data to JavaScript -->
+{{-- JavaScript moved to: resources/js/pages/instructor/course-outcomes-table.js --}}
+{{-- Pass PHP data to JavaScript --}}
 <script>
-// Set subject code for JavaScript functions
 @if(isset($selectedSubject))
-    window.courseOutcomesData = {
+    window.pageData = {
         subjectCode: '{{ $selectedSubject->subject_code }}',
         userCanEdit: {{ (Auth::user()->isChairperson() || Auth::user()->isGECoordinator()) ? 'true' : 'false' }}
     };
 @endif
-
-// Modal Functions (kept inline as they need Blade syntax)
-function openEditModal(id, coCode, identifier, description) {
-    // Populate the form fields
-    document.getElementById('edit_co_code').value = coCode;
-    document.getElementById('edit_co_identifier').value = identifier;
-    document.getElementById('edit_description').value = description;
-    
-    // Set the form action URL
-    document.getElementById('editForm').action = `/instructor/course_outcomes/${id}`;
-    
-    // Show the modal
-    modal.open('editCourseOutcomeModal', { id, coCode, coDescription });
-}
-
-function openDeleteModal(id, coCode) {
-    document.getElementById('delete_co_code').textContent = coCode;
-    
-    // Set the form action URL
-    document.getElementById('deleteForm').action = `/instructor/course_outcomes/${id}`;
-    
-    // Show the modal
-    modal.open('deleteCourseOutcomeModal', { id, coCode });
-}
 </script>
 @endpush
 

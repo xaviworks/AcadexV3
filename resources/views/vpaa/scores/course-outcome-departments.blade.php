@@ -63,16 +63,6 @@
 </div>
 @endsection
 
-@push('scripts')
-<script>
- document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('#department-selection .subject-card[data-url]').forEach(card => {
-        card.addEventListener('click', () => {
-            window.location.href = card.dataset.url;
-        });
-    });
- });
-</script>
-@endpush
+{{-- JavaScript moved to: resources/js/pages/vpaa/scores/course-outcome-departments.js --}}
 
 {{-- Styles: resources/css/vpaa/cards.css --}}

@@ -70,16 +70,7 @@
 @endsection
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Subject card click handlers
-    document.querySelectorAll('.subject-card[data-url]').forEach(card => {
-        card.addEventListener('click', function() {
-            window.location.href = this.dataset.url;
-        });
-    });
-});
-</script>
+{{-- JavaScript moved to: resources/js/pages/instructor/scores/course-outcome-results-wildcards.js --}}
 @endpush
 
 {{-- Styles: resources/css/instructor/subject-cards.css --}}

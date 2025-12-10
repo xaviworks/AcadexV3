@@ -156,17 +156,6 @@
     @endforeach
 </div>
 
-@push('scripts')
-<script>
-    // Initialize tooltips
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-</script>
-@endpush
-
 {{-- Styles: resources/css/vpaa/common.css --}}
+{{-- JavaScript: resources/js/pages/vpaa/departments.js --}}
 @endsection

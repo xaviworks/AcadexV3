@@ -55,41 +55,4 @@
 </div>
 @endsection
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const select = document.getElementById('academic-period-select');
-        const periodInput = document.getElementById('selected-academic-period');
-        const yearInput = document.getElementById('selected-academic-year');
-        const semesterInput = document.getElementById('selected-semester');
-        const continueButton = document.getElementById('continue-button');
-
-        const syncSelection = () => {
-            const option = select.options[select.selectedIndex];
-            const hasSelection = option && option.value !== '';
-
-            continueButton.disabled = ! hasSelection;
-
-            if (! hasSelection) {
-                periodInput.value = '';
-                yearInput.value = '';
-                semesterInput.value = '';
-                return;
-            }
-
-            if (option.value === 'all') {
-                periodInput.value = 'all';
-                yearInput.value = '';
-                semesterInput.value = '';
-            } else {
-                periodInput.value = option.value;
-                yearInput.value = option.dataset.year ?? '';
-                semesterInput.value = option.dataset.semester ?? '';
-            }
-        };
-
-        select.addEventListener('change', syncSelection);
-        syncSelection();
-    });
-</script>
-@endpush
+{{-- JavaScript moved to: resources/js/pages/admin/grades-formula-select-period.js --}}

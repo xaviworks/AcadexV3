@@ -203,67 +203,7 @@
 </div>
 @endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const structureTypeInput = document.getElementById('structure-type-input');
-    const structureConfigInput = document.getElementById('structure-config-input');
-    const weightDisplay = document.getElementById('weight-display');
-    const templateRadios = document.querySelectorAll('.structure-template-radio');
-
-    function updateWeightDisplay(structure) {
-        if (!structure || typeof structure !== 'object') {
-            weightDisplay.innerHTML = '<p class="text-muted small mb-0">No weights available</p>';
-            return;
-        }
-
-        let html = '<div class="d-flex flex-wrap gap-2">';
-        
-        function flattenWeights(obj, prefix = '') {
-            const weights = [];
-            for (const [key, value] of Object.entries(obj)) {
-                if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-                    weights.push(...flattenWeights(value, key + ' '));
-                } else if (typeof value === 'number') {
-                    const label = (prefix + key).trim().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                    weights.push({ label, percent: Math.round(value) });
-                }
-            }
-            return weights;
-        }
-
-        const weights = flattenWeights(structure);
-        weights.forEach(weight => {
-            html += `<span class="badge bg-info-subtle text-info">${weight.label} ${weight.percent}%</span>`;
-        });
-        
-        html += '</div>';
-        weightDisplay.innerHTML = html;
-    }
-
-    templateRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.checked) {
-                const templateKey = this.value;
-                const structureData = JSON.parse(this.dataset.structure || '{}');
-                
-                structureTypeInput.value = templateKey;
-                structureConfigInput.value = JSON.stringify(structureData);
-                
-                updateWeightDisplay(structureData);
-            }
-        });
-    });
-
-    // Initialize on page load
-    const checkedRadio = document.querySelector('.structure-template-radio:checked');
-    if (checkedRadio) {
-        const structureData = JSON.parse(checkedRadio.dataset.structure || '{}');
-        updateWeightDisplay(structureData);
-    }
-});
-</script>
-@endpush
+{{-- JavaScript moved to: resources/js/pages/admin/grades-formula-edit-global.js --}}
 
 {{-- Styles: resources/css/admin/grades-formula.css --}}
 @push('styles')

@@ -373,28 +373,4 @@
 </div>
 @endsection
 {{-- Styles: resources/css/dashboard/common.css --}}
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl, {
-            trigger: 'hover'
-        });
-    });
-    
-    // Add hover effect to status cards
-    document.querySelectorAll('.status-card').forEach(function(card) {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
-    });
-});
-</script>
-@endpush
+{{-- JavaScript: resources/js/pages/dashboard/chairperson.js --}}

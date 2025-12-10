@@ -409,15 +409,11 @@
 </div>
 
 @push('scripts')
+{{-- JavaScript moved to: resources/js/pages/admin/users.js --}}
 <script>
-    async function enableUser(userId, userName) {
-        const confirmed = await window.confirm.ask({
-            title: 'Re-enable Account?',
-            message: `Are you sure you want to re-enable ${userName}?`,
-            confirmText: 'Yes, Re-enable',
-            cancelText: 'Cancel',
-            type: 'info'
-        });
+    // Functions loaded from external JS file
+</script>
+@endpush
         
         if (!confirmed) return;
         
