@@ -88,25 +88,5 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-    $(document).ready(function() {
-        $('#coursesTable').DataTable({
-            order: [[2, 'asc'], [0, 'asc']], // Sort by Department then Code
-            language: {
-                search: "_INPUT_",
-                searchPlaceholder: "Search programs...",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ programs",
-                emptyTable: "No programs found"
-            },
-            // Keep default ordering behavior. No explicit columnDefs needed after removing Actions column.
-        });
-    });
-
-    function showModal() {
-        modal.open('courseModal');
-    }
-</script>
-@endpush
+{{-- JavaScript is loaded via resources/js/pages/admin/courses.js --}}
 @endsection

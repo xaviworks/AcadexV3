@@ -74,25 +74,5 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-    $(document).ready(function() {
-        $('#departmentsTable').DataTable({
-            order: [[1, 'asc']], // Sort by Code by default
-            language: {
-                search: "_INPUT_",
-                searchPlaceholder: "Search departments...",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ departments",
-                emptyTable: "No departments found"
-            },
-            // Keep default ordering behavior after removing Actions column
-        });
-    });
-
-    function showModal() {
-        modal.open('departmentModal');
-    }
-</script>
-@endpush
+{{-- JavaScript is loaded via resources/js/pages/admin/departments.js --}}
 @endsection

@@ -148,39 +148,5 @@
 </div>
 @endif
 
-@push('scripts')
-<script>
-    $(document).ready(function() {
-        $('#subjectsTable').DataTable({
-            order: [[1, 'asc']], // Sort by Code
-            language: {
-                search: "_INPUT_",
-                searchPlaceholder: "Search courses...",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ courses",
-                emptyTable: "No courses found"
-            },
-            // Keep default ordering behavior after removing Actions column
-        });
-
-        // Filter courses based on selected department
-        $('#department-select').change(function() {
-            const departmentId = $(this).val();
-            const courseSelect = $('#course-select');
-            
-            // Reset course selection
-            courseSelect.val('');
-            
-            // Show/hide courses based on department
-            courseSelect.find('option').each(function() {
-                if (!departmentId || $(this).val() === '' || $(this).data('department') == departmentId) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
-            });
-        });
-    });
-</script>
-@endpush
+{{-- JavaScript is loaded via resources/js/pages/admin/subjects.js --}}
 @endsection

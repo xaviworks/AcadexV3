@@ -7,6 +7,9 @@ import { getDeviceFingerprint } from './fingerprint';
 import './stores'; // Initialize Alpine stores
 import './store-helpers'; // Global helper functions
 
+// Import page-specific scripts (auto-initialize on DOMContentLoaded)
+import './pages/index.js';
+
 window.Alpine = Alpine;
 
 Alpine.start();
