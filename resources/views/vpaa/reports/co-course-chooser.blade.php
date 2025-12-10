@@ -60,10 +60,4 @@
 </div>
 
 {{-- Styles: resources/css/vpaa/cards.css --}}
-  .course-circle h5 { 
-    font-size: 0.95rem; 
-  }
-}
-</style>
-@endpush
 @endsection
