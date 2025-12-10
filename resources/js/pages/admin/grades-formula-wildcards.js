@@ -1132,8 +1132,16 @@ function initStructureTemplateManagement(config) {
     });
 }
 
-// Auto-initialize on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', initGradesFormulaWildcards);
+// Auto-initialize on DOMContentLoaded - only on admin grades formula wildcards page
+document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize if we're on the admin grades formula wildcards page
+    // Check for page-specific elements that only exist on that page
+    if (document.querySelector('[data-section-container]') || 
+        document.getElementById('create-template-modal') ||
+        document.querySelector('[data-page="admin-grades-formula-wildcards"]')) {
+        initGradesFormulaWildcards();
+    }
+});
 
 // Expose function globally
 window.initGradesFormulaWildcards = initGradesFormulaWildcards;
