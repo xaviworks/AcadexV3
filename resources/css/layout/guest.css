@@ -2,7 +2,8 @@
 
 body {
     background-color: #023336; /* Fallback color */
-    background: url('/images/bg.jpg') no-repeat center center fixed;
+    /* Use CSS variable injected by Blade for the correct image path. No hardcoded fallback to avoid incorrect root-relative paths under subdirectories. */
+    background: var(--guest-background) no-repeat center center fixed;
     background-size: cover;
 }
 
@@ -66,4 +67,9 @@ body {
 .glass-card::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 4px;
+}
+
+/* Scrollbar track: make it transparent to avoid white line on right edge in some browsers */
+.glass-card::-webkit-scrollbar-track {
+    background: transparent;
 }

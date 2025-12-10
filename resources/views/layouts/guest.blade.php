@@ -6,7 +6,13 @@
     <title>{{ config('app.name', 'ACADEX') }}</title>
 
     <!-- Preload Background Image -->
-    <link rel="preload" as="image" href="/images/bg.jpg">
+    <link rel="preload" as="image" href="{{ asset('images/bg.jpg') }}">
+    <!-- Set the CSS variable early so the preloaded image is used across the page -->
+    <style>
+        :root {
+            --guest-background: url('{{ asset('images/bg.jpg') }}');
+        }
+    </style>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -22,11 +28,11 @@
 
     {{-- Styles: resources/css/layout/guest.css (loaded via guest-entry.css) --}}
 </head>
-<body class="text-white">
+    <body class="text-white" style="--guest-background: url('{{ asset('images/bg.jpg') }}'); background-image: var(--guest-background); background-size: cover; background-attachment: fixed; background-position: center center;">
 
     <!-- Branding Section -->
     <div class="branding-container">
-        <img src="/logo.jpg" alt="ACADEX Logo">
+        <img src="{{ asset('logo.jpg') }}" alt="ACADEX Logo">
         <div class="branding-text">
             <h1>ACADEX</h1>
             <p>Fides et Servitium</p>

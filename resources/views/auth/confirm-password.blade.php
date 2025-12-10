@@ -26,7 +26,7 @@
         </div>
 
         <div class="flex justify-end">
-            <x-primary-button class="bg-green-700 hover:bg-green-800 text-white">
+            <x-primary-button class="bg-green-700 hover:bg-green-800 text-black dark:text-white">
                 {{ __('Confirm') }}
             </x-primary-button>
         </div>

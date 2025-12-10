@@ -28,7 +28,7 @@
         </div>
 
         <div class="flex items-center justify-end">
-            <x-primary-button class="bg-green-700 hover:bg-green-800 text-white">
+            <x-primary-button class="bg-green-700 hover:bg-green-800 text-black dark:text-white">
                 {{ __('Email Password Reset Link') }}
             </x-primary-button>
         </div>

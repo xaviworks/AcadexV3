@@ -111,7 +111,7 @@
         {{-- Submit --}}
         <div class="flex items-center justify-between pt-4">
             <a href="{{ route('login') }}" class="text-sm text-green-300 hover:underline">Already registered?</a>
-            <x-primary-button class="bg-green-700 hover:bg-green-800 text-white">
+            <x-primary-button class="bg-green-700 hover:bg-green-800 text-black dark:text-white">
                 {{ __('Register') }}
             </x-primary-button>
         </div>
