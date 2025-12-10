@@ -1,4 +1,4 @@
-# 🎓 ACADEX - Academic Excellence Management System
+# 🎓 ACADEX - An Outcome-Based Grading System
 
 **Version 3.0** | Academic Records & Grading Management System for Brokenshire College
 
