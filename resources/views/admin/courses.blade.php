@@ -17,7 +17,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="coursesTable" class="table table-hover align-middle" style="width:100%">
+                <table id="coursesTable" class="table table-hover align-middle w-100-table">
                     <thead class="table-light">
                         <tr>
                             <th>Code</th>
@@ -105,10 +105,7 @@
     });
 
     function showModal() {
-        const modal = new bootstrap.Modal(document.getElementById('courseModal'), {
-            backdrop: false
-        });
-        modal.show();
+        modal.open('courseModal');
     }
 </script>
 @endpush

@@ -22,10 +22,7 @@
     </div>
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>notify.success('{{ session('success') }}');</script>
     @endif
 
     @if ($errors->any())
@@ -162,21 +159,4 @@
     @endif
 </div>
 @endsection
-
-@push('styles')
-<style>
-.request-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.request-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
-}
-
-.alert-sm {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
-}
-</style>
-@endpush
+{{-- Styles: resources/css/chairperson/structure-templates.css --}}

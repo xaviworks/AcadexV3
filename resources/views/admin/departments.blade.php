@@ -17,7 +17,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="departmentsTable" class="table table-hover align-middle" style="width:100%">
+                <table id="departmentsTable" class="table table-hover align-middle w-100-table">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
@@ -91,10 +91,7 @@
     });
 
     function showModal() {
-        const modal = new bootstrap.Modal(document.getElementById('departmentModal'), {
-            backdrop: false
-        });
-        modal.show();
+        modal.open('departmentModal');
     }
 </script>
 @endpush

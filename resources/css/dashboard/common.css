@@ -1,0 +1,430 @@
+/* Dashboard Common Styles */
+
+/* ===========================
+   THEME VARIABLES
+   =========================== */
+
+:root {
+    --theme-primary: #4e73df;
+    --theme-success: #1cc88a;
+    --theme-info: #36b9cc;
+    --theme-warning: #f6c23e;
+    --theme-danger: #e74a3b;
+    --theme-secondary: #858796;
+    --theme-light: #f8f9fc;
+    --theme-dark: #5a5c69;
+}
+
+/* ===========================
+   HOVER EFFECTS
+   =========================== */
+
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+}
+
+/* ===========================
+   BACKGROUND COLORS - SUBTLE
+   =========================== */
+
+.bg-primary-subtle {
+    background-color: rgba(78, 115, 223, 0.1) !important;
+}
+
+.bg-success-subtle {
+    background-color: rgba(28, 200, 138, 0.1) !important;
+}
+
+.bg-info-subtle {
+    background-color: rgba(54, 185, 204, 0.1) !important;
+}
+
+.bg-warning-subtle {
+    background-color: rgba(246, 194, 62, 0.1) !important;
+}
+
+.bg-danger-subtle {
+    background-color: rgba(231, 74, 59, 0.1) !important;
+}
+
+/* ===========================
+   TEXT COLORS
+   =========================== */
+
+.text-primary {
+    color: var(--theme-primary) !important;
+}
+
+.text-success {
+    color: var(--theme-success) !important;
+}
+
+.text-info {
+    color: var(--theme-info) !important;
+}
+
+.text-warning {
+    color: var(--theme-warning) !important;
+}
+
+.text-danger {
+    color: var(--theme-danger) !important;
+}
+
+.text-secondary {
+    color: var(--theme-secondary) !important;
+}
+
+/* ===========================
+   BUTTONS
+   =========================== */
+
+.btn-primary {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2653d4;
+}
+
+.btn-light {
+    background-color: var(--theme-light);
+    border-color: #e3e6f0;
+}
+
+.btn-light:hover {
+    background-color: #eaecf4;
+    border-color: #d1d3e2;
+}
+
+/* Quick Action Button Hover Effects */
+.btn-light:hover .bg-primary-subtle {
+    background-color: rgba(78, 115, 223, 0.15) !important;
+}
+
+.btn-light:hover .bg-success-subtle {
+    background-color: rgba(28, 200, 138, 0.15) !important;
+}
+
+.btn-light:hover .bg-info-subtle {
+    background-color: rgba(54, 185, 204, 0.15) !important;
+}
+
+/* ===========================
+   PROGRESS BARS
+   =========================== */
+
+.progress {
+    overflow: visible;
+}
+
+.progress-bar {
+    background-color: var(--theme-primary);
+    position: relative;
+    overflow: visible;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -3px;
+    height: 18px;
+    width: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar:last-child::after {
+    display: none;
+}
+
+.progress-bar.bg-success {
+    background-color: var(--theme-success) !important;
+}
+
+.progress-bar.bg-info {
+    background-color: var(--theme-info) !important;
+}
+
+.progress-bar.bg-warning {
+    background-color: var(--theme-warning) !important;
+}
+
+.progress-bar.bg-danger {
+    background-color: var(--theme-danger) !important;
+}
+
+/* ===========================
+   BADGES
+   =========================== */
+
+.badge.bg-primary-subtle {
+    background-color: rgba(78, 115, 223, 0.1) !important;
+    color: var(--theme-primary) !important;
+}
+
+.badge.bg-success-subtle {
+    background-color: rgba(28, 200, 138, 0.1) !important;
+    color: var(--theme-success) !important;
+}
+
+.badge.bg-info-subtle {
+    background-color: rgba(54, 185, 204, 0.1) !important;
+    color: var(--theme-info) !important;
+}
+
+.badge.bg-warning-subtle {
+    background-color: rgba(246, 194, 62, 0.1) !important;
+    color: var(--theme-warning) !important;
+}
+
+.badge.bg-danger-subtle {
+    background-color: rgba(231, 74, 59, 0.1) !important;
+    color: var(--theme-danger) !important;
+}
+
+/* ===========================
+   BORDERS
+   =========================== */
+
+.border-success-subtle {
+    border-color: rgba(28, 200, 138, 0.2) !important;
+}
+
+.border-danger-subtle {
+    border-color: rgba(231, 74, 59, 0.2) !important;
+}
+
+.border-warning-subtle {
+    border-color: rgba(246, 194, 62, 0.2) !important;
+}
+
+.border-info-subtle {
+    border-color: rgba(54, 185, 204, 0.2) !important;
+}
+
+.border-primary-subtle {
+    border-color: rgba(78, 115, 223, 0.2) !important;
+}
+
+/* ===========================
+   TABLES
+   =========================== */
+
+.table-light {
+    background-color: var(--theme-light);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+/* ===========================
+   CARDS
+   =========================== */
+
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Status Cards */
+.status-card {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+}
+
+.status-help-item {
+    transition: background-color 0.3s ease;
+}
+
+.status-help-item:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+/* ===========================
+   UTILITIES
+   =========================== */
+
+.min-w-0 {
+    min-width: 0;
+    flex: 1;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+/* ===========================
+   SCROLLBAR STYLING
+   =========================== */
+
+.table-responsive::-webkit-scrollbar,
+div::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track,
+div::-webkit-scrollbar-track {
+    background: var(--theme-light);
+    border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb,
+div::-webkit-scrollbar-thumb {
+    background: var(--theme-secondary);
+    border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover,
+div::-webkit-scrollbar-thumb:hover {
+    background: #6e707e;
+}
+
+/* ===========================
+   STICKY ELEMENTS
+   =========================== */
+
+.sticky-top {
+    background: var(--theme-light);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.table-active {
+    background-color: rgba(78, 115, 223, 0.05) !important;
+}
+
+/* ===========================
+   FORM CONTROLS
+   =========================== */
+
+.form-control,
+.form-select {
+    border-color: #e3e6f0;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--theme-success);
+    box-shadow: 0 0 0 0.25rem rgba(28, 200, 138, 0.25);
+}
+
+.border-success-subtle {
+    border-color: rgba(28, 200, 138, 0.3) !important;
+}
+
+/* ===========================
+   BUTTON ENHANCEMENTS
+   =========================== */
+
+.btn {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.btn-success {
+    background-color: var(--theme-success);
+    border-color: var(--theme-success);
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #169b6b;
+    border-color: #169b6b;
+    color: #fff;
+}
+
+.btn-outline-success {
+    color: var(--theme-success);
+    border-color: var(--theme-success);
+}
+
+.btn-outline-success:hover {
+    background-color: var(--theme-success);
+    border-color: var(--theme-success);
+    color: #fff;
+}
+
+/* ===========================
+   PROGRESS BAR ENHANCEMENTS
+   =========================== */
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* ===========================
+   ACCESSIBILITY
+   =========================== */
+
+.stretched-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    border-radius: 0.5rem;
+}
+
+/* ===========================
+   MOBILE OPTIMIZATIONS
+   =========================== */
+
+@media (max-width: 576px) {
+    .status-card {
+        padding: 0.75rem !important;
+    }
+    
+    .status-card .rounded-circle {
+        padding: 0.5rem !important;
+    }
+    
+    .status-card .fs-5 {
+        font-size: 1rem !important;
+    }
+    
+    .status-card h3 {
+        font-size: 1.5rem !important;
+    }
+    
+    .alert .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ===========================
+   PRINT OPTIMIZATION
+   =========================== */
+
+@media print {
+    .status-card {
+        break-inside: avoid;
+    }
+    
+    .hover-lift {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}

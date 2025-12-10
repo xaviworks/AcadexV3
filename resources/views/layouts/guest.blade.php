@@ -18,77 +18,9 @@
     <link href="https://fonts.cdnfonts.com/css/feeling-passionate" rel="stylesheet">
 
     <!-- Tailwind & App Assets -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/guest-entry.css', 'resources/js/app.js'])
 
-    <style>
-        body {
-            background-color: #023336; /* Fallback color */
-            background: url('/images/bg.jpg') no-repeat center center fixed;
-            background-size: cover;
-        }
-
-        .overlay {
-            background-color: rgba(0, 0, 0, 0.6);
-            min-height: 100vh;
-        }
-
-        .branding-container {
-            position: absolute;
-            top: 50%;
-            left: 10%;
-            transform: translateY(-50%);
-            display: flex;
-            align-items: center;
-            gap: 1px;
-            color: white;
-        }
-
-        .branding-container img {
-            height: 250px;
-            width: auto;
-        }
-
-        .branding-text h1 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 4.5rem;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .branding-text p {
-            font-family: 'Feeling Passionate', cursive;
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .login-container {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            height: 100vh;
-        }
-
-        /* Glassmorphism Card */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        /* Smooth scroll */
-        .glass-card::-webkit-scrollbar {
-            width: 6px;
-        }
-        .glass-card::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-        }
-    </style>
+    {{-- Styles: resources/css/layout/guest.css (loaded via guest-entry.css) --}}
 </head>
 <body class="text-white">
 

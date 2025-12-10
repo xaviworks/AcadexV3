@@ -1,145 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- Styles: resources/css/admin/users.css --}}
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
-    <style>
-        .swal-small {
-            width: 360px !important;
-            font-size: 0.875rem;
-        }
-        .swal2-html-container {
-            margin: 0.5em 1em 0.5em !important;
-        }
-        /* Disable modal option cards */
-        .disable-modal-header {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            border-bottom: none;
-            padding: 1.5rem;
-        }
-        .disable-modal-body {
-            padding: 1.75rem;
-            background: #f8f9fa;
-        }
-        .disable-modal-intro {
-            background: white;
-            padding: 1rem 1.25rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #dc3545;
-            margin-bottom: 1.5rem;
-        }
-        .disable-options-row {
-            gap: 0.75rem;
-            margin-top: 0.75rem;
-        }
-        .disable-option-card {
-            border: 2px solid #e9ecef;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            background: white;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-        .disable-option-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #0d6efd, #0dcaf0);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        .disable-option-card:hover {
-            border-color: #0d6efd;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
-        }
-        .disable-option-card .icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-        }
-        .disable-option-card .meta {
-            flex: 1 1 auto;
-            width: 100%;
-        }
-        .disable-option-card .meta .fw-semibold {
-            font-size: 0.875rem;
-            margin-bottom: 0.15rem;
-            color: #212529;
-        }
-        .disable-option-card.active {
-            border-color: #0d6efd;
-            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.2);
-            background: linear-gradient(135deg, #f8fbff 0%, #e7f3ff 100%);
-            transform: translateY(-2px);
-        }
-        .disable-option-card.active::before {
-            transform: scaleX(1);
-        }
-        .disable-option-card.active .icon {
-            background: linear-gradient(135deg, #0d6efd, #0dcaf0) !important;
-            color: white !important;
-            transform: scale(1.05);
-        }
-        .disable-option-card small {
-            color: #6c757d;
-            font-size: 0.75rem;
-            line-height: 1.3;
-        }
-        .disable-option-card .check-mark {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            width: 20px;
-            height: 20px;
-            background: #0d6efd;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.65rem;
-        }
-        .disable-option-card.active .check-mark {
-            display: flex;
-            animation: checkPop 0.3s ease;
-        }
-        @keyframes checkPop {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        .disable-modal-footer {
-            background: white;
-            border-top: 1px solid #dee2e6;
-            padding: 1.25rem 1.75rem;
-        }
-        #customDisableDatetime {
-            border: 2px solid #e9ecef;
-            border-radius: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            transition: border-color 0.2s ease;
-        }
-        #customDisableDatetime:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
-        }
-    </style>
 @endpush
 
 @push('head')
@@ -187,7 +51,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="usersTable" class="table table-hover align-middle" style="width:100%">
+                <table id="usersTable" class="table table-hover align-middle w-100-table">
                     <thead class="table-light">
                         <tr>
                             <th>Username</th>
@@ -247,7 +111,7 @@
                                 <td class="text-center">
                                     @if($user->is_active)
                                         @if(auth()->id() !== $user->id)
-                                            <button type="button" class="btn btn-sm btn-danger" onclick="openChooseDisableModal({{ $user->id }}, '{{ addslashes($user->name) }}')" title="Disable Account">
+                                            <button type="button" class="btn btn-sm btn-danger" @click="modal.open('chooseDisableModal', { userId: {{ $user->id }}, userName: '{{ addslashes($user->name) }}' })" title="Disable Account">
                                                 <i class="bi bi-person-slash"></i> Disable
                                             </button>
                                         @else
@@ -278,28 +142,28 @@
     </div>
 </div>
     {{-- Disable Choose Modal (one instance) --}}
-    <div class="modal fade" id="chooseDisableModal" tabindex="-1" aria-labelledby="chooseDisableModalLabel" aria-hidden="true">
+    <div x-data x-show="$store.modals.active === 'chooseDisableModal'" x-transition.opacity class="modal fade show d-block-important" tabindex="-1" @click.self="modal.close()">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header disable-modal-header text-white">
                     <div>
-                        <h5 class="modal-title mb-1" id="chooseDisableModalLabel">
+                        <h5 class="modal-title mb-1">
                             <i class="bi bi-person-slash me-2"></i>Disable User Account
                         </h5>
                         <small class="opacity-75">Temporarily restrict account access</small>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" @click="modal.close()" aria-label="Close"></button>
                 </div>
-                <form id="chooseDisableForm" method="POST" action="">
+                <form id="chooseDisableForm" method="POST" :action="`/admin/users/${$store.modals.data.userId}/disable`">
                     @csrf
                     <div class="modal-body disable-modal-body">
                         <div class="disable-modal-intro">
                             <div class="d-flex align-items-start gap-3">
-                                <div class="text-danger" style="font-size: 1.5rem;">
+                                <div class="text-danger icon-xl">
                                     <i class="bi bi-exclamation-triangle-fill"></i>
                                 </div>
                                 <div>
-                                    <h6 class="mb-1 fw-bold">Disabling: <span id="chooseDisableUserName" class="text-primary"></span></h6>
+                                    <h6 class="mb-1 fw-bold">Disabling: <span x-text="$store.modals.data.userName" class="text-primary"></span></h6>
                                     <p class="mb-0 small text-muted">
                                         This will prevent the user from logging in or accessing the system for the selected duration. 
                                         All active sessions will be terminated immediately.
@@ -372,7 +236,7 @@
                             </div>
                         </div>
 
-                        <div id="customDatetimeWrapper" style="display: none;" class="mt-3">
+                        <div id="customDatetimeWrapper" class="custom-datetime-wrapper">
                             <div class="bg-white p-3 rounded-3 border">
                                 <label for="customDisableDatetime" class="form-label fw-semibold small mb-2">
                                     <i class="bi bi-calendar-event me-1"></i>Select Re-enable Date & Time
@@ -395,8 +259,13 @@
                             <i class="bi bi-x-lg me-1"></i>Cancel
                         </button>
                         <input type="hidden" name="duration" id="chooseDisableDuration" value="1_week">
-                        <button type="submit" class="btn btn-danger px-4">
-                            <i class="bi bi-person-slash me-2"></i>Disable Account
+                        <button type="submit" class="btn btn-danger px-4" x-data>
+                            <span x-show="!$store.loading.isLoading('disableUser')">
+                                <i class="bi bi-person-slash me-2"></i>Disable Account
+                            </span>
+                            <span x-show="$store.loading.isLoading('disableUser')" x-cloak>
+                                <span class="spinner-border spinner-border-sm me-2"></span>Disabling...
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -486,8 +355,7 @@
                                    placeholder="Min. 8 characters" autocomplete="new-password"
                                    oninput="checkPassword(this.value)" id="password">
                             <button type="button" id="togglePassword" 
-                                    class="btn btn-outline-secondary border-start-0 text-dark" 
-                                    style="background-color: #f8f9fa;">
+                                    class="btn btn-outline-secondary border-start-0 text-dark card-header-light">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -497,21 +365,21 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center gap-2 mb-2">
-                                        <div id="circle-length" class="rounded-circle bg-secondary" style="width: 12px; height: 12px;"></div>
+                                        <div id="circle-length" class="password-indicator bg-secondary"></div>
                                         <small>Minimum 8 characters</small>
                                     </div>
                                     <div class="d-flex align-items-center gap-2 mb-2">
-                                        <div id="circle-case" class="rounded-circle bg-secondary" style="width: 12px; height: 12px;"></div>
+                                        <div id="circle-case" class="password-indicator bg-secondary"></div>
                                         <small>Upper & lowercase</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center gap-2 mb-2">
-                                        <div id="circle-number" class="rounded-circle bg-secondary" style="width: 12px; height: 12px;"></div>
+                                        <div id="circle-number" class="password-indicator bg-secondary"></div>
                                         <small>At least 1 number</small>
                                     </div>
                                     <div class="d-flex align-items-center gap-2 mb-2">
-                                        <div id="circle-special" class="rounded-circle bg-secondary" style="width: 12px; height: 12px;"></div>
+                                        <div id="circle-special" class="password-indicator bg-secondary"></div>
                                         <small>Special character</small>
                                     </div>
                                 </div>
@@ -525,8 +393,7 @@
                         <div class="input-group">
                             <input type="password" name="password_confirmation" class="form-control" required id="password_confirmation">
                             <button type="button" id="togglePasswordConfirmation" 
-                                    class="btn btn-outline-secondary border-start-0 text-dark" 
-                                    style="background-color: #f8f9fa;">
+                                    class="btn btn-outline-secondary border-start-0 text-dark card-header-light">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -543,54 +410,44 @@
 
 @push('scripts')
 <script>
-    function enableUser(userId, userName) {
-        Swal.fire({
+    async function enableUser(userId, userName) {
+        const confirmed = await window.confirm.ask({
             title: 'Re-enable Account?',
-            html: `Are you sure you want to re-enable <strong>${userName}</strong>?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#198754',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, Re-enable'
-        }).then((result) => {
-            if (!result.isConfirmed) return;
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            fetch(`/admin/users/${userId}/enable`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({ icon: 'success', title: 'Success', text: data.message, confirmButtonColor: '#198754' });
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'Failed to re-enable user', confirmButtonColor: '#198754' });
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to re-enable user', confirmButtonColor: '#198754' });
-            });
+            message: `Are you sure you want to re-enable ${userName}?`,
+            confirmText: 'Yes, Re-enable',
+            cancelText: 'Cancel',
+            type: 'info'
+        });
+        
+        if (!confirmed) return;
+        
+        loading.start('enableUser');
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch(`/admin/users/${userId}/enable`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            loading.stop('enableUser');
+            if (data.success) {
+                notify.success(data.message);
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                notify.error(data.message || 'Failed to re-enable user');
+            }
+        })
+        .catch(err => {
+            loading.stop('enableUser');
+            console.error(err);
+            notify.error('Failed to re-enable user');
+        });
         })
     }
-    function openChooseDisableModal(userId, userName) {
-        document.getElementById('chooseDisableUserName').textContent = userName;
-        const form = document.getElementById('chooseDisableForm');
-        form.action = '/admin/users/' + userId + '/disable';
-        form.dataset.userId = userId;
-        form.dataset.userName = userName;
-        // default radio value
-        const defaultVal = document.querySelector('input[name="duration_option"]:checked')?.value || '1_week';
-        document.getElementById('chooseDisableDuration').value = defaultVal;
-        // show modal
-        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chooseDisableModal'));
-        modal.show();
-    }
-
+    // openChooseDisableModal replaced by Alpine modal store: modal.open('chooseDisableModal', { userId, userName })
 
     // Update hidden input and show/hide custom datetime when radio changes
     document.addEventListener('change', function (e) {
@@ -645,21 +502,21 @@
         const formData = new FormData();
         formData.append('duration', duration);
         formData.append('_token', document.querySelector('input[name="_token"]').value);
-        // Disable submit button early so we can safely restore it on early returns
+        // Start loading state
+        loading.start('disableUser');
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn ? submitBtn.innerHTML : null;
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Disabling...';
         }
 
         if (duration === 'custom') {
             const customVal = document.getElementById('customDisableDatetime').value;
             if (!customVal) {
-                alert('Please select a custom date and time.');
+                notify.warning('Please select a custom date and time.');
+                loading.stop('disableUser');
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
                 }
                 return;
             }
@@ -684,31 +541,11 @@
         })
         .then(data => {
             if (data && data.success) {
-                // Hide modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('chooseDisableModal'));
-                modal.hide();
-                // Show success message
-                const successAlert = document.createElement('div');
-                successAlert.className = 'alert alert-success alert-dismissible fade show';
-                successAlert.innerHTML = `
-                    <i class="bi bi-check-circle me-2"></i>${data.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                // Find a container to insert the alert into. The page uses 'container-fluid' but search both to be safe.
-                const container = document.querySelector('.container-fluid.py-4') || document.querySelector('.container.py-4') || document.body;
-                const headerRef = document.querySelector('.d-flex.justify-content-between');
-                if (container) {
-                    if (headerRef && container.contains(headerRef)) {
-                        container.insertBefore(successAlert, headerRef);
-                    } else if (container.firstChild) {
-                        container.insertBefore(successAlert, container.firstChild);
-                    } else {
-                        container.appendChild(successAlert);
-                    }
-                } else {
-                    document.body.appendChild(successAlert);
-                }
-                // Optionally reload page after 2 seconds
+                // Hide modal using Alpine store
+                modal.close();
+                // Show success notification
+                notify.success(data.message);
+                // Reload page after 2 seconds
                 setTimeout(() => location.reload(), 2000);
             } else {
                 // When response is OK but data.success is false, show its message
@@ -718,11 +555,11 @@
         .catch(error => {
             console.error('Error:', error);
             const message = typeof error === 'string' ? error : (error?.message || 'An error occurred while disabling the user.');
-            alert(message);
+            notify.error(message);
         })
         .finally(() => {
+            loading.stop('disableUser');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
         });
     });
 </script>
@@ -795,31 +632,13 @@
             if (!confirmPassword) missingFields.push('Confirm Password');
 
             if (missingFields.length > 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Missing Information',
-                    html: `<div class="text-start small">
-                        <p class="mb-2">Please fill in the following required fields:</p>
-                        ${missingFields.map(field => `<span class="d-block">• ${field}</span>`).join('')}
-                    </div>`,
-                    confirmButtonColor: '#198754',
-                    customClass: {
-                        popup: 'swal-small',
-                        title: 'fs-5',
-                        htmlContainer: 'text-start'
-                    }
-                });
+                notify.warning(`Please fill in the following fields: ${missingFields.join(', ')}`);
                 return false;
             }
 
             // Validate email format (no @ or domain)
             if (email.includes('@')) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Email Format',
-                    text: 'Please enter only your username without @ or domain.',
-                    confirmButtonColor: '#198754'
-                });
+                notify.error('Please enter only your username without @ or domain.');
                 return false;
             }
 
@@ -837,24 +656,13 @@
                 if (!hasNumber) missingRequirements.push('At least one number');
                 if (!hasSpecial) missingRequirements.push('At least one special character');
 
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Password Requirements Not Met',
-                    html: `Your password must include:<br><br>` +
-                          missingRequirements.map(req => `• ${req}`).join('<br>'),
-                    confirmButtonColor: '#198754'
-                });
+                notify.error(`Password requirements not met: ${missingRequirements.join(', ')}`);
                 return false;
             }
 
             // Check if passwords match
             if (password !== confirmPassword) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Passwords Do Not Match',
-                    text: 'Please make sure your passwords match.',
-                    confirmButtonColor: '#198754'
-                });
+                notify.error('Passwords do not match. Please try again.');
                 return false;
             }
 
@@ -862,15 +670,11 @@
         }
 
         function openModal() {
-            const modal = new bootstrap.Modal(document.getElementById('courseModal'), {
-                backdrop: false
-            });
-            modal.show();
+            modal.open('courseModal');
         }
 
         function closeModal() {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('courseModal'));
-            modal.hide();
+            modal.close('courseModal');
         }
 
         function openConfirmModal() {
@@ -884,38 +688,22 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.exists) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'User Already Exists',
-                                text: 'A user with this name or email already exists in the system.',
-                                confirmButtonColor: '#198754',
-                                customClass: {
-                                    popup: 'swal-small',
-                                    icon: 'text-danger'
-                                }
-                            });
+                            notify.error('A user with this name or email already exists in the system.');
                         } else {
                             // Proceed with confirmation modal if no duplicate
-                            const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'), {
-                                backdrop: false
-                            });
-                            confirmModal.show();
+                            modal.open('confirmModal');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         // Proceed with confirmation modal if check fails
-                        const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'), {
-                            backdrop: false
-                        });
-                        confirmModal.show();
+                        modal.open('confirmModal');
                     });
             }
         }
 
         function closeConfirmModal() {
-            const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
-            confirmModal.hide();
+            modal.close('confirmModal');
         }
 
         // Password validation
@@ -959,33 +747,15 @@
             .then(data => {
                 if (data.success) {
                     closeConfirmModal();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Password Verified',
-                        text: 'Creating new user account...',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        willClose: () => {
-                            submitUserForm();
-                        }
-                    });
+                    notify.success('Password verified. Creating user...');
+                    setTimeout(() => submitUserForm(), 500);
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Verification Failed',
-                        text: data.message || 'Invalid password. Please try again.',
-                        confirmButtonColor: '#198754'
-                    });
+                    notify.error(data.message || 'Invalid password. Please try again.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'There was an error processing your request. Please try again.',
-                    confirmButtonColor: '#198754'
-                });
+                notify.error('There was an error processing your request. Please try again.');
             });
         });
 
@@ -1186,24 +956,24 @@
             const forceLogoutButtons = document.querySelectorAll('.force-logout-btn');
             
             forceLogoutButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', async function() {
                     const userId = this.dataset.userId;
                     const userName = this.dataset.userName;
                     
-                    Swal.fire({
+                    const confirmed = await window.confirm.ask({
                         title: 'Force Logout User?',
-                        html: `Are you sure you want to log out <strong>${userName}</strong> from all devices?<br><br>This will end all their active sessions immediately.`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#dc3545',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Yes, Force Logout',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Show loading state
-                            button.disabled = true;
-                            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Logging out...';
+                        message: `Are you sure you want to log out ${userName} from all devices? This will end all their active sessions immediately.`,
+                        confirmText: 'Yes, Force Logout',
+                        type: 'danger'
+                    });
+                    
+                    if (!confirmed) return;
+                    
+                    // Show loading state
+                    loading.start('forceLogout');
+                    button.disabled = true;
+                    const originalHTML = button.innerHTML;
+                    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Logging out...';
                             
                             fetch(`/admin/users/${userId}/force-logout`, {
                                 method: 'POST',
@@ -1215,12 +985,7 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Success!',
-                                        text: data.message,
-                                        confirmButtonColor: '#198754'
-                                    });
+                                    notify.success(data.message);
                                     
                                     // Update session count badge
                                     const sessionBadge = document.querySelector(`.session-count[data-user-id="${userId}"]`);
@@ -1230,24 +995,21 @@
                                         sessionBadge.classList.add('bg-secondary');
                                     }
                                 } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: data.message,
-                                        confirmButtonColor: '#198754'
-                                    });
+                                    notify.error(data.message);
                                 }
                             })
                             .catch(error => {
                                 console.error('Error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'Failed to force logout user. Please try again.',
-                                    confirmButtonColor: '#198754'
-                                });
+                                notify.error('Failed to force logout user. Please try again.');
                             })
                             .finally(() => {
+                                loading.stop('forceLogout');
+                                button.disabled = false;
+                                button.innerHTML = originalHTML;
+                            });
+                    });
+                });
+            });
                                 // Reset button state
                                 button.disabled = false;
                                 button.innerHTML = '<i class="bi bi-door-open"></i> Force Logout';

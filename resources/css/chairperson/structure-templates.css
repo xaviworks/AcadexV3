@@ -1,0 +1,60 @@
+/* Chairperson Structure Template Styles */
+
+/* Request Cards */
+.request-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.request-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.alert-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+/* Component Items */
+.component-item, .subcomponent-item {
+    transition: all 0.2s ease;
+}
+
+.component-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Weight Indicator */
+#weight-indicator {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+#submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.component-weight:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.sub-weight-indicator {
+    font-size: 0.85rem;
+    transition: opacity 0.3s ease;
+}
+
+.sub-weight-total.text-success {
+    color: #198754 !important;
+}
+
+.sub-weight-total.text-warning {
+    color: #ffc107 !important;
+}
+
+.sub-weight-total.text-danger {
+    color: #dc3545 !important;
+}

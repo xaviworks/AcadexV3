@@ -168,44 +168,5 @@
 </script>
 @endpush
 
-@push('styles')
-<style>
-    /* GE Coordinator Style Card Hover Effects */
-    .card:hover .position-absolute {
-        transform: translate(-50%, -50%) scale(1.1) !important;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
-    }
-    
-    .card {
-        transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-    }
-    
-    .mini-stat-card {
-        transition: all 0.2s ease;
-    }
-    
-    .card:hover .mini-stat-card {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .hover-lift {
-        transition: all 0.3s ease-in-out;
-    }
-
-    .hover-lift:hover {
-        transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-    
-    /* Green theme colors to match GE Coordinator */
-    .bg-primary-subtle {
-        background-color: rgba(78, 205, 133, 0.1) !important;
-    }
-    
-    .text-primary {
-        color: #4ecd85 !important;
-    }
-</style>
-@endpush
+{{-- Styles: resources/css/vpaa/common.css --}}
 @endsection

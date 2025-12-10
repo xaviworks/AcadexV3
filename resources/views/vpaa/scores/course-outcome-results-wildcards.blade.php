@@ -25,8 +25,18 @@
                 @else
                     <div class="flex-grow-1"></div>
                 @endif
-                <div class="flex-grow-1">
-                    <input type="text" id="subject-search" class="form-control" placeholder="Search subjects (code or title)…" aria-label="Search subjects">
+                <div class="flex-grow-1" x-data="{ 
+                    init() {
+                        const saved = search.get('vpaaSubjects');
+                        if (saved) this.$el.querySelector('input').value = saved;
+                    }
+                }">
+                    <input type="text" 
+                        id="subject-search" 
+                        class="form-control" 
+                        placeholder="Search subjects (code or title)…" 
+                        aria-label="Search subjects"
+                        @input="search.set('vpaaSubjects', $event.target.value)">
                 </div>
                 <div>
                     <select id="items-per-page" class="form-select">
@@ -202,18 +212,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 @endpush
 
-@push('styles')
-<style>
-.vpaa-readonly form { display: none !important; }
-.subject-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.subject-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important; }
-.subject-circle { transition: all 0.3s ease; }
-.subject-card:hover .subject-circle { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
-.breadcrumb-item a { color: #198754; text-decoration: none; }
-.breadcrumb-item a:hover { color: #0f5132; text-decoration: underline; }
-.form-label { color: #495057; font-weight: 600; }
-.form-select:focus { border-color: #198754; box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25); }
-.btn-primary { background-color: #198754; border-color: #198754; }
-.btn-primary:hover { background-color: #0f5132; border-color: #0f5132; }
-</style>
-@endpush
+{{-- Styles: resources/css/vpaa/common.css, resources/css/vpaa/cards.css --}}

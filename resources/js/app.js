@@ -4,6 +4,8 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import Alpine from 'alpinejs';
 import { getDeviceFingerprint } from './fingerprint';
+import './stores'; // Initialize Alpine stores
+import './store-helpers'; // Global helper functions
 
 window.Alpine = Alpine;
 

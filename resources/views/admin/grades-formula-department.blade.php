@@ -20,22 +20,22 @@
         return $url . '?' . http_build_query($queryParams);
     };
 @endphp
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
     <div class="row mb-2">
         <div class="col">
             <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-house-door me-1"></i>Home
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-sliders me-1"></i>Grades Formula
                         </a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page" style="color: #6c757d; font-size: 0.9rem;">
+                    <li class="breadcrumb-item active text-muted-gray text-sm" aria-current="page">
                         {{ $department->department_code }} Department
                     </li>
                 </ol>
@@ -43,11 +43,11 @@
 
             <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
                 <div class="d-flex align-items-center">
-                    <div class="p-2 rounded-circle me-2" style="background: linear-gradient(135deg, #198754, #20c997);">
-                        <i class="bi bi-building text-white" style="font-size: 1.2rem;"></i>
+                    <div class="p-2 rounded-circle me-2 bg-gradient-green">
+                        <i class="bi bi-building text-white icon-lg"></i>
                     </div>
                     <div>
-                        <h4 class="fw-bold mb-0" style="color: #198754;">
+                        <h4 class="fw-bold mb-0 text-primary-green">
                             {{ $department->department_description }}
                         </h4>
                         <small class="text-muted">
@@ -71,7 +71,7 @@
     <form method="GET" action="{{ route('admin.gradesFormula.department', ['department' => $department->id]) }}" class="d-flex align-items-center gap-2 flex-wrap">
             <div class="d-flex flex-column">
                 <label class="text-success small mb-1">Academic Year</label>
-                <select name="academic_year" class="form-select form-select-sm" onchange="this.form.submit()" style="max-width: 180px;">
+                <select name="academic_year" class="form-select form-select-sm max-w-180" onchange="this.form.submit()">
                     <option value="" {{ $selectedAcademicYear ? '' : 'selected' }}>All Years</option>
                     @foreach($academicYears as $year)
                         <option value="{{ $year }}" {{ $selectedAcademicYear === $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -80,7 +80,7 @@
             </div>
             <div class="d-flex flex-column">
                 <label class="text-success small mb-1">Semester</label>
-                <select name="semester" class="form-select form-select-sm" onchange="this.form.submit()" style="max-width: 150px;">
+                <select name="semester" class="form-select form-select-sm max-w-150" onchange="this.form.submit()">
                     <option value="" {{ $semester ? '' : 'selected' }}>All/Default</option>
                     @foreach($availableSemesters as $availableSemester)
                         <option value="{{ $availableSemester }}" {{ $semester === $availableSemester ? 'selected' : '' }}>{{ $availableSemester }}</option>
@@ -98,12 +98,12 @@
         $catalogTotal = $departmentFormulas->count();
     @endphp
 
-    <div class="card border-0 shadow-sm mb-3" style="background: linear-gradient(135deg, #198754, #20c997); color: white;">
+    <div class="card border-0 shadow-sm mb-3 bg-gradient-green-card">
         <div class="card-body py-3">
             <div class="row align-items-center">
                 <div class="col-md-8 d-flex align-items-center gap-3">
-                    <div class="p-2 rounded-circle" style="background: rgba(255,255,255,0.15);">
-                        <i class="bi bi-collection text-white" style="font-size: 1rem;"></i>
+                    <div class="p-2 rounded-circle bg-gradient-overlay">
+                        <i class="bi bi-collection text-white icon-md"></i>
                     </div>
                     <div>
                         <h6 class="mb-1 fw-bold">Course Wildcards Overview</h6>
@@ -151,7 +151,7 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body p-4 d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
                     <div>
-                        <h5 class="fw-semibold mb-1" style="color: #198754;">Department Formula Catalog</h5>
+                        <h5 class="fw-semibold mb-1 text-primary-green">Department Formula Catalog</h5>
                         <p class="text-muted mb-0">Start subjects from a consistent baseline or tailor alternatives for special cases.</p>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
@@ -168,9 +168,9 @@
 
         <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
             <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden bg-success bg-opacity-10" data-status="catalog" data-url="{{ $buildRoute('admin.gradesFormula.department.formulas.create', ['department' => $department->id]) }}">
-                <div class="position-relative" style="height: 80px; background: linear-gradient(135deg, #198754, #20c997);"></div>
-                <div class="wildcard-circle" style="background: linear-gradient(135deg, #198754, #0f5132);">
-                    <i class="bi bi-plus-lg text-white" style="font-size: 1.2rem;"></i>
+                <div class="position-relative header-height-80 bg-gradient-green"></div>
+                <div class="wildcard-circle bg-gradient-green-dark">
+                    <i class="bi bi-plus-lg text-white icon-lg"></i>
                 </div>
                     <div class="card-body pt-5 text-center d-flex flex-column align-items-center gap-3">
                     <div>
@@ -197,8 +197,8 @@
             @endphp
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                 <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden formula-card" data-status="catalog" data-url="{{ $editRoute }}">
-                    <div class="position-relative" style="height: 80px; background: linear-gradient(135deg, #0f5132, #198754);"></div>
-                    <div class="wildcard-circle" style="background: linear-gradient(135deg, #23a362, #0b3d23);">
+                <div class="position-relative wildcard-header-green-reverse"></div>
+                <div class="wildcard-circle wildcard-circle-alt">
                         <span class="text-white fw-bold">{{ $isFallback ? 'FALLBACK' : 'CATALOG' }}</span>
                     </div>
                     <div class="card-body pt-5 d-flex flex-column gap-3">
@@ -254,11 +254,10 @@
                     $course = $summary['course'];
                 @endphp
                 <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                    <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden" data-status="{{ $summary['status'] }}" data-url="{{ $buildRoute('admin.gradesFormula.course', ['department' => $department->id, 'course' => $course->id]) }}" style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                    <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow" data-status="{{ $summary['status'] }}" data-url="{{ $buildRoute('admin.gradesFormula.course', ['department' => $department->id, 'course' => $course->id]) }}">
                         {{-- Top header --}}
-                        <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
-                            <div class="wildcard-circle position-absolute start-50 translate-middle"
-                                style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                        <div class="position-relative header-height-80 bg-gradient-green-soft">
+                            <div class="wildcard-circle-positioned">
                                 <span class="text-white fw-bold">{{ $course->course_code }}</span>
                             </div>
                         </div>
@@ -356,85 +355,6 @@
 <!-- Bottom badge elements removed to prevent empty rounded pills. -->
 @endpush
 
+{{-- Styles: resources/css/admin/grades-formula.css --}}
 @push('styles')
-<style>
-.wildcard-card {
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    min-height: 240px;
-    background: #ffffff;
-}
-
-.wildcard-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
-}
-
-.wildcard-circle {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.wildcard-card:hover .wildcard-circle {
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    transform: translate(-50%, -55%) scale(1.05);
-}
-
-.wildcard-filter-btn {
-    transition: all 0.3s ease;
-}
-
-.wildcard-filter-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.15);
-}
-
-.wildcard-filter-btn.active {
-    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.25);
-}
-
-.badge-formula-label {
-    background-color: #ffffff;
-    color: #198754;
-    border: 1px solid rgba(25, 135, 84, 0.25);
-    font-weight: 600;
-}
-
-.wildcard-card .badge-formula-label {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    width: 100%;
-    line-height: 1.2;
-    padding: 0.45rem 0.75rem;
-    border-radius: 999px;
-}
-
-.bg-danger-subtle {
-    background-color: rgba(220, 53, 69, 0.15) !important;
-    color: #842029 !important;
-}
-
-.wildcard-title {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word;
-}
-
-@media (max-width: 576px) {
-    .wildcard-card {
-        min-height: 200px;
-    }
-
-    .wildcard-circle {
-        width: 80px;
-        height: 80px;
-    }
-}
-</style>
 @endpush

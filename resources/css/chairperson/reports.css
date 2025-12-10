@@ -1,0 +1,84 @@
+/* Chairperson Course Reports Styles */
+
+/* Course Cards - Enhanced Styling */
+.course-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.course-card * {
+    pointer-events: none;
+}
+
+.course-card {
+    pointer-events: auto;
+}
+
+.course-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(77, 166, 116, 0.3) !important;
+}
+
+.course-card .position-relative {
+    background: linear-gradient(135deg, #4da674 0%, #3d8a5e 100%) !important;
+}
+
+.course-card:hover .position-relative {
+    background: linear-gradient(135deg, #3d8a5e 0%, #2d6a4e 100%) !important;
+}
+
+.course-circle {
+    transition: all 0.3s ease;
+}
+
+.course-card:hover .course-circle {
+    transform: translate(-50%, -50%) rotate(5deg) scale(1.1) !important;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
+}
+
+.course-card .card-body {
+    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    transition: background 0.3s;
+}
+
+.course-card:hover .card-body {
+    background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.course-card h6 {
+    transition: color 0.3s;
+}
+
+.course-card:hover h6 {
+    color: #4da674 !important;
+}
+
+.course-card .badge {
+    transition: all 0.3s;
+}
+
+.course-card:hover .badge {
+    background-color: #4da674 !important;
+    transform: scale(1.05);
+}
+
+.course-circle h5 {
+    font-size: 1.1rem;
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+    line-height: 1.1;
+    max-width: 70px;
+    margin: 0 auto;
+}
+
+.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+@media (max-width: 600px) {
+    .course-circle h5 { 
+        font-size: 0.95rem; 
+    }
+}

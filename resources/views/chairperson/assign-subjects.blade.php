@@ -9,84 +9,7 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .import-courses-wrapper {
-        min-height: 100vh;
-        background-color: #EAF8E7;
-        padding: 0;
-        margin: 0;
-    }
-
-    .import-courses-container {
-        max-width: 100%;
-        padding: 2rem 2rem;
-    }
-
-    .page-title {
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid rgba(77, 166, 116, 0.2);
-    }
-
-    .page-title h1 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin: 0 0 0.5rem 0;
-        display: flex;
-        align-items: center;
-    }
-
-    .page-title h1 i {
-        color: #198754;
-        font-size: 2rem;
-        margin-right: 0.75rem;
-    }
-
-    .page-subtitle {
-        color: #6c757d;
-        font-size: 0.875rem;
-        margin: 0;
-    }
-
-    .nav-tabs {
-        background: #f8f9fa;
-        border-radius: 0.75rem 0.75rem 0 0;
-        border-bottom: 2px solid #e9ecef;
-        margin-bottom: 0;
-        padding: 0.5rem 1rem 0 1rem;
-    }
-
-    .nav-tabs .nav-link {
-        color: #6c757d;
-        font-weight: 500;
-        border: none;
-        border-bottom: 3px solid transparent;
-        padding: 0.75rem 1.25rem;
-        border-radius: 0.75rem 0.75rem 0 0;
-        margin-right: 0.25rem;
-        background: transparent;
-        transition: all 0.2s;
-    }
-
-    .nav-tabs .nav-link:hover {
-        color: #4da674;
-        border-bottom-color: #4da674;
-        background: #eaf8e7;
-    }
-
-    .nav-tabs .nav-link.active {
-        color: #4da674;
-        background: #fff;
-        border-bottom-color: #4da674;
-        box-shadow: 0 -2px 8px rgba(77,166,116,0.06);
-    }
-
-    .tab-content .tab-pane .table-responsive {
-        border-radius: 0 0 0.75rem 0.75rem !important;
-        border-top: none;
-    }
-</style>
+{{-- Styles: resources/css/chairperson/common.css --}}
 
 <div class="import-courses-wrapper">
     <div class="import-courses-container">
@@ -112,11 +35,11 @@
         </div>
 
     @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <script>notify.success('{{ session('success') }}');</script>
     @endif
 
     @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+        <script>notify.error('{{ session('error') }}');</script>
     @endif
 
     <!-- YEAR VIEW (Tabbed) -->
@@ -386,28 +309,7 @@
     }
 </script>
 @endpush
-
-@push('styles')
-<style>
-    .bg-success-subtle {
-        background-color: rgba(25, 135, 84, 0.1);
-    }
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.02);
-    }
-    .btn-outline-success:hover, .btn-outline-danger:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .table-success {
-        background-color: #198754 !important;
-    }
-    .table-success th {
-        color: #000000 !important;
-        font-weight: 500;
-    }
-</style>
-@endpush
+{{-- Styles: resources/css/chairperson/common.css --}}
 
     </div>
 </div>

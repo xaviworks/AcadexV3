@@ -1,0 +1,159 @@
+/* Admin Users Page Styles */
+
+/* SweetAlert2 customizations */
+.swal-small {
+    width: 360px !important;
+    font-size: 0.875rem;
+}
+
+.swal2-html-container {
+    margin: 0.5em 1em 0.5em !important;
+}
+
+/* Disable Modal Styles */
+.disable-modal-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.disable-modal-body {
+    padding: 1.75rem;
+    background: #f8f9fa;
+}
+
+.disable-modal-intro {
+    background: white;
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid #dc3545;
+    margin-bottom: 1.5rem;
+}
+
+.disable-options-row {
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.disable-option-card {
+    border: 2px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.disable-option-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.disable-option-card:hover {
+    border-color: #0d6efd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+.disable-option-card .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.disable-option-card .meta {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.disable-option-card .meta .fw-semibold {
+    font-size: 0.875rem;
+    margin-bottom: 0.15rem;
+    color: #212529;
+}
+
+.disable-option-card.active {
+    border-color: #0d6efd;
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.2);
+    background: linear-gradient(135deg, #f8fbff 0%, #e7f3ff 100%);
+    transform: translateY(-2px);
+}
+
+.disable-option-card.active::before {
+    transform: scaleX(1);
+}
+
+.disable-option-card.active .icon {
+    background: linear-gradient(135deg, #0d6efd, #0dcaf0) !important;
+    color: white !important;
+    transform: scale(1.05);
+}
+
+.disable-option-card small {
+    color: #6c757d;
+    font-size: 0.75rem;
+    line-height: 1.3;
+}
+
+.disable-option-card .check-mark {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 20px;
+    height: 20px;
+    background: #0d6efd;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.65rem;
+}
+
+.disable-option-card.active .check-mark {
+    display: flex;
+    animation: checkPop 0.3s ease;
+}
+
+@keyframes checkPop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.disable-modal-footer {
+    background: white;
+    border-top: 1px solid #dee2e6;
+    padding: 1.25rem 1.75rem;
+}
+
+#customDisableDatetime {
+    border: 2px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.2s ease;
+}
+
+#customDisableDatetime:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}

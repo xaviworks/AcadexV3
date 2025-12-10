@@ -121,22 +121,22 @@
     $formAction = $buildRoute($formRouteName, $formRouteParameters);
 @endphp
 
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
     <div class="row mb-2">
         <div class="col">
             <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-house-door me-1"></i>Home
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-sliders me-1"></i>Grades Formula
                         </a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page" style="color: #6c757d; font-size: 0.9rem;">
+                    <li class="breadcrumb-item active text-muted-gray text-sm" aria-current="page">
                         {{ $pageTitle }}
                     </li>
                 </ol>
@@ -144,17 +144,17 @@
 
             <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
                 <div class="d-flex align-items-center">
-                    <div class="p-2 rounded-circle me-2" style="background: linear-gradient(135deg, #198754, #20c997);">
-                        <i class="bi bi-sliders text-white" style="font-size: 1.2rem;"></i>
+                    <div class="p-2 rounded-circle me-2 bg-gradient-green">
+                        <i class="bi bi-sliders text-white icon-lg"></i>
                     </div>
                     <div>
-                        <h4 class="fw-bold mb-0" style="color: #198754;">{{ $pageTitle }}</h4>
+                        <h4 class="fw-bold mb-0 text-primary-green">{{ $pageTitle }}</h4>
                         @if ($pageSubtitle)
                             <small class="text-muted">{{ $pageSubtitle }}</small>
                         @endif
                     </div>
                 </div>
-                <a href="{{ $backRoute }}" class="btn btn-outline-success btn-sm rounded-pill shadow-sm" style="font-weight: 600;">
+                <a href="{{ $backRoute }}" class="btn btn-outline-success btn-sm rounded-pill shadow-sm fw-600">
                     <i class="bi bi-arrow-left me-1"></i>{{ $backLabel }}
                 </a>
             </div>
@@ -162,10 +162,7 @@
     </div>
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>notify.success('{{ session('success') }}');</script>
     @endif
 
     @if ($errors->any())
@@ -187,7 +184,7 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <h5 class="mb-1 fw-semibold" style="color: #198754;">
+                <h5 class="mb-1 fw-semibold text-primary-green">
                     {{ $isDefault ? 'Default Weights Snapshot' : 'Current Weighting' }}
                 </h5>
                 <small class="text-muted">
@@ -388,7 +385,7 @@
                                 </div>
                                 <div class="modal-body">
                                     <p class="text-muted mb-3">This subject already has recorded grades. Enter your password to continue updating its grading formula.</p>
-                                    <div class="alert alert-warning border-0 shadow-sm-sm mb-3" style="white-space: pre-wrap; font-size: 0.9rem;">
+                                    <div class="alert alert-warning border-0 shadow-sm-sm mb-3 white-space-pre-wrap text-sm">
 Choose Department Formula
 Department formulas replace the old department baselines. Pick one to baseline {{ $subjectStructureContext }} and refine a subject-specific override afterward.
 
@@ -757,14 +754,4 @@ This subject already has a custom formula. Applying a structure template will re
 </script>
 @endpush
 
-@push('styles')
-<style>
-.shadow-sm-sm {
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
-.weight-editor-card {
-    border: 1px dashed rgba(25, 135, 84, 0.35);
-}
-</style>
-@endpush
+{{-- Styles: resources/css/admin/grades-formula.css --}}

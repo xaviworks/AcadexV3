@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
     <div class="row mb-3">
         <div class="col">
             <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-circle" style="background: linear-gradient(135deg, #198754, #20c997);">
-                        <i class="bi bi-clipboard-check text-white" style="font-size: 1.5rem;"></i>
+                    <div class="p-3 rounded-circle bg-gradient-green">
+                        <i class="bi bi-clipboard-check text-white icon-xl"></i>
                     </div>
                     <div>
-                        <h3 class="fw-bold mb-1" style="color: #198754;">Structure Formula Requests</h3>
+                        <h3 class="fw-bold mb-1 text-primary-green">Structure Formula Requests</h3>
                         <p class="text-muted mb-0">Review and approve chairperson formula submissions</p>
                     </div>
                 </div>
@@ -22,10 +22,7 @@
     </div>
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>notify.success('{{ session('success') }}');</script>
     @endif
 
     @if ($errors->any())
@@ -67,7 +64,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
                 <div class="mb-3">
-                    <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                    <i class="bi bi-inbox icon-xxl icon-muted-gray"></i>
                 </div>
                 <h5 class="text-muted mb-2">No Requests Found</h5>
                 <p class="text-muted mb-0">
@@ -189,7 +186,7 @@
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-success text-white border-0">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-eye-fill" style="font-size: 1.5rem;"></i>
+                    <i class="bi bi-eye-fill icon-xl"></i>
                     <h5 class="modal-title mb-0" id="viewRequestModalLabel">Template Request Details</h5>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -214,7 +211,7 @@
                 @csrf
                 <div class="modal-header bg-success text-white border-0">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-check-circle-fill" style="font-size: 1.5rem;"></i>
+                        <i class="bi bi-check-circle-fill icon-xl"></i>
                         <h5 class="modal-title mb-0" id="approveModalLabel">Approve Template Request</h5>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -254,7 +251,7 @@
                 @csrf
                 <div class="modal-header bg-danger text-white border-0">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-x-circle-fill" style="font-size: 1.5rem;"></i>
+                        <i class="bi bi-x-circle-fill icon-xl"></i>
                         <h5 class="modal-title mb-0" id="rejectModalLabel">Reject Template Request</h5>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>

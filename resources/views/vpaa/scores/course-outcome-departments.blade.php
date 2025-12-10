@@ -75,23 +75,4 @@
 </script>
 @endpush
 
-@push('styles')
-<style>
-.subject-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.subject-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important; }
-.subject-circle { transition: all 0.3s ease; }
-.subject-card:hover .subject-circle { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
-.subject-circle h5 {
-  font-size: 1.1rem;
-  white-space: normal;
-  word-break: break-word;
-  text-align: center;
-  line-height: 1.1;
-  max-width: 70px;
-  margin: 0 auto;
-}
-@media (max-width: 600px) {
-  .subject-circle h5 { font-size: 0.95rem; }
-}
-</style>
-@endpush
+{{-- Styles: resources/css/vpaa/cards.css --}}

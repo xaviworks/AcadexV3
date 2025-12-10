@@ -17,7 +17,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="subjectsTable" class="table table-hover align-middle" style="width:100%">
+                <table id="subjectsTable" class="table table-hover align-middle w-100-table">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
@@ -139,7 +139,7 @@
 </div>
 
 @if ($errors->any())
-<div class="alert alert-danger position-fixed bottom-0 end-0 m-3" style="z-index: 1050;">
+<div class="alert alert-danger alert-fixed-bottom">
     <ul class="mb-0">
         @foreach ($errors->all() as $error)
             <li>{{ $error }}</li>

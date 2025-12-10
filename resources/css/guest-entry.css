@@ -1,0 +1,2 @@
+/* Guest Layout Entry Point - Only loaded on login/register pages */
+@import './layout/guest.css';

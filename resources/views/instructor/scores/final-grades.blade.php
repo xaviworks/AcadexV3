@@ -274,70 +274,7 @@
 </div>
 @endsection
 
-@push('styles')
-<style>
-/* Enhanced Card Styling - Matching Chairperson View Grades */
-.subject-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.subject-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s;
-}
-
-.subject-card:hover::before {
-    left: 100%;
-}
-
-.subject-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 24px rgba(77, 166, 116, 0.3) !important;
-}
-
-.subject-card .position-relative {
-    background: linear-gradient(135deg, #4da674 0%, #3d8a5e 100%) !important;
-}
-
-.subject-card:hover .position-relative {
-    background: linear-gradient(135deg, #3d8a5e 0%, #2d6a4e 100%) !important;
-}
-
-.subject-circle {
-    transition: all 0.3s ease;
-}
-
-.subject-card:hover .subject-circle {
-    transform: translate(-50%, -50%) rotate(5deg) scale(1.1) !important;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
-}
-
-.subject-card .card-body {
-    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
-    transition: background 0.3s;
-}
-
-.subject-card:hover .card-body {
-    background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
-}
-
-.subject-card h6 {
-    transition: color 0.3s;
-}
-
-.subject-card:hover h6 {
-    color: #4da674 !important;
-}
-</style>
-@endpush
+{{-- Styles: resources/css/instructor/subject-cards.css --}}
 
 @push('scripts')
 <script>
@@ -347,17 +284,11 @@
 
     // Close print modal helper
     function closePrintModal() {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('printOptionsModal'));
-        if (modal) {
-            modal.hide();
-        }
+        modal.close('printOptionsModal');
     }
 
     // View Notes Modal Handler
     document.addEventListener('DOMContentLoaded', function() {
-        const viewNotesModal = new bootstrap.Modal(document.getElementById('viewNotesModal'), {
-            backdrop: false
-        });
         const viewStudentNameDisplay = document.getElementById('viewStudentNameDisplay');
         const viewNotesContent = document.getElementById('viewNotesContent');
 
@@ -372,7 +303,7 @@
                 viewNotesContent.textContent = notes;
                 
                 // Show modal
-                viewNotesModal.show();
+                modal.open('viewNotesModal', { studentName, notes });
             });
         });
 

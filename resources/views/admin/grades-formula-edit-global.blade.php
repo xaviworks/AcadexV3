@@ -30,7 +30,7 @@
     $backRoute = route('admin.gradesFormula', array_merge($queryParams, ['view' => 'formulas']));
 @endphp
 
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
     <div class="row mb-3">
         <div class="col">
             <a href="{{ $backRoute }}" class="btn btn-outline-secondary">
@@ -265,26 +265,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 @endpush
 
+{{-- Styles: resources/css/admin/grades-formula.css --}}
 @push('styles')
-<style>
-.form-check-input.structure-template-radio {
-    display: none;
-}
-
-.form-check-input.structure-template-radio:checked + label .card {
-    border-color: #0dcaf0;
-    background-color: rgba(13, 202, 240, 0.1);
-}
-
-.form-check-input.structure-template-radio + label .card {
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.form-check-input.structure-template-radio + label .card:hover {
-    border-color: #0dcaf0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(13, 202, 240, 0.2);
-}
-</style>
 @endpush

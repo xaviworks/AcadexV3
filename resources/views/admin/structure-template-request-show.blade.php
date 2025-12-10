@@ -1,23 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
     <div class="row mb-3">
         <div class="col">
             <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none" style="color: #198754;">
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green">
                             <i class="bi bi-house-door me-1"></i>Home
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{ route('admin.gradesFormula', ['view' => 'formulas']) }}" class="text-decoration-none" style="color: #198754;">
+                        <a href="{{ route('admin.gradesFormula', ['view' => 'formulas']) }}" class="text-decoration-none link-success-green">
                             <i class="bi bi-sliders me-1"></i>Grades Formula
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{ route('admin.structureTemplateRequests.index') }}" class="text-decoration-none" style="color: #198754;">
+                        <a href="{{ route('admin.structureTemplateRequests.index') }}" class="text-decoration-none link-success-green">
                             Formula Requests
                         </a>
                     </li>
@@ -27,11 +27,11 @@
 
             <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-circle" style="background: linear-gradient(135deg, #198754, #20c997);">
-                        <i class="bi bi-clipboard-check text-white" style="font-size: 1.5rem;"></i>
+                    <div class="p-3 rounded-circle bg-gradient-green">
+                        <i class="bi bi-clipboard-check text-white icon-xl"></i>
                     </div>
                     <div>
-                        <h3 class="fw-bold mb-1" style="color: #198754;">{{ $request->label }}</h3>
+                        <h3 class="fw-bold mb-1 text-primary-green">{{ $request->label }}</h3>
                         <p class="text-muted mb-0">Formula Request Details</p>
                     </div>
                 </div>
@@ -43,10 +43,7 @@
     </div>
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>notify.success('{{ session('success') }}');</script>
     @endif
 
     @if ($errors->any())
@@ -83,7 +80,7 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3" style="color: #198754;">Status</h5>
+                    <h5 class="fw-bold mb-3 text-primary-green">Status</h5>
                     <div class="mb-3">
                         <span class="badge {{ $statusBadge['class'] }} fs-6 px-3 py-2">
                             <i class="bi bi-{{ $statusBadge['icon'] }} me-1"></i>{{ $statusBadge['label'] }}
@@ -127,7 +124,7 @@
             @if ($request->status === 'pending')
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
-                        <h5 class="fw-bold mb-3" style="color: #198754;">Actions</h5>
+                        <h5 class="fw-bold mb-3 text-primary-green">Actions</h5>
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
                                 <i class="bi bi-check-circle me-1"></i>Approve Request
@@ -145,7 +142,7 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3" style="color: #198754;">Formula Information</h5>
+                    <h5 class="fw-bold mb-3 text-primary-green">Formula Information</h5>
                     
                     <div class="mb-4">
                         <label class="fw-semibold text-muted small">Formula Name</label>
@@ -178,7 +175,7 @@
             <!-- Structure Configuration Card -->
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3" style="color: #198754;">Structure Configuration</h5>
+                    <h5 class="fw-bold mb-3 text-primary-green">Structure Configuration</h5>
                     
                     @php
                         $structure = $request->structure_config['structure'] ?? [];

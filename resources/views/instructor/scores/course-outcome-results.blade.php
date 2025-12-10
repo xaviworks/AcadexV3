@@ -15,9 +15,7 @@
 @endphp
 @extends('layouts.app')
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/course-outcome-results.css') }}">
-<style>
+{{-- Styles: resources/css/instructor/course-outcomes.css --}}
 /* Enhanced Table Styling */
 .student-row:hover {
     background-color: #f8f9fa !important;
@@ -222,8 +220,6 @@
         height: 28px !important;
     }
 }
-</style>
-@endpush
 
 @section('content')
 <div class="container-fluid px-4 py-4">

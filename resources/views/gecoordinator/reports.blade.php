@@ -137,19 +137,5 @@
         </div>
     </div>
 </div>
-
-@push('styles')
-<style>
-    @media print {
-        .no-print {
-            display: none !important;
-        }
-        
-        .bg-blue-50, .bg-green-50, .bg-red-50, .bg-purple-50, .bg-yellow-50, .bg-indigo-50 {
-            background-color: #f9fafb !important;
-            border: 1px solid #d1d5db !important;
-        }
-    }
-</style>
-@endpush
+{{-- Styles: resources/css/gecoordinator/common.css --}}
 @endsection

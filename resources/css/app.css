@@ -1,3 +1,28 @@
+/* Import layout styles FIRST */
+@import './layout/layout.css';
+@import './layout/app.css';
+@import './layout/navigation.css';
+/* guest.css removed from global imports - loaded separately in guest.blade.php */
+
+/* Import portal styles */
+@import './admin/utilities.css';
+@import './admin/users.css';
+@import './admin/sessions.css';
+@import './admin/grades-formula.css';
+@import './chairperson/common.css';
+@import './chairperson/select-curriculum.css';
+@import './chairperson/structure-templates.css';
+@import './chairperson/reports.css';
+@import './dashboard/common.css';
+@import './dean/reports.css';
+@import './gecoordinator/common.css';
+@import './gecoordinator/reports.css';
+@import './instructor/common.css';
+@import './instructor/subject-cards.css';
+@import './instructor/course-outcomes.css';
+@import './vpaa/common.css';
+@import './vpaa/cards.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -46,4 +71,6 @@
 .modal-content {
     z-index: 1057 !important;
 }
+
+
 

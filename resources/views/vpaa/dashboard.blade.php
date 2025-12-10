@@ -200,37 +200,4 @@
 </div>
 @endsection
 
-@push('styles')
-<style>
-    .hover-lift {
-        transition: transform 0.2s ease;
-    }
-    .hover-lift:hover {
-        transform: translateY(-3px);
-    }
-    
-    .hover-bg-opacity-25:hover {
-        background-opacity: 0.25 !important;
-    }
-    
-    .transition-all {
-        transition: all 0.2s ease;
-    }
-    
-    .bg-soft-primary {
-        background-color: rgba(13, 110, 253, 0.1);
-    }
-    
-    .bg-soft-success {
-        background-color: rgba(25, 135, 84, 0.1);
-    }
-    
-    .bg-soft-info {
-        background-color: rgba(13, 202, 240, 0.1);
-    }
-    
-    .bg-soft-warning {
-        background-color: rgba(255, 193, 7, 0.1);
-    }
-</style>
-@endpush
+{{-- Styles: resources/css/vpaa/common.css --}}

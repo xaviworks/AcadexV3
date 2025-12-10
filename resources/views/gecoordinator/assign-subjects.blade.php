@@ -9,267 +9,7 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    /* Container wrapper for consistent styling */
-    .page-wrapper {
-        background-color: #EAF8E7;
-        min-height: 100vh;
-        padding: 0;
-        margin: 0;
-    }
-
-    .page-container {
-        max-width: 100%;
-        margin: 0;
-        padding: 1.5rem 1rem;
-    }
-
-    /* Page title styling */
-    .page-title {
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid rgba(77, 166, 116, 0.2);
-    }
-
-    /* Content wrapper */
-    .content-wrapper {
-        background-color: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        padding: 0.5rem 1.5rem 1.5rem 1.5rem;
-        margin-top: 1.5rem;
-    }
-
-    /* Alert improvements */
-    .alert {
-        border-radius: 0.5rem !important;
-        border: 0 !important;
-    }
-
-    .alert-success {
-        background-color: #d4edda !important;
-        color: #155724 !important;
-    }
-
-    .alert-danger {
-        background-color: #f8d7da !important;
-        color: #721c24 !important;
-    }
-
-    /* Tab styling */
-    .nav-tabs {
-        border-bottom: 2px solid #d0d0d0 !important;
-        margin-bottom: 1.5rem;
-        margin-top: 0.5rem;
-    }
-
-    .nav-tabs .nav-link {
-        border: none !important;
-        border-radius: 0.5rem 0.5rem 0 0;
-        background-color: transparent;
-        transition: all 0.3s ease;
-        font-weight: 500;
-        color: #666 !important;
-        padding: 0.75rem 1.5rem !important;
-    }
-
-    .nav-tabs .nav-link:hover {
-        background-color: rgba(77, 166, 116, 0.08) !important;
-        color: #4da674 !important;
-    }
-
-    .nav-tabs .nav-link.active {
-        background-color: transparent !important;
-        color: #4da674 !important;
-        border-bottom: 3px solid #4da674 !important;
-    }
-
-    /* Modal improvements for instructor assignment/unassign */
-    .modal-header .bi {
-        font-size: 1.3rem !important;
-    }
-    
-    /* Ensure confirmation modals appear above instructor modal */
-    #confirmBulkAssignModal,
-    #confirmUnassignModal {
-        z-index: 1060 !important;
-    }
-    
-    /* Ensure modal backdrops appear in correct order */
-    .modal-backdrop.show {
-        z-index: 1055 !important;
-    }
-    
-    #confirmBulkAssignModal.show ~ .modal-backdrop,
-    #confirmUnassignModal.show ~ .modal-backdrop {
-        z-index: 1059 !important;
-    }
-    
-    /* Style instructor list items to match import confirmation */
-    #assignList > div,
-    #unassignList > div {
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    #assignList > div:last-child,
-    #unassignList > div:last-child {
-        border-bottom: none;
-    }
-
-    #instructorListModal .modal-body {
-        max-height: 60vh;
-        overflow-y: auto;
-    }
-
-    #unassignList li {
-        display: inline-block;
-        margin-right: 0.5rem;
-        margin-bottom: 0.4rem;
-    }
-
-    #unassignList .badge {
-        padding: 0.5rem 0.75rem;
-        border-radius: 10rem;
-        background-color: rgba(0,0,0,0.05);
-        color: #333;
-    }
-
-    /* Tab styling for instructor modal */
-    #instructorListModal .nav-tabs {
-        border-bottom: 2px solid #dee2e6;
-    }
-
-    #instructorListModal .nav-tabs .nav-link {
-        border: none;
-        border-radius: 0;
-        background-color: transparent;
-        color: #6c757d;
-        font-weight: 500;
-        padding: 0.75rem 1.5rem;
-        transition: all 0.3s ease;
-        border-bottom: 3px solid transparent;
-    }
-
-    #instructorListModal .nav-tabs .nav-link:hover {
-        background-color: rgba(77, 166, 116, 0.05);
-        color: #4da674;
-        border-bottom-color: rgba(77, 166, 116, 0.3);
-    }
-
-    #instructorListModal .nav-tabs .nav-link.active {
-        background-color: white;
-        color: #4da674;
-        border-bottom-color: #4da674;
-    }
-
-    #instructorListModal .tab-content {
-        background-color: white;
-    }
-
-    /* Make header title + subject display on a single line with ellipsis if too long */
-    #instructorListModal .modal-title {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    #instructorListModal .modal-title #instructorListSubjectName {
-        color: rgba(255, 255, 255, 0.95);
-        font-size: 1.05rem;
-        font-weight: 600;
-        margin-left: 0.6rem;
-    }
-
-    #assignedInstructorsListTab::-webkit-scrollbar,
-    #availableInstructorsListTab::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    #assignedInstructorsListTab::-webkit-scrollbar-track,
-    #availableInstructorsListTab::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-
-    #assignedInstructorsListTab::-webkit-scrollbar-thumb,
-    #availableInstructorsListTab::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 10px;
-    }
-
-    #assignedInstructorsListTab::-webkit-scrollbar-thumb:hover,
-    #availableInstructorsListTab::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-
-    /* Split-pane modal enhancements */
-    .hover-bg:hover {
-        background-color: rgba(77, 166, 116, 0.05) !important;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-
-    .btn-icon-only {
-        padding: 0.25rem 0.4rem;
-        font-size: 0.75rem;
-        opacity: 0;
-        transition: all 0.2s ease;
-    }
-
-    .form-check:hover .btn-icon-only {
-        opacity: 1;
-        animation: fadeInButton 0.3s ease;
-    }
-
-    @keyframes fadeInButton {
-        from {
-            opacity: 0;
-            transform: scale(0.8);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
-    }
-
-    .btn-icon-only:hover {
-        transform: scale(1.1);
-    }
-
-    .btn-icon-only i {
-        font-size: 0.7rem;
-    }
-
-    #assignedInstructorsList, #availableInstructorsList {
-        max-height: 400px;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    #assignedInstructorsList::-webkit-scrollbar,
-    #availableInstructorsList::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    #assignedInstructorsList::-webkit-scrollbar-track,
-    #availableInstructorsList::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-
-    #assignedInstructorsList::-webkit-scrollbar-thumb,
-    #availableInstructorsList::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 10px;
-    }
-
-    #assignedInstructorsList::-webkit-scrollbar-thumb:hover,
-    #availableInstructorsList::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-
-</style>
+{{-- Styles: resources/css/gecoordinator/common.css --}}
 
 <div class="page-wrapper">
     <div class="page-container">
@@ -949,7 +689,7 @@
 
     // Open a simple read-only modal to view assigned instructors
     function openViewInstructorsModal(subjectId, subjectName) {
-        const modal = new bootstrap.Modal(document.getElementById('viewInstructorsModal'));
+        modal.open('viewInstructorsModal', { subjectId, subjectName });
         
         // Set subject name
         document.getElementById('viewSubjectName').textContent = subjectName;
@@ -964,8 +704,6 @@
                 <div class="mt-2 small">Loading instructors...</div>
             </div>
         `;
-        
-        modal.show();
         
         // Fetch assigned instructors
         fetch(`/gecoordinator/subjects/${subjectId}/instructors`)
@@ -1022,10 +760,7 @@
         modalTitle.textContent = 'Manage Instructors';
         
         // Show the modal
-        const modal = new bootstrap.Modal(document.getElementById('instructorListModal'), {
-            backdrop: false
-        });
-        modal.show();
+        modal.open('instructorListModal', { subjectId, subjectName, mode });
         
         // Fetch both assigned and available instructors
         Promise.all([
@@ -1593,11 +1328,7 @@
         if (centerToast) centerToast.style.display = 'none';
 
         // Show the confirmation modal
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmUnassignModal'), {
-            backdrop: 'static',
-            keyboard: false
-        });
-        confirmModal.show();
+        modal.open('confirmUnassignModal');
     }
 
     // Show a confirmation summary modal for bulk assign
@@ -1624,11 +1355,7 @@
         const centerToast = document.getElementById('centerToastContainer');
         if (centerToast) centerToast.style.display = 'none';
 
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmBulkAssignModal'), {
-            backdrop: 'static',
-            keyboard: false
-        });
-        confirmModal.show();
+        const confirmModal = modal.open('confirmBulkAssignModal');
 
         window.bulkAssignInstructorIds = ids;
         window.bulkAssignCallerBtn = callingBtn;
@@ -1648,8 +1375,7 @@
             this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
 
             // Hide the confirmation modal
-            const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmUnassignModal'));
-            confirmModal.hide();
+            modal.close('confirmUnassignModal');
             
             // Perform the unassign operation for all selected instructors
             Promise.all(currentUnassignInstructorIds.map(id => {
@@ -1740,9 +1466,9 @@
                 console.log('Submit button found:', submitButton);
                 
                 // Show loading state
+                loading.start('assignInstructor');
                 if (submitButton) {
                     submitButton.disabled = true;
-                    submitButton.innerHTML = '<i class="spinner-border spinner-border-sm me-1"></i> Assigning...';
                 }
                 
                 // Get the form data
@@ -1766,14 +1492,11 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        // Close the modal using Bootstrap
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmAssignModal'));
-                        if (modal) {
-                            modal.hide();
-                        }
+                        // Close the modal using Alpine
+                        modal.close('confirmAssignModal');
                         
-                        // Show success message using Bootstrap alert
-                        showNotification('success', data.message || 'Instructor assigned successfully!');
+                        // Show success message
+                        notify.success(data.message || 'Instructor assigned successfully!');
                         
                         // Refresh the modal and the table count after a short delay to update the instructor lists
                         setTimeout(() => {
@@ -1793,14 +1516,13 @@
                 .catch(error => {
                     console.error('Error:', error);
                     
-                    // Show error message using Bootstrap alert
-                    showNotification('error', error.message || 'Failed to assign instructor');
+                    // Show error message
+                    notify.error(error.message || 'Failed to assign instructor');
                 })
                 .finally(() => {
-                    // Restore button state
+                    loading.stop('assignInstructor');
                     if (submitButton) {
                         submitButton.disabled = false;
-                        submitButton.innerHTML = originalButtonText;
                     }
                 });
             });
@@ -1815,22 +1537,20 @@
                         }
 
                         // Disable to prevent double clicks
+                        loading.start('bulkAssign');
                         this.disabled = true;
-                        const orig = this.innerHTML;
-                        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Assigning...';
 
                         // Hide the modal
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmBulkAssignModal'));
-                        if (modal) modal.hide();
+                        modal.close('confirmBulkAssignModal');
 
                         // Perform assignment
                         const callerBtn = window.bulkAssignCallerBtn || this;
                         assignMultipleInstructors(currentSubjectId, window.bulkAssignInstructorIds, callerBtn);
 
-                        // restore and cleanup 
+                        // Restore state
                         setTimeout(() => {
+                            loading.stop('bulkAssign');
                             this.disabled = false;
-                            this.innerHTML = orig;
                         }, 800);
                     });
                 }
@@ -1915,10 +1635,10 @@
     // Render server-side flash messages as toasts (session)
     document.addEventListener('DOMContentLoaded', function () {
         @if (session('success'))
-            showNotification('success', @json(session('success')));
+            notify.success(@json(session('success')));
         @endif
         @if (session('error'))
-            showNotification('error', @json(session('error')));
+            notify.error(@json(session('error')));
         @endif
         
         // Initialize Bootstrap tooltips for better UX
@@ -1929,22 +1649,5 @@
     });
 </script>
 @endpush
-
-@push('styles')
-<style>
-    .bg-success-subtle {
-        background-color: rgba(25, 135, 84, 0.1);
-    }
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.02);
-    }
-    .btn-outline-success:hover, .btn-outline-danger:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .modal-header .fs-3 {
-        font-size: 1.3rem;
-    }
-</style>
-@endpush
+{{-- Styles: resources/css/gecoordinator/common.css --}}
 @endsection

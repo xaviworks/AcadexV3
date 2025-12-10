@@ -1,6 +1,5 @@
 <script>
-    // Define hasUnsavedChanges globally
-    let hasUnsavedChanges = false;
+    // Use Alpine store for unsaved changes tracking
     let checkForChanges; // Declare the function variable globally
     let form; // Declare form globally
     let termChangeInProgress = false;
@@ -30,7 +29,10 @@
             form.addEventListener('submit', function(e) {
                 console.log('Form submit event fired');
                 this.submitting = true;
-                hasUnsavedChanges = false; // Clear the global flag on form submit
+                // Clear unsaved changes in Alpine store
+                if (Alpine && Alpine.store) {
+                    Alpine.store('grades').clearUnsaved();
+                }
             });
         }
 
@@ -88,7 +90,15 @@
             if (!saveButton) return;
 
             const { hasChanges, hasInvalidInputs } = checkForChanges();
-            hasUnsavedChanges = hasChanges;
+            
+            // Update Alpine store
+            if (Alpine && Alpine.store) {
+                if (hasChanges) {
+                    Alpine.store('grades').markChanged();
+                } else {
+                    Alpine.store('grades').clearUnsaved();
+                }
+            }
 
             // Update button state
             saveButton.disabled = !hasChanges || hasInvalidInputs;
@@ -585,14 +595,18 @@
                     return;
                 }
 
-                // Show loading state
+                // Show loading state using Alpine store
+                if (Alpine && Alpine.store) {
+                    Alpine.store('loading').start('saveGrades');
+                }
                 if (saveButton) {
                     saveButton.disabled = true;
-                    saveButton.querySelector('.spinner-border')?.classList.remove('d-none');
                 }
 
-                // Clear unsaved changes before submitting
-                hasUnsavedChanges = false;
+                // Clear unsaved changes in Alpine store before submitting
+                if (Alpine && Alpine.store) {
+                    Alpine.store('grades').clearUnsaved();
+                }
                 
                 // Get form data
                 const formData = new FormData(form);
@@ -639,10 +653,12 @@
                     });
                     updateSaveButtonState();
 
-                    // Hide loading state on the current button instance
+                    // Hide loading state using Alpine store
+                    if (Alpine && Alpine.store) {
+                        Alpine.store('loading').stop('saveGrades');
+                    }
                     if (saveButton) {
                         saveButton.disabled = true;
-                        saveButton.querySelector('.spinner-border')?.classList.add('d-none');
                     }
 
                     const refreshPromise = typeof window.refreshGradeSection === 'function'
@@ -806,7 +822,10 @@
                 if (form) {
                     form.submitting = true;
                 }
-                hasUnsavedChanges = false; // Clear the global flag
+                // Clear unsaved changes in Alpine store
+                if (Alpine && Alpine.store) {
+                    Alpine.store('grades').clearUnsaved();
+                }
                 
                 // Clear the notification immediately
                 const container = document.getElementById('unsavedNotificationContainer');
@@ -919,7 +938,9 @@
             return;
         }
         
-        if (!hasUnsavedChanges) {
+        // Check Alpine store for unsaved changes
+        const hasUnsaved = Alpine && Alpine.store && Alpine.store('grades').unsavedChanges;
+        if (!hasUnsaved) {
             console.log('No unsaved changes, allowing navigation');
             return;
         }
@@ -947,12 +968,18 @@
                     // Use custom modal if available, otherwise fallback to confirm
                     if (typeof window.showUnsavedChangesModal === 'function') {
                         window.showUnsavedChangesModal(() => {
-                            hasUnsavedChanges = false; // Clear the flag before navigation
+                            // Clear unsaved changes in Alpine store
+                            if (Alpine && Alpine.store) {
+                                Alpine.store('grades').clearUnsaved();
+                            }
                             window.location.href = link.href;
                         });
                     } else {
                         if (confirm('You have unsaved changes. Are you sure you want to leave this page?')) {
-                            hasUnsavedChanges = false; // Clear the flag before navigation
+                            // Clear unsaved changes in Alpine store
+                            if (Alpine && Alpine.store) {
+                                Alpine.store('grades').clearUnsaved();
+                            }
                             window.location.href = link.href;
                         }
                     }
@@ -1159,7 +1186,10 @@
                 return;
             }
 
-            hasUnsavedChanges = false;
+            // Clear unsaved changes in Alpine store
+            if (Alpine && Alpine.store) {
+                Alpine.store('grades').clearUnsaved();
+            }
 
             if (typeof window.refreshGradeSection === 'function') {
                 termChangeInProgress = true;
@@ -1181,7 +1211,10 @@
             const { hasChanges } = checkForChanges();
             if (hasChanges) {
                 const confirmSwitch = () => {
-                    hasUnsavedChanges = false;
+                    // Clear unsaved changes in Alpine store
+                    if (Alpine && Alpine.store) {
+                        Alpine.store('grades').clearUnsaved();
+                    }
                     proceedWithSwitch();
                 };
 
@@ -1189,6 +1222,7 @@
                     window.showUnsavedChangesModal(confirmSwitch);
                 } else if (confirm('You have unsaved changes that will be lost. Continue?')) {
                     confirmSwitch();
+                }
                 }
                 return;
             }

@@ -175,28 +175,9 @@
     </div>
 </header>
 
+{{-- Styles: resources/css/layout/navigation.css --}}
+
 @if($showNotifications ?? false)
-<style>
-.notification-item:hover {
-    background-color: #f8f9fa;
-}
-.notification-item:last-child {
-    border-bottom: none !important;
-}
-/* Prevent badge from causing layout shift */
-.badge.rounded-pill {
-    min-width: 20px;
-    text-align: center;
-}
-/* Smooth opacity changes only - prevent layout shift */
-[x-cloak] {
-    display: none !important;
-}
-/* Optimize Alpine transitions */
-[x-transition] {
-    will-change: opacity, transform;
-}
-</style>
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('notificationBell', () => ({
@@ -287,13 +268,4 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 </script>
-
-<style>
-.notification-item:hover {
-    background-color: #f8f9fa;
-}
-.notification-item:last-child {
-    border-bottom: none !important;
-}
-</style>
 @endif

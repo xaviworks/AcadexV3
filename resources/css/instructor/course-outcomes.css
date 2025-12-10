@@ -1,0 +1,367 @@
+/* Instructor Portal - Course Outcomes Styles */
+
+/* Course Outcomes Results Table Styles */
+.student-row:hover {
+    background-color: #f8f9fa !important;
+    transition: background-color 0.2s ease;
+}
+
+.co-table th {
+    border-top: 2px solid #198754;
+    vertical-align: middle;
+}
+
+.co-table .small {
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.score-value {
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+}
+
+.score-value[data-percentage]:not([data-percentage=""]):not([data-percentage="-"]) {
+    background-color: #e8f5e8;
+    border: 1px solid #c3e6cb;
+}
+
+.table-success th {
+    background-color: #d1e7dd !important;
+    border-color: #a3cfbb !important;
+}
+
+/* Compact Circular Term Navigation Styles */
+.compact-stepper {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+    padding: 4px 0;
+}
+
+.compact-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #6c757d;
+    position: relative;
+    z-index: 2;
+}
+
+.compact-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 100%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 2px;
+    background: #dee2e6;
+    z-index: 1;
+}
+
+.compact-step.active:not(:last-child)::after {
+    background: #198754;
+}
+
+.compact-step.completed:not(:last-child)::after {
+    background: #28a745;
+}
+
+.compact-step.completed:first-child:not(:last-child)::after {
+    background: #28a745 !important;
+}
+
+.compact-step.upcoming:not(:last-child)::after {
+    background: #dee2e6;
+}
+
+.compact-step.upcoming + .compact-step.completed::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    right: 100%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 2px;
+    background: #28a745;
+    z-index: 1;
+}
+
+/* Enhanced Card Animations */
+.enhanced-card {
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.enhanced-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(77, 166, 116, 0.3) !important;
+}
+
+/* Shimmer Effect */
+.shimmer-overlay {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.enhanced-card:hover .shimmer-overlay {
+    left: 100%;
+}
+
+/* Card Header Enhancement */
+.card-header-enhanced {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Course Outcomes Wildcards Styles */
+:root {
+    --primary-color: #198754;
+    --primary-light: #20c997;
+    --primary-dark: #146c43;
+    --primary-subtle: rgba(25, 135, 84, 0.1);
+}
+
+.course-outcomes-page {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* Year level sections */
+.year-level-section {
+    scroll-margin-top: 120px;
+}
+
+/* Modern card effects */
+.subject-card .card {
+    border-radius: 1rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: #4ecd85 !important;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.subject-card:hover .card {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+/* Subject code circle animation */
+.subject-code-circle {
+    transition: all 0.3s ease;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4da674, #023336);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.subject-card:hover .subject-code-circle {
+    transform: translateX(-50%) scale(1.1);
+}
+
+.card-header {
+    background: transparent !important;
+    border-bottom: none;
+    padding-top: 50px;
+    position: relative;
+}
+
+/* Navigation buttons */
+.year-nav-btn {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.year-nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.year-nav-btn.active {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.3);
+}
+
+/* Course Outcomes Table Specific Styles */
+.table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+.card-header-custom {
+    background: linear-gradient(135deg, #198754, #0f5132);
+    color: white;
+    padding: 1rem 1.5rem;
+    border: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.card-header-primary {
+    background: linear-gradient(135deg, #198754, #0f5132);
+}
+
+.card-header-custom i {
+    font-size: 1.2rem;
+}
+
+.expand-toggle {
+    background: none;
+    border: none;
+    color: #198754;
+    font-size: 0.875rem;
+    padding: 0;
+    margin-left: 0.5rem;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.expand-toggle:hover {
+    color: #0f5132;
+}
+
+.description-text {
+    transition: all 0.3s ease;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.description-container {
+    line-height: 1.4;
+    position: relative;
+    cursor: pointer;
+    min-height: auto;
+}
+
+.description-container:hover {
+    background-color: rgba(25, 135, 84, 0.05);
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+}
+
+.description-container:hover .edit-indicator {
+    opacity: 1;
+}
+
+.edit-indicator {
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: rgba(25, 135, 84, 0.9);
+    color: white;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.edit-indicator i {
+    font-size: 0.7rem;
+}
+
+.edit-tooltip {
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.textarea-error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Breadcrumb specific styles */
+.breadcrumb-item a {
+    color: #198754;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: #0f5132;
+    text-decoration: underline;
+}
+
+.form-label {
+    color: #495057;
+    font-weight: 600;
+}
+
+.form-select:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.btn-primary {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-primary:hover {
+    background-color: #0f5132;
+    border-color: #0f5132;
+}

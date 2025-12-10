@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
+{{-- Styles: resources/css/instructor/course-outcomes.css --}}
 /* Enhanced Card Animations */
 .enhanced-card {
     position: relative;
@@ -318,5 +318,3 @@ document.addEventListener('DOMContentLoaded', function() {
     width: 300px;
     height: 300px;
 }
-</style>
-@endpush

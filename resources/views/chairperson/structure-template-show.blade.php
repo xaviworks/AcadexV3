@@ -218,20 +218,4 @@
 </div>
 @endsection
 
-@push('styles')
-<style>
-.timeline-item {
-    position: relative;
-}
-
-.timeline-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    left: 17px;
-    top: 40px;
-    width: 2px;
-    height: calc(100% - 20px);
-    background: #dee2e6;
-}
-</style>
-@endpush
+{{-- Styles: resources/css/chairperson/common.css --}}

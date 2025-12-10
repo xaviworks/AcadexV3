@@ -35,34 +35,7 @@
 </div>
 @endsection
 
-@push('styles')
-<style>
-/* VPAA read-only: hide non-view actions coming from the instructor template */
-.vpaa-readonly .notification-bell { display: none !important; }
-.vpaa-readonly [data-bs-target="#printOptionsModal"],
-.vpaa-readonly #printOptionsModal,
-.vpaa-readonly #warningModal { display: none !important; }
-.vpaa-readonly a[href*="/instructor/course-outcome-attainments"],
-.vpaa-readonly a[href*="/instructor/course_outcomes"],
-.vpaa-readonly a[href*="/instructor/grades"] { display: none !important; }
-/* Prevent any accidental form submissions if present */
-.vpaa-readonly form { display: none !important; }
-
-/* Global fallback if included template escapes wrapper */
-body.vpaa-view a[href*="/instructor/course_outcomes"],
-body.vpaa-view a[href*="/instructor/course-outcome-attainments"],
-body.vpaa-view a[href*="/instructor/grades"],
-body.vpaa-view .notification-bell,
-body.vpaa-view [data-bs-target="#printOptionsModal"],
-body.vpaa-view #printOptionsModal,
-body.vpaa-view #warningModal { display: none !important; }
-
-/* Hide the academic-period note container under the empty-state buttons */
-.vpaa-readonly .card-body.text-center .mt-3 { display: none !important; }
-/* Extra: hide small info line regardless of wrapper */
-body.vpaa-view .card-body.text-center .mt-3 small.text-muted { display: none !important; }
-</style>
-@endpush
+{{-- Styles: resources/css/vpaa/common.css --}}
 
 @push('scripts')
 <script>

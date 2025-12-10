@@ -1,161 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .import-courses-wrapper {
-        min-height: 100vh;
-        background-color: #EAF8E7;
-        padding: 0;
-        margin: 0;
-    }
-
-    .import-courses-container {
-        max-width: 100%;
-        padding: 2rem 2rem;
-    }
-
-    .page-title {
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid rgba(77, 166, 116, 0.2);
-    }
-
-    .page-title h1 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #2c3e50;
-        margin: 0 0 0.5rem 0;
-        display: flex;
-        align-items: center;
-    }
-
-    .page-title h1 i {
-        color: #198754;
-        font-size: 2rem;
-        margin-right: 0.75rem;
-    }
-
-    .page-subtitle {
-        color: #6c757d;
-        font-size: 0.875rem;
-        margin: 0;
-    }
-
-    /* Breadcrumb Styling */
-    .breadcrumb {
-        background-color: transparent;
-        padding: 0.75rem 0;
-    }
-
-    .breadcrumb-item a {
-        color: #4da674;
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.2s;
-    }
-
-    .breadcrumb-item a.active {
-        text-decoration: underline;
-        text-underline-offset: 4px;
-        font-weight: 600;
-    }
-
-    .breadcrumb-item a:hover {
-        color: #3d8a5e;
-        text-decoration: underline;
-    }
-
-    .breadcrumb-item.active {
-        color: #6c757d;
-        font-weight: 500;
-    }
-
-    .breadcrumb-item + .breadcrumb-item::before {
-        color: #4da674;
-    }
-
-    /* Enhanced Card Styling */
-    .subject-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .subject-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-        transition: left 0.5s;
-    }
-
-    .subject-card:hover::before {
-        left: 100%;
-    }
-
-    .subject-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 12px 24px rgba(77, 166, 116, 0.3) !important;
-    }
-
-    .subject-card .position-relative {
-        background: linear-gradient(135deg, #4da674 0%, #3d8a5e 100%) !important;
-    }
-
-    .subject-card:hover .position-relative {
-        background: linear-gradient(135deg, #3d8a5e 0%, #2d6a4e 100%) !important;
-    }
-
-    .subject-circle {
-        transition: all 0.3s ease;
-    }
-
-    .subject-card:hover .subject-circle {
-        transform: translate(-50%, -50%) rotate(5deg) scale(1.1) !important;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
-    }
-
-    .subject-card .card-body {
-        background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
-        transition: background 0.3s;
-    }
-
-    .subject-card:hover .card-body {
-        background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
-    }
-
-    .subject-card h6 {
-        transition: color 0.3s;
-    }
-
-    .subject-card:hover h6 {
-        color: #4da674 !important;
-    }
-
-    .subject-card .badge {
-        transition: all 0.3s;
-    }
-
-    .subject-card:hover .badge {
-        background-color: #4da674 !important;
-        transform: scale(1.05);
-    }
-
-    /* Add ripple effect */
-    @keyframes ripple {
-        0% {
-            transform: scale(0);
-            opacity: 1;
-        }
-        100% {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-</style>
+{{-- Styles: resources/css/chairperson/common.css --}}
 
 <div class="import-courses-wrapper">
     <div class="import-courses-container">
@@ -188,15 +34,11 @@
             @foreach($instructors as $instructor)
                 <div class="col-md-4">
                     <div
-                        class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden transform transition hover:scale-105 hover:shadow-xl hover:border-primary"
-                        data-url="{{ route('chairperson.viewGrades', ['instructor_id' => $instructor->id]) }}"
-                        style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;"
-                        onclick="window.location.href='{{ route('chairperson.viewGrades', ['instructor_id' => $instructor->id]) }}'"
+                        class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow"
                     >
                         {{-- Top header --}}
                         <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
-                            <div class="subject-circle position-absolute start-50 translate-middle"
-                                style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 10%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                            <div class="subject-circle wildcard-circle-positioned">
                                 {{-- Person Icon for Instructor (Square Design) --}}
                                 <i class="bi bi-person-circle text-white" style="font-size: 40px;"></i>
                             </div>
@@ -229,9 +71,8 @@
                             onclick="window.location.href='{{ route('chairperson.viewGrades', ['instructor_id' => $selectedInstructorId, 'subject_id' => $subjectItem->id]) }}'"
                         >
                             {{-- Top header --}}
-                            <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
-                                <div class="subject-circle position-absolute start-50 translate-middle"
-                                    style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                            <div class="position-relative header-height-80 bg-gradient-green-soft">
+                                <div class="wildcard-circle-positioned">
                                     <h5 class="mb-0 text-white fw-bold">{{ $subjectItem->subject_code }}</h5>
                                 </div>
                             </div>
@@ -379,9 +220,15 @@
                     <i class="bi bi-x-circle me-1"></i>
                     Cancel
                 </button>
-                <button type="button" class="btn btn-success" id="saveNotesBtn">
-                    <i class="bi bi-check-circle me-1"></i>
-                    Save Notes
+                <button type="button" class="btn btn-success" id="saveNotesBtn" x-data>
+                    <span x-show="!$store.loading.isLoading('saveNotes')">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Save Notes
+                    </span>
+                    <span x-show="$store.loading.isLoading('saveNotes')" x-cloak>
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                        Saving...
+                    </span>
                 </button>
             </div>
         </div>
@@ -390,16 +237,7 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const notesModal = new bootstrap.Modal(document.getElementById('notesModal'), {
-        backdrop: false
-    });
-    const notesTextarea = document.getElementById('notesTextarea');
-    const studentNameDisplay = document.getElementById('studentNameDisplay');
-    const saveNotesBtn = document.getElementById('saveNotesBtn');
-    const charCount = document.getElementById('charCount');
-    let currentFinalGradeId = null;
-    let currentButton = null;
+document.addEventListener('DOMContentLoaded', function() {\n    const notesTextarea = document.getElementById('notesTextarea');\n    const studentNameDisplay = document.getElementById('studentNameDisplay');\n    const saveNotesBtn = document.getElementById('saveNotesBtn');\n    const charCount = document.getElementById('charCount');\n    let currentFinalGradeId = null;\n    let currentButton = null;
 
     // Update character count
     notesTextarea.addEventListener('input', function() {
@@ -420,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
             charCount.textContent = notes.length;
             
             // Show modal
-            notesModal.show();
+            modal.open('notesModal', { finalGradeId, studentName, notes });
         });
     });
 
@@ -430,10 +268,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const notes = notesTextarea.value.trim();
         
-        // Disable button during save
+        // Start loading
+        loading.start('saveNotes');
         this.disabled = true;
-        const originalHTML = this.innerHTML;
-        this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Saving...';
         
         try {
             const response = await fetch('{{ route('chairperson.saveGradeNotes') }}', {
@@ -473,26 +310,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentButton.dataset.notes = notes;
                 }
                 
-                // Show success feedback
-                this.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Saved!';
-                
-                // Show toast notification
-                showToast('Success', data.message, 'success');
+                // Show success notification
+                notify.success(data.message);
                 
                 // Close modal after short delay
                 setTimeout(() => {
-                    notesModal.hide();
-                    this.innerHTML = originalHTML;
+                    modal.close('notesModal');
+                    loading.stop('saveNotes');
                     this.disabled = false;
-                }, 1000);
+                }, 500);
             } else {
                 throw new Error(data.message || 'Failed to save notes');
             }
         } catch (error) {
             console.error('Error saving notes:', error);
-            this.innerHTML = originalHTML;
+            loading.stop('saveNotes');
             this.disabled = false;
-            showToast('Error', error.message || 'Failed to save notes. Please try again.', 'error');
+            notify.error(error.message || 'Failed to save notes. Please try again.');
         }
     });
 

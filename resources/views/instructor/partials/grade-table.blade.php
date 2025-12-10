@@ -62,7 +62,12 @@
     @endif
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
-            <div class="input-group shadow-sm" style="width: 300px;">
+            <div class="input-group shadow-sm" style="width: 300px;" x-data="{ 
+                init() {
+                    const saved = search.get('gradeStudents');
+                    if (saved) this.$el.querySelector('input').value = saved;
+                }
+            }">
                 <span class="input-group-text bg-white border-end-0">
                     <i class="bi bi-search text-muted"></i>
                 </span>
@@ -70,7 +75,8 @@
                     id="studentSearch" 
                     class="form-control border-start-0 ps-0" 
                     placeholder="Search student name..."
-                    aria-label="Search student">
+                    aria-label="Search student"
+                    @input="search.set('gradeStudents', $event.target.value)">
             </div>
             <select id="sortFilter" class="form-select shadow-sm" style="width: 140px;">
                 <option value="asc" selected>A to Z</option>
@@ -234,11 +240,18 @@
 
 @if ($hasData)
     <div class="text-end mt-4 d-flex justify-content-end align-items-center">
+        <!-- Alpine-powered unsaved changes indicator -->
+        <div x-data x-show="$store.grades.unsavedChanges" x-transition class="me-3">
+            <div class="alert alert-warning mb-0 py-2 px-3 d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span class="small fw-semibold">Unsaved changes</span>
+            </div>
+        </div>
         <div id="unsavedNotificationContainer" class="me-3"></div>
-        <button type="submit" id="saveGradesBtn" class="btn btn-success px-4 py-2 d-flex align-items-center gap-2 position-relative" disabled>
+        <button type="submit" id="saveGradesBtn" class="btn btn-success px-4 py-2 d-flex align-items-center gap-2 position-relative" disabled x-data>
             <i class="bi bi-save"></i>
-            <span>Save Grades</span>
-            <div class="spinner-border spinner-border-sm ms-1 d-none" role="status">
+            <span x-text="$store.loading.isLoading('saveGrades') ? 'Saving...' : 'Save Grades'"></span>
+            <div x-show="$store.loading.isLoading('saveGrades')" x-transition class="spinner-border spinner-border-sm ms-1" role="status">
                 <span class="visually-hidden">Saving...</span>
             </div>
         </button>

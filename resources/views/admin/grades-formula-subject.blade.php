@@ -20,36 +20,36 @@
         return $url . '?' . http_build_query($queryParams);
     };
 @endphp
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
     <div class="row mb-2">
         <div class="col">
             <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-house-door me-1"></i>Home
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-sliders me-1"></i>Grades Formula
                         </a>
                     </li>
                     @if($department)
                         <li class="breadcrumb-item">
-                            <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                            <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="text-decoration-none link-success-green text-sm">
                                 {{ $department->department_code }} Department
                             </a>
                         </li>
                     @endif
                     @if($course)
                         <li class="breadcrumb-item">
-                            <a href="{{ $buildRoute('admin.gradesFormula.course', ['department' => $department->id, 'course' => $course->id]) }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                            <a href="{{ $buildRoute('admin.gradesFormula.course', ['department' => $department->id, 'course' => $course->id]) }}" class="text-decoration-none link-success-green text-sm">
                                 {{ $course->course_code }} Course
                             </a>
                         </li>
                     @endif
-                    <li class="breadcrumb-item active" aria-current="page" style="color: #6c757d; font-size: 0.9rem;">
+                    <li class="breadcrumb-item active text-muted-gray text-sm" aria-current="page">
                         {{ $subject->subject_code }} Subject
                     </li>
                 </ol>
@@ -57,11 +57,11 @@
 
             <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
                 <div class="d-flex align-items-center">
-                    <div class="p-2 rounded-circle me-2" style="background: linear-gradient(135deg, #198754, #20c997);">
-                        <i class="bi bi-journal-text text-white" style="font-size: 1.2rem;"></i>
+                    <div class="p-2 rounded-circle me-2 bg-gradient-green">
+                        <i class="bi bi-journal-text text-white icon-lg"></i>
                     </div>
                     <div>
-                        <h4 class="fw-bold mb-0" style="color: #198754;">
+                        <h4 class="fw-bold mb-0 text-primary-green">
                             {{ $subject->subject_code }} · {{ $subject->subject_description }}
                         </h4>
                         <small class="text-muted">
@@ -82,7 +82,7 @@
         <form method="GET" action="{{ route('admin.gradesFormula.subject', ['subject' => $subject->id]) }}" class="d-flex align-items-center gap-2 flex-wrap">
             <div class="d-flex flex-column">
                 <label class="text-success small mb-1">Academic Year</label>
-                <select name="academic_year" class="form-select form-select-sm" onchange="this.form.submit()" style="max-width: 180px;">
+                <select name="academic_year" class="form-select form-select-sm max-w-180" onchange="this.form.submit()">
                     <option value="" {{ $selectedAcademicYear ? '' : 'selected' }}>All Years</option>
                     @foreach($academicYears as $year)
                         <option value="{{ $year }}" {{ $selectedAcademicYear === $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -91,7 +91,7 @@
             </div>
             <div class="d-flex flex-column">
                 <label class="text-success small mb-1">Semester</label>
-                <select name="semester" class="form-select form-select-sm" onchange="this.form.submit()" style="max-width: 150px;">
+                <select name="semester" class="form-select form-select-sm max-w-150" onchange="this.form.submit()">
                     <option value="" {{ $semester ? '' : 'selected' }}>All/Default</option>
                     @foreach($availableSemesters as $availableSemester)
                         <option value="{{ $availableSemester }}" {{ $semester === $availableSemester ? 'selected' : '' }}>{{ $availableSemester }}</option>
@@ -102,9 +102,7 @@
     </div>
 
     @if (session('success'))
-        <div class="alert alert-success shadow-sm">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-        </div>
+        <script>notify.success('{{ session('success') }}');</script>
     @endif
 
     @php
@@ -386,7 +384,7 @@
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <div class="alert alert-warning border-0 shadow-sm-sm mb-3" style="white-space: pre-wrap; font-size: 0.9rem;">
+                                        <div class="alert alert-warning border-0 shadow-sm-sm mb-3 white-space-pre-wrap text-sm">
 Choose Department Formula
 Department formulas replace the old department baselines. Pick one to baseline {{ $subjectName }} and refine a subject-specific override afterward.
 
@@ -725,151 +723,7 @@ This subject already has a custom formula. Applying a structure template will re
 </script>
 @endpush
 
+{{-- Styles: resources/css/admin/grades-formula.css --}}
 @push('styles')
-<style>
-.formula-option-wrapper {
-    display: block;
-    position: relative;
-}
 
-.formula-option-input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.formula-option-card {
-    border: 1px solid rgba(25, 135, 84, 0.18);
-    border-radius: 1.25rem;
-    background: #ffffff;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.formula-option-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
-}
-
-.formula-option-card.is-selected {
-    border-color: #198754;
-    box-shadow: 0 22px 48px rgba(25, 135, 84, 0.22);
-}
-
-.formula-option-card .formula-card-glow {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(25, 135, 84, 0.15), rgba(32, 201, 151, 0.12));
-    opacity: 0;
-    transform: scale(0.96);
-    transition: opacity 0.35s ease, transform 0.35s ease;
-    pointer-events: none;
-}
-
-.formula-option-card.is-selected .formula-card-glow {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.formula-check {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #198754, #20c997);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    transform: scale(0.4);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.formula-option-card.is-selected .formula-check {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.formula-option-card.pulse {
-    animation: formulaPulse 0.6s ease;
-}
-
-@keyframes formulaPulse {
-    0% {
-        transform: translateY(-4px) scale(0.99);
-    }
-    40% {
-        transform: translateY(-8px) scale(1.02);
-    }
-    100% {
-        transform: translateY(-4px) scale(1);
-    }
-}
-
-.formula-weight-chip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    padding: 0.35rem 0.85rem;
-    border-radius: 999px;
-    background: rgba(25, 135, 84, 0.08);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #0f5132;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-}
-
-.formula-weight-chip::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(25, 135, 84, 0.35), rgba(32, 201, 151, 0.35));
-    transform-origin: left center;
-    transform: scaleX(var(--chip-progress, 0));
-    transition: transform 0.4s ease;
-    opacity: 0.6;
-}
-
-.formula-weight-chip span {
-    position: relative;
-    z-index: 1;
-}
-
-.formula-alert {
-    border-radius: 1rem;
-    border: none;
-}
-
-.shadow-sm-sm {
-    box-shadow: 0 8px 20px rgba(25, 135, 84, 0.12);
-}
-
-.btn-apply-formula {
-    border-radius: 999px;
-    padding: 0.4rem 1.6rem;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.btn-apply-formula:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.btn-apply-formula:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(25, 135, 84, 0.25);
-}
-
-@media (max-width: 576px) {
-    .formula-option-card {
-        border-radius: 1rem;
-    }
-}
-</style>
 @endpush

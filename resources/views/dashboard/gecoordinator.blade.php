@@ -335,37 +335,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 @endpush
 
-@push('styles')
-<style>
-    .hover-lift {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    .hover-lift:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.075) !important;
-    }
-    .progress {
-        overflow: visible;
-    }
-    .progress-bar {
-        position: relative;
-        overflow: visible;
-    }
-    .progress-bar::after {
-        content: '';
-        position: absolute;
-        right: -1px;
-        top: -3px;
-        height: 18px;
-        width: 1px;
-        background-color: rgba(0, 0, 0, 0.1);
-    }
-    .progress-bar:last-child::after {
-        display: none;
-    }
-    .card {
-        border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-</style>
-@endpush
+{{-- Styles: resources/css/dashboard/common.css --}}
 @endsection

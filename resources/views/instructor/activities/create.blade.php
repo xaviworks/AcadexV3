@@ -4,13 +4,7 @@
 <div class="container-fluid px-3 py-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
 
   @if (session('error'))
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert" style="border-left: 4px solid #dc3545 !important;">
-      <div class="d-flex align-items-center">
-        <i class="bi bi-exclamation-triangle-fill me-3 fs-4" style="color: #dc3545;"></i>
-        <div class="flex-grow-1">{{ session('error') }}</div>
-      </div>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <script>notify.error('{{ session('error') }}');</script>
   @endif
 
   @if ($errors->any())
@@ -719,76 +713,4 @@
 </script>
 @endpush
 
-@push('styles')
-<style>
-  /* Custom animations */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .card {
-    animation: fadeInUp 0.5s ease-out;
-  }
-
-  /* Table hover effects */
-  table tbody tr {
-    transition: all 0.2s ease;
-  }
-
-  table tbody tr:hover {
-    transform: translateX(2px);
-    box-shadow: 0 2px 8px rgba(25, 135, 84, 0.1);
-  }
-
-  /* Form control focus */
-  .form-control:focus,
-  .form-select:focus {
-    border-color: #198754 !important;
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15) !important;
-  }
-
-  /* Badge enhancements */
-  .badge {
-    font-weight: 500;
-    letter-spacing: 0.3px;
-  }
-
-  /* Modal animations */
-  .modal.fade .modal-dialog {
-    transform: scale(0.8);
-    opacity: 0;
-    transition: all 0.3s ease;
-  }
-
-  .modal.show .modal-dialog {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  /* Button hover effects */
-  .btn {
-    transition: all 0.2s ease;
-  }
-
-  .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .btn:active {
-    transform: translateY(0);
-  }
-
-  /* Alert enhancements */
-  .alert {
-    animation: fadeInUp 0.4s ease-out;
-  }
-</style>
-@endpush
+{{-- Styles: resources/css/instructor/common.css --}}

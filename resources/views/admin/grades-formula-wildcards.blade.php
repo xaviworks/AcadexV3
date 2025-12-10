@@ -127,13 +127,13 @@
 @endphp
 
 @section('content')
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
     <div class="row mb-2">
         <div class="col">
             <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none" style="color: #198754;">
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green">
                             <i class="bi bi-house-door me-1"></i>Home
                         </a>
                     </li>
@@ -145,11 +145,11 @@
 
             <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
                 <div class="d-flex align-items-center">
-                    <div class="p-2 rounded-circle me-2" style="background: linear-gradient(135deg, #198754, #20c997);">
-                        <i class="bi bi-sliders text-white" style="font-size: 1.2rem;"></i>
+                    <div class="p-2 rounded-circle me-2 bg-gradient-green">
+                        <i class="bi bi-sliders text-white icon-lg"></i>
                     </div>
                     <div>
-                        <h4 class="fw-bold mb-0" style="color: #198754;">Grades Formula Management</h4>
+                        <h4 class="fw-bold mb-0 text-primary-green">Grades Formula Management</h4>
                         <small class="text-muted">Select a wildcard to manage its grading scale</small>
                     </div>
                 </div>
@@ -161,10 +161,7 @@
     </div>
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>notify.success('{{ session('success') }}');</script>
     @endif
 
     @unless($departments->flatMap->courses->flatMap->subjects->isNotEmpty())
@@ -173,12 +170,12 @@
         </div>
     @endunless
 
-    <div class="card border-0 shadow-sm mb-3" style="background: linear-gradient(135deg, #198754, #20c997); color: white;">
+    <div class="card border-0 shadow-sm mb-3 bg-gradient-green-card">
         <div class="card-body py-3">
             <div class="row align-items-center">
                 <div class="col-md-8 d-flex align-items-center gap-3">
-                    <div class="p-2 rounded-circle" style="background: rgba(255,255,255,0.15);">
-                        <i class="bi bi-collection text-white" style="font-size: 1rem;"></i>
+                    <div class="p-2 rounded-circle bg-gradient-overlay">
+                        <i class="bi bi-collection text-white icon-md"></i>
                     </div>
                     <div>
                         <h6 class="mb-1 fw-bold">Wildcard Summary</h6>
@@ -223,7 +220,7 @@
                 <div class="d-flex justify-content-end mb-3">
                 <form method="GET" action="{{ route('admin.gradesFormula') }}" class="d-flex align-items-center gap-2">
                     <label class="text-success small mb-0">Semester</label>
-                    <select name="semester" class="form-select form-select-sm" onchange="this.form.submit()" style="max-width: 180px;">
+                    <select name="semester" class="form-select form-select-sm max-w-180" onchange="this.form.submit()">
                         <option value="" {{ request('semester') ? '' : 'selected' }}>All/Default</option>
                         <option value="1st" {{ request('semester')==='1st' ? 'selected' : '' }}>1st</option>
                         <option value="2nd" {{ request('semester')==='2nd' ? 'selected' : '' }}>2nd</option>
@@ -248,11 +245,10 @@
                     @endphp
                     <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                         <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="text-decoration-none text-reset">
-                            <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden" data-status="{{ $status }}" data-url="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                            <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow" data-status="{{ $status }}" data-url="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}">
                             {{-- Top header --}}
-                            <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
-                                <div class="wildcard-circle position-absolute start-50 translate-middle"
-                                    style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                            <div class="position-relative header-height-80 bg-gradient-green-soft">
+                                <div class="wildcard-circle-positioned">
                                     <span class="text-white fw-bold">{{ $department->department_code }}</span>
                                 </div>
                             </div>
@@ -1001,7 +997,7 @@
                         <!-- Components will be added here dynamically -->
                     </div>
 
-                    <div class="alert alert-warning mb-4" id="weight-warning" style="display: none;">
+                    <div class="alert alert-warning mb-4 d-none-important" id="weight-warning">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         <small>Total weight must equal <strong>100%</strong>. Current total: <span id="total-weight">0</span>%</small>
                     </div>
@@ -2149,628 +2145,6 @@
 </script>
 @endpush
 
+{{-- Styles: resources/css/admin/grades-formula.css --}}
 @push('styles')
-<style>
-.section-scroll {
-    padding: 0.5rem 0.75rem 1.25rem;
-}
-
-/* Ensure Bootstrap scrollable modals have an explicit max-height and allow
-   inner vertical scrolling so long modal content remains accessible on
-   smaller viewports or when many dynamic components are added. */
-.modal-dialog-scrollable .modal-body {
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.component-item {
-    transition: all 0.2s ease;
-}
-
-.component-item.ms-4 {
-    background: rgba(13, 110, 253, 0.02);
-}
-
-.component-item .add-subcomponent-btn {
-    transition: all 0.2s ease;
-}
-
-.component-item .add-subcomponent-btn:hover {
-    transform: translateY(-1px);
-}
-
-.subcomponents-container {
-    padding-left: 0;
-}
-
-.subcomponents-container > .component-item:last-child {
-    margin-bottom: 0 !important;
-}
-
-.bulk-layout-card {
-    background: #ffffff;
-    border-radius: 1.25rem;
-    border: 1px solid rgba(25, 135, 84, 0.12);
-    box-shadow: 0 14px 32px rgba(25, 135, 84, 0.08);
-    padding: 1.5rem;
-}
-
-@media (max-width: 576px) {
-    .bulk-layout-card {
-        padding: 1.15rem;
-        border-radius: 1rem;
-    }
-}
-
-.bulk-course-scroll {
-    background: #ffffff;
-    border: 1px solid rgba(25, 135, 84, 0.12);
-    box-shadow: 0 10px 26px rgba(25, 135, 84, 0.07);
-}
-
-.bulk-course-scroll {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    padding: 0.85rem 0.95rem 1.15rem;
-    flex: 1 1 auto;
-}
-
-.formula-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    padding: 0.85rem 0.95rem;
-    flex: 1 1 auto;
-    background: #ffffff;
-    border: 1px solid rgba(25, 135, 84, 0.12) !important;
-    border-radius: 1rem;
-    box-shadow: 0 8px 22px rgba(25, 135, 84, 0.08);
-}
-
-.bulk-course-card {
-    background: #ffffff;
-    border: 1px solid rgba(25, 135, 84, 0.2);
-    border-radius: 1rem;
-    padding: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.bulk-course-card:hover {
-    border-color: rgba(25, 135, 84, 0.45);
-    box-shadow: 0 12px 24px rgba(25, 135, 84, 0.1);
-}
-
-.bulk-course-card .form-check-input:checked ~ label {
-    color: #0f5132;
-}
-
-.bulk-course-card.is-selected {
-    border-color: rgba(25, 135, 84, 0.6);
-    box-shadow: 0 16px 30px rgba(25, 135, 84, 0.12);
-}
-
-.bulk-course-card-header .course-label {
-    display: block;
-    word-break: break-word;
-}
-
-.bulk-course-card-header .course-meta {
-    word-break: break-word;
-}
-
-.bulk-course-card-header .bulk-course-toggle {
-    white-space: nowrap;
-}
-
-.bulk-course-subjects {
-    margin-top: 0.75rem;
-}
-
-.bulk-course-subject-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.course-formula-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.35rem;
-}
-
-.course-formula-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.3rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.course-formula-chip-course {
-    background: rgba(25, 135, 84, 0.18);
-    color: #0f5132;
-    border: 1px solid rgba(25, 135, 84, 0.25);
-}
-
-.course-formula-chip-department {
-    background: rgba(13, 110, 253, 0.12);
-    color: #0a58ca;
-    border: 1px solid rgba(13, 110, 253, 0.24);
-}
-
-.course-formula-chip-global {
-    background: rgba(108, 117, 125, 0.12);
-    color: #495057;
-    border: 1px solid rgba(108, 117, 125, 0.2);
-}
-
-.course-formula-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.subject-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.35rem 0.65rem;
-    border-radius: 999px;
-    background: rgba(25, 135, 84, 0.12);
-    color: #0f5132;
-    max-width: 100%;
-}
-
-.subject-pill-warning {
-    background: rgba(220, 53, 69, 0.12);
-    color: #842029;
-}
-
-.subject-pill-text {
-    white-space: normal;
-    word-break: break-word;
-}
-
-.subject-chip-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.45rem 0.6rem;
-    border-radius: 0.85rem;
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(25, 135, 84, 0.14);
-    box-shadow: 0 6px 16px rgba(25, 135, 84, 0.05);
-    min-width: 180px;
-}
-
-.subject-chip-card .subject-pill {
-    width: 100%;
-}
-
-.subject-formula-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.subject-formula-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 600;
-}
-
-.subject-formula-chip-subject {
-    background: rgba(111, 66, 193, 0.18);
-    color: #4b2a86;
-    border: 1px solid rgba(111, 66, 193, 0.26);
-}
-
-.subject-formula-chip-course {
-    background: rgba(25, 135, 84, 0.18);
-    color: #0f5132;
-    border: 1px solid rgba(25, 135, 84, 0.25);
-}
-
-.subject-formula-chip-department {
-    background: rgba(13, 110, 253, 0.14);
-    color: #0a58ca;
-    border: 1px solid rgba(13, 110, 253, 0.24);
-}
-
-.subject-formula-chip-global {
-    background: rgba(108, 117, 125, 0.14);
-    color: #495057;
-    border: 1px solid rgba(108, 117, 125, 0.2);
-}
-
-.subject-formula-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-}
-
-.template-selection-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    padding: 0.85rem 0.95rem;
-    background: #ffffff;
-    border: 1px solid rgba(25, 135, 84, 0.12) !important;
-    border-radius: 1rem;
-    box-shadow: 0 8px 22px rgba(25, 135, 84, 0.08);
-}
-
-.structure-template-card {
-    display: block;
-    border: 1px solid rgba(25, 135, 84, 0.2);
-    border-radius: 1rem;
-    background: #ffffff;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    cursor: pointer;
-}
-
-.structure-template-card:hover,
-.structure-template-card:focus-within {
-    border-color: rgba(25, 135, 84, 0.45);
-    box-shadow: 0 14px 32px rgba(25, 135, 84, 0.12);
-    transform: translateY(-2px);
-}
-
-.structure-template-card.is-selected {
-    border-color: rgba(25, 135, 84, 0.6);
-    box-shadow: 0 18px 34px rgba(25, 135, 84, 0.16);
-    transform: translateY(-2px);
-    background: rgba(25, 135, 84, 0.02);
-}
-
-.structure-template-card input[type="radio"] {
-    cursor: pointer;
-}
-
-.formula-card {
-    display: block;
-    border: 1px solid rgba(25, 135, 84, 0.2);
-    border-radius: 1rem;
-    background: #ffffff;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-}
-
-.formula-card:hover,
-.formula-card:focus-within {
-    border-color: rgba(25, 135, 84, 0.45);
-    box-shadow: 0 14px 32px rgba(25, 135, 84, 0.12);
-}
-
-.formula-card.is-selected {
-    border-color: rgba(25, 135, 84, 0.6);
-    box-shadow: 0 18px 34px rgba(25, 135, 84, 0.16);
-}
-
-.formula-card.formula-context-mismatch {
-    border-color: rgba(255, 193, 7, 0.45);
-    box-shadow: 0 14px 32px rgba(255, 193, 7, 0.18);
-}
-
-.formula-card.formula-context-mismatch.is-selected {
-    border-color: rgba(220, 53, 69, 0.6);
-    box-shadow: 0 20px 40px rgba(220, 53, 69, 0.2);
-}
-
-.formula-context-row .badge {
-    font-size: 0.7rem;
-}
-
-.formula-card input[type="radio"] {
-    cursor: pointer;
-}
-
-.formula-card-title {
-    word-break: break-word;
-}
-
-.formula-list.formula-filter-fallback .formula-card.formula-fallback {
-    border-color: rgba(25, 135, 84, 0.65);
-    box-shadow: 0 20px 40px rgba(25, 135, 84, 0.2);
-}
-
-.formula-list.formula-filter-fallback .formula-card:not(.formula-fallback) {
-    opacity: 0.9;
-}
-
-.wildcard-card {
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    min-height: 240px;
-    background: #ffffff;
-}
-
-.wildcard-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
-}
-
-.wildcard-card.is-pressed {
-    transform: scale(0.99);
-    box-shadow: 0 14px 28px rgba(0,0,0,0.08);
-}
-
-.wildcard-card:focus-visible {
-    outline: 3px solid rgba(25, 135, 84, 0.45);
-    outline-offset: 4px;
-}
-
-.wildcard-circle {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.wildcard-card:hover .wildcard-circle {
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    transform: translate(-50%, -55%) scale(1.05);
-}
-
-.wildcard-filter-btn {
-    transition: all 0.3s ease;
-}
-
-.wildcard-filter-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.15);
-}
-
-.wildcard-filter-btn.active {
-    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.25);
-}
-
-.badge.bg-success-subtle {
-    background-color: rgba(25, 135, 84, 0.15) !important;
-    color: #0f5132 !important;
-}
-
-.bg-warning-subtle {
-    background-color: rgba(255, 193, 7, 0.15) !important;
-    color: #664d03 !important;
-}
-
-.bg-danger-subtle {
-    background-color: rgba(220, 53, 69, 0.15) !important;
-    color: #842029 !important;
-}
-
-
-.badge-formula-label {
-    background-color: #ffffff;
-    color: #198754;
-    border: 1px solid rgba(25, 135, 84, 0.25);
-    font-weight: 600;
-}
-
-.wildcard-card .badge-formula-label {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    width: 100%;
-    line-height: 1.2;
-    padding: 0.45rem 0.75rem;
-    border-radius: 999px;
-}
-
-.wildcard-title {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word;
-}
-
-.structure-card {
-    background: #ffffff;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.structure-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
-}
-
-.structure-card .badge {
-    font-weight: 600;
-}
-
-.structure-card .badge.bg-primary {
-    font-size: 0.85rem;
-    padding: 0.45rem 0.85rem;
-}
-
-.structure-card .badge.ps-3 {
-    font-size: 0.8rem;
-    border-left: 3px solid rgba(25, 135, 84, 0.3);
-}
-
-.structure-card .d-flex.flex-wrap {
-    row-gap: 0.5rem;
-}
-
-.structure-template-wrapper {
-    margin-top: 1.25rem;
-    padding: 1.25rem;
-    border-radius: 1.1rem;
-    border: 1px dashed rgba(25, 135, 84, 0.25);
-    background: rgba(25, 135, 84, 0.05);
-    box-shadow: 0 12px 28px rgba(25, 135, 84, 0.08);
-}
-
-.structure-template-grid {
-    display: grid;
-    gap: 1.1rem;
-}
-
-@media (min-width: 768px) {
-    .structure-template-grid {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .section-scroll {
-        max-height: none;
-        padding: 0.5rem 0 1rem;
-    }
-}
-
-.structure-template-card {
-    position: relative;
-    background: #f8fff9;
-    border: 1px solid rgba(25, 135, 84, 0.18);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, opacity 0.2s ease;
-}
-
-.structure-template-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(25, 135, 84, 0.12);
-    border-color: rgba(25, 135, 84, 0.45);
-}
-
-.structure-template-card.is-active {
-    border-color: rgba(25, 135, 84, 0.6);
-    box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
-}
-
-.structure-template-card.is-loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.structure-template-card .badge {
-    font-weight: 500;
-}
-
-.structure-template-card .template-status-badge {
-    align-self: flex-start;
-}
-
-.structure-template-card.is-active .template-status-badge {
-    background: rgba(25, 135, 84, 0.18) !important;
-    color: #0f5132 !important;
-}
-
-.structure-template-card .js-template-apply {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.structure-template-card .js-template-apply:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(25, 135, 84, 0.18);
-}
-
-.structure-template-card .js-template-apply:disabled {
-    transform: none;
-    box-shadow: none;
-    opacity: 0.75;
-}
-
-.structure-template-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: rgba(25, 135, 84, 0.1);
-    color: #198754;
-    font-weight: 600;
-}
-
-.structure-template-chip .bi {
-    font-size: 0.8rem;
-}
-
-.template-feedback {
-    font-size: 0.85rem;
-}
-
-@media (max-width: 576px) {
-    .wildcard-card {
-        min-height: 200px;
-    }
-
-    .wildcard-circle {
-        width: 80px;
-        height: 80px;
-    }
-}
-
-.js-delete-formula {
-    transition: all 0.2s ease;
-}
-
-.js-delete-formula:hover {
-    transform: scale(1.05);
-}
-
-.formula-card .btn-outline-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(13, 110, 253, 0.2);
-}
-
-.formula-card .btn-outline-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(220, 53, 69, 0.2);
-}
-
-.formula-card.border-info {
-    border-width: 2px;
-    border-style: solid;
-}
-
-.formula-card.border-info:hover {
-    border-color: rgba(13, 202, 240, 0.6);
-    box-shadow: 0 16px 36px rgba(13, 202, 240, 0.15);
-}
-
-.badge.bg-info-subtle {
-    background-color: rgba(13, 202, 240, 0.12) !important;
-    color: #055160 !important;
-}
-
-/* Ensure long badge/text content wraps inside cards instead of overflowing */
-.card-body .badge,
-.formula-card .badge,
-.structure-card .badge,
-.wildcard-card .badge-formula-label,
-.card .badge-formula-label {
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
-    display: inline-flex !important;
-    align-items: center;
-    max-width: 100%;
-}
-
-/* For pill-style badges that may otherwise extend the card width, limit their max width
-   and allow them to break into multiple lines for small viewports. */
-.badge-formula-label,
-.badge.bg-success-subtle,
-.badge.bg-light {
-    max-width: 100%;
-}
-
-/* Hide any empty formula-label badges that render as blank pills at the
-   bottom of wildcard cards while preserving non-empty labels like
-   "Department Baseline". This avoids visual empty placeholders. */
-.badge-formula-label:empty {
-    display: none !important;
-}
-
-</style>
 @endpush

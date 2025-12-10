@@ -1,0 +1,441 @@
+/* GE Coordinator Common Styles */
+
+/* ===========================
+   PAGE WRAPPER & CONTAINER
+   =========================== */
+
+.page-wrapper {
+    background-color: #EAF8E7;
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+}
+
+.page-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 1.5rem 1rem;
+}
+
+.instructor-management-wrapper {
+    background-color: #EAF8E7;
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+}
+
+.instructor-management-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 1.5rem 1rem;
+}
+
+/* ===========================
+   PAGE TITLE & HEADERS
+   =========================== */
+
+.page-title {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(77, 166, 116, 0.2);
+}
+
+.page-title h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.page-title h1 i {
+    color: #198754;
+    font-size: 2rem;
+    margin-right: 0.75rem;
+}
+
+.page-subtitle {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* ===========================
+   CONTENT WRAPPER
+   =========================== */
+
+.content-wrapper {
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* ===========================
+   ALERTS
+   =========================== */
+
+.alert {
+    border-radius: 0.5rem !important;
+    border: 0 !important;
+}
+
+.alert-success {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+}
+
+.alert-danger {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+}
+
+/* ===========================
+   TABS
+   =========================== */
+
+.nav-tabs {
+    border-bottom: 2px solid #d0d0d0 !important;
+    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.nav-tabs .nav-link {
+    border: none !important;
+    border-radius: 0.5rem 0.5rem 0 0;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    color: #666 !important;
+    padding: 0.75rem 1.5rem !important;
+}
+
+.nav-tabs .nav-link:hover {
+    background-color: rgba(77, 166, 116, 0.08) !important;
+    color: #4da674 !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: white !important;
+    color: #4da674 !important;
+    border-bottom: 3px solid #4da674 !important;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+}
+
+.nav-tabs .nav-link.inactive {
+    color: #4da674 !important;
+    border-color: #4da674 !important;
+}
+
+.tab-content {
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+}
+
+/* ===========================
+   BREADCRUMBS
+   =========================== */
+
+.breadcrumb {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb-item {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.breadcrumb-item a {
+    color: #4da674;
+    text-decoration: none;
+    transition: all 0.2s;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.breadcrumb-item a:hover {
+    color: #3d8a5e;
+    background-color: rgba(77, 166, 116, 0.1);
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: #6c757d;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0 0.5rem;
+}
+
+/* ===========================
+   FILTER SECTION
+   =========================== */
+
+.filter-section {
+    background-color: #f8f9fa;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ===========================
+   TABLES
+   =========================== */
+
+.table-responsive {
+    border-radius: 0.5rem !important;
+    background-color: transparent;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    padding: 1rem;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table tbody td {
+    padding: 0.875rem 1rem;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* ===========================
+   MODALS
+   =========================== */
+
+.modal-header .bi {
+    font-size: 1.3rem !important;
+}
+
+.modal-header .fs-3 {
+    font-size: 1.3rem;
+}
+
+#confirmBulkAssignModal,
+#confirmUnassignModal {
+    z-index: 1060 !important;
+}
+
+.modal-backdrop.show {
+    z-index: 1055 !important;
+}
+
+/* ===========================
+   BUTTONS
+   =========================== */
+
+.btn-outline-success:hover, 
+.btn-outline-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ===========================
+   UTILITIES
+   =========================== */
+
+.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+/* ===========================
+   INSTRUCTOR MODAL SPECIFIC
+   =========================== */
+
+#assignList > div,
+#unassignList > div {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+#assignList > div:last-child,
+#unassignList > div:last-child {
+    border-bottom: none;
+}
+
+#instructorListModal .modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+#unassignList li {
+    display: inline-block;
+    margin-right: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+#unassignList .badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 10rem;
+    background-color: rgba(0,0,0,0.05);
+    color: #333;
+}
+
+#instructorListModal .nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+}
+
+#instructorListModal .nav-tabs .nav-link {
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+#instructorListModal .nav-tabs .nav-link:hover {
+    background-color: rgba(77, 166, 116, 0.05);
+    color: #4da674;
+    border-bottom-color: rgba(77, 166, 116, 0.3);
+}
+
+#instructorListModal .nav-tabs .nav-link.active {
+    background-color: white;
+    color: #4da674;
+    border-bottom-color: #4da674;
+}
+
+#instructorListModal .tab-content {
+    background-color: white;
+}
+
+#instructorListModal .modal-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#instructorListModal .modal-title #instructorListSubjectName {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-left: 0.6rem;
+}
+
+/* Scrollbars for instructor lists */
+#assignedInstructorsListTab::-webkit-scrollbar,
+#availableInstructorsListTab::-webkit-scrollbar,
+#assignedInstructorsList::-webkit-scrollbar,
+#availableInstructorsList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#assignedInstructorsListTab::-webkit-scrollbar-track,
+#availableInstructorsListTab::-webkit-scrollbar-track,
+#assignedInstructorsList::-webkit-scrollbar-track,
+#availableInstructorsList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#assignedInstructorsListTab::-webkit-scrollbar-thumb,
+#availableInstructorsListTab::-webkit-scrollbar-thumb,
+#assignedInstructorsList::-webkit-scrollbar-thumb,
+#availableInstructorsList::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+#assignedInstructorsListTab::-webkit-scrollbar-thumb:hover,
+#availableInstructorsListTab::-webkit-scrollbar-thumb:hover,
+#assignedInstructorsList::-webkit-scrollbar-thumb:hover,
+#availableInstructorsList::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Split-pane modal enhancements */
+.hover-bg:hover {
+    background-color: rgba(77, 166, 116, 0.05) !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-icon-only {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.form-check:hover .btn-icon-only {
+    opacity: 1;
+    animation: fadeInButton 0.3s ease;
+}
+
+@keyframes fadeInButton {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.btn-icon-only:hover {
+    transform: scale(1.1);
+}
+
+.btn-icon-only i {
+    font-size: 0.7rem;
+}
+
+#assignedInstructorsList, 
+#availableInstructorsList {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ===========================
+   PRINT STYLES
+   =========================== */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .bg-blue-50, 
+    .bg-green-50, 
+    .bg-red-50, 
+    .bg-purple-50, 
+    .bg-yellow-50, 
+    .bg-indigo-50 {
+        background-color: #f9fafb !important;
+        border: 1px solid #d1d5db !important;
+    }
+}

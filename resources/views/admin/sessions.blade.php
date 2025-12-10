@@ -1,253 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- Styles: resources/css/admin/sessions.css --}}
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
-    <style>
-        /* Session status badges */
-        .session-status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            gap: 0.25rem;
-        }
-        
-        .session-status-active {
-            background-color: #d1f4e0;
-            color: #0f4b36;
-        }
-        
-        .session-status-expired {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .session-status-current {
-            background-color: #0d6efd;
-            color: #ffffff;
-        }
-
-        /* User info styling */
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.125rem;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #212529;
-            font-size: 0.875rem;
-        }
-
-        .user-email {
-            color: #6c757d;
-            font-size: 0.75rem;
-        }
-
-        /* Device icon styling */
-        .device-icon-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .device-icon {
-            font-size: 1rem;
-            color: #0f4b36;
-            width: 20px;
-            text-align: center;
-        }
-
-        /* Action buttons */
-        .action-btn-group {
-            display: inline-flex;
-            gap: 0.5rem;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-btn {
-            padding: 0.5rem 0.75rem !important;
-            font-size: 0.875rem;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            border: none !important;
-            display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            min-width: 38px;
-            height: 38px;
-            cursor: pointer;
-        }
-
-        .action-btn i {
-            font-size: 1rem;
-            margin: 0;
-            line-height: 1;
-        }
-
-        .btn-revoke {
-            background-color: #dc3545 !important;
-            color: white !important;
-        }
-
-        .btn-revoke:hover {
-            background-color: #bb2d3b !important;
-            color: white !important;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
-        }
-
-        .btn-revoke-all {
-            background-color: #fd7e14 !important;
-            color: white !important;
-        }
-
-        .btn-revoke-all:hover {
-            background-color: #e8590c !important;
-            color: white !important;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(253, 126, 20, 0.3);
-        }
-
-        /* Role badges */
-        .role-badge {
-            display: inline-block;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        /* IP address styling */
-        .ip-address {
-            font-family: 'Courier New', monospace;
-            font-size: 0.8125rem;
-            color: #495057;
-            background-color: #f8f9fa;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        /* Last activity styling */
-        .activity-time {
-            font-size: 0.875rem;
-        }
-
-        .activity-date {
-            color: #6c757d;
-            font-size: 0.75rem;
-        }
-
-        /* Current session highlight */
-        .current-session-row {
-            background-color: #e7f3ff !important;
-        }
-
-        /* Fix modal z-index layering */
-        .modal-backdrop {
-            z-index: 1040 !important;
-        }
-        
-        .modal {
-            z-index: 1050 !important;
-        }
-        
-        .modal-dialog {
-            z-index: 1060 !important;
-        }
-        
-        .modal-content {
-            position: relative;
-            z-index: 1070 !important;
-        }
-        
-        .modal-content input,
-        .modal-content button,
-        .modal-content .form-control {
-            position: relative;
-            z-index: 1080 !important;
-        }
-
-        .your-session-badge {
-            background-color: #0d6efd;
-            color: white;
-            padding: 0.375rem 0.65rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            white-space: nowrap;
-        }
-
-        /* Event type badges */
-        .event-badge {
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        /* Tab styling */
-        .nav-tabs .nav-link {
-            color: #6c757d;
-            font-weight: 500;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: #0f4b36;
-            font-weight: 600;
-        }
-
-        /* Platform and browser text */
-        .platform-text,
-        .browser-text {
-            font-size: 0.875rem;
-            color: #495057;
-        }
-
-        /* Pagination styling */
-        .pagination {
-            margin-bottom: 0;
-        }
-
-        .pagination .page-link {
-            color: #0f4b36;
-            border-color: #dee2e6;
-        }
-
-        .pagination .page-link:hover {
-            color: #0f4b36;
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #0f4b36;
-            border-color: #0f4b36;
-        }
-
-        /* Responsive table text */
-        @media (max-width: 768px) {
-            .user-name, .user-email {
-                font-size: 0.8125rem;
-            }
-            
-            .action-btn {
-                padding: 0.25rem 0.375rem;
-                font-size: 0.7rem;
-            }
-        }
-    </style>
 @endpush
 
 <div class="container py-4">
@@ -368,11 +124,11 @@
                                     </td>
                                     <td>
                                         @if($session->device_fingerprint)
-                                            <code class="text-muted" style="font-size: 0.75rem;" title="{{ $session->device_fingerprint }}">
+                                            <code class="text-muted text-xs" title="{{ $session->device_fingerprint }}">
                                                 {{ Str::limit($session->device_fingerprint, 12, '...') }}
                                             </code>
                                         @else
-                                            <span class="text-muted" style="font-size: 0.75rem;">N/A</span>
+                                            <span class="text-muted text-xs">N/A</span>
                                         @endif
                                     </td>
                                     <td>
@@ -490,7 +246,7 @@
                     @endif
                     <label for="date" class="mb-0 small fw-semibold">Filter by Date:</label>
                     <input type="date" name="date" id="date" value="{{ request('date', now()->format('Y-m-d')) }}" 
-                           class="form-control form-control-sm" style="width: 180px;" 
+                           class="form-control form-control-sm max-w-180" 
                            onchange="this.form.submit()" />
                 </form>
             </div>
@@ -730,67 +486,47 @@
 </div>
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js" defer></script>
     <script defer>
         function confirmRevoke(sessionId, userName) {
+            modal.open('revokeModal', { sessionId, userName });
             document.getElementById('revoke-session-id').value = sessionId;
             document.getElementById('revoke-user-name').textContent = userName;
-            const modalEl = document.getElementById('revokeModal');
-            const modal = new bootstrap.Modal(modalEl, {
-                backdrop: false,
-                keyboard: true,
-                focus: true
-            });
             
-            // Clear previous password value and focus on input when modal is shown
-            modalEl.addEventListener('shown.bs.modal', function () {
+            // Focus on password input after modal opens
+            setTimeout(() => {
                 const passwordInput = document.getElementById('revoke-password');
                 if (passwordInput) {
                     passwordInput.value = '';
                     passwordInput.focus();
                 }
-            }, { once: true });
-            
-            modal.show();
+            }, 100);
         }
 
         function confirmRevokeUser(userId, userName) {
+            modal.open('revokeUserModal', { userId, userName });
             document.getElementById('revoke-user-id').value = userId;
             document.getElementById('revoke-all-user-name').textContent = userName;
-            const modalEl = document.getElementById('revokeUserModal');
-            const modal = new bootstrap.Modal(modalEl, {
-                backdrop: false,
-                keyboard: true,
-                focus: true
-            });
             
-            // Clear previous password value and focus on input when modal is shown
-            modalEl.addEventListener('shown.bs.modal', function () {
+            // Focus on password input after modal opens
+            setTimeout(() => {
                 const passwordInput = document.getElementById('revoke-user-password');
                 if (passwordInput) {
                     passwordInput.value = '';
                     passwordInput.focus();
                 }
-            }, { once: true });
-            
-            modal.show();
+            }, 100);
         }
 
         function confirmRevokeAll() {
-            const modalEl = document.getElementById('revokeAllModal');
-            const modal = new bootstrap.Modal(modalEl, {
-                backdrop: false
-            });
+            modal.open('revokeAllModal');
             
-            // Focus on password input when modal is shown
-            modalEl.addEventListener('shown.bs.modal', function () {
-                const passwordInput = modalEl.querySelector('input[type="password"]');
+            // Focus on password input after modal opens
+            setTimeout(() => {
+                const passwordInput = document.querySelector('#revokeAllModal input[type="password"]');
                 if (passwordInput) {
-                    setTimeout(() => passwordInput.focus(), 100);
+                    passwordInput.focus();
                 }
-            }, { once: true });
-            
-            modal.show();
+            }, 100);
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -848,29 +584,18 @@
             window.addEventListener('popstate', updatePaginationLinksWithTab);
         });
 
-        // Show success/error messages
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: '{{ session('success') }}',
-                confirmButtonColor: '#0f4b36',
-                timer: 3000
-            });
-        @endif
-
-        @if($errors->any())
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                html: '<ul class="text-start mb-0">' +
-                    @foreach($errors->all() as $error)
-                        '<li>{{ $error }}</li>' +
-                    @endforeach
-                    '</ul>',
-                confirmButtonColor: '#0f4b36'
-            });
-        @endif
     </script>
+    
+    @if(session('success'))
+        <script>notify.success('{{ session('success') }}');</script>
+    @endif
+
+    @if($errors->any())
+        <script>
+            @foreach($errors->all() as $error)
+                notify.error('{{ $error }}');
+            @endforeach
+        </script>
+    @endif
 @endpush
 @endsection

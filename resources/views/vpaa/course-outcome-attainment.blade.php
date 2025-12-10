@@ -1,53 +1,8 @@
 @extends('layouts.app')
 
+{{-- Styles: resources/css/vpaa/cards.css --}}
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/course-outcome-results.css') }}">
-<style>
-.subject-card {
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.subject-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transition: left 0.5s ease;
-    z-index: 1;
-}
-
-.subject-card:hover::before {
-    left: 100%;
-}
-
-.subject-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 28px rgba(77, 166, 116, 0.3) !important;
-}
-
-.subject-card .position-relative {
-    transition: background-color 0.3s ease;
-}
-
-.subject-card:hover .position-relative {
-    background: linear-gradient(135deg, #4da674, #3d8a5e) !important;
-}
-
-.subject-circle {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.subject-card:hover .subject-circle {
-    transform: translate(-50%, -50%) rotate(5deg) scale(1.05) !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-}
- </style>
 @endpush
 
 @section('content')

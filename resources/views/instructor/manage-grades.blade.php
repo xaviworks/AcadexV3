@@ -81,39 +81,23 @@
 </div>
 
 @if(session('success'))
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
-        <div class="toast show align-items-center text-bg-success border-0 shadow" role="alert">
-            <div class="d-flex">
-                <div class="toast-body">{{ session('success') }}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            notify.success('{{ session('success') }}');
+        });
+    </script>
+@endif
+
+@if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            notify.error('{{ session('error') }}');
+        });
+    </script>
 @endif
 @endsection
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/grade-table.css') }}">
-<style>
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-.subject-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.subject-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
-}
-.subject-circle {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-.subject-card:hover .subject-circle {
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    transform: translate(-50%, -55%) scale(1.05);
-}
-</style>
-@endpush
+{{-- Styles: resources/css/instructor/common.css, resources/css/instructor/subject-cards.css --}}
 
 @push('scripts')
 @include('instructor.partials.grade-script')
@@ -197,9 +181,7 @@ window.showUnsavedChangesModal = function(onConfirm, onCancel = null) {
         document.body.appendChild(modal.firstElementChild);
     }
 
-    const modalInstance = new bootstrap.Modal(document.getElementById('unsavedChangesModal'), {
-        backdrop: false
-    });
+    modal.open('unsavedChangesModal');
     const confirmBtn = document.getElementById('confirmLeaveBtn');
 
     // Remove any existing event listeners
@@ -208,7 +190,7 @@ window.showUnsavedChangesModal = function(onConfirm, onCancel = null) {
 
     // Add new event listener
     newConfirmBtn.addEventListener('click', function() {
-        modalInstance.hide();
+        modal.close('unsavedChangesModal');
         if (onConfirm) onConfirm();
     });
 
@@ -222,59 +204,6 @@ window.showUnsavedChangesModal = function(onConfirm, onCancel = null) {
 
 // The rest of the navigation/partial loading functions are implemented inside the included grade-script partial.
 </script>
-
-<style>
-/* Enhanced Card Styling - Matching Chairperson View Grades */
-.subject-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.subject-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s;
-}
-
-.subject-card:hover::before {
-    left: 100%;
-}
-
-.subject-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 24px rgba(77, 166, 116, 0.3) !important;
-}
-
-.subject-card .position-relative {
-    background: linear-gradient(135deg, #4da674 0%, #3d8a5e 100%) !important;
-}
-
-.subject-card:hover .position-relative {
-    background: linear-gradient(135deg, #3d8a5e 0%, #2d6a4e 100%) !important;
-}
-
-.subject-circle {
-    transition: all 0.3s ease;
-}
-
-.subject-card:hover .subject-circle {
-    transform: translate(-50%, -50%) rotate(5deg) scale(1.1) !important;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
-}
-
-.subject-card .card-body {
-    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
-    transition: background 0.3s;
-}
-
-.subject-card:hover .card-body {
-    background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .subject-card h6 {

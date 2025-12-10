@@ -21,22 +21,22 @@
 @endphp
 
 @section('content')
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
     <div class="row mb-2">
         <div class="col">
             <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-house-door me-1"></i>Home
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none" style="color: #198754; font-size: 0.9rem;">
+                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-sliders me-1"></i>Grades Formula
                         </a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page" style="color: #6c757d; font-size: 0.9rem;">
+                    <li class="breadcrumb-item active text-muted-gray text-sm" aria-current="page">
                         Edit Structure Template
                     </li>
                 </ol>
@@ -44,15 +44,15 @@
 
             <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
                 <div class="d-flex align-items-center">
-                    <div class="p-2 rounded-circle me-2" style="background: linear-gradient(135deg, #198754, #20c997);">
-                        <i class="bi bi-diagram-3 text-white" style="font-size: 1.2rem;"></i>
+                    <div class="p-2 rounded-circle me-2 bg-gradient-green">
+                        <i class="bi bi-diagram-3 text-white icon-lg"></i>
                     </div>
                     <div>
-                        <h4 class="fw-bold mb-0" style="color: #198754;">Edit Structure Template</h4>
+                        <h4 class="fw-bold mb-0 text-primary-green">Edit Structure Template</h4>
                         <small class="text-muted">Modify the grading structure template</small>
                     </div>
                 </div>
-                <a href="{{ $backRoute }}" class="btn btn-outline-success btn-sm rounded-pill shadow-sm" style="font-weight: 600;">
+                <a href="{{ $backRoute }}" class="btn btn-outline-success btn-sm rounded-pill shadow-sm fw-600">
                     <i class="bi bi-arrow-left me-1"></i>Back to Formulas
                 </a>
             </div>
@@ -60,10 +60,7 @@
     </div>
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>notify.success('{{ session('success') }}');</script>
     @endif
 
     @if ($errors->any())
@@ -84,7 +81,7 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-0 py-4 px-4">
-            <h5 class="mb-0 fw-semibold" style="color: #198754;">Template Information</h5>
+            <h5 class="mb-0 fw-semibold text-primary-green">Template Information</h5>
         </div>
         <div class="card-body p-4">
             <form method="POST" action="{{ route('admin.gradesFormula.structureTemplate.update', $template) }}" x-data="structureTemplateEditor()" x-init="init()">

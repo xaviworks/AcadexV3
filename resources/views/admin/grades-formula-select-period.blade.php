@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-3 py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-3 py-5 bg-gradient-light min-vh-100">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8 col-xxl-6">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-5">
                     <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="p-3 rounded-circle" style="background: linear-gradient(135deg, #198754, #20c997);">
-                            <i class="bi bi-calendar2-week text-white" style="font-size: 1.5rem;"></i>
+                        <div class="p-3 rounded-circle bg-gradient-green">
+                            <i class="bi bi-calendar2-week text-white icon-xl"></i>
                         </div>
                         <div>
-                            <h3 class="fw-bold mb-1" style="color: #198754;">Select Academic Period</h3>
+                            <h3 class="fw-bold mb-1 text-primary-green">Select Academic Period</h3>
                             <p class="text-muted mb-0">Choose which academic period you want to manage formulas for. You can switch periods at any time.</p>
                         </div>
                     </div>
