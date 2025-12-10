@@ -181,15 +181,39 @@
 document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('subjectPerformanceChart').getContext('2d');
     
-    const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
-    gradientFill.addColorStop(0, 'rgba(13, 110, 253, 0.3)');
-    gradientFill.addColorStop(1, 'rgba(13, 110, 253, 0)');
+    // Raw data from PHP
+    const rawData = @json($subjectCharts);
+    
+    // Color palette for different subjects
+    const colors = [
+        { border: '#4e73df', background: 'rgba(78, 115, 223, 0.1)' },
+        { border: '#1cc88a', background: 'rgba(28, 200, 138, 0.1)' },
+        { border: '#36b9cc', background: 'rgba(54, 185, 204, 0.1)' },
+        { border: '#f6c23e', background: 'rgba(246, 194, 62, 0.1)' },
+        { border: '#e74a3b', background: 'rgba(231, 74, 59, 0.1)' },
+        { border: '#858796', background: 'rgba(133, 135, 150, 0.1)' },
+        { border: '#5a5c69', background: 'rgba(90, 92, 105, 0.1)' },
+        { border: '#6f42c1', background: 'rgba(111, 66, 193, 0.1)' },
+    ];
+    
+    // Transform data to Chart.js format
+    const datasets = rawData.map((subject, index) => {
+        const colorIndex = index % colors.length;
+        return {
+            label: subject.code,
+            data: subject.termPercentages,
+            borderColor: colors[colorIndex].border,
+            backgroundColor: colors[colorIndex].background,
+            fill: true,
+            tension: 0.4
+        };
+    });
 
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
-            datasets: @json($subjectCharts)
+            labels: ['Prelim', 'Midterm', 'Prefinal', 'Final'],
+            datasets: datasets
         },
         options: {
             responsive: true,
@@ -202,17 +226,28 @@ document.addEventListener('DOMContentLoaded', function () {
                         padding: 20,
                         color: '#5a5c69'
                     }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y + '% completed';
+                        }
+                    }
                 }
             },
             scales: {
                 y: {
                     beginAtZero: true,
+                    max: 100,
                     grid: {
                         drawBorder: false,
                         color: '#eaecf4'
                     },
                     ticks: {
-                        color: '#5a5c69'
+                        color: '#5a5c69',
+                        callback: function(value) {
+                            return value + '%';
+                        }
                     }
                 },
                 x: {
@@ -225,15 +260,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             elements: {
-                line: {
-                    tension: 0.4,
-                    borderColor: '#4e73df',
-                    backgroundColor: 'rgba(78, 115, 223, 0.05)'
-                },
                 point: {
                     radius: 4,
-                    hoverRadius: 6,
-                    backgroundColor: '#4e73df'
+                    hoverRadius: 6
                 }
             }
         }

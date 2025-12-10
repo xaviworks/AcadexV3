@@ -4,6 +4,22 @@
     let form; // Declare form globally
     let termChangeInProgress = false;
 
+    // Helper function to safely access Alpine grades store
+    function getGradesStore() {
+        if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
+            return Alpine.store('grades');
+        }
+        return null;
+    }
+
+    // Helper function to safely access Alpine loading store
+    function getLoadingStore() {
+        if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
+            return Alpine.store('loading');
+        }
+        return null;
+    }
+
     function bindGradeInputEvents() {
         console.log("Binding grade input events...");
         
@@ -30,8 +46,9 @@
                 console.log('Form submit event fired');
                 this.submitting = true;
                 // Clear unsaved changes in Alpine store
-                if (Alpine && Alpine.store) {
-                    Alpine.store('grades').clearUnsaved();
+                const gradesStore = getGradesStore();
+                if (gradesStore) {
+                    gradesStore.clearUnsaved();
                 }
             });
         }
@@ -91,12 +108,15 @@
 
             const { hasChanges, hasInvalidInputs } = checkForChanges();
             
-            // Update Alpine store
-            if (Alpine && Alpine.store) {
-                if (hasChanges) {
-                    Alpine.store('grades').markChanged();
-                } else {
-                    Alpine.store('grades').clearUnsaved();
+            // Update Alpine store (with safety check for store existence)
+            if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
+                const gradesStore = Alpine.store('grades');
+                if (gradesStore) {
+                    if (hasChanges) {
+                        gradesStore.markChanged();
+                    } else {
+                        gradesStore.clearUnsaved();
+                    }
                 }
             }
 
@@ -596,16 +616,18 @@
                 }
 
                 // Show loading state using Alpine store
-                if (Alpine && Alpine.store) {
-                    Alpine.store('loading').start('saveGrades');
+                const loadingStore = getLoadingStore();
+                if (loadingStore) {
+                    loadingStore.start('saveGrades');
                 }
                 if (saveButton) {
                     saveButton.disabled = true;
                 }
 
                 // Clear unsaved changes in Alpine store before submitting
-                if (Alpine && Alpine.store) {
-                    Alpine.store('grades').clearUnsaved();
+                const gradesStoreSubmit = getGradesStore();
+                if (gradesStoreSubmit) {
+                    gradesStoreSubmit.clearUnsaved();
                 }
                 
                 // Get form data
@@ -654,8 +676,9 @@
                     updateSaveButtonState();
 
                     // Hide loading state using Alpine store
-                    if (Alpine && Alpine.store) {
-                        Alpine.store('loading').stop('saveGrades');
+                    const loadingStoreStop = getLoadingStore();
+                    if (loadingStoreStop) {
+                        loadingStoreStop.stop('saveGrades');
                     }
                     if (saveButton) {
                         saveButton.disabled = true;
@@ -823,8 +846,9 @@
                     form.submitting = true;
                 }
                 // Clear unsaved changes in Alpine store
-                if (Alpine && Alpine.store) {
-                    Alpine.store('grades').clearUnsaved();
+                const gradesStoreSave = getGradesStore();
+                if (gradesStoreSave) {
+                    gradesStoreSave.clearUnsaved();
                 }
                 
                 // Clear the notification immediately
@@ -939,7 +963,8 @@
         }
         
         // Check Alpine store for unsaved changes
-        const hasUnsaved = Alpine && Alpine.store && Alpine.store('grades').unsavedChanges;
+        const gradesStoreCheck = getGradesStore();
+        const hasUnsaved = gradesStoreCheck ? gradesStoreCheck.unsavedChanges : false;
         if (!hasUnsaved) {
             console.log('No unsaved changes, allowing navigation');
             return;
@@ -969,17 +994,15 @@
                     if (typeof window.showUnsavedChangesModal === 'function') {
                         window.showUnsavedChangesModal(() => {
                             // Clear unsaved changes in Alpine store
-                            if (Alpine && Alpine.store) {
-                                Alpine.store('grades').clearUnsaved();
-                            }
+                            const gs = getGradesStore();
+                            if (gs) gs.clearUnsaved();
                             window.location.href = link.href;
                         });
                     } else {
                         if (confirm('You have unsaved changes. Are you sure you want to leave this page?')) {
                             // Clear unsaved changes in Alpine store
-                            if (Alpine && Alpine.store) {
-                                Alpine.store('grades').clearUnsaved();
-                            }
+                            const gs = getGradesStore();
+                            if (gs) gs.clearUnsaved();
                             window.location.href = link.href;
                         }
                     }
@@ -1187,8 +1210,9 @@
             }
 
             // Clear unsaved changes in Alpine store
-            if (Alpine && Alpine.store) {
-                Alpine.store('grades').clearUnsaved();
+            const gradesStoreTerm = getGradesStore();
+            if (gradesStoreTerm) {
+                gradesStoreTerm.clearUnsaved();
             }
 
             if (typeof window.refreshGradeSection === 'function') {
@@ -1212,9 +1236,8 @@
             if (hasChanges) {
                 const confirmSwitch = () => {
                     // Clear unsaved changes in Alpine store
-                    if (Alpine && Alpine.store) {
-                        Alpine.store('grades').clearUnsaved();
-                    }
+                    const gsConfirm = getGradesStore();
+                    if (gsConfirm) gsConfirm.clearUnsaved();
                     proceedWithSwitch();
                 };
 
@@ -1222,7 +1245,6 @@
                     window.showUnsavedChangesModal(confirmSwitch);
                 } else if (confirm('You have unsaved changes that will be lost. Continue?')) {
                     confirmSwitch();
-                }
                 }
                 return;
             }

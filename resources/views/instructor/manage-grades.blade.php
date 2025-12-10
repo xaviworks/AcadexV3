@@ -146,16 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Make function globally available
-window.initializeCourseOutcomeDropdowns = initializeCourseOutcomeDropdowns;
-
 // Global function to show unsaved changes modal
 window.showUnsavedChangesModal = function(onConfirm, onCancel = null) {
     // Create modal if it doesn't exist
-    let modal = document.getElementById('unsavedChangesModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.innerHTML = `
+    let modalElement = document.getElementById('unsavedChangesModal');
+    if (!modalElement) {
+        const modalWrapper = document.createElement('div');
+        modalWrapper.innerHTML = `
             <div class="modal fade" id="unsavedChangesModal" tabindex="-1" aria-labelledby="unsavedChangesModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow-lg">
@@ -178,24 +175,26 @@ window.showUnsavedChangesModal = function(onConfirm, onCancel = null) {
                 </div>
             </div>
         `;
-        document.body.appendChild(modal.firstElementChild);
+        document.body.appendChild(modalWrapper.firstElementChild);
+        modalElement = document.getElementById('unsavedChangesModal');
     }
 
-    modal.open('unsavedChangesModal');
+    // Use Bootstrap Modal API
+    const modalInstance = new bootstrap.Modal(modalElement);
     const confirmBtn = document.getElementById('confirmLeaveBtn');
 
-    // Remove any existing event listeners
+    // Remove any existing event listeners by cloning
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
 
     // Add new event listener
     newConfirmBtn.addEventListener('click', function() {
-        modal.close('unsavedChangesModal');
+        modalInstance.hide();
         if (onConfirm) onConfirm();
     });
 
     // Handle cancel
-    document.getElementById('unsavedChangesModal').addEventListener('hidden.bs.modal', function() {
+    modalElement.addEventListener('hidden.bs.modal', function() {
         if (onCancel) onCancel();
     }, { once: true });
 
@@ -204,8 +203,8 @@ window.showUnsavedChangesModal = function(onConfirm, onCancel = null) {
 
 // The rest of the navigation/partial loading functions are implemented inside the included grade-script partial.
 </script>
-}
 
+<style>
 .subject-card h6 {
     transition: color 0.3s;
 }
