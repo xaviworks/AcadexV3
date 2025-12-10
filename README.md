@@ -1,67 +1,235 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🎓 ACADEX - Academic Excellence Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Version 3.0** | Academic Records & Grading Management System for Brokenshire College
 
-## About Laravel
+## 📋 About ACADEX
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+ACADEX is a comprehensive academic management system designed specifically for Brokenshire College to streamline grade management, student records, and course outcome tracking across multiple departments and programs.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Multi-Role Portal System**
+  - 👨‍🏫 Instructor Portal - Grade entry, student management, course outcome tracking
+  - 👔 Chairperson Portal - Department oversight, instructor management, grade approval
+  - 🎖️ Dean Portal - College-wide academic monitoring and reporting
+  - 🌐 GE Coordinator Portal - General Education subject management
+  - 📊 VPAA Portal - Institutional academic oversight and analytics
+  - 🔧 Admin Portal - System configuration, user management, academic period setup
 
-## Learning Laravel
+- **Grade Management**
+  - Configurable grading formulas (Quiz 40%, OCR 20%, Exam 40%)
+  - Term-based grade entry (Prelim, Midterm, Prefinal, Final)
+  - Automated final grade calculation
+  - Grade notification system for chairpersons
+  - Bulk Excel import/export for student grades
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Course Outcome Tracking**
+  - Course Outcome (CO) compliance monitoring
+  - Multi-level CO attainment reporting (Subject → Course → Department → Institution)
+  - Wildcard CO management for GE subjects
+  - Performance analytics and visualization
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Student Management**
+  - Student enrollment and subject assignment
+  - Excel-based bulk student import
+  - Student records with year level and course tracking
+  - Soft delete system for data retention
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Academic Period Management**
+  - Semester-based academic period configuration
+  - Auto-generation of academic years
+  - Period-specific data isolation
 
-## Laravel Sponsors
+## 🛠️ Technology Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Backend**: Laravel 12.x (PHP 8.2+)
+- **Frontend**: Blade templating, Alpine.js 3.x, Bootstrap 5.3
+- **Build Tool**: Vite 6.4
+- **Database**: MySQL/MariaDB
+- **Styling**: Custom CSS architecture with PostCSS
+- **Icons**: Bootstrap Icons
 
-### Premium Partners
+## 📁 Project Structure
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+```
+AcadexV3/
+├── app/
+│   ├── Http/Controllers/     # Role-based controllers
+│   ├── Models/                # Eloquent models
+│   ├── Traits/                # Reusable traits (GradeCalculation, ActivityManagement)
+│   └── Imports/               # Excel import handlers
+├── resources/
+│   ├── views/                 # Blade templates by portal
+│   │   ├── admin/
+│   │   ├── chairperson/
+│   │   ├── dean/
+│   │   ├── gecoordinator/
+│   │   ├── instructor/
+│   │   └── vpaa/
+│   ├── css/                   # Organized CSS by portal
+│   │   ├── layout/
+│   │   ├── admin/
+│   │   ├── instructor/
+│   │   └── vpaa/
+│   └── js/                    # Alpine.js stores and utilities
+├── database/
+│   ├── migrations/            # Database schema
+│   └── seeders/               # Initial data seeders
+└── routes/
+    └── web.php                # All application routes
+```
 
-## Contributing
+## 🚀 Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Prerequisites
+- PHP >= 8.2
+- Composer
+- Node.js >= 18.x
+- MySQL/MariaDB
+- Git
 
-## Code of Conduct
+### Setup Steps
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/B0GARTT00/AcadexV3.git
+   cd AcadexV3
+   ```
 
-## Security Vulnerabilities
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+3. **Install JavaScript dependencies**
+   ```bash
+   npm install
+   ```
 
-## License
+4. **Environment configuration**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# bammy
-# Acadex
-# Acadex
-# Acadex
-# Acadex-v2
-# Acadex-v2
+5. **Configure database** (edit `.env`)
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=acadex
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+
+6. **Run migrations and seeders**
+   ```bash
+   php artisan migrate --seed
+   ```
+
+7. **Build assets**
+   ```bash
+   npm run build
+   ```
+
+8. **Start development server**
+   ```bash
+   # Option 1: Use the dev script (runs all services)
+   composer run dev
+   
+   # Option 2: Run individually
+   php artisan serve
+   php artisan queue:listen
+   npm run dev
+   ```
+
+## 👥 User Roles
+
+| Role | ID | Access Level | Key Permissions |
+|------|-----|--------------|-----------------|
+| Instructor | 0 | Subject-level | Grade entry, student management, CO tracking |
+| Chairperson | 1 | Department-level | Instructor oversight, grade approval, department reports |
+| Dean | 2 | College-level | Cross-department monitoring, academic reporting |
+| Admin | 3 | System-level | User management, system configuration |
+| GE Coordinator | 4 | GE Subject-level | General Education subject management |
+| VPAA | 5 | Institution-level | Institutional oversight, comprehensive analytics |
+
+## 🔑 Default Credentials
+
+After seeding, you can log in with:
+
+**Admin Account:**
+- Email: `admin@brokenshire.edu.ph`
+- Password: (set during seeding)
+
+**Note:** All user emails use the `@brokenshire.edu.ph` domain.
+
+## 📊 Database Schema
+
+### Core Tables
+- `users` - System users with role-based access
+- `students` - Student records with soft delete
+- `subjects` - Course/subject catalog
+- `academic_periods` - Semester configuration
+- `term_grades` - Individual term grades (Prelim, Midterm, Prefinal, Final)
+- `final_grades` - Computed final grades
+- `activities` - Activity/assessment records
+- `course_outcomes` - Course outcome definitions
+- `course_outcome_attainments` - CO performance tracking
+
+## 🎨 CSS Architecture
+
+Organized modular CSS structure:
+- `layout/` - App layout, navigation, guest pages
+- `admin/` - Admin portal styles
+- `instructor/` - Instructor-specific styles
+- `chairperson/` - Chairperson portal styles
+- `dean/`, `gecoordinator/`, `vpaa/` - Role-specific styles
+
+**Build output:** ~124 kB (gzip: ~22 kB)
+
+## 🧪 Testing
+
+```bash
+# Run tests
+composer test
+
+# Run specific test suite
+php artisan test --filter=GradeCalculationTest
+```
+
+## 📝 Development Workflow
+
+1. **Branch naming**: `feature/feature-name` or `fix/bug-name`
+2. **Commit messages**: Follow conventional commits
+3. **CSS changes**: Always rebuild with `npm run build`
+4. **Database changes**: Create migrations, never modify existing ones
+5. **Testing**: Write tests for new features
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and ensure build succeeds
+5. Submit a pull request
+
+## 📄 License
+
+Proprietary software © 2025 Brokenshire College. All rights reserved.
+
+## 🆘 Support
+
+For issues and questions:
+- Create an issue in the GitHub repository
+- Contact the development team
+
+## 🔄 Version History
+
+- **v3.0** - Current version with modular CSS architecture
+- **v2.0** - Enhanced multi-role portal system
+- **v1.0** - Initial release
+
+---
+
+**Built with ❤️ for Brokenshire College**
