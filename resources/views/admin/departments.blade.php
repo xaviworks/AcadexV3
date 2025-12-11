@@ -8,7 +8,7 @@
             <h1 class="h3 text-dark fw-bold mb-0">🏢 Departments</h1>
             <p class="text-muted mb-0">Manage academic departments</p>
         </div>
-        <button class="btn btn-success" onclick="showModal()">
+        <button class="btn btn-success" onclick="showDepartmentModal()">
             <i class="bi bi-plus-lg me-1"></i> Add Department
         </button>
     </div>

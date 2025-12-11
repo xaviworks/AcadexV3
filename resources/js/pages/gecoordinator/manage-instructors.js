@@ -67,6 +67,11 @@ function getRequestId(button) {
  * Initialize all modal handlers for the manage instructors page
  */
 function initGECoordinatorManageInstructorsPage() {
+    // Only run on GE Coordinator pages - check if URL contains 'gecoordinator'
+    if (!window.location.pathname.includes('gecoordinator')) {
+        return;
+    }
+    
     // Approve instructor modal
     const approveModal = document.getElementById('confirmApproveModal');
     setupModalHandler(approveModal, (button) => {

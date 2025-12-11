@@ -7,6 +7,11 @@
  * Initialize manage instructors page functionality
  */
 function initManageInstructorsPage() {
+    // Only run on Chairperson pages - check if URL contains 'chairperson'
+    if (!window.location.pathname.includes('chairperson')) {
+        return;
+    }
+    
     const approveModal = document.getElementById('confirmApproveModal');
     const rejectModal = document.getElementById('confirmRejectModal');
     const deactivateModal = document.getElementById('confirmDeactivateModal');

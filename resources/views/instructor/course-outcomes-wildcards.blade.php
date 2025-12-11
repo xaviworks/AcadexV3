@@ -352,6 +352,8 @@
 <script>
     window.pageData = {
         userRole: {{ Auth::user()->role }},
+        isChairpersonOrGE: {{ (Auth::user()->role === 1 || Auth::user()->role === 4) ? 'true' : 'false' }},
+        hasValidationErrors: {{ $errors->any() ? 'true' : 'false' }},
         hasErrors: {{ $errors->any() ? 'true' : 'false' }},
         oldGenerationMode: '{{ old('generation_mode', '') }}',
         @if(old('year_levels'))

@@ -871,23 +871,5 @@
         });
     </script>
 @endpush
-@push('scripts')
-<script>
-    $(document).ready(function() {
-        $('#usersTable').DataTable({
-            order: [[1, 'asc'], [0, 'asc']], // Sort by Role then Name
-            language: {
-                search: "_INPUT_",
-                searchPlaceholder: "Search users...",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ users",
-                emptyTable: "No users found"
-            },
-            columnDefs: [
-                { orderable: false, targets: 3 } // Disable sorting on Actions column
-            ]
-        });
-    });
-</script>
-@endpush
+{{-- DataTables initialization is handled by resources/js/pages/admin/users.js --}}
 @endsection

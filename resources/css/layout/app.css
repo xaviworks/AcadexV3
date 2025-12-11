@@ -201,15 +201,15 @@ body {
     color: var(--menu-text) !important;
     font-size: 0.9375rem;
     will-change: background-color;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .sidebar-link span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
     flex: 1;
     min-width: 0;
 }
