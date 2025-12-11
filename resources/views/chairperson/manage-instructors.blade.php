@@ -113,7 +113,7 @@
                                                     data-instructor-id="{{ $instructor->id }}"
                                                     data-instructor-name="{{ $instructor->last_name }}, {{ $instructor->first_name }}"
                                                     data-request-ge-url="{{ route('chairperson.requestGEAssignment', $instructor->id) }}">
-                                                    <i class="bi bi-journal-plus"></i> Request GE Again
+                                                    <i class="bi bi-journal-plus"></i> Request GE
                                                 </button>
                                             @else
                                                 {{-- No request exists, allow new request --}}

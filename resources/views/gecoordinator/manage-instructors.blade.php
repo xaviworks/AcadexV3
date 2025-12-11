@@ -22,6 +22,7 @@
         <div class="content-wrapper">
             @php
                 // Precompute filtered lists and counts for nav badges and tab usage
+                $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
                 $activeInstructors = $instructors->filter(fn($i) => $i->is_active);
                 $inactiveInstructors = $instructors->filter(fn($i) => !$i->is_active);
                 $pendingAccountsCount = $pendingAccounts->count();
@@ -77,17 +78,34 @@
                                     <tbody>
                                         @foreach($activeInstructors as $instructor)
                                                 <tr>
-                                                    <td>{{ $instructor->last_name }}, {{ $instructor->first_name }} {{ $instructor->middle_name }}</td>
+                                                    <td>
+                                                        {{ $instructor->last_name }}, {{ $instructor->first_name }} {{ $instructor->middle_name }}
+                                                        @if($instructor->department_id !== $geDepartment?->id)
+                                                            <span class="badge bg-info text-white ms-1" title="Has GE teaching access">GE Access</span>
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $instructor->email }}</td>
                                                     <td class="text-center">
-                                                        <button type="button"
-                                                            class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#confirmDeactivateModal"
-                                                            data-instructor-id="{{ $instructor->id }}"
-                                                            data-instructor-name="{{ $instructor->last_name }}, {{ $instructor->first_name }}">
-                                                            <i class="bi bi-person-x-fill"></i> Deactivate
-                                                        </button>
+                                                        @if($instructor->department_id === $geDepartment?->id)
+                                                            <button type="button"
+                                                                class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#confirmDeactivateModal"
+                                                                data-instructor-id="{{ $instructor->id }}"
+                                                                data-instructor-name="{{ $instructor->last_name }}, {{ $instructor->first_name }}"
+                                                                data-is-ge-dept="true">
+                                                                <i class="bi bi-person-x-fill"></i> Deactivate
+                                                            </button>
+                                                        @else
+                                                            <button type="button"
+                                                                class="btn btn-warning btn-sm d-inline-flex align-items-center gap-1"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#confirmRemoveGEAccessModal"
+                                                                data-instructor-id="{{ $instructor->id }}"
+                                                                data-instructor-name="{{ $instructor->last_name }}, {{ $instructor->first_name }}">
+                                                                <i class="bi bi-shield-x"></i> Remove GE Access
+                                                            </button>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                         @endforeach
@@ -272,11 +290,41 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to deactivate <strong id="instructorName"></strong>'s account?
+                    <p>Are you sure you want to deactivate <strong id="instructorName"></strong>'s account?</p>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        This will completely deactivate the instructor's account and revoke all GE teaching access.
+                    </p>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Deactivate</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Remove GE Access Modal (for non-GE department instructors) --}}
+<div class="modal fade" id="confirmRemoveGEAccessModal" tabindex="-1" aria-labelledby="confirmRemoveGEAccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="removeGEAccessForm" method="POST">
+            @csrf
+            <div class="modal-content rounded-4 shadow">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="confirmRemoveGEAccessModalLabel">Remove GE Teaching Access</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to remove GE teaching access for <strong id="removeGEAccessName"></strong>?</p>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        This will only revoke their ability to teach GE courses. Their account will remain active under their department.
+                    </p>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Remove GE Access</button>
                 </div>
             </div>
         </form>

@@ -164,24 +164,47 @@ body {
     width: 16rem;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden; /* Prevent double scrollbars */
     z-index: 1040;
-    contain: layout style paint;
+}
+
+/* Inner sidebar container - takes remaining space after version display */
+.sidebar-inner {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Critical for nested flex scrolling */
+    overflow: hidden;
 }
 
 .sidebar-content {
-    height: calc(100vh - 140px); /* Adjusted to make room for version */
-    overflow-y: auto;
+    /* Use flex-grow instead of fixed height to prevent content clipping */
+    flex: 1 1 auto;
+    min-height: 0; /* Allow flex item to shrink below content size for scrolling */
+    overflow-y: auto !important;
     overflow-x: hidden;
-    flex: 1;
+    padding-bottom: 60px; /* Space for version display */
 }
 
 .sidebar-section {
-    overflow: hidden;
+    /* Ensure sections are always visible */
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .sidebar-section ul {
-    overflow: hidden;
+    /* Ensure nav lists are always visible */
+    display: flex !important;
+    flex-direction: column;
+    visibility: visible !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.sidebar-section ul li {
+    display: list-item !important;
+    visibility: visible !important;
 }
 
 .sidebar-section h6 {
@@ -604,10 +627,7 @@ body {
     opacity: 0.7;
     border-top: 1px solid var(--border-color);
     text-align: center;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    flex-shrink: 0; /* Don't shrink - keep at bottom */
     background-color: var(--primary-green);
 }
 

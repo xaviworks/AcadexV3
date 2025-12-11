@@ -1,4 +1,4 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 text-white h-100 sidebar-wrapper">
+<div class="d-flex flex-column flex-shrink-0 p-3 text-white sidebar-inner">
     <!-- Logo Section -->
     <div class="logo-section">
         <a href="{{ route('dashboard') }}" class="logo-wrapper text-white text-decoration-none">

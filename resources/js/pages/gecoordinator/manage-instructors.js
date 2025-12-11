@@ -98,7 +98,7 @@ function initGECoordinatorManageInstructorsPage() {
         if (name && nameEl) nameEl.textContent = name;
     });
 
-    // Deactivate instructor modal
+    // Deactivate instructor modal (for GE department instructors only)
     const deactivateModal = document.getElementById('confirmDeactivateModal');
     setupModalHandler(deactivateModal, (button) => {
         const id = getInstructorId(button);
@@ -107,6 +107,20 @@ function initGECoordinatorManageInstructorsPage() {
         const form = document.getElementById('deactivateForm');
         const nameEl = document.getElementById('instructorName');
         
+        if (id && form) form.action = `/gecoordinator/instructors/${id}/deactivate`;
+        if (name && nameEl) nameEl.textContent = name;
+    });
+
+    // Remove GE Access modal (for non-GE department instructors)
+    const removeGEAccessModal = document.getElementById('confirmRemoveGEAccessModal');
+    setupModalHandler(removeGEAccessModal, (button) => {
+        const id = getInstructorId(button);
+        const name = getInstructorName(button);
+        
+        const form = document.getElementById('removeGEAccessForm');
+        const nameEl = document.getElementById('removeGEAccessName');
+        
+        // Uses the same deactivate endpoint - controller handles the logic
         if (id && form) form.action = `/gecoordinator/instructors/${id}/deactivate`;
         if (name && nameEl) nameEl.textContent = name;
     });

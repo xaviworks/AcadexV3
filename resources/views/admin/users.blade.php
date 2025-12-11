@@ -857,15 +857,6 @@
                                 button.disabled = false;
                                 button.innerHTML = originalHTML;
                             });
-                    });
-                });
-            });
-                                // Reset button state
-                                button.disabled = false;
-                                button.innerHTML = '<i class="bi bi-door-open"></i> Force Logout';
-                            });
-                        }
-                    });
                 });
             });
         });

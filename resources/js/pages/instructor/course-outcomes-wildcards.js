@@ -58,7 +58,8 @@ export function submitGenerateForm() {
         .then(data => {
             if (data.valid) {
                 // Password is valid, show final confirmation
-                const confirmed = confirm(
+                // Use window.confirm directly to avoid conflict with global confirm helper
+                const confirmed = window.confirm(
                     '⚠️ FINAL WARNING ⚠️\n\n' +
                     'This will PERMANENTLY DELETE all existing course outcomes and replace them with standard templates.\n\n' +
                     'Are you absolutely sure you want to proceed?\n\n' +

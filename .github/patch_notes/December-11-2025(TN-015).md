@@ -1,23 +1,77 @@
-# TN-015: JavaScript Migration Bug Fixes
+# TN-015: JavaScript Migration Bug Fixes & System Improvements
 **Date:** December 11, 2025  
 **Type:** Bug Fixes  
-**Related:** JS extraction from Blade templates
+**Related:** JS extraction from Blade templates, Role-based access control
 
 ## Summary
-Fixed multiple bugs that emerged after migrating inline JavaScript from Blade templates to external JS files. Issues affected Admin, Chairperson, GE Coordinator, and Instructor roles.
+Fixed multiple bugs that emerged after migrating inline JavaScript from Blade templates to external JS files. Also addressed role-based permission issues and UI display problems. Issues affected Admin, Chairperson, GE Coordinator, and Instructor roles.
 
 ---
 
-## Bugs Fixed
+## Critical Bugs Fixed
 
-### 1. Chairperson/GE Coordinator Route Conflict (Critical)
-**Issue:** Activate/Deactivate instructor buttons on Chairperson pages were redirecting to GE Coordinator routes (`/gecoordinator/instructors/7/activate`), causing 403 Forbidden errors.
+### 1. Admin Users Page - Disable Modal Auto-Loading & Syntax Error
+**Issue:** The disable user modal was loading immediately on page load instead of when clicking the Disable button. Console showed "Uncaught SyntaxError: Unexpected token '}'"
 
-**Root Cause:** Both `chairperson/manage-instructors.js` and `gecoordinator/manage-instructors.js` were bundled together and both attached event handlers to the same modal elements (`confirmActivateModal`, `confirmDeactivateModal`). The GE Coordinator script ran second and overwrote the form action with hardcoded GE Coordinator URLs.
+**Root Cause:** Orphaned JavaScript code from incomplete cleanup - duplicate/malformed closing braces and stale code block around lines 862-871 in `users.blade.php`.
 
-**Fix:** Added page URL detection to both scripts:
-- `chairperson/manage-instructors.js` - Only runs if URL contains 'chairperson'
-- `gecoordinator/manage-instructors.js` - Only runs if URL contains 'gecoordinator'
+**Fix:** Removed orphaned JavaScript code that included duplicate closing braces and dead code referencing 'Force Logout' button reset.
+
+**Files Modified:**
+- `resources/views/admin/users.blade.php`
+
+---
+
+### 2. Chairperson/GE Coordinator - Password Validation Error on Override COs
+**Issue:** When inputting the correct password to override Course Outcomes, an error occurred: "TypeError: confirm is not a function"
+
+**Root Cause:** The global `confirm` function was being shadowed by the custom `window.confirm` helper object in the application's store system. The code was calling `confirm()` directly instead of `window.confirm()`.
+
+**Fix:** Changed the confirm call to explicitly use `window.confirm()` to invoke the browser's native confirmation dialog.
+
+**Files Modified:**
+- `resources/js/pages/instructor/course-outcomes-wildcards.js`
+
+---
+
+### 3. GE Coordinator - Incorrect Deactivation Logic for Non-GE Instructors
+**Issue:** GE Coordinator could deactivate instructor accounts even for instructors who were only approved for GE access but belonged to other departments. This was incorrect - GE Coordinator should only be able to deactivate GE department instructors and only remove GE access for others.
+
+**Root Cause:** The `deactivateInstructor` method in `GECoordinatorController` was treating all instructors the same, setting `is_active = false` regardless of their department.
+
+**Fix:** 
+- Modified controller logic to check if instructor belongs to GE department
+- For GE department instructors: Full deactivation (is_active = false)
+- For non-GE department instructors: Only remove GE teaching access (can_teach_ge = false), keep account active
+- Added new modal "Remove GE Access" for non-GE department instructors with appropriate warning text
+- Updated blade template to show different buttons based on instructor's department
+- Added "GE Access" badge to identify instructors from other departments who have GE teaching access
+
+**Files Modified:**
+- `app/Http/Controllers/GECoordinatorController.php`
+- `resources/views/gecoordinator/manage-instructors.blade.php`
+- `resources/js/pages/gecoordinator/manage-instructors.js`
+
+---
+
+### 4. Instructor Sidebar - Content Cut Off / Not Scrolling
+**Issue:** Instructor sidebar was not displaying all menu items. The "REPORTS" section and some items were hidden/cut off.
+
+**Root Cause:** The `.sidebar-wrapper` CSS had `overflow: hidden` which prevented the sidebar content from being scrollable when it exceeded the viewport height.
+
+**Fix:** Changed `.sidebar-wrapper` overflow property from `overflow: hidden` to `overflow-x: hidden; overflow-y: auto` to allow vertical scrolling.
+
+**Files Modified:**
+- `resources/css/layout/app.css`
+
+---
+
+## Previously Fixed (Earlier in Day)
+
+### 5. Chairperson/GE Coordinator Route Conflict
+**Issue:** Activate/Deactivate instructor buttons on Chairperson pages were redirecting to GE Coordinator routes.
+
+**Fix:** Added page URL detection to both scripts to only run on their respective portals.
 
 **Files Modified:**
 - `resources/js/pages/chairperson/manage-instructors.js`
@@ -25,41 +79,30 @@ Fixed multiple bugs that emerged after migrating inline JavaScript from Blade te
 
 ---
 
-### 2. DataTables Reinitialize Error on Admin Users Page
+### 6. DataTables Reinitialize Error on Admin Users Page
 **Issue:** Console error "Cannot reinitialize DataTable" on the Admin Users page.
 
-**Root Cause:** DataTables initialization existed in both the blade template (`users.blade.php` line 877) AND the external JS file (`admin/users.js`), causing double initialization.
-
-**Fix:** Removed the duplicate DataTables initialization from `users.blade.php`, keeping only the external JS version.
+**Fix:** Removed duplicate DataTables initialization from blade template.
 
 **Files Modified:**
 - `resources/views/admin/users.blade.php`
 
 ---
 
-### 3. Sidebar Text Cutoff
-**Issue:** Sidebar navigation links were cutting off text with ellipsis (`...`), making full menu item names unreadable.
+### 7. Sidebar Text Cutoff
+**Issue:** Sidebar navigation links were cutting off text with ellipsis.
 
-**Root Cause:** CSS rules applied `white-space: nowrap`, `overflow: hidden`, and `text-overflow: ellipsis` to sidebar links.
-
-**Fix:** Changed sidebar CSS to allow text wrapping:
-- Removed `text-overflow: ellipsis`
-- Changed `white-space: nowrap` to `white-space: normal`
-- Added `word-wrap: break-word` and `overflow-wrap: break-word`
+**Fix:** Changed sidebar CSS to allow text wrapping with proper overflow handling.
 
 **Files Modified:**
 - `resources/css/layout/app.css`
 
 ---
 
-### 4. Add Department/Program Buttons Not Working
+### 8. Add Department/Program Buttons Not Working
 **Issue:** "Add Department" and "Add Program" buttons on Admin pages did nothing when clicked.
 
-**Root Cause:** The buttons called `showModal()` but the functions were renamed to `showDepartmentModal()` and `showCourseModal()` during JS extraction to avoid naming conflicts.
-
-**Fix:** Updated onclick handlers in blade templates to use the correct function names:
-- `departments.blade.php`: `showModal()` → `showDepartmentModal()`
-- `courses.blade.php`: `showModal()` → `showCourseModal()`
+**Fix:** Updated onclick handlers to use correct function names after JS extraction.
 
 **Files Modified:**
 - `resources/views/admin/departments.blade.php`
@@ -67,20 +110,10 @@ Fixed multiple bugs that emerged after migrating inline JavaScript from Blade te
 
 ---
 
-### 5. Override COs Password Prompt Not Showing
-**Issue:** When selecting "Override all existing COs" mode on the Course Outcomes Wildcards page, the password confirmation field was not appearing for Chairpersons and GE Coordinators.
+### 9. Override COs Password Prompt Not Showing
+**Issue:** Password confirmation field was not appearing when selecting override mode.
 
-**Root Cause:** The JavaScript looked for `pageData.isChairpersonOrGE` to determine whether to enable the override mode functionality, but the blade template was only passing `userRole` without the explicit `isChairpersonOrGE` boolean.
-
-**Fix:** Added `isChairpersonOrGE` and `hasValidationErrors` to the `pageData` object in the blade template:
-```javascript
-window.pageData = {
-    userRole: {{ Auth::user()->role }},
-    isChairpersonOrGE: {{ (Auth::user()->role === 1 || Auth::user()->role === 4) ? 'true' : 'false' }},
-    hasValidationErrors: {{ $errors->any() ? 'true' : 'false' }},
-    // ...
-};
-```
+**Fix:** Added `isChairpersonOrGE` and `hasValidationErrors` to the `pageData` object.
 
 **Files Modified:**
 - `resources/views/instructor/course-outcomes-wildcards.blade.php`
@@ -102,39 +135,52 @@ function initPageSpecificFunction() {
 }
 ```
 
-### Data Passing Pattern: PHP → JavaScript
-Always pass boolean flags explicitly in `pageData` when the JS logic depends on them:
+### Native vs Custom Confirm Dialog
+When the application has a custom `window.confirm` helper, use the browser's native confirm explicitly:
 
 ```javascript
-window.pageData = {
-    isFeatureEnabled: {{ $featureEnabled ? 'true' : 'false' }},
-    // NOT: relying on JS to derive from other values
-};
+// Use window.confirm() for native browser confirmation
+const confirmed = window.confirm('Are you sure?');
+
+// NOT: confirm() which may be shadowed by custom helper
+```
+
+### Role-Based Actions in Controllers
+Always check user context before performing destructive actions:
+
+```php
+// Example: Different behavior based on instructor's department
+$geDepartment = Department::where('department_code', 'GE')->first();
+
+if ($instructor->department_id === $geDepartment?->id) {
+    // Full action for department members
+} else {
+    // Limited action for external users with access
+}
 ```
 
 ---
 
 ## Build Information
-- Build successful: 56 modules, 286.69 KB (80.24 KB gzip)
+- Build successful: 56 modules, 286.98 KB (80.29 KB gzip)
 - All CSS and JS assets compiled without errors
 
-**Fixes**
-- Fixed critical error on Admin Users page: "Cannot end a push stack without first starting one" caused by orphaned JavaScript code from incomplete cleanup
-- Fixed sidebar horizontal scroll issue and text cutoff by adding proper overflow handling and text ellipsis styles
-- Fixed Instructor Dashboard chart not rendering - added auto-initialization when pageData is available
-- Fixed Chairperson "View Courses" button not working on CO Course Chooser page by improving card URL detection
-- Fixed Chairperson instructor cards not clickable on View Grades page - added missing `data-url` and `onclick` handler
-- Fixed Override COs functionality breaking with "event is not defined" error by using button ID selector instead
-- Fixed Admin "Add Department" button conflict by renaming to unique function `showDepartmentModal`
-- Fixed Admin "Add Program" button conflict by renaming to unique function `showCourseModal`  
-- Fixed Admin "Generate New" academic period button by correcting function name to `showGenerateModal`
+---
 
-**Technical Changes**
-- Removed ~150 lines of orphaned JavaScript code from `admin/users.blade.php`
-- Updated `admin/departments.js` to use page-specific initialization guard
-- Updated `admin/courses.js` to use page-specific initialization guard
-- Updated `chairperson/reports/co-course-chooser.js` to detect cards via data-url attribute
-- Updated `dashboard/instructor.js` to auto-initialize chart on DOM ready
-- Updated `instructor/course-outcomes-wildcards.js` to get submit button by ID
-- Updated `academic-periods/index.blade.php` to use correct function name
-- Added CSS fixes for sidebar content overflow handling
+## Summary of All Changes
+
+**Bug Fixes:**
+- Fixed Admin Users page disable modal auto-loading and syntax error
+- Fixed password validation "confirm is not a function" error on Override COs
+- Fixed GE Coordinator incorrectly deactivating non-GE department instructors
+- Fixed Instructor sidebar content being cut off/not scrollable
+- Fixed Chairperson/GE Coordinator route conflicts
+- Fixed DataTables reinitialization error
+- Fixed sidebar text cutoff
+- Fixed Add Department/Program buttons not working
+- Fixed Override COs password prompt not showing
+
+**Enhancements:**
+- Added "Remove GE Access" modal with appropriate messaging for non-GE instructors
+- Added "GE Access" badge to identify instructors with GE teaching access from other departments
+- Improved role-based permission handling in GE Coordinator controller

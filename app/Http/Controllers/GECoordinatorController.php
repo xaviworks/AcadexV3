@@ -163,24 +163,38 @@ class GECoordinatorController extends Controller
             abort(403);
         }
         
-        // Find the instructor (don't restrict to GE department since they might be from another department)
+        // Find the instructor
         $instructor = User::where('id', $id)
             ->where('role', 0)
             ->where('is_active', true)
             ->firstOrFail();
-            
-        // Remove GE teaching capability AND deactivate the account
-        $instructor->update([
-            'can_teach_ge' => false,
-            'is_active' => false
-        ]);
         
-        // Update any existing approved GE requests to "rejected" status
+        // Get GE department to check if instructor belongs to it
+        $geDepartment = Department::where('department_code', 'GE')->first();
+        
+        // Only GE department instructors can be fully deactivated by GE Coordinator
+        // For instructors from other departments, only remove their GE teaching access
+        if ($instructor->department_id === $geDepartment?->id) {
+            // Full deactivation for GE department instructors
+            $instructor->update([
+                'can_teach_ge' => false,
+                'is_active' => false
+            ]);
+            $message = 'Instructor deactivated successfully.';
+        } else {
+            // For non-GE department instructors, only remove GE teaching capability
+            $instructor->update([
+                'can_teach_ge' => false
+            ]);
+            $message = 'GE teaching access removed successfully. The instructor\'s account remains active under their department.';
+        }
+        
+        // Update any existing approved GE requests to "revoked" status
         \App\Models\GESubjectRequest::where('instructor_id', $id)
             ->where('status', 'approved')
-            ->update(['status' => 'rejected']);
+            ->update(['status' => 'revoked']);
         
-        return redirect()->back()->with('success', 'Instructor deactivated successfully.');
+        return redirect()->back()->with('success', $message);
     }
 
     public function activateInstructor($id)
