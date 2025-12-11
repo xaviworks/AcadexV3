@@ -111,7 +111,7 @@
                                 <td class="text-center">
                                     @if($user->is_active)
                                         @if(auth()->id() !== $user->id)
-                                            <button type="button" class="btn btn-sm btn-danger" @click="modal.open('chooseDisableModal', { userId: {{ $user->id }}, userName: '{{ addslashes($user->name) }}' })" title="Disable Account">
+                                            <button type="button" class="btn btn-sm btn-danger" @click="modal.open('chooseDisableModal', { userId: {{ $user->id }}, userName: {{ json_encode($user->name) }} })" title="Disable Account">
                                                 <i class="bi bi-person-slash"></i> Disable
                                             </button>
                                         @else
@@ -123,7 +123,7 @@
                                     @else
                                         <span class="badge bg-secondary px-3 py-2">Disabled</span>
                                         @if(auth()->id() !== $user->id)
-                                            <button type="button" class="btn btn-sm btn-success ms-2" onclick="enableUser({{ $user->id }}, '{{ addslashes($user->name) }}')" title="Re-enable Account">
+                                            <button type="button" class="btn btn-sm btn-success ms-2" onclick="enableUser({{ $user->id }}, {{ json_encode($user->name) }})" title="Re-enable Account">
                                                 <i class="bi bi-person-plus"></i> Enable
                                             </button>
                                         @else
@@ -142,7 +142,7 @@
     </div>
 </div>
     {{-- Disable Choose Modal (one instance) --}}
-    <div x-data x-show="$store.modals.active === 'chooseDisableModal'" x-transition.opacity class="modal fade show d-block-important" tabindex="-1" @click.self="modal.close()">
+    <div x-data x-show="$store.modals.active === 'chooseDisableModal'" x-cloak x-transition.opacity class="modal fade show" :class="{ 'd-block-important': $store.modals.active === 'chooseDisableModal' }" tabindex="-1" @click.self="modal.close()">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header disable-modal-header text-white">

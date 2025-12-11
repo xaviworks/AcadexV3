@@ -16,6 +16,8 @@
 @extends('layouts.app')
 
 {{-- Styles: resources/css/instructor/course-outcomes.css --}}
+@push('styles')
+<style>
 /* Enhanced Table Styling */
 .student-row:hover {
     background-color: #f8f9fa !important;
@@ -220,6 +222,8 @@
         height: 28px !important;
     }
 }
+</style>
+@endpush
 
 @section('content')
 <div class="container-fluid px-4 py-4">

@@ -1,57 +1,124 @@
 # Acadex Copilot Instructions
 
 ## 🏗️ Architecture
-- Laravel 12 monolith with Blade views (`resources/views`) and a Vite pipeline (`resources/js`, `vite.config.js`); AlpineJS and Bootstrap are the default UI stack.
-- Domain models revolve around `Student`, `Subject`, `TermGrade`, `FinalGrade`, and `Activity`, all using manual `is_deleted` flags instead of `SoftDeletes`.
-- Global `NoCacheHeaders` middleware prevents browser caching, and `DashboardController@index` dispatches to role-specific dashboards by checking Gates.
+- Laravel 12 monolith with Blade views (`resources/views`) and Vite pipeline; AlpineJS 3.x + Bootstrap 5.3 are the UI stack.
+- Domain models: `Student`, `Subject`, `TermGrade`, `FinalGrade`, `Activity`, `Score`—all use manual `is_deleted` flags instead of `SoftDeletes`.
+- `DashboardController@index` dispatches to role-specific dashboards by checking `$user->role` and model helpers (`isChairperson()`, `isAdmin()`, etc.).
+- Grade formula logic lives in `GradesFormulaService` with hierarchical resolution (subject → course → department → default) and caching.
 
-## 🔐 Roles & periods
-- Role integers live in `App\Providers\AuthServiceProvider`: instructor=0, chairperson=1, dean=2, admin=3; use `Gate::authorize('role')` helpers to guard controllers.
-- Instructor tooling requires `session('active_academic_period_id')`; the `academic.period.set` middleware alias (registered in `bootstrap/app.php`) redirects to `/select-academic-period` until that session key is set.
-- `routes/web.php` groups routes by portal; reuse its middleware stacks when adding endpoints to keep role and period enforcement consistent.
+## 🔐 Roles & Middleware
+| Role | Integer | Gate | Model Helper |
+|------|---------|------|--------------|
+| Instructor | 0 | `instructor` | — |
+| Chairperson | 1 | `chairperson` | `isChairperson()` |
+| Dean | 2 | `dean` | — |
+| Admin | 3 | `admin` | `isAdmin()` |
+| GE Coordinator | 4 | `gecoordinator` | `isGECoordinator()` |
+| VPAA | 5 | `vpaa` | `isVPAA()` |
 
-## 🧮 Grades & activities
-- `App\Traits\GradeCalculationTrait` applies weights (quiz 40%, OCR 20%, exam 40%) and expects seven activities per term; the companion `ActivityManagementTrait` seeds 3 quizzes, 3 OCRs, 1 exam when missing.
-- Term labels map to IDs via `getTermId` helpers (`prelim`→1, `midterm`→2, `prefinal`→3, `final`→4); reuse the helpers in grade logic to avoid mismatches.
-- `GradeController` saves scores, updates `term_grades`, and triggers `calculateAndUpdateFinalGrade`; any new grading flow must call both term and final update methods to keep averages in sync.
+- Gates defined in `App\Providers\AuthServiceProvider`; use `Gate::authorize('role')` in controllers.
+- **Academic period middleware**: `academic.period.set` (alias in `bootstrap/app.php`) redirects to `/select-academic-period` until `session('active_academic_period_id')` is set. Required for instructor/chairperson/dean/gecoordinator/vpaa routes.
+- Routes grouped by portal in `routes/web.php`; reuse existing middleware stacks when adding endpoints.
 
-## 📥 Imports
-- `StudentImportController` stages Excel uploads into `review_students` using `StudentReviewImport` (columns: last name, first name, middle name, year level, course code).
-- Confirming a list deduplicates by name/course/period, links through `StudentSubject`, and ensures default activities exist for every term—mirror this when introducing new intake paths.
-- Imports and manual enrollment both depend on `session('active_academic_period_id')`; validate the subject’s period before creating students.
+## 🔑 Authentication
+- **Google OAuth**: Primary login via `GoogleAuthController` using Laravel Socialite. Only `@brokenshire.edu.ph` emails allowed.
+- Users must be pre-created by Admin—no auto-registration on Google login.
+- Single-session enforcement: Non-admin users blocked from concurrent logins on multiple devices.
+- `UnverifiedUser` model stages pending account requests until Admin/Chairperson approval.
 
-## 🧑‍🏫 Back-office portals
-- Chairperson flows in `ChairpersonController` constrain instructors and subjects to the authenticated user’s department/course and active period; they forbid unassigning subjects with enrolled students.
-- Admin CRUD in `AdminController` manages departments, courses, subjects, academic periods, and higher-role users, always toggling `is_deleted` instead of removing rows.
-- `AcademicPeriodController::generate` auto-creates a new academic year (1st/2nd/Summer); invoke it instead of hand-seeding periods to maintain the `YYYY-YYYY` pattern.
+## 🧮 Grades & Activities
+- `GradeCalculationTrait` calculates term grades using configurable formula structures (lecture_only, lecture_lab, etc.) from `GradesFormulaService`.
+- `ActivityManagementTrait::getOrCreateDefaultActivities()` seeds activities per term based on formula weights; default is 3 quizzes, 3 OCRs, 1 exam for lecture_only.
+- Term mapping via `getTermId()`: `prelim`→1, `midterm`→2, `prefinal`→3, `final`→4.
+- **Critical**: Grade saves must call both `updateTermGrade()` AND `calculateAndUpdateFinalGrade()` to keep averages in sync.
+- Final grade = average of all 4 term grades; remarks set by comparing against `passing_grade` from formula.
+- `GradeNotification` alerts chairpersons/GE coordinators when instructors submit grades; handled via `NotificationController`.
 
-## 📈 Usage analytics
-- Login, failed login, and logout listeners (`app/Listeners/LogUser*`) write to `user_logs` and dedupe events within five seconds while capturing device info via `jenssegers/agent`.
-- `DashboardController@adminDashboard` and `AdminController@viewUserLogs` rely on this table; extend analytics by adding new listener logic, not controller-side inserts.
+## 📊 Course Outcome (CO) Tracking
+- `CourseOutcomes` model stores CO definitions per subject (`co_code`, `co_identifier`, `description`).
+- Each `Activity` can be mapped to a `course_outcome_id` to track which CO it assesses.
+- `CourseOutcomeTrait::computeCoAttainment()` calculates per-term and semester-total CO percentages:
+  ```
+  CO% = (Sum of raw scores for CO ÷ Sum of max possible scores for CO) × 100
+  ```
+- `CourseOutcomeAttainmentController` renders student-level CO attainment matrices.
+- Reports hierarchy: Student → Course → Program → Department (controllers: `CourseOutcomeReportsController`, `ProgramReportsController`).
 
-## 🛠️ Developer workflows
-- Fresh setup: `composer install`, `npm install`, copy `.env`, run `php artisan key:generate`, then migrations/seeds.
-- Local dev watcher: `composer run dev` launches PHP serve, queue listener, Laravel Pail, and Vite through `npx concurrently`; on PowerShell you can run the processes separately if concurrency has issues.
-- Asset build via `npm run build`; backend tests with `composer test` (clears config cache before `php artisan test`).
+## 🌐 GE Subject Management
+- GE (General Education) subjects span multiple departments; managed by GE Coordinator (role 4).
+- `GESubjectRequest` model handles cross-department instructor assignment requests:
+  - Chairperson requests → GE Coordinator approves/rejects
+  - Fields: `instructor_id`, `requested_by`, `status`, `reviewed_by`, `reviewed_at`
+- `GECoordinatorController` manages GE-specific instructor pools and subject assignments.
+- Users with `can_teach_ge` flag can be assigned to GE subjects.
 
-## 🧩 Frontend & assets
-- Vite entry is `resources/js/app.js`; it imports `bootstrap/dist/css` and starts Alpine. Tailwind is configured in `tailwind.config.js` but legacy Bootstrap styles still apply.
-- Blade templates sit under `resources/views/...` (e.g., `dashboard/*`, `instructor/*`); stay consistent with existing component/partial structure when introducing new screens.
+## 📐 Structure Templates
+- `StructureTemplate` model stores reusable grading formula structures (activity weights, types).
+- `StructureTemplateRequest` enables chairpersons to propose new templates for Admin approval:
+  - Status flow: `pending` → `approved`/`rejected`
+  - Fields: `chairperson_id`, `label`, `structure_config` (JSON), `status`, `admin_notes`
+- Admin manages templates via `AdminController::*StructureTemplate*` methods.
+- Chairpersons submit requests via `ChairpersonController::*TemplateRequest*` routes.
 
-## ⚙️ Data conventions
-- Always filter active records with `->where('is_deleted', false)`; pivots (`student_subjects`) expose the same flag via the `StudentSubject` model.
-- `FinalGrade` and `TermGrade` include `created_by`/`updated_by`; controllers typically set these with `Auth::id()`, so propagate that when writing service logic.
-- `User` emails are stored with the `@brokenshire.edu.ph` domain appended in controllers; preserve this convention when creating accounts programmatically.
+## 📥 Student Imports
+- `StudentImportController` stages Excel uploads into `review_students` table using `StudentReviewImport`.
+- Expected columns: last name, first name, middle name, year level, course code.
+- `confirmImport()` deduplicates by name/course/period, creates `StudentSubject` links, ensures activities exist.
+- **Always validate**: `session('active_academic_period_id')` and subject's `academic_period_id` must match.
 
-## 🧪 Testing tips
-- Tests extend `Tests\TestCase`; use `RefreshDatabase` for grade/import scenarios to reset `students`, `student_subjects`, `term_grades`, and `final_grades` tables.
-- Stub the academic period session in tests (`session(['active_academic_period_id' => $period->id])`) before hitting instructor routes to satisfy the middleware redirect.
+## 🧑‍🏫 Portal Controllers
+| Portal | Controller | Key Constraints |
+|--------|------------|-----------------|
+| Chairperson | `ChairpersonController` | Filters by user's department/course + active period |
+| GE Coordinator | `GECoordinatorController` | Manages GE subjects across departments |
+| Dean | `DeanController` | Department-wide read access |
+| VPAA | `VPAAController` | Institution-wide read access |
+| Admin | `AdminController` | Full CRUD, toggles `is_deleted` (never hard deletes) |
 
-## 🚫 Code quality rules
-- **Never access properties on potentially null objects**: Always use null-safe operators (`?->`) or helper functions like `optional()` when accessing properties on objects that might be null.
-- **Validate before accessing**: Before accessing object properties or array keys, ensure they exist using null checks, `isset()`, or null coalescing operators (`??`).
-- **Load relationships defensively**: When accessing relationships, use `loadMissing()` or eager loading to ensure relationships are available before accessing their properties.
-- **Safe route generation**: When generating routes with model parameters, verify models exist and use fallback routes if null: `$model ? route('name', $model) : route('fallback')`.
-- **Match expressions**: Always include a `default` case in match expressions and ensure all matched values are properly initialized before use.
-- **No undefined variables or properties**: When referencing any attribute, method, or variable, declare it explicitly or ensure the model metadata (casts, `$fillable`, PHPDoc) tells static analysis where it comes from; add annotations or refactor code before leaving warnings behind.
-- **Document complex flows**: When controller actions or services combine multiple branch-dependent return types, add precise PHPDoc (`@return`, `@var`) or extract helpers so the analyzer can infer types without emitting "internal limitation" warnings.
+- `AcademicPeriodController::generate` auto-creates academic year (1st/2nd/Summer semesters).
+
+## 🛠️ Developer Workflows
+```bash
+# Fresh setup
+composer install && npm install
+cp .env.example .env && php artisan key:generate
+php artisan migrate --seed
+
+# Development (runs server, queue, pail logs, vite concurrently)
+composer run dev
+
+# Build assets
+npm run build
+
+# Run tests (clears config cache first)
+composer test
+```
+
+## 🧩 Frontend Patterns
+- Vite entry: `resources/js/app.js` (imports Bootstrap CSS, initializes Alpine).
+- Views organized by portal: `resources/views/{admin,chairperson,dean,gecoordinator,instructor,vpaa}/`.
+- Alpine stores documented in `docs/ALPINE_STORE_USAGE.md`.
+- Bootstrap 5.3 is primary styling; Tailwind configured but legacy Bootstrap still dominant.
+
+## ⚙️ Data Conventions
+- **Soft delete pattern**: Filter with `->where('is_deleted', false)`; applies to all major models.
+- **Audit columns**: `created_by`/`updated_by` set via `Auth::id()` in controllers.
+- **User emails**: Stored with `@brokenshire.edu.ph` domain suffix.
+- **Pivot model**: `StudentSubject` has its own `is_deleted` flag for enrollment status.
+
+## 📈 Usage Analytics
+- Event listeners in `app/Listeners/LogUser{Login,Logout,FailedLogin}.php` write to `user_logs`.
+- Uses `jenssegers/agent` for device detection; dedupes events within 5 seconds.
+- Session management in `AdminController` handles force logout/disable via `disabled_until` field.
+
+## 🧪 Testing
+- Tests extend `Tests\TestCase`; use `RefreshDatabase` for grade/import scenarios.
+- Stub academic period in tests: `session(['active_academic_period_id' => $period->id])` before hitting protected routes.
+
+## 🚫 Code Quality Rules
+- **Null safety**: Always use `?->` operator or `optional()` when accessing potentially null objects.
+- **Relationship loading**: Use `loadMissing()` or eager loading before accessing relationship properties.
+- **Safe routes**: `$model ? route('name', $model) : route('fallback')` when model might be null.
+- **Match expressions**: Always include `default` case; ensure all matched values are initialized.
+- **PHPDoc annotations**: Add `@property`, `@return`, `@var` for complex types to satisfy static analysis.
+- **No undefined access**: Declare attributes in `$fillable`, `$casts`, or PHPDoc before referencing.

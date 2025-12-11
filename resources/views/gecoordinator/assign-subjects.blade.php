@@ -91,7 +91,7 @@
                                             <td class="text-center">
                                                 <button class="btn btn-sm btn-outline-success subject-view-btn" 
                                                     data-subject-id="{{ $subject->id }}"
-                                                    onclick="openViewInstructorsModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}')">
+                                                    onclick="openViewInstructorsModal({{ $subject->id }}, {{ json_encode($subject->subject_code . ' - ' . $subject->subject_description) }})">
                                                     <i class="bi bi-people-fill text-success me-1"></i>
                                                     <span>View (<span class="view-count">{{ $subject->instructors_count ?? $subject->instructors->count() }}</span>)</span>
                                                 </button>
@@ -100,7 +100,7 @@
                                                 <div class="d-flex justify-content-center">
                                                     <button class="btn btn-sm btn-success subject-edit-btn"
                                                         data-subject-id="{{ $subject->id }}"
-                                                        onclick="openInstructorListModal({{ $subject->id }}, '{{ addslashes($subject->subject_code) }}', 'edit')"
+                                                        onclick="openInstructorListModal({{ $subject->id }}, {{ json_encode($subject->subject_code) }}, 'edit')"
                                                         title="Edit Instructors">
                                                         <i class="bi bi-pencil-square"></i> Edit
                                                     </button>
@@ -160,7 +160,7 @@
                                                     <td class="text-center">
                                                         <button class="btn btn-sm btn-outline-success subject-view-btn" 
                                                             data-subject-id="{{ $subject->id }}"
-                                                            onclick="openViewInstructorsModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}')">
+                                                            onclick="openViewInstructorsModal({{ $subject->id }}, {{ json_encode($subject->subject_code . ' - ' . $subject->subject_description) }})">
                                                             <i class="bi bi-people-fill text-success me-1"></i>
                                                             <span>View (<span class="view-count">{{ $subject->instructors_count ?? $subject->instructors->count() }}</span>)</span>
                                                         </button>
@@ -170,7 +170,7 @@
                                                             <button
                                                                 class="btn btn-success btn-sm subject-edit-btn"
                                                                 data-subject-id="{{ $subject->id }}"
-                                                                onclick="openInstructorListModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}', 'edit')"
+                                                                onclick="openInstructorListModal({{ $subject->id }}, {{ json_encode($subject->subject_code . ' - ' . $subject->subject_description) }}, 'edit')"
                                                                 title="Edit Instructors">
                                                                 <i class="bi bi-pencil-square me-1"></i> Edit
                                                             </button>

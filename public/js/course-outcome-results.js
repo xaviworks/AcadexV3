@@ -197,13 +197,16 @@ function toggleScoreTypeWithValue(type) {
 }
 
 function toggleScoreType() {
-    var type = document.getElementById('scoreType').value;
+    var scoreTypeEl = document.getElementById('scoreType');
+    if (!scoreTypeEl) return; // Guard against null element
+    var type = scoreTypeEl.value;
     toggleScoreTypeWithValue(type);
 }
 
 function switchTerm(term, index) {
     currentTerm = term;
-    var scoreType = document.getElementById('scoreType').value;
+    var scoreTypeEl = document.getElementById('scoreType');
+    var scoreType = scoreTypeEl ? scoreTypeEl.value : 'raw';
     
     // Hide combined tables and all term tables
     var combinedTable = document.getElementById('combined-table');

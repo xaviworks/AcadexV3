@@ -1,11 +1,11 @@
 {{-- Alpine Confirmation Dialog Component --}}
 <div x-data 
-     x-show="$store.confirm.show" 
-     x-transition.opacity 
-     class="modal fade show" 
-     style="display: block; z-index: 1055;" 
-     tabindex="-1"
-     @keydown.escape.window="$store.confirm.cancel()">
+    x-show="$store.confirm.show" 
+    x-transition.opacity 
+    class="modal show" 
+    style="display: block; z-index: 1055;" 
+    tabindex="-1"
+    @keydown.escape.window="$store.confirm.cancel()">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             {{-- Header with dynamic color based on type --}}
@@ -58,8 +58,8 @@
 
 {{-- Confirmation dialog backdrop --}}
 <div x-data 
-     x-show="$store.confirm.show" 
-     x-transition.opacity 
-     class="modal-backdrop fade show" 
-     style="z-index: 1054;"
-     @click="$store.confirm.cancel()"></div>
+    x-show="$store.confirm.show" 
+    x-transition.opacity 
+    class="position-fixed top-0 start-0 w-100 h-100" 
+    style="z-index: 1054; background: rgba(0, 0, 0, 0.08);"
+    @click="$store.confirm.cancel()"></div>

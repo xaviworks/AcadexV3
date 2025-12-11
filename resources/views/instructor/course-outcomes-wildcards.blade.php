@@ -20,7 +20,7 @@
             {{-- Generate CO Button (Chairperson and GE Coordinator Only) --}}
             @if(Auth::user()->role === 1 || Auth::user()->role === 4)
             <div>
-                <button type="button" class="btn btn-success rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#generateCOModal" style="font-weight: 600;">
+                <button type="button" class="btn btn-success rounded-pill shadow-sm" id="openGenerateCOModalBtn" style="font-weight: 600;">
                     <i class="bi bi-magic me-1"></i>Generate COs
                 </button>
             </div>
@@ -135,7 +135,7 @@
 
 {{-- Generate Course Outcomes Modal --}}
 @if(Auth::user()->role === 1 || Auth::user()->role === 4)
-<div class="modal fade" id="generateCOModal" tabindex="-1" aria-labelledby="generateCOModalLabel" aria-hidden="true">
+<div class="modal fade" id="generateCOModal" tabindex="-1" aria-labelledby="generateCOModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
             <div class="modal-header border-0" style="background: linear-gradient(135deg, #198754, #20c997); border-radius: 1rem 1rem 0 0;">

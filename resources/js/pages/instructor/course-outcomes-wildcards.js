@@ -55,26 +55,11 @@ export function submitGenerateForm() {
             })
         })
         .then(response => response.json())
-        .then(data => {
+        .then(async data => {
             if (data.valid) {
-                // Password is valid, show final confirmation
-                // Use window.confirm directly to avoid conflict with global confirm helper
-                const confirmed = window.confirm(
-                    '⚠️ FINAL WARNING ⚠️\n\n' +
-                    'This will PERMANENTLY DELETE all existing course outcomes and replace them with standard templates.\n\n' +
-                    'Are you absolutely sure you want to proceed?\n\n' +
-                    'Click OK to continue with this destructive action, or Cancel to abort.'
-                );
-                
-                if (confirmed) {
-                    // Update button and submit
-                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Overriding COs...';
-                    form.submit();
-                } else {
-                    // Reset button if user cancels
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
+                // Password is valid; proceed directly to submit (no extra backdrop)
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Overriding COs...';
+                form.submit();
             } else {
                 // Password is invalid
                 passwordField.classList.add('is-invalid');
@@ -184,8 +169,32 @@ export function initCourseOutcomesWildcardsPage() {
     const oldGenerationMode = pageData.oldGenerationMode || '';
     const oldYearLevels = pageData.oldYearLevels || [];
     
+    // Store the modal instance reference
+    let generateCOModalInstance = null;
+    
+    // Helper function to safely open the Generate CO modal
+    function openGenerateCOModal() {
+        const modalEl = document.getElementById('generateCOModal');
+        if (!modalEl) return;
+        
+        // Create a new modal instance if it doesn't exist, or get the existing one
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            generateCOModalInstance = bootstrap.Modal.getOrCreateInstance(modalEl, {
+                backdrop: false,
+                keyboard: true
+            });
+            generateCOModalInstance.show();
+        }
+    }
+    
     // Generation-specific functionality (only for chairpersons and GE coordinators)
     if (isChairpersonOrGE) {
+        // Set up the open modal button handler
+        const openModalBtn = document.getElementById('openGenerateCOModalBtn');
+        if (openModalBtn) {
+            openModalBtn.addEventListener('click', openGenerateCOModal);
+        }
+        
         const allYearsCheckbox = document.getElementById('year_all');
         const yearSpecificCheckboxes = document.querySelectorAll('.year-specific');
         const overrideWarning = document.getElementById('overrideWarning');
@@ -244,8 +253,9 @@ export function initCourseOutcomesWildcardsPage() {
         }
         
         // Auto-show modal if there are validation errors (form was submitted with errors)
-        if (hasValidationErrors && oldGenerationMode && typeof window.modal !== 'undefined') {
-            window.modal.open('generateCOModal');
+        if (hasValidationErrors && oldGenerationMode) {
+            // Use the helper function to open the modal
+            openGenerateCOModal();
             
             // Restore form state
             if (oldGenerationMode) {

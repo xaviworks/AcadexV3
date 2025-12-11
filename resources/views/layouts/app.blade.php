@@ -342,7 +342,7 @@
     </script>
 
     {{-- Sign Out Confirmation Modal - At body level for proper z-index stacking --}}
-    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true">
+    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 1.25rem; overflow: hidden;">
                 {{-- Header with gradient background --}}
@@ -394,57 +394,13 @@
     
     {{-- Styles: resources/css/layout/app.css --}}
 
-    {{-- Global Modal Backdrop Fix --}}
-    <script>
-        // Fix all modals to have no backdrop - must run before any modal initialization
-        (function() {
-            // Wait for Bootstrap to be available
-            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                // Store original methods
-                const originalShow = bootstrap.Modal.prototype.show;
-                const originalGetOrCreateInstance = bootstrap.Modal.getOrCreateInstance;
-                
-                // Override show method
-                bootstrap.Modal.prototype.show = function() {
-                    if (this._config && this._config.backdrop !== false) {
-                        this._config.backdrop = false;
-                    }
-                    originalShow.call(this);
-                };
-                
-                // Override getOrCreateInstance to always use backdrop: false
-                bootstrap.Modal.getOrCreateInstance = function(element, config) {
-                    config = config || {};
-                    config.backdrop = false;
-                    return originalGetOrCreateInstance.call(this, element, config);
-                };
-                
-                // Override constructor to set backdrop: false by default
-                const OriginalModal = bootstrap.Modal;
-                bootstrap.Modal = function(element, config) {
-                    config = config || {};
-                    if (config.backdrop !== false) {
-                        config.backdrop = false;
-                    }
-                    return new OriginalModal(element, config);
-                };
-                // Copy static methods
-                Object.setPrototypeOf(bootstrap.Modal, OriginalModal);
-                bootstrap.Modal.prototype = OriginalModal.prototype;
-                bootstrap.Modal.getOrCreateInstance = function(element, config) {
-                    config = config || {};
-                    config.backdrop = false;
-                    return OriginalModal.getOrCreateInstance(element, config);
-                };
-                bootstrap.Modal.getInstance = OriginalModal.getInstance;
-                bootstrap.Modal.VERSION = OriginalModal.VERSION;
-                bootstrap.Modal.Default = OriginalModal.Default;
-            }
-        })();
-    </script>
+    {{-- Note: Modal backdrop handling is done via data-bs-backdrop attributes on individual modals --}}
 
     {{-- Toast Notifications --}}
     @include('components.toast-notifications')
+
+    {{-- Confirmation Dialog (Alpine.js) --}}
+    @include('components.confirmation-dialog')
 
     @stack('scripts')
 </body>
