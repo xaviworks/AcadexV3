@@ -9,7 +9,9 @@ export function submitGenerateForm() {
     const form = document.getElementById('generateCOForm');
     if (!form) return false;
     
-    const submitBtn = event.target;
+    const submitBtn = document.getElementById('generateSubmitBtn');
+    if (!submitBtn) return false;
+    
     const originalText = submitBtn.innerHTML;
     const generationModeEl = document.querySelector('input[name="generation_mode"]:checked');
     const generationMode = generationModeEl?.value || 'missing_only';

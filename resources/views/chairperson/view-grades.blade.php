@@ -35,6 +35,9 @@
                 <div class="col-md-4">
                     <div
                         class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow"
+                        data-url="{{ route('chairperson.viewGrades', ['instructor_id' => $instructor->id]) }}"
+                        onclick="window.location.href='{{ route('chairperson.viewGrades', ['instructor_id' => $instructor->id]) }}'"
+                        style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;"
                     >
                         {{-- Top header --}}
                         <div class="position-relative" style="height: 80px; background-color: #4ecd85;">

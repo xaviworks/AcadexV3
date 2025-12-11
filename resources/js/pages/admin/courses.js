@@ -9,15 +9,11 @@
 /**
  * Show the course modal
  */
-function showModal() {
-    if (typeof window.modal !== 'undefined') {
-        window.modal.open('courseModal');
-    } else {
-        const modalEl = document.getElementById('courseModal');
-        if (modalEl) {
-            const bsModal = new bootstrap.Modal(modalEl);
-            bsModal.show();
-        }
+function showCourseModal() {
+    const modalEl = document.getElementById('courseModal');
+    if (modalEl) {
+        const bsModal = new bootstrap.Modal(modalEl);
+        bsModal.show();
     }
 }
 
@@ -41,8 +37,13 @@ function initAdminCoursesPage() {
 }
 
 // Export for global access
-window.showModal = showModal;
+window.showCourseModal = showCourseModal;
+window.showModal = showCourseModal; // Alias for onclick handlers
 window.initAdminCoursesPage = initAdminCoursesPage;
 
 // Auto-initialize when DOM is ready
-$(document).ready(initAdminCoursesPage);
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('coursesTable')) {
+        initAdminCoursesPage();
+    }
+});

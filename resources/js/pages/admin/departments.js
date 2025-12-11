@@ -9,15 +9,11 @@
 /**
  * Show the department modal
  */
-function showModal() {
-    if (typeof window.modal !== 'undefined') {
-        window.modal.open('departmentModal');
-    } else {
-        const modalEl = document.getElementById('departmentModal');
-        if (modalEl) {
-            const bsModal = new bootstrap.Modal(modalEl);
-            bsModal.show();
-        }
+function showDepartmentModal() {
+    const modalEl = document.getElementById('departmentModal');
+    if (modalEl) {
+        const bsModal = new bootstrap.Modal(modalEl);
+        bsModal.show();
     }
 }
 
@@ -41,8 +37,13 @@ function initAdminDepartmentsPage() {
 }
 
 // Export for global access
-window.showModal = showModal;
+window.showDepartmentModal = showDepartmentModal;
+window.showModal = showDepartmentModal; // Alias for onclick handlers
 window.initAdminDepartmentsPage = initAdminDepartmentsPage;
 
 // Auto-initialize when DOM is ready
-$(document).ready(initAdminDepartmentsPage);
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('departmentsTable')) {
+        initAdminDepartmentsPage();
+    }
+});

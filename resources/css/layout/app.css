@@ -176,6 +176,14 @@ body {
     flex: 1;
 }
 
+.sidebar-section {
+    overflow: hidden;
+}
+
+.sidebar-section ul {
+    overflow: hidden;
+}
+
 .sidebar-section h6 {
     color: var(--section-text);
     font-size: 0.75rem;
@@ -193,6 +201,17 @@ body {
     color: var(--menu-text) !important;
     font-size: 0.9375rem;
     will-change: background-color;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
 }
 
 .sidebar-link:hover {

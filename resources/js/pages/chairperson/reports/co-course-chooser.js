@@ -30,8 +30,8 @@ export function initCOCourseChooserPage() {
 
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    if (document.querySelector('[data-page="co-course-chooser"]') || 
-        window.location.pathname.includes('/reports/course-outcome')) {
+    // Initialize if we have course cards with data-url attributes
+    if (document.querySelector('.course-card[data-url]')) {
         initCOCourseChooserPage();
     }
 });

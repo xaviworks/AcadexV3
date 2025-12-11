@@ -101,5 +101,13 @@ function initSubjectPerformanceChart(subjectData) {
 // Make available globally for inline script usage
 window.initSubjectPerformanceChart = initSubjectPerformanceChart;
 
+// Auto-initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('subjectPerformanceChart');
+    if (canvas && window.pageData && window.pageData.subjectCharts) {
+        initSubjectPerformanceChart(window.pageData.subjectCharts);
+    }
+});
+
 // Export for module usage
 export { initSubjectPerformanceChart };

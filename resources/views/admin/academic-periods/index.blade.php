@@ -5,7 +5,7 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h4 text-dark fw-bold mb-0">📅 Academic Periods</h1>
-        <button class="btn btn-success" onclick="showModal()">+ Generate New</button>
+        <button class="btn btn-success" onclick="showGenerateModal()">+ Generate New</button>
     </div>
 
     {{-- Periods Table --}}
@@ -61,8 +61,13 @@
 
 {{-- JS --}}
 <script>
-    function showConfirmModal() {
-        modal.open('confirmModal');
+    function showGenerateModal() {
+        const modalEl = document.getElementById('confirmModal');
+        if (modalEl) {
+            const bsModal = new bootstrap.Modal(modalEl);
+            bsModal.show();
+        }
     }
+    window.showGenerateModal = showGenerateModal;
 </script>
 @endsection
