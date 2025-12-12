@@ -42,6 +42,7 @@ import './instructor/course-outcomes-wildcards.js';
 import './instructor/course-outcomes-table.js';
 import './instructor/scores/final-grades.js';
 import './instructor/scores/course-outcome-results-wildcards.js';
+import './instructor/scores/course-outcome-results.js';
 
 // Chairperson pages
 import './chairperson/manage-instructors.js';
@@ -102,6 +103,7 @@ export function initPage(pageName) {
         'instructor.course-outcomes-wildcards': window.initCourseOutcomesWildcardsPage,
         'instructor.course-outcomes-table': window.initCourseOutcomesTablePage,
         'instructor.final-grades': window.initFinalGradesPage,
+        'instructor.course-outcome-results': window.initCourseOutcomeResultsPage,
         'instructor.course-outcome-results-wildcards': window.initCourseOutcomeResultsWildcardsPage,
         
         // Chairperson

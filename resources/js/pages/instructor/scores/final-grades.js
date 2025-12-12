@@ -3,8 +3,12 @@
  * Handles print functionality, notes viewing, and report generation
  */
 
+function isFinalGradesPage() {
+    return document.querySelector('[data-page="instructor.final-grades"]');
+}
+
 // Close print modal helper
-export function closePrintModal() {
+export function fgClosePrintModal() {
     if (typeof window.modal !== 'undefined') {
         window.modal.close('printOptionsModal');
     } else {
@@ -16,7 +20,7 @@ export function closePrintModal() {
 }
 
 // Print HTML via hidden iframe (preferred) with window.open fallback
-export function printHtml(html) {
+function fgPrintHtml(html) {
     try {
         const iframe = document.createElement('iframe');
         iframe.style.position = 'fixed';
@@ -109,7 +113,7 @@ function formatScore(txt) {
 }
 
 // Print specific table function (handles both summary and term sheets)
-export function printSpecificTable(tableType) {
+export function fgPrintSpecificTable(tableType) {
     const pageData = window.pageData || {};
     const currentSubjectId = pageData.currentSubjectId;
     const termReportUrl = pageData.termReportUrl;
@@ -142,7 +146,7 @@ export function printSpecificTable(tableType) {
             return response.text();
         })
         .then(html => {
-            printHtml(html);
+            fgPrintHtml(html);
         })
         .catch(error => {
             console.error(error);
@@ -152,7 +156,7 @@ export function printSpecificTable(tableType) {
 }
 
 // Print Final Summary Function
-export function printFinalSummary() {
+export function fgPrintFinalSummary() {
     const pageData = window.pageData || {};
     const content = document.getElementById('print-area')?.innerHTML || '';
     
@@ -505,10 +509,21 @@ export function printFinalSummary() {
     `;
     
     // Use iframe-based printing to avoid browser URL footers when possible
-    printHtml(html);
+    fgPrintHtml(html);
 }
 
 export function initFinalGradesPage() {
+    if (!isFinalGradesPage()) return;
+    
+    // Debug: Log print button status
+    const printBtn = document.getElementById('printOptionsButton');
+    console.log('[Final Grades] Print button found:', !!printBtn);
+    if (printBtn) {
+        console.log('[Final Grades] Button display:', window.getComputedStyle(printBtn).display);
+        console.log('[Final Grades] Button visibility:', window.getComputedStyle(printBtn).visibility);
+        console.log('[Final Grades] Button opacity:', window.getComputedStyle(printBtn).opacity);
+    }
+
     // View Notes Modal Handler
     const viewStudentNameDisplay = document.getElementById('viewStudentNameDisplay');
     const viewNotesContent = document.getElementById('viewNotesContent');
@@ -538,9 +553,34 @@ export function initFinalGradesPage() {
 // Auto-initialize on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', initFinalGradesPage);
 
-// Expose functions globally
-window.printSpecificTable = printSpecificTable;
-window.printFinalSummary = printFinalSummary;
-window.closePrintModal = closePrintModal;
-window.printHtml = printHtml;
+// Debug: Watch for any DOM mutations on the print button
+document.addEventListener('DOMContentLoaded', function() {
+    const printBtn = document.getElementById('printOptionsButton');
+    if (printBtn) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                console.log('[Final Grades] Button mutation:', mutation.type, mutation);
+            });
+        });
+        observer.observe(printBtn, { attributes: true, childList: true, subtree: true, attributeOldValue: true });
+        
+        // Also watch the parent
+        const parent = printBtn.parentElement;
+        if (parent) {
+            const parentObserver = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        console.log('[Final Grades] Parent childList mutation:', mutation.removedNodes, mutation.addedNodes);
+                    }
+                });
+            });
+            parentObserver.observe(parent, { childList: true });
+        }
+    }
+});
+
+// Expose functions globally (page-scoped names to avoid collisions)
+window.fgPrintSpecificTable = fgPrintSpecificTable;
+window.fgPrintFinalSummary = fgPrintFinalSummary;
+window.fgClosePrintModal = fgClosePrintModal;
 window.initFinalGradesPage = initFinalGradesPage;

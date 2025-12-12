@@ -11,7 +11,7 @@
 
 @section('content')
 
-<div class="container-fluid px-0">
+<div class="container-fluid px-0" data-page="instructor.final-grades">
     @if (!request('subject_id'))
         {{-- Card-based Subject Selection --}}
         <div class="px-4 pt-4 pb-2">
@@ -62,7 +62,7 @@
                 </h1>
 
                 @if(!empty($finalData) && count($finalData) > 0)
-                    <button type="button" class="btn btn-success shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#printOptionsModal">
+                    <button type="button" id="printOptionsButton" class="btn btn-success shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#printOptionsModal" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
                         <i class="bi bi-printer-fill"></i>
                         <span>Print Options</span>
                     </button>
@@ -173,16 +173,16 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-success" onclick="printSpecificTable('prelim'); closePrintModal();">
+                                    <button class="btn btn-outline-success" onclick="fgPrintSpecificTable('prelim'); fgClosePrintModal();">
                                         <i class="bi bi-printer me-2"></i>Print Prelim Term Sheet
                                     </button>
-                                    <button class="btn btn-outline-success" onclick="printSpecificTable('midterm'); closePrintModal();">
+                                    <button class="btn btn-outline-success" onclick="fgPrintSpecificTable('midterm'); fgClosePrintModal();">
                                         <i class="bi bi-printer me-2"></i>Print Midterm Term Sheet
                                     </button>
-                                    <button class="btn btn-outline-success" onclick="printSpecificTable('prefinal'); closePrintModal();">
+                                    <button class="btn btn-outline-success" onclick="fgPrintSpecificTable('prefinal'); fgClosePrintModal();">
                                         <i class="bi bi-printer me-2"></i>Print Prefinal Term Sheet
                                     </button>
-                                    <button class="btn btn-outline-success" onclick="printSpecificTable('final'); closePrintModal();">
+                                    <button class="btn btn-outline-success" onclick="fgPrintSpecificTable('final'); fgClosePrintModal();">
                                         <i class="bi bi-printer me-2"></i>Print Final Term Sheet
                                     </button>
                                 </div>
@@ -196,7 +196,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-success" onclick="printSpecificTable('summary'); closePrintModal();">
+                                    <button class="btn btn-success" onclick="fgPrintSpecificTable('summary'); fgClosePrintModal();">
                                         <i class="bi bi-table me-2"></i>Print Final Summary
                                     </button>
                                 </div>

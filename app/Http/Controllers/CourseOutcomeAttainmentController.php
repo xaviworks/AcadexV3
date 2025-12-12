@@ -15,8 +15,6 @@ class CourseOutcomeAttainmentController extends Controller
 
     public function subject($subjectId)
     {
-        $academicPeriodId = session('active_academic_period_id');
-
         // Get the selected subject with course and academicPeriod relationships
         $selectedSubject = \App\Models\Subject::with(['course', 'academicPeriod'])->findOrFail($subjectId);
 
@@ -25,55 +23,59 @@ class CourseOutcomeAttainmentController extends Controller
             $q->where('subject_id', $subjectId);
         })->get();
 
+        $studentIds = $students->pluck('id');
+
         // Terms
         $terms = ['prelim', 'midterm', 'prefinal', 'final'];
-        $termIds = [1 => 'prelim', 2 => 'midterm', 3 => 'prefinal', 4 => 'final'];
 
-        // Get activities for the subject, grouped by term
-        $activitiesByTerm = [];
+        // Load all activities once, then group by term for faster lookups
+        $activities = \App\Models\Activity::where('subject_id', $subjectId)
+            ->where('is_deleted', false)
+            ->whereNotNull('course_outcome_id')
+            ->get();
+
+        // Load CO details for only the referenced, non-deleted COs
+        $coDetails = \App\Models\CourseOutcomes::whereIn('id', $activities->pluck('course_outcome_id')->unique())
+            ->where('is_deleted', false)
+            ->get()
+            ->keyBy('id');
+
+        // Filter activities to those that have a valid CO record (avoids missing keys in the view/sort)
+        $activitiesByTerm = $activities
+            ->filter(fn($activity) => $coDetails->has($activity->course_outcome_id))
+            ->groupBy('term');
+
+        // Build term -> activity collections and CO columns per term
         $coColumnsByTerm = [];
+        $activityCoMap = [];
         foreach ($terms as $term) {
-            $activities = \App\Models\Activity::where('subject_id', $subjectId)
-                ->where('term', $term)
-                ->where('is_deleted', false)
-                ->whereNotNull('course_outcome_id')
-                ->get();
-            $activitiesByTerm[$term] = $activities;
-            
-            // Get unique course outcome IDs and sort them properly
-            $coIds = $activities->pluck('course_outcome_id')->unique()->toArray();
-            
-            // Sort by getting the actual CourseOutcomes and ordering by co_code (excluding soft-deleted)
-            if (!empty($coIds)) {
-                $sortedCos = \App\Models\CourseOutcomes::whereIn('id', $coIds)
-                    ->where('is_deleted', false)
-                    ->orderBy('co_code')
-                    ->pluck('id')
-                    ->toArray();
-                $coColumnsByTerm[$term] = $sortedCos;
-            } else {
-                $coColumnsByTerm[$term] = [];
+            $termActivities = $activitiesByTerm->get($term, collect());
+            $coColumnsByTerm[$term] = $termActivities->pluck('course_outcome_id')->unique()->values()->all();
+
+            foreach ($termActivities as $activity) {
+                $activityCoMap[$term][$activity->id] = $activity->course_outcome_id;
             }
         }
 
-        // Build activityCoMap: [term => [activity_id => co_id]]
-        $activityCoMap = [];
-        foreach ($activitiesByTerm as $term => $activities) {
-            foreach ($activities as $activity) {
-                $activityCoMap[$term][$activity->id] = $activity->course_outcome_id;
-            }
+        $activityIds = $activitiesByTerm->flatten()->pluck('id');
+
+        // Load scores in a single query and group for O(1) access when building the grid
+        $scoresByStudentAndActivity = collect();
+        if ($studentIds->isNotEmpty() && $activityIds->isNotEmpty()) {
+            $scoresByStudentAndActivity = \App\Models\Score::whereIn('student_id', $studentIds)
+                ->whereIn('activity_id', $activityIds)
+                ->get()
+                ->groupBy(['student_id', 'activity_id']);
         }
 
         // Build studentScores: [student_id => [term => [activity_id => ['score'=>, 'max'=>]]]]
         $studentScores = [];
         foreach ($students as $student) {
-            foreach ($activitiesByTerm as $term => $activities) {
-                foreach ($activities as $activity) {
-                    $score = \App\Models\Score::where('student_id', $student->id)
-                        ->where('activity_id', $activity->id)
-                        ->first();
+            foreach ($terms as $term) {
+                foreach ($activitiesByTerm->get($term, collect()) as $activity) {
+                    $score = optional(optional($scoresByStudentAndActivity->get($student->id))?->get($activity->id))->first();
                     $studentScores[$student->id][$term][$activity->id] = [
-                        'score' => $score ? $score->score : 0,
+                        'score' => $score->score ?? 0,
                         'max' => $activity->number_of_items,
                     ];
                 }
@@ -86,27 +88,22 @@ class CourseOutcomeAttainmentController extends Controller
             $coResults[$student->id] = $this->computeCoAttainment($studentScores[$student->id] ?? [], $activityCoMap);
         }
 
-        // Get CO details for columns (excluding soft-deleted ones)
-        $coDetails = \App\Models\CourseOutcomes::whereIn('id', array_unique(array_merge(...array_values($coColumnsByTerm))))
-            ->where('is_deleted', false)
-            ->get()
-            ->keyBy('id');
+        $allCoIds = collect($coColumnsByTerm)->flatten()->unique()->values();
 
         // Filter out soft-deleted COs from coColumnsByTerm
         foreach ($coColumnsByTerm as $term => $coIds) {
-            $coColumnsByTerm[$term] = array_filter($coIds, function($coId) use ($coDetails) {
+            $coColumnsByTerm[$term] = array_values(array_filter($coIds, function($coId) use ($coDetails) {
                 return isset($coDetails[$coId]);
-            });
-            $coColumnsByTerm[$term] = array_values($coColumnsByTerm[$term]); // Reindex
+            }));
         }
 
         // Create properly sorted finalCOs for the combined table (only non-deleted COs)
-        $finalCOs = array_unique(array_merge(...array_values($coColumnsByTerm)));
+        $finalCOs = array_values(array_unique(array_merge(...array_values($coColumnsByTerm))));
         
         // Sort finalCOs by co_code numerically (CO1, CO2, CO3, CO4)
         usort($finalCOs, function($a, $b) use ($coDetails) {
-            $codeA = $coDetails[$a]->co_code ?? '';
-            $codeB = $coDetails[$b]->co_code ?? '';
+            $codeA = optional($coDetails->get($a))->co_code ?? '';
+            $codeB = optional($coDetails->get($b))->co_code ?? '';
             
             // Extract numeric part from CO codes (CO1 -> 1, CO2 -> 2, etc.)
             $numA = (int)preg_replace('/[^0-9]/', '', $codeA);

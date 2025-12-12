@@ -226,7 +226,7 @@
 @endpush
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-4" data-page="instructor.course-outcome-results">
     {{-- Breadcrumbs --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
@@ -333,7 +333,7 @@
                             
                             @if(isset($coDetails) && is_countable($coDetails) && count($coDetails) > 0)
                                 <!-- Print Options Modal Trigger -->
-                                <button class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#printOptionsModal">
+                                <button id="coPrintOptionsButton" class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#printOptionsModal" style="display: inline-flex !important; visibility: visible !important; opacity: 1 !important;">
                                     <i class="bi bi-printer me-2"></i>Print Options
                                 </button>
                             @endif
@@ -1222,7 +1222,6 @@
 @endsection
 
 @push('scripts')
-</script>
 {{-- Print Options Modal --}}
 <div class="modal fade" id="printOptionsModal" tabindex="-1" aria-labelledby="printOptionsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -1242,16 +1241,16 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-success" onclick="printSpecificTable('prelim'); closePrintModal();">
+                                    <button class="btn btn-outline-success" onclick="coPrintSpecificTable('prelim'); coClosePrintModal();">
                                         <i class="bi bi-printer me-2"></i>Print Prelim Only
                                     </button>
-                                    <button class="btn btn-outline-success" onclick="printSpecificTable('midterm'); closePrintModal();">
+                                    <button class="btn btn-outline-success" onclick="coPrintSpecificTable('midterm'); coClosePrintModal();">
                                         <i class="bi bi-printer me-2"></i>Print Midterm Only
                                     </button>
-                                    <button class="btn btn-outline-success" onclick="printSpecificTable('prefinal'); closePrintModal();">
+                                    <button class="btn btn-outline-success" onclick="coPrintSpecificTable('prefinal'); coClosePrintModal();">
                                         <i class="bi bi-printer me-2"></i>Print Prefinal Only
                                     </button>
-                                    <button class="btn btn-outline-success" onclick="printSpecificTable('final'); closePrintModal();">
+                                    <button class="btn btn-outline-success" onclick="coPrintSpecificTable('final'); coClosePrintModal();">
                                         <i class="bi bi-printer me-2"></i>Print Final Only
                                     </button>
                                 </div>
@@ -1265,16 +1264,16 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-success" onclick="printSpecificTable('combined'); closePrintModal();">
+                                    <button class="btn btn-success" onclick="coPrintSpecificTable('combined'); coClosePrintModal();">
                                         <i class="bi bi-table me-2"></i>Print Combined Table
                                     </button>
-                                    <button class="btn btn-success" onclick="printSpecificTable('passfail'); closePrintModal();">
+                                    <button class="btn btn-success" onclick="coPrintSpecificTable('passfail'); coClosePrintModal();">
                                         <i class="bi bi-check-circle me-2"></i>Print Pass/Fail Analysis
                                     </button>
-                                    <button class="btn btn-success" onclick="printSpecificTable('copasssummary'); closePrintModal();">
+                                    <button class="btn btn-success" onclick="coPrintSpecificTable('copasssummary'); coClosePrintModal();">
                                         <i class="bi bi-graph-up me-2"></i>Print Course Outcomes Summary
                                     </button>
-                                    <button class="btn btn-success" onclick="printSpecificTable('all'); closePrintModal();">
+                                    <button class="btn btn-success" onclick="coPrintSpecificTable('all'); coClosePrintModal();">
                                         <i class="bi bi-grid-3x3 me-2"></i>Print Everything
                                     </button>
                                 </div>
@@ -1342,6 +1341,4 @@
     window.subjectInfo = "{{ isset($selectedSubject) ? $selectedSubject->subject_code . ' - ' . $selectedSubject->subject_description : 'Course Outcome Results' }}";
     window.bannerUrl = "{{ asset('images/banner-header.png') }}";
 </script>
-<script src="{{ asset('js/course-outcome-results.js') }}"></script>
-
 @endpush
