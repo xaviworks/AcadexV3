@@ -55,21 +55,19 @@
     }
 }
 
-/* Global Modal Fix - Proper z-index stacking */
-.modal-backdrop {
+/* Global Modal Fix - keep modal above backdrop on all portals */
+.modal-backdrop,
+.modal-backdrop.show {
     z-index: 1040 !important;
 }
 
 .modal {
-    z-index: 1055 !important;
+    z-index: 1060 !important;
 }
 
-.modal-dialog {
-    z-index: 1056 !important;
-}
-
+.modal-dialog,
 .modal-content {
-    z-index: 1057 !important;
+    z-index: 1061 !important;
 }
 
 

@@ -2,8 +2,9 @@
 <div x-data 
     x-show="$store.confirm.show" 
     x-transition.opacity 
-    class="modal show" 
-    style="display: block; z-index: 1055;" 
+    class="modal"
+    :class="{ 'show d-block': $store.confirm.show }"
+    :style="$store.confirm.show ? 'z-index: 1055;' : ''"
     tabindex="-1"
     @keydown.escape.window="$store.confirm.cancel()">
     <div class="modal-dialog modal-dialog-centered">
