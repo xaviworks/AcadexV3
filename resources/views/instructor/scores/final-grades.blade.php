@@ -62,7 +62,7 @@
                 </h1>
 
                 @if(!empty($finalData) && count($finalData) > 0)
-                    <button type="button" id="printOptionsButton" class="btn btn-success shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#printOptionsModal" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+                    <button type="button" id="printOptionsButton" class="btn btn-success shadow-sm d-flex align-items-center gap-2" onclick="fgOpenPrintModal()">
                         <i class="bi bi-printer-fill"></i>
                         <span>Print Options</span>
                     </button>
@@ -154,86 +154,72 @@
     @endif
 </div>
 
-{{-- Print Options Modal --}}
-<div class="modal fade" id="printOptionsModal" tabindex="-1" aria-labelledby="printOptionsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="printOptionsModalLabel">
-                    <i class="bi bi-printer me-2"></i>Print Options
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card border-success mb-3">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Individual Terms</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-success" onclick="fgPrintSpecificTable('prelim'); fgClosePrintModal();">
-                                        <i class="bi bi-printer me-2"></i>Print Prelim Term Sheet
-                                    </button>
-                                    <button class="btn btn-outline-success" onclick="fgPrintSpecificTable('midterm'); fgClosePrintModal();">
-                                        <i class="bi bi-printer me-2"></i>Print Midterm Term Sheet
-                                    </button>
-                                    <button class="btn btn-outline-success" onclick="fgPrintSpecificTable('prefinal'); fgClosePrintModal();">
-                                        <i class="bi bi-printer me-2"></i>Print Prefinal Term Sheet
-                                    </button>
-                                    <button class="btn btn-outline-success" onclick="fgPrintSpecificTable('final'); fgClosePrintModal();">
-                                        <i class="bi bi-printer me-2"></i>Print Final Term Sheet
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+{{-- Custom Print Options Modal (No Bootstrap dependency) --}}
+<div class="print-modal-overlay" id="fgPrintModalOverlay">
+    <div class="print-modal-container">
+        <div class="print-modal-header">
+            <h5><i class="bi bi-printer"></i>Print Options</h5>
+            <button type="button" class="print-modal-close" onclick="fgClosePrintModal();">&times;</button>
+        </div>
+        <div class="print-modal-body">
+            <div class="print-options-grid">
+                <div class="print-option-card">
+                    <div class="print-option-card-header">
+                        <h6><i class="bi bi-calendar-event"></i>Individual Terms</h6>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card border-success mb-3">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0"><i class="bi bi-table me-2"></i>Complete Report</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-success" onclick="fgPrintSpecificTable('summary'); fgClosePrintModal();">
-                                        <i class="bi bi-table me-2"></i>Print Final Summary
-                                    </button>
-                                </div>
-                                <hr>
-                                <div class="text-muted small">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    <strong>Final Summary:</strong> Shows all term grades and final averages<br>
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    <strong>Term Sheets:</strong> Detailed activities and scores per term
-                                </div>
-                                
-                                <div class="mt-2 small text-muted">
-                                    ⚠️ To remove the URL or headers/footers printed by your browser, uncheck <em>Headers &amp; footers</em> in the print dialog. If you need a PDF without headers/footers, please use the "Export PDF" option or ask me to generate server-side PDFs.
-                                </div>
-                            </div>
+                    <div class="print-option-card-body">
+                        <div class="print-btn-list">
+                            <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('prelim'); fgClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Prelim Term Sheet
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('midterm'); fgClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Midterm Term Sheet
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('prefinal'); fgClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Prefinal Term Sheet
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('final'); fgClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Final Term Sheet
+                            </button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="alert alert-info border-0 bg-light">
-                    <div class="d-flex">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-printer text-info" style="font-size: 1.5rem;"></i>
+                <div class="print-option-card">
+                    <div class="print-option-card-header">
+                        <h6><i class="bi bi-table"></i>Complete Report</h6>
+                    </div>
+                    <div class="print-option-card-body">
+                        <div class="print-btn-list">
+                            <button class="print-btn print-btn-solid" onclick="fgPrintSpecificTable('summary'); fgClosePrintModal();">
+                                <i class="bi bi-table"></i>Print Final Summary
+                            </button>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="alert-heading mb-1">Print Settings</h6>
-                            <p class="mb-1">All printouts are optimized for <strong>A4 portrait</strong> format with professional styling.</p>
-                            <small class="text-muted">Make sure your printer is set to A4 paper size for best results.</small>
+                        <div class="print-info-text">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Final Summary:</strong> Shows all term grades and final averages<br>
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Term Sheets:</strong> Detailed activities and scores per term<br><br>
+                            ⚠️ To remove URL or headers/footers in printout, uncheck <em>Headers &amp; footers</em> in your browser's print dialog.
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-2"></i>Cancel
-                </button>
+            
+            <div class="print-info-alert">
+                <div class="print-info-alert-icon">
+                    <i class="bi bi-printer"></i>
+                </div>
+                <div>
+                    <h6>Print Settings</h6>
+                    <p>All printouts are optimized for <strong>A4 portrait</strong> format with professional styling.</p>
+                    <small>Make sure your printer is set to A4 paper size for best results.</small>
+                </div>
             </div>
+        </div>
+        <div class="print-modal-footer">
+            <button type="button" class="print-modal-cancel-btn" onclick="fgClosePrintModal();">
+                <i class="bi bi-x-circle"></i>Cancel
+            </button>
         </div>
     </div>
 </div>

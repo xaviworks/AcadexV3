@@ -7,17 +7,48 @@ function isFinalGradesPage() {
     return document.querySelector('[data-page="instructor.final-grades"]');
 }
 
-// Close print modal helper
-export function fgClosePrintModal() {
-    if (typeof window.modal !== 'undefined') {
-        window.modal.close('printOptionsModal');
-    } else {
-        const modalEl = document.getElementById('printOptionsModal');
-        if (modalEl && window.bootstrap?.Modal) {
-            window.bootstrap.Modal.getInstance(modalEl)?.hide();
-        }
+// ==================== CUSTOM PRINT MODAL (No Bootstrap dependency) ====================
+
+/**
+ * Open the print options modal using custom CSS-based modal
+ */
+function fgOpenPrintModal() {
+    const overlay = document.getElementById('fgPrintModalOverlay');
+    if (overlay) {
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+    
+    // Fallback to Bootstrap modal if custom one doesn't exist
+    const modalEl = document.getElementById('printOptionsModal');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 }
+
+/**
+ * Close the print options modal
+ */
+function fgClosePrintModal() {
+    const overlay = document.getElementById('fgPrintModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
+        return;
+    }
+    
+    // Fallback to Bootstrap modal
+    const modalEl = document.getElementById('printOptionsModal');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+    }
+}
+
+// Expose globally IMMEDIATELY so onclick handlers work
+window.fgOpenPrintModal = fgOpenPrintModal;
+window.fgClosePrintModal = fgClosePrintModal;
 
 // Print HTML via hidden iframe (preferred) with window.open fallback
 function fgPrintHtml(html) {
@@ -514,15 +545,6 @@ export function fgPrintFinalSummary() {
 
 export function initFinalGradesPage() {
     if (!isFinalGradesPage()) return;
-    
-    // Debug: Log print button status
-    const printBtn = document.getElementById('printOptionsButton');
-    console.log('[Final Grades] Print button found:', !!printBtn);
-    if (printBtn) {
-        console.log('[Final Grades] Button display:', window.getComputedStyle(printBtn).display);
-        console.log('[Final Grades] Button visibility:', window.getComputedStyle(printBtn).visibility);
-        console.log('[Final Grades] Button opacity:', window.getComputedStyle(printBtn).opacity);
-    }
 
     // View Notes Modal Handler
     const viewStudentNameDisplay = document.getElementById('viewStudentNameDisplay');
@@ -553,34 +575,7 @@ export function initFinalGradesPage() {
 // Auto-initialize on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', initFinalGradesPage);
 
-// Debug: Watch for any DOM mutations on the print button
-document.addEventListener('DOMContentLoaded', function() {
-    const printBtn = document.getElementById('printOptionsButton');
-    if (printBtn) {
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                console.log('[Final Grades] Button mutation:', mutation.type, mutation);
-            });
-        });
-        observer.observe(printBtn, { attributes: true, childList: true, subtree: true, attributeOldValue: true });
-        
-        // Also watch the parent
-        const parent = printBtn.parentElement;
-        if (parent) {
-            const parentObserver = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'childList') {
-                        console.log('[Final Grades] Parent childList mutation:', mutation.removedNodes, mutation.addedNodes);
-                    }
-                });
-            });
-            parentObserver.observe(parent, { childList: true });
-        }
-    }
-});
-
-// Expose functions globally (page-scoped names to avoid collisions)
+// Expose additional functions globally (modal functions already exposed at top of file)
 window.fgPrintSpecificTable = fgPrintSpecificTable;
 window.fgPrintFinalSummary = fgPrintFinalSummary;
-window.fgClosePrintModal = fgClosePrintModal;
 window.initFinalGradesPage = initFinalGradesPage;

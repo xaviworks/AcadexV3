@@ -3,6 +3,7 @@
 2. Prioritize correctness, readability, and maintainability over cleverness.
 3. Never commit or suggest changes that you cannot fully justify with (a) tests, (b) references to repository files, or (c) explicit rationales.
 4. When uncertain about user intent or where the change should go, **ask a concise clarifying question** before producing code changes.
+5. Always analyze the code thoroughly before starting to write. Ensure you understand the full context and requirements.
 
 ## CONTEXT USAGE & SCOPE
 - This repository uses **Laravel 12**, **Laravel Breeze**, and **Alpine.js**. All generated code must follow Laravel's conventions (controllers, models, Blade templates, route definitions, form requests, policies) and Breeze’s authentication scaffolding.
@@ -61,6 +62,45 @@
   3. Migration test strategy using sample datasets.
 - Prefer non-destructive changes (feature flags, adapter pattern) where applicable.
 
+## DEBUGGING & TROUBLESHOOTING (LARAVEL-SPECIFIC)
+- Reproduce before fixing: always produce a minimal, reproducible failing test (PHPUnit/Pest) or a small reproduction script using `artisan tinker` before writing fixes.
+- Local-only tools: enable and use Laravel Telescope and Laravel Debugbar in local and staging environments only; never enable `APP_DEBUG=true` in production. Document when and why these tools are enabled in the PR description.
+- Logging and structured context:
+  - Use `Log::debug/info/warning/error()` with structured context arrays for important runtime data (user id, request id, route, payload) so logs can be filtered.
+  - Correlate logs with a request ID (inject `X-Request-Id`) for cross-service tracing.
+- Step debugging:
+  - Prefer Xdebug with an IDE (PhpStorm, VS Code + php-debug) for step-through debugging of complex flows, queued jobs, and middleware. Include breakpoints in tests when necessary.
+- Database & query inspection:
+  - Use `DB::listen()` in local debug middleware or Telescope to capture slow queries.
+  - When investigating incorrect queries, log `->toSql()` and bindings, or enable query logging temporarily; always remove or gate query logging behind environment checks.
+- Queue & jobs:
+  - Use `php artisan queue:work --tries=1` locally and inspect `failed_jobs` (`php artisan queue:failed`, `queue:retry`) for job issues. Add thorough job unit tests and integration tests that assert expected side effects.
+- Blade & frontend (Breeze + Alpine.js):
+  - For Blade issues, render small reproducible views and use `@dump()` or `dd()` guarded by environment checks.
+  - For Alpine.js bugs, rely on browser DevTools, Alpine DevTools, and unit tests for JavaScript behavior where feasible. Use minimal Blade/JS fixtures for reproduction.
+- Assertions and defensive coding:
+  - Add assertions or explicit validation (FormRequest rules) to catch invalid inputs early.
+  - Prefer returning 4xx responses for client errors with clear error messages rather than allowing exceptions to bubble in production.
+- CI & automated detection:
+  - Add failing test cases to CI; never ship a fix without the corresponding test that reproduces the bug. Use `artisan test --coverage` in CI pipelines where possible.
+- Environment sanity checks:
+  - Verify environment variables, cached configs, and compiled views: `php artisan config:cache`, `route:clear`, `view:clear`, `cache:clear` when debugging environment-specific behavior.
+- Performance debugging:
+  - Use `EXPLAIN` and query profiling for slow queries. Profile application hotspots with Blackfire, XHProf, or Telescope metrics locally.
+- Safe temporary changes:
+  - When adding temporary debug logs or dumps, mark them with `// DEBUG: remove before merge` and include a PR checklist item to remove or gate them.
+- Security and privacy:
+  - Never log or expose sensitive data (passwords, full tokens, PII). Mask or omit these fields when logging.
+- Documentation in PRs:
+  - For each debugging-led fix, include a short “Debugging notes” section in the PR describing reproduction steps, tools used, key log entries, and why the fix addresses the root cause.
+- Postmortem & learnings:
+  - For production incidents, include a brief postmortem in the issue or PR describing timeline, root cause, mitigation, and long-term fixes (tests, monitoring, alerts).
+- For risky changes (database migrations, migrations of data formats, major refactors), produce:
+  1. Small incremental commit plan.
+  2. Down-migration or rollback steps.
+  3. Migration test strategy using sample datasets.
+- Prefer non-destructive changes (feature flags, adapter pattern) where applicable.
+
 ## PR & COMMIT GUIDELINES
 - Commit message format: `<area(scope)>: short summary (max 72 chars)`
   - Body: 1–3 lines explaining *why* the change is needed + how it was tested.
@@ -106,3 +146,4 @@
 - I will not store or invent secrets (API keys, passwords).
 - I will not produce code that violates laws or the repository’s license.
 - I will not produce production database migrations without an explicit backup and rollback plan.
+

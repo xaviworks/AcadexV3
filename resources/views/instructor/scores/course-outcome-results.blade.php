@@ -240,63 +240,7 @@
         </ol>
     </nav>
 
-    {{-- Warning System for Incomplete CO Records --}}
-    @php
-        $incompleteActivities = [];
-        $incompleteCOs = [];
-        $missingScoreCounts = [];
-        
-        // Check for incomplete records across all terms and COs by examining the scores table
-        if(isset($terms) && is_array($terms) && isset($coColumnsByTerm) && isset($students)) {
-            foreach($terms as $term) {
-                if(!empty($coColumnsByTerm[$term])) {
-                    foreach($coColumnsByTerm[$term] as $coId) {
-                        $totalMissingScores = 0;
-                        $totalStudents = is_countable($students) ? count($students) : 0;
-                        $activities = \App\Models\Activity::where('term', $term)
-                            ->where('course_outcome_id', $coId)
-                            ->where('subject_id', $subjectId)
-                            ->get();
-                    
-                    foreach($students as $student) {
-                        foreach($activities as $activity) {
-                            // Check if a score record exists in the scores table for this student and activity
-                            $scoreRecord = \App\Models\Score::where('student_id', $student->id)
-                                ->where('activity_id', $activity->id)
-                                ->where('is_deleted', false)
-                                ->first();
-                            
-                            // Flag as incomplete if:
-                            // 1. No score record exists in the scores table, OR
-                            // 2. Score record exists but the score field is NULL
-                            // Note: A score of 0 is valid and should NOT be flagged as incomplete
-                            if(!$scoreRecord || $scoreRecord->score === null) {
-                                $totalMissingScores++;
-                                if(!in_array($activity->id, $incompleteActivities)) {
-                                    $incompleteActivities[] = $activity->id;
-                                }
-                            }
-                        }
-                    }
-                    
-                    if($totalMissingScores > 0) {
-                        // Get CO details for this specific CO ID
-                        $coDetail = isset($coDetails[$coId]) ? $coDetails[$coId] : \App\Models\CourseOutcomes::find($coId);
-                        
-                        $incompleteCOs[] = [
-                            'co_id' => $coId,
-                            'co_code' => $coDetail ? $coDetail->co_code : 'CO'.$coId,
-                            'term' => $term,
-                            'missing_scores' => $totalMissingScores,
-                            'total_possible' => $totalStudents * count($activities),
-                            'percentage_incomplete' => $totalStudents > 0 && count($activities) > 0 ? round(($totalMissingScores / ($totalStudents * count($activities))) * 100, 1) : 0
-                        ];
-                    }
-                }
-            }
-        }
-    }
-    @endphp
+    {{-- Note: $incompleteCOs is now pre-computed in the controller for performance --}}
 
     {{-- Course Outcome Attainment Results Management Section --}}
     @if(isset($finalCOs) && is_countable($finalCOs) && count($finalCOs))
@@ -333,7 +277,7 @@
                             
                             @if(isset($coDetails) && is_countable($coDetails) && count($coDetails) > 0)
                                 <!-- Print Options Modal Trigger -->
-                                <button id="coPrintOptionsButton" class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#printOptionsModal" style="display: inline-flex !important; visibility: visible !important; opacity: 1 !important;">
+                                <button id="coPrintOptionsButton" class="btn btn-success" type="button" onclick="coOpenPrintModal()">
                                     <i class="bi bi-printer me-2"></i>Print Options
                                 </button>
                             @endif
@@ -1219,105 +1163,93 @@
         @endif
         </div> {{-- End of print-area --}}
     </div> {{-- End of main-results-container --}}
-@endsection
 
-@push('scripts')
-{{-- Print Options Modal --}}
-<div class="modal fade" id="printOptionsModal" tabindex="-1" aria-labelledby="printOptionsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="printOptionsModalLabel">
-                    <i class="bi bi-printer me-2"></i>Print Options
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card border-success mb-3">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Individual Terms</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-success" onclick="coPrintSpecificTable('prelim'); coClosePrintModal();">
-                                        <i class="bi bi-printer me-2"></i>Print Prelim Only
-                                    </button>
-                                    <button class="btn btn-outline-success" onclick="coPrintSpecificTable('midterm'); coClosePrintModal();">
-                                        <i class="bi bi-printer me-2"></i>Print Midterm Only
-                                    </button>
-                                    <button class="btn btn-outline-success" onclick="coPrintSpecificTable('prefinal'); coClosePrintModal();">
-                                        <i class="bi bi-printer me-2"></i>Print Prefinal Only
-                                    </button>
-                                    <button class="btn btn-outline-success" onclick="coPrintSpecificTable('final'); coClosePrintModal();">
-                                        <i class="bi bi-printer me-2"></i>Print Final Only
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+{{-- Custom Print Options Modal (No Bootstrap dependency) --}}
+<div class="print-modal-overlay" id="coPrintModalOverlay">
+    <div class="print-modal-container">
+        <div class="print-modal-header">
+            <h5><i class="bi bi-printer"></i>Print Options</h5>
+            <button type="button" class="print-modal-close" onclick="coClosePrintModal();">&times;</button>
+        </div>
+        <div class="print-modal-body">
+            <div class="print-options-grid">
+                <div class="print-option-card">
+                    <div class="print-option-card-header">
+                        <h6><i class="bi bi-calendar-event"></i>Individual Terms</h6>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card border-success mb-3">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0"><i class="bi bi-collection me-2"></i>Complete Reports</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-success" onclick="coPrintSpecificTable('combined'); coClosePrintModal();">
-                                        <i class="bi bi-table me-2"></i>Print Combined Table
-                                    </button>
-                                    <button class="btn btn-success" onclick="coPrintSpecificTable('passfail'); coClosePrintModal();">
-                                        <i class="bi bi-check-circle me-2"></i>Print Pass/Fail Analysis
-                                    </button>
-                                    <button class="btn btn-success" onclick="coPrintSpecificTable('copasssummary'); coClosePrintModal();">
-                                        <i class="bi bi-graph-up me-2"></i>Print Course Outcomes Summary
-                                    </button>
-                                    <button class="btn btn-success" onclick="coPrintSpecificTable('all'); coClosePrintModal();">
-                                        <i class="bi bi-grid-3x3 me-2"></i>Print Everything
-                                    </button>
-                                </div>
-                                <hr>
-                                <div class="text-muted small">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    <strong>Combined Table:</strong> Shows all terms in one view<br>
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    <strong>Pass/Fail Analysis:</strong> Student performance analysis<br>
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    <strong>Course Outcomes Summary:</strong> Dashboard overview<br>
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    <strong>Print Everything:</strong> Includes all tables and analysis
-                                </div>
-                            </div>
+                    <div class="print-option-card-body">
+                        <div class="print-btn-list">
+                            <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('prelim'); coClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Prelim Only
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('midterm'); coClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Midterm Only
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('prefinal'); coClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Prefinal Only
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('final'); coClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Final Only
+                            </button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="alert alert-info border-0 bg-light">
-                    <div class="d-flex">
-                        <div class="flex-shrink-0">
-                            <i class="bi bi-printer text-info" style="font-size: 1.5rem;"></i>
+                <div class="print-option-card">
+                    <div class="print-option-card-header">
+                        <h6><i class="bi bi-collection"></i>Complete Reports</h6>
+                    </div>
+                    <div class="print-option-card-body">
+                        <div class="print-btn-list">
+                            <button class="print-btn print-btn-solid" onclick="coPrintSpecificTable('combined'); coClosePrintModal();">
+                                <i class="bi bi-table"></i>Print Combined Table
+                            </button>
+                            <button class="print-btn print-btn-solid" onclick="coPrintSpecificTable('passfail'); coClosePrintModal();">
+                                <i class="bi bi-check-circle"></i>Print Pass/Fail Analysis
+                            </button>
+                            <button class="print-btn print-btn-solid" onclick="coPrintSpecificTable('copasssummary'); coClosePrintModal();">
+                                <i class="bi bi-graph-up"></i>Print Course Outcomes Summary
+                            </button>
+                            <button class="print-btn print-btn-solid" onclick="coPrintSpecificTable('all'); coClosePrintModal();">
+                                <i class="bi bi-grid-3x3"></i>Print Everything
+                            </button>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="alert-heading mb-1">Print Settings</h6>
-                            <p class="mb-1">All printouts are optimized for <strong>A4 portrait</strong> format with professional styling.</p>
-                            <small class="text-muted">Make sure your printer is set to A4 paper size for best results.</small>
+                        <div class="print-info-text">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Combined Table:</strong> Shows all terms in one view<br>
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Pass/Fail Analysis:</strong> Student performance analysis<br>
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Course Outcomes Summary:</strong> Dashboard overview<br>
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Print Everything:</strong> Includes all tables and analysis
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-2"></i>Cancel
-                </button>
+            
+            <div class="print-info-alert">
+                <div class="print-info-alert-icon">
+                    <i class="bi bi-printer"></i>
+                </div>
+                <div>
+                    <h6>Print Settings</h6>
+                    <p>All printouts are optimized for <strong>A4 portrait</strong> format with professional styling.</p>
+                    <small>Make sure your printer is set to A4 paper size for best results.</small>
+                </div>
             </div>
+        </div>
+        <div class="print-modal-footer">
+            <button type="button" class="print-modal-cancel-btn" onclick="coClosePrintModal();">
+                <i class="bi bi-x-circle"></i>Cancel
+            </button>
         </div>
     </div>
 </div>
+@endsection
 
-<!-- Include external JavaScript file -->
+@push('scripts')
+<!-- JavaScript variables for print header information -->
 <script>
-    // Set global variables for print header information
     @if(isset($selectedSubject))
         window.courseCode = "{{ $selectedSubject->subject_code ?? 'N/A' }}";
         window.subjectDescription = "{{ $selectedSubject->subject_description ?? 'N/A' }}";

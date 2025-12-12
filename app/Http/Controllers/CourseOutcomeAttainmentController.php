@@ -18,10 +18,14 @@ class CourseOutcomeAttainmentController extends Controller
         // Get the selected subject with course and academicPeriod relationships
         $selectedSubject = \App\Models\Subject::with(['course', 'academicPeriod'])->findOrFail($subjectId);
 
-        // Get students enrolled in the subject
+        // Get students enrolled in the subject - order by last_name, first_name for consistent display
         $students = \App\Models\Student::whereHas('subjects', function($q) use ($subjectId) {
             $q->where('subject_id', $subjectId);
-        })->get();
+        })
+        ->where('is_deleted', false)
+        ->orderBy('last_name')
+        ->orderBy('first_name')
+        ->get();
 
         $studentIds = $students->pluck('id');
 
@@ -64,6 +68,7 @@ class CourseOutcomeAttainmentController extends Controller
         if ($studentIds->isNotEmpty() && $activityIds->isNotEmpty()) {
             $scoresByStudentAndActivity = \App\Models\Score::whereIn('student_id', $studentIds)
                 ->whereIn('activity_id', $activityIds)
+                ->where('is_deleted', false)
                 ->get()
                 ->groupBy(['student_id', 'activity_id']);
         }
@@ -87,8 +92,6 @@ class CourseOutcomeAttainmentController extends Controller
         foreach ($students as $student) {
             $coResults[$student->id] = $this->computeCoAttainment($studentScores[$student->id] ?? [], $activityCoMap);
         }
-
-        $allCoIds = collect($coColumnsByTerm)->flatten()->unique()->values();
 
         // Filter out soft-deleted COs from coColumnsByTerm
         foreach ($coColumnsByTerm as $term => $coIds) {
@@ -115,6 +118,51 @@ class CourseOutcomeAttainmentController extends Controller
         // Reindex the array to ensure sequential indices (0, 1, 2, 3...)
         $finalCOs = array_values($finalCOs);
 
+        // Pre-compute incomplete COs in the controller (avoid N+1 queries in Blade)
+        // This uses the already-loaded data instead of making new queries
+        $incompleteCOs = [];
+        $totalStudents = $students->count();
+        
+        foreach ($terms as $term) {
+            $termCOs = $coColumnsByTerm[$term] ?? [];
+            foreach ($termCOs as $coId) {
+                // Get activities for this CO and term from already-loaded data
+                $termActivities = $activitiesByTerm->get($term, collect())
+                    ->filter(fn($a) => $a->course_outcome_id == $coId);
+                
+                if ($termActivities->isEmpty()) continue;
+                
+                $totalMissingScores = 0;
+                $activityCount = $termActivities->count();
+                
+                foreach ($students as $student) {
+                    foreach ($termActivities as $activity) {
+                        // Check score from already-loaded data (O(1) lookup)
+                        $scoreRecord = optional(optional($scoresByStudentAndActivity->get($student->id))?->get($activity->id))->first();
+                        
+                        // Flag as incomplete if no score record exists or score is null
+                        if (!$scoreRecord || $scoreRecord->score === null) {
+                            $totalMissingScores++;
+                        }
+                    }
+                }
+                
+                if ($totalMissingScores > 0) {
+                    $coDetail = $coDetails->get($coId);
+                    $totalPossible = $totalStudents * $activityCount;
+                    
+                    $incompleteCOs[] = [
+                        'co_id' => $coId,
+                        'co_code' => $coDetail ? $coDetail->co_code : 'CO' . $coId,
+                        'term' => $term,
+                        'missing_scores' => $totalMissingScores,
+                        'total_possible' => $totalPossible,
+                        'percentage_incomplete' => $totalPossible > 0 ? round(($totalMissingScores / $totalPossible) * 100, 1) : 0
+                    ];
+                }
+            }
+        }
+
         return view('instructor.scores.course-outcome-results', [
             'students' => $students,
             'coResults' => $coResults,
@@ -124,6 +172,7 @@ class CourseOutcomeAttainmentController extends Controller
             'terms' => $terms,
             'subjectId' => $subjectId,
             'selectedSubject' => $selectedSubject,
+            'incompleteCOs' => $incompleteCOs,
         ]);
     }
 

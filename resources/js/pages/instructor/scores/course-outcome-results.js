@@ -9,6 +9,49 @@ function isCourseOutcomeResultsPage() {
     return document.querySelector('[data-page="instructor.course-outcome-results"]');
 }
 
+// ==================== CUSTOM PRINT MODAL (No Bootstrap dependency) ====================
+
+/**
+ * Open the print options modal using custom CSS-based modal
+ */
+function coOpenPrintModal() {
+    const overlay = document.getElementById('coPrintModalOverlay');
+    if (overlay) {
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        return;
+    }
+    
+    // Fallback to Bootstrap modal if custom one doesn't exist
+    const modalEl = document.getElementById('printOptionsModal');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+}
+
+/**
+ * Close the print options modal
+ */
+function coClosePrintModal() {
+    const overlay = document.getElementById('coPrintModalOverlay');
+    if (overlay) {
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
+        return;
+    }
+    
+    // Fallback to Bootstrap modal
+    const modalEl = document.getElementById('printOptionsModal');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+    }
+}
+
+// Expose globally IMMEDIATELY so onclick handlers work
+window.coOpenPrintModal = coOpenPrintModal;
+window.coClosePrintModal = coClosePrintModal;
+
 function setDisplayType(type, icon, text) {
     const currentIcon = document.getElementById('currentIcon');
     const currentText = document.getElementById('currentText');
@@ -528,26 +571,10 @@ function refreshData() {
     setTimeout(() => window.location.reload(), 1000);
 }
 
-function coClosePrintModal() {
-    const modalEl = document.getElementById('printOptionsModal');
-    if (!modalEl) return;
-    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-    modal.hide();
-}
-
 export function initCourseOutcomeResultsPage() {
     if (!isCourseOutcomeResultsPage()) return;
 
-    // Debug: Log print button status
-    const printBtn = document.getElementById('coPrintOptionsButton');
-    console.log('[CO Results] Print button found:', !!printBtn);
-    if (printBtn) {
-        console.log('[CO Results] Button display:', window.getComputedStyle(printBtn).display);
-        console.log('[CO Results] Button visibility:', window.getComputedStyle(printBtn).visibility);
-        console.log('[CO Results] Button opacity:', window.getComputedStyle(printBtn).opacity);
-    }
-
-    // Expose functions for inline handlers in Blade
+    // Expose remaining functions for inline handlers in Blade
     Object.assign(window, {
         setDisplayType,
         toggleScoreType,
@@ -558,7 +585,6 @@ export function initCourseOutcomeResultsPage() {
         coPrintSpecificTable,
         dismissWarning,
         refreshData,
-        coClosePrintModal,
     });
 
     toggleScoreType();

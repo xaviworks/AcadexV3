@@ -4,6 +4,9 @@
 @import './layout/navigation.css';
 /* guest.css removed from global imports - loaded separately in guest.blade.php */
 
+/* Import component styles */
+@import './components/print-modal.css';
+
 /* Import portal styles */
 @import './admin/utilities.css';
 @import './admin/users.css';
