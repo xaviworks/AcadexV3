@@ -411,15 +411,9 @@
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
-                                            $attempted = 0;
-                                            foreach($students as $student) {
-                                                $raw = $coResults[$student->id]['semester_raw'][$coId] ?? null;
-                                                $max = $coResults[$student->id]['semester_max'][$coId] ?? null;
-                                                $percent = ($max > 0 && $raw !== null) ? ($raw / $max) * 100 : null;
-                                                if($percent !== null) $attempted++;
-                                            }
+                                            $stats = $coSummaryStats[$coId] ?? ['attempted' => 0];
                                         @endphp
-                                        <td class="fw-bold text-success">{{ $attempted }}</td>
+                                        <td class="fw-bold text-success">{{ $stats['attempted'] }}</td>
                                     @endif
                                 @endforeach
                             </tr>
@@ -428,18 +422,9 @@
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
-                                            $threshold = 75; // Fixed threshold
-                                            $passed = 0;
-                                            foreach($students as $student) {
-                                                $raw = $coResults[$student->id]['semester_raw'][$coId] ?? null;
-                                                $max = $coResults[$student->id]['semester_max'][$coId] ?? null;
-                                                $percent = ($max > 0 && $raw !== null) ? ($raw / $max) * 100 : null;
-                                                if($percent !== null && $percent > $threshold) {
-                                                    $passed++;
-                                                }
-                                            }
+                                            $stats = $coSummaryStats[$coId] ?? ['passed' => 0];
                                         @endphp
-                                        <td class="fw-bold text-success">{{ $passed }}</td>
+                                        <td class="fw-bold text-success">{{ $stats['passed'] }}</td>
                                     @endif
                                 @endforeach
                             </tr>
@@ -448,19 +433,8 @@
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
-                                            $threshold = 75; // Fixed threshold
-                                            $attempted = 0;
-                                            $passed = 0;
-                                            foreach($students as $student) {
-                                                $raw = $coResults[$student->id]['semester_raw'][$coId] ?? null;
-                                                $max = $coResults[$student->id]['semester_max'][$coId] ?? null;
-                                                $percent = ($max > 0 && $raw !== null) ? ($raw / $max) * 100 : null;
-                                                if($percent !== null) {
-                                                    $attempted++;
-                                                    if($percent > $threshold) $passed++;
-                                                }
-                                            }
-                                            $percentPassed = $attempted > 0 ? round(($passed / $attempted) * 100, 2) : 0;
+                                            $stats = $coSummaryStats[$coId] ?? ['pass_percentage' => 0];
+                                            $percentPassed = $stats['pass_percentage'];
                                             $textClass = $percentPassed >= 75 ? 'text-success' : 'text-danger';
                                         @endphp
                                         <td class="fw-bold {{ $textClass }}">{{ $percentPassed }}%</td>
@@ -472,20 +446,8 @@
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
-                                            $threshold = 75; // Fixed threshold
-                                            $attempted = 0;
-                                            $passed = 0;
-                                            foreach($students as $student) {
-                                                $raw = $coResults[$student->id]['semester_raw'][$coId] ?? null;
-                                                $max = $coResults[$student->id]['semester_max'][$coId] ?? null;
-                                                $percent = ($max > 0 && $raw !== null) ? ($raw / $max) * 100 : null;
-                                                if($percent !== null) {
-                                                    $attempted++;
-                                                    if($percent > $threshold) $passed++;
-                                                }
-                                            }
-                                            $failed = $attempted - $passed;
-                                            $failedPercentage = $attempted > 0 ? round(($failed / $attempted) * 100, 1) : 0;
+                                            $stats = $coSummaryStats[$coId] ?? ['fail_percentage' => 0];
+                                            $failedPercentage = $stats['fail_percentage'];
                                             $textClass = $failedPercentage >= 75 ? 'text-danger' : 'text-success';
                                         @endphp
                                         <td>
@@ -667,17 +629,8 @@
                                         @php
                                             // Check if this CO exists in this term
                                             $coExistsInTerm = isset($coColumnsByTerm[$term]) && in_array($coId, $coColumnsByTerm[$term]);
-                                            
-                                            if ($coExistsInTerm) {
-                                                $max = 0;
-                                                foreach(\App\Models\Activity::where('term', $term)
-                                                    ->where('course_outcome_id', $coId)
-                                                    ->where('subject_id', $subjectId)
-                                                ->get() as $activity) {
-                                                $max += $activity->number_of_items;
-                                            }
-                                        }
-                                    @endphp
+                                            $max = $maxScoresByTermCo[$term][$coId] ?? 0;
+                                        @endphp
                                     <td>
                                         @if ($coExistsInTerm)
                                             <span class="score-value" data-score="{{ $max }}" data-percentage="75">
@@ -689,12 +642,7 @@
                                     </td>
                                 @endforeach
                                 @php
-                                    $totalMax = 0;
-                                    foreach($terms as $term) {
-                                        foreach(\App\Models\Activity::where('term', $term)->where('course_outcome_id', $coId)->where('subject_id', $subjectId)->get() as $activity) {
-                                            $totalMax += $activity->number_of_items;
-                                        }
-                                    }
+                                    $totalMax = $totalMaxByCoId[$coId] ?? 0;
                                 @endphp
                                 <td class="bg-light">
                                     <span class="score-value fw-bold" data-score="{{ $totalMax }}" data-percentage="{{ $percent ?? '' }}">
@@ -716,26 +664,15 @@
                                                 // Check if this CO exists in this term
                                                 $coExistsInTerm = isset($coColumnsByTerm[$term]) && in_array($coId, $coColumnsByTerm[$term]);
                                                 
-                                                if ($coExistsInTerm) {
-                                                    // Calculate raw score for this student, term, CO
-                                                    $rawScore = 0;
-                                                    $maxScore = 0;
-                                                    foreach(\App\Models\Activity::where('term', $term)
-                                                        ->where('course_outcome_id', $coId)
-                                                        ->where('subject_id', $subjectId)
-                                                        ->get() as $activity) {
-                                                    $score = \App\Models\Score::where('student_id', $student->id)
-                                                        ->where('activity_id', $activity->id)
-                                                        ->first();
-                                                    if($score) $rawScore += $score->score;
-                                                    $maxScore += $activity->number_of_items;
-                                                }
-                                                $percent = $maxScore > 0 ? ($rawScore / $maxScore) * 100 : 0;
-                                            }
-                                        @endphp
+                                                // Use pre-computed data instead of database queries
+                                                $termData = $studentTermCoScores[$student->id][$term][$coId] ?? null;
+                                                $rawScore = $termData['raw'] ?? 0;
+                                                $maxScore = $termData['max'] ?? 0;
+                                                $percent = $termData['percent'] ?? 0;
+                                            @endphp
                                         <td>
                                             @if ($coExistsInTerm)
-                                                <span class="score-value" data-score="{{ $rawScore }}" data-percentage="{{ ceil($percent) }}">
+                                                <span class="score-value" data-score="{{ $rawScore }}" data-percentage="{{ $percent }}">
                                                     {{ $rawScore }}
                                                 </span>
                                             @else
@@ -790,13 +727,7 @@
                                     </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
-                                            $max = 0;
-                                            foreach(\App\Models\Activity::where('term', $term)
-                                                ->where('course_outcome_id', $coId)
-                                                ->where('subject_id', $subjectId)
-                                                ->get() as $activity) {
-                                                $max += $activity->number_of_items;
-                                            }
+                                            $max = $maxScoresByTermCo[$term][$coId] ?? 0;
                                         @endphp
                                         <td>
                                             <span class="score-value" data-score="{{ $max }}" data-percentage="75">
@@ -810,23 +741,14 @@
                                         <td>{{ $student->getFullNameAttribute() }}</td>
                                         @foreach($coColumnsByTerm[$term] as $coId)
                                             @php
-                                                // Calculate raw score for this student, term, CO
-                                                $rawScore = 0;
-                                                $maxScore = 0;
-                                                foreach(\App\Models\Activity::where('term', $term)
-                                                    ->where('course_outcome_id', $coId)
-                                                    ->where('subject_id', $subjectId)
-                                                    ->get() as $activity) {
-                                                    $score = \App\Models\Score::where('student_id', $student->id)
-                                                        ->where('activity_id', $activity->id)
-                                                        ->first();
-                                                    if($score) $rawScore += $score->score;
-                                                    $maxScore += $activity->number_of_items;
-                                                }
-                                                $percent = $maxScore > 0 ? ($rawScore / $maxScore) * 100 : 0;
+                                                // Use pre-computed data instead of database queries
+                                                $termData = $studentTermCoScores[$student->id][$term][$coId] ?? null;
+                                                $rawScore = $termData['raw'] ?? 0;
+                                                $maxScore = $termData['max'] ?? 0;
+                                                $percent = $termData['percent'] ?? 0;
                                             @endphp
                                             <td>
-                                                <span class="score-value" data-score="{{ $rawScore }}" data-percentage="{{ ceil($percent) }}">
+                                                <span class="score-value" data-score="{{ $rawScore }}" data-percentage="{{ $percent }}">
                                                     {{ $rawScore }}
                                                 </span>
                                             </td>
@@ -916,26 +838,15 @@
                                         <td>{{ $student->getFullNameAttribute() }}</td>
                                         @foreach($coColumnsByTerm[$term] as $coId)
                                             @php
-                                                // Calculate score for this specific term
-                                                $rawScore = 0;
-                                                $maxScore = 0;
-                                                foreach(\App\Models\Activity::where('term', $term)
-                                                    ->where('course_outcome_id', $coId)
-                                                    ->where('subject_id', $subjectId)
-                                                    ->get() as $activity) {
-                                                    $score = \App\Models\Score::where('student_id', $student->id)
-                                                        ->where('activity_id', $activity->id)
-                                                        ->first();
-                                                    $rawScore += $score ? $score->score : 0;
-                                                    $maxScore += $activity->number_of_items;
-                                                }
-                                                $percent = $maxScore > 0 ? ($rawScore / $maxScore) * 100 : 0;
+                                                // Use pre-computed data instead of database queries
+                                                $termData = $studentTermCoScores[$student->id][$term][$coId] ?? null;
+                                                $percent = $termData['percent'] ?? 0;
                                                 $threshold = 75;
                                             @endphp
                                             <td class="fw-bold text-{{ $percent >= $threshold ? 'success' : 'danger' }}">
                                                 {{ $percent >= $threshold ? 'Passed' : 'Failed' }}
                                                 <br>
-                                                <small>({{ ceil($percent) }}%)</small>
+                                                <small>({{ $percent }}%)</small>
                                             </td>
                                         @endforeach
                                     </tr>
@@ -977,78 +888,26 @@
                                     <td class="fw-bold text-dark text-start">👥 Students Attempted</td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
-                                            $attempted = 0;
-                                            foreach($students as $student) {
-                                                $rawScore = 0;
-                                                $maxScore = 0;
-                                                foreach(\App\Models\Activity::where('term', $term)
-                                                    ->where('course_outcome_id', $coId)
-                                                    ->where('subject_id', $subjectId)
-                                                    ->get() as $activity) {
-                                                    $score = \App\Models\Score::where('student_id', $student->id)
-                                                        ->where('activity_id', $activity->id)
-                                                        ->first();
-                                                    $rawScore += $score ? $score->score : 0;
-                                                    $maxScore += $activity->number_of_items;
-                                                }
-                                                if($maxScore > 0) $attempted++;
-                                            }
+                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['attempted' => 0];
                                         @endphp
-                                        <td class="fw-bold text-success">{{ $attempted }}</td>
+                                        <td class="fw-bold text-success">{{ $stats['attempted'] }}</td>
                                     @endforeach
                                 </tr>
                                 <tr style="background:#fff;">
                                     <td class="fw-bold text-dark text-start">✅ Students Passed</td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
-                                            $threshold = 75;
-                                            $passed = 0;
-                                            foreach($students as $student) {
-                                                $rawScore = 0;
-                                                $maxScore = 0;
-                                                foreach(\App\Models\Activity::where('term', $term)
-                                                    ->where('course_outcome_id', $coId)
-                                                    ->where('subject_id', $subjectId)
-                                                    ->get() as $activity) {
-                                                    $score = \App\Models\Score::where('student_id', $student->id)
-                                                        ->where('activity_id', $activity->id)
-                                                        ->first();
-                                                    $rawScore += $score ? $score->score : 0;
-                                                    $maxScore += $activity->number_of_items;
-                                                }
-                                                $percent = $maxScore > 0 ? ($rawScore / $maxScore) * 100 : 0;
-                                                if($percent >= $threshold) $passed++;
-                                            }
+                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['passed' => 0];
                                         @endphp
-                                        <td class="fw-bold text-success">{{ $passed }}</td>
+                                        <td class="fw-bold text-success">{{ $stats['passed'] }}</td>
                                     @endforeach
                                 </tr>
                                 <tr style="background:#f8f9fa;">
                                     <td class="fw-bold text-dark text-start">📊 Pass Percentage</td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
-                                            $attempted = 0;
-                                            $passed = 0;
-                                            foreach($students as $student) {
-                                                $rawScore = 0;
-                                                $maxScore = 0;
-                                                foreach(\App\Models\Activity::where('term', $term)
-                                                    ->where('course_outcome_id', $coId)
-                                                    ->where('subject_id', $subjectId)
-                                                    ->get() as $activity) {
-                                                    $score = \App\Models\Score::where('student_id', $student->id)
-                                                        ->where('activity_id', $activity->id)
-                                                        ->first();
-                                                    $rawScore += $score ? $score->score : 0;
-                                                    $maxScore += $activity->number_of_items;
-                                                }
-                                                if($maxScore > 0) {
-                                                    $attempted++;
-                                                    $percent = ($rawScore / $maxScore) * 100;
-                                                    if($percent >= 75) $passed++;
-                                                }
-                                            }
-                                            $percentPassed = $attempted > 0 ? round(($passed / $attempted) * 100, 1) : 0;
+                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['pass_percentage' => 0];
+                                            $percentPassed = $stats['pass_percentage'];
                                             $textClass = $percentPassed >= 75 ? 'text-success' : 'text-danger';
                                         @endphp
                                         <td class="fw-bold {{ $textClass }}">{{ $percentPassed }}%</td>
@@ -1058,28 +917,8 @@
                                     <td class="fw-bold text-dark text-start">❌ Failed Percentage</td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
-                                            $attempted = 0;
-                                            $failed = 0;
-                                            foreach($students as $student) {
-                                                $rawScore = 0;
-                                                $maxScore = 0;
-                                                foreach(\App\Models\Activity::where('term', $term)
-                                                    ->where('course_outcome_id', $coId)
-                                                    ->where('subject_id', $subjectId)
-                                                    ->get() as $activity) {
-                                                    $score = \App\Models\Score::where('student_id', $student->id)
-                                                        ->where('activity_id', $activity->id)
-                                                        ->first();
-                                                    $rawScore += $score ? $score->score : 0;
-                                                    $maxScore += $activity->number_of_items;
-                                                }
-                                                if($maxScore > 0) {
-                                                    $attempted++;
-                                                    $percent = ($rawScore / $maxScore) * 100;
-                                                    if($percent < 75) $failed++;
-                                                }
-                                            }
-                                            $failedPercentage = $attempted > 0 ? round(($failed / $attempted) * 100, 1) : 0;
+                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['fail_percentage' => 0];
+                                            $failedPercentage = $stats['fail_percentage'];
                                             $textClass = $failedPercentage >= 75 ? 'text-danger' : 'text-success';
                                         @endphp
                                         <td class="fw-bold {{ $textClass }}">{{ $failedPercentage }}%</td>

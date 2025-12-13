@@ -13,6 +13,10 @@ class CourseOutcomeAttainmentController extends Controller
 {
     use CourseOutcomeTrait;
 
+    /**
+     * Display the course outcome attainment results for a subject.
+     * Optimized for performance - all data is pre-computed in the controller.
+     */
     public function subject($subjectId)
     {
         // Get the selected subject with course and academicPeriod relationships
@@ -118,8 +122,116 @@ class CourseOutcomeAttainmentController extends Controller
         // Reindex the array to ensure sequential indices (0, 1, 2, 3...)
         $finalCOs = array_values($finalCOs);
 
+        // ============================================================
+        // PRE-COMPUTE ALL DATA FOR VIEW (Eliminates N+1 queries)
+        // ============================================================
+        
+        // Pre-compute max scores per CO per term
+        $maxScoresByTermCo = [];
+        foreach ($terms as $term) {
+            $termActivities = $activitiesByTerm->get($term, collect());
+            foreach ($coColumnsByTerm[$term] ?? [] as $coId) {
+                $max = $termActivities
+                    ->where('course_outcome_id', $coId)
+                    ->sum('number_of_items');
+                $maxScoresByTermCo[$term][$coId] = $max;
+            }
+        }
+        
+        // Pre-compute total max scores per CO (across all terms)
+        $totalMaxByCoId = [];
+        foreach ($finalCOs as $coId) {
+            $total = 0;
+            foreach ($terms as $term) {
+                $total += $maxScoresByTermCo[$term][$coId] ?? 0;
+            }
+            $totalMaxByCoId[$coId] = $total;
+        }
+        
+        // Pre-compute student scores per term per CO (for individual term views)
+        $studentTermCoScores = [];
+        foreach ($students as $student) {
+            foreach ($terms as $term) {
+                $termActivities = $activitiesByTerm->get($term, collect());
+                foreach ($coColumnsByTerm[$term] ?? [] as $coId) {
+                    $rawScore = 0;
+                    $maxScore = 0;
+                    
+                    foreach ($termActivities->where('course_outcome_id', $coId) as $activity) {
+                        $scoreRecord = optional(optional($scoresByStudentAndActivity->get($student->id))?->get($activity->id))->first();
+                        $rawScore += $scoreRecord->score ?? 0;
+                        $maxScore += $activity->number_of_items;
+                    }
+                    
+                    $percent = $maxScore > 0 ? ($rawScore / $maxScore) * 100 : 0;
+                    
+                    $studentTermCoScores[$student->id][$term][$coId] = [
+                        'raw' => $rawScore,
+                        'max' => $maxScore,
+                        'percent' => ceil($percent),
+                    ];
+                }
+            }
+        }
+        
+        // Pre-compute summary statistics per CO (all terms combined)
+        $coSummaryStats = [];
+        foreach ($finalCOs as $coId) {
+            $attempted = 0;
+            $passed = 0;
+            $threshold = 75;
+            
+            foreach ($students as $student) {
+                $raw = $coResults[$student->id]['semester_raw'][$coId] ?? null;
+                $max = $coResults[$student->id]['semester_max'][$coId] ?? null;
+                $percent = ($max > 0 && $raw !== null) ? ($raw / $max) * 100 : null;
+                
+                if ($percent !== null) {
+                    $attempted++;
+                    if ($percent > $threshold) {
+                        $passed++;
+                    }
+                }
+            }
+            
+            $coSummaryStats[$coId] = [
+                'attempted' => $attempted,
+                'passed' => $passed,
+                'failed' => $attempted - $passed,
+                'pass_percentage' => $attempted > 0 ? round(($passed / $attempted) * 100, 2) : 0,
+                'fail_percentage' => $attempted > 0 ? round((($attempted - $passed) / $attempted) * 100, 1) : 0,
+            ];
+        }
+        
+        // Pre-compute summary statistics per term per CO
+        $termCoSummaryStats = [];
+        foreach ($terms as $term) {
+            foreach ($coColumnsByTerm[$term] ?? [] as $coId) {
+                $attempted = 0;
+                $passed = 0;
+                $threshold = 75;
+                
+                foreach ($students as $student) {
+                    $data = $studentTermCoScores[$student->id][$term][$coId] ?? null;
+                    if ($data && $data['max'] > 0) {
+                        $attempted++;
+                        if ($data['percent'] >= $threshold) {
+                            $passed++;
+                        }
+                    }
+                }
+                
+                $termCoSummaryStats[$term][$coId] = [
+                    'attempted' => $attempted,
+                    'passed' => $passed,
+                    'failed' => $attempted - $passed,
+                    'pass_percentage' => $attempted > 0 ? round(($passed / $attempted) * 100, 1) : 0,
+                    'fail_percentage' => $attempted > 0 ? round((($attempted - $passed) / $attempted) * 100, 1) : 0,
+                ];
+            }
+        }
+
         // Pre-compute incomplete COs in the controller (avoid N+1 queries in Blade)
-        // This uses the already-loaded data instead of making new queries
         $incompleteCOs = [];
         $totalStudents = $students->count();
         
@@ -173,6 +285,12 @@ class CourseOutcomeAttainmentController extends Controller
             'subjectId' => $subjectId,
             'selectedSubject' => $selectedSubject,
             'incompleteCOs' => $incompleteCOs,
+            // Pre-computed data for performance
+            'maxScoresByTermCo' => $maxScoresByTermCo,
+            'totalMaxByCoId' => $totalMaxByCoId,
+            'studentTermCoScores' => $studentTermCoScores,
+            'coSummaryStats' => $coSummaryStats,
+            'termCoSummaryStats' => $termCoSummaryStats,
         ]);
     }
 
