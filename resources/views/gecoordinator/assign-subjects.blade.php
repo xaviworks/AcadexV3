@@ -567,6 +567,12 @@
 @push('scripts')
 {{-- JavaScript moved to: resources/js/pages/gecoordinator/assign-subjects.js --}}
 <script>
+    // Provide endpoints to the page script so clicks hit the correct routes
+    window.pageData = Object.assign({}, window.pageData, {
+        assignInstructorUrl: "{{ route('gecoordinator.assignInstructor') }}",
+        unassignInstructorUrl: "{{ route('gecoordinator.unassignInstructor') }}",
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         // Server-side flash messages
         @if (session('success'))
@@ -577,10 +583,12 @@
         @endif
 
         // Initialize Bootstrap tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        if (window.bootstrap?.Tooltip) {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
     });
 </script>
 @endpush

@@ -25,6 +25,24 @@ function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content || '';
 }
 
+// Prefer Bootstrap modals when available; fall back to Alpine modal store helpers
+function showBootstrapModalById(id) {
+    if (typeof bootstrap === 'undefined' || !bootstrap.Modal) return null;
+    const modalEl = document.getElementById(id);
+    if (!modalEl) return null;
+    const instance = bootstrap.Modal.getOrCreateInstance(modalEl);
+    instance.show();
+    return instance;
+}
+
+function hideBootstrapModalById(id) {
+    if (typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+    const modalEl = document.getElementById(id);
+    if (!modalEl) return;
+    const instance = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+    instance.hide();
+}
+
 // Function to show Bootstrap toasts (top-right floating) for consistency
 export function showNotification(type, message) {
     const toastContainer = document.getElementById('globalToastContainer') || createGlobalToastContainer();
@@ -108,14 +126,9 @@ export function refreshSubjectInstructorCount(subjectId) {
 
 // Open a simple read-only modal to view assigned instructors
 export function openViewInstructorsModal(subjectId, subjectName) {
-    if (typeof window.modal !== 'undefined' && window.modal.open) {
+    const shown = showBootstrapModalById('viewInstructorsModal');
+    if (!shown && typeof window.modal !== 'undefined' && window.modal.open) {
         window.modal.open('viewInstructorsModal', { subjectId, subjectName });
-    } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modalEl = document.getElementById('viewInstructorsModal');
-        if (modalEl) {
-            const bsModal = new bootstrap.Modal(modalEl);
-            bsModal.show();
-        }
     }
     
     document.getElementById('viewSubjectName').textContent = subjectName;
@@ -181,14 +194,9 @@ export function openInstructorListModal(subjectId, subjectName, mode = 'view') {
     const modalTitle = document.getElementById('instructorListModalTitle');
     if (modalTitle) modalTitle.textContent = 'Manage Instructors';
     
-    if (typeof window.modal !== 'undefined' && window.modal.open) {
+    const shown = showBootstrapModalById('instructorListModal');
+    if (!shown && typeof window.modal !== 'undefined' && window.modal.open) {
         window.modal.open('instructorListModal', { subjectId, subjectName, mode });
-    } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modalEl = document.getElementById('instructorListModal');
-        if (modalEl) {
-            const bsModal = new bootstrap.Modal(modalEl);
-            bsModal.show();
-        }
     }
     
     Promise.all([
@@ -460,18 +468,32 @@ export function confirmUnassignInstructor(instructorIdOrArray, instructorNameOrA
     const centerToast = document.getElementById('centerToastContainer');
     if (centerToast) centerToast.style.display = 'none';
 
-    if (typeof window.modal !== 'undefined' && window.modal.open) {
+    const shown = showBootstrapModalById('confirmUnassignModal');
+    if (!shown && typeof window.modal !== 'undefined' && window.modal.open) {
         window.modal.open('confirmUnassignModal');
-    } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modalEl = document.getElementById('confirmUnassignModal');
-        if (modalEl) {
-            const bsModal = new bootstrap.Modal(modalEl);
-            bsModal.show();
-        }
     }
 }
 
 export function showBulkAssignModal(ids, names, callingBtn) {
+    // If the instructor modal is open, temporarily hide it to avoid stacking issues
+    const instructorModalEl = document.getElementById('instructorListModal');
+    if (instructorModalEl && instructorModalEl.classList.contains('show')) {
+        hideBootstrapModalById('instructorListModal');
+        window._instructorModalWasOpen = true;
+    }
+
+    // Re-open the instructor modal after the confirm modal closes
+    const confirmModalEl = document.getElementById('confirmBulkAssignModal');
+    if (confirmModalEl && !confirmModalEl.dataset.reopenListener) {
+        confirmModalEl.addEventListener('hidden.bs.modal', () => {
+            if (window._instructorModalWasOpen) {
+                showBootstrapModalById('instructorListModal');
+                window._instructorModalWasOpen = false;
+            }
+        });
+        confirmModalEl.dataset.reopenListener = '1';
+    }
+
     const subjectNameEl = document.getElementById('assignTargetSubject');
     const subjectName = document.getElementById('instructorListSubjectName')?.textContent || 'Unknown Subject';
     if (subjectNameEl) subjectNameEl.textContent = subjectName;
@@ -491,14 +513,9 @@ export function showBulkAssignModal(ids, names, callingBtn) {
     const centerToast = document.getElementById('centerToastContainer');
     if (centerToast) centerToast.style.display = 'none';
 
-    if (typeof window.modal !== 'undefined' && window.modal.open) {
+    const shown = showBootstrapModalById('confirmBulkAssignModal');
+    if (!shown && typeof window.modal !== 'undefined' && window.modal.open) {
         window.modal.open('confirmBulkAssignModal');
-    } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modalEl = document.getElementById('confirmBulkAssignModal');
-        if (modalEl) {
-            const bsModal = new bootstrap.Modal(modalEl);
-            bsModal.show();
-        }
     }
 
     window.bulkAssignInstructorIds = ids;
@@ -507,7 +524,7 @@ export function showBulkAssignModal(ids, names, callingBtn) {
 
 export function assignMultipleInstructors(subjectId, instructorIds, button) {
     const pageData = getPageData();
-    const assignUrl = pageData.assignInstructorUrl || '/gecoordinator/assign-instructor';
+    const assignUrl = pageData.assignInstructorUrl || '/gecoordinator/subjects/assign';
     const csrfToken = getCsrfToken();
     
     if (button) {
@@ -586,8 +603,9 @@ export function quickAssign(instructorId, instructorName) {
 
 export function initAssignSubjectsPage() {
     const pageData = getPageData();
-    const unassignUrl = pageData.unassignInstructorUrl || '/gecoordinator/unassign-instructor';
-    const assignUrl = pageData.assignInstructorUrl || '/gecoordinator/assign-instructor';
+    // Fallback to the real route paths so modals keep working even if pageData is not injected
+    const unassignUrl = pageData.unassignInstructorUrl || '/gecoordinator/subjects/unassign';
+    const assignUrl = pageData.assignInstructorUrl || '/gecoordinator/subjects/assign';
     const csrfToken = getCsrfToken();
     
     // Listen for broadcast updates
@@ -631,6 +649,7 @@ export function initAssignSubjectsPage() {
             const origHtml = this.innerHTML;
             this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
 
+            hideBootstrapModalById('confirmUnassignModal');
             if (typeof window.modal !== 'undefined' && window.modal.close) {
                 window.modal.close('confirmUnassignModal');
             }
@@ -705,6 +724,7 @@ export function initAssignSubjectsPage() {
             }
             this.disabled = true;
 
+            hideBootstrapModalById('confirmBulkAssignModal');
             if (typeof window.modal !== 'undefined' && window.modal.close) {
                 window.modal.close('confirmBulkAssignModal');
             }
@@ -770,6 +790,7 @@ export function initAssignSubjectsPage() {
             })
             .then(data => {
                 if (data.success) {
+                    hideBootstrapModalById('confirmAssignModal');
                     if (typeof window.modal !== 'undefined' && window.modal.close) {
                         window.modal.close('confirmAssignModal');
                     }
