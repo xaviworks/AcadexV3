@@ -28,19 +28,6 @@
         </div>
     </div>
 
-    {{-- Year Level Sections --}}
-    @if(isset($subjectsByYear) && count($subjectsByYear) > 0)
-        <div class="mb-3">
-            @if(isset($currentPeriod))
-                <small class="text-muted d-block mb-3">
-                    <i class="bi bi-calendar3 me-1"></i>{{ $currentPeriod->academic_year }} - {{ $currentPeriod->semester }}
-                    @if((Auth::user()->role === 1 || Auth::user()->role === 4) && Auth::user()->course)
-                        • {{ Auth::user()->course->course_code }} Program
-                    @endif
-                </small>
-            @endif
-        </div>
-    @endif
 
     {{-- Subject Cards Grouped by Year Level --}}
     @if(isset($subjectsByYear) && count($subjectsByYear))

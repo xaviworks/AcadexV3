@@ -95,16 +95,30 @@
         </div>
     @endif
 
+    @php
+        $activeInstructors = $instructors->filter(fn($i) => $i->is_active);
+        $inactiveInstructors = $instructors->filter(fn($i) => !$i->is_active);
+        $pendingAccountsCount = $pendingAccounts->count();
+    @endphp
+
     {{-- Bootstrap Tabs --}}
     <ul class="nav nav-tabs" id="instructorTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <a class="nav-link active" id="active-instructors-tab" data-bs-toggle="tab" href="#active-instructors" role="tab" aria-controls="active-instructors" aria-selected="true">
                 Active Instructors
+                <span class="badge bg-light text-muted ms-2">{{ $activeInstructors->count() }}</span>
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="inactive-instructors-tab" data-bs-toggle="tab" href="#inactive-instructors" role="tab" aria-controls="inactive-instructors" aria-selected="false">
                 Inactive Instructors
+                <span class="badge bg-light text-muted ms-2">{{ $inactiveInstructors->count() }}</span>
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="pending-approvals-tab" data-bs-toggle="tab" href="#pending-approvals" role="tab" aria-controls="pending-approvals" aria-selected="false">
+                Pending Approvals
+                <span class="badge bg-light text-muted ms-2">{{ $pendingAccountsCount }}</span>
             </a>
         </li>
     </ul>
@@ -113,7 +127,7 @@
         {{-- Active Instructors Tab --}}
         <div class="tab-pane fade show active" id="active-instructors" role="tabpanel" aria-labelledby="active-instructors-tab">
 
-            @if($instructors->isEmpty())
+            @if($activeInstructors->isEmpty())
                 <div class="alert alert-warning shadow-sm rounded">No active instructors.</div>
             @else
             <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
@@ -122,21 +136,14 @@
                         <tr>
                             <th>Instructor Name</th>
                             <th>Email Address</th>
-                            <th class="text-center">Status</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($instructors as $instructor)
-                            @if($instructor->is_active)
+                        @foreach($activeInstructors as $instructor)
                                 <tr>
                                     <td>{{ $instructor->last_name }}, {{ $instructor->first_name }} {{ $instructor->middle_name }}</td>
                                     <td>{{ $instructor->email }}</td>
-                                    <td class="text-center">
-                                        <span class="badge border border-success text-success px-3 py-2 rounded-pill">
-                                            Active
-                                        </span>
-                                    </td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
                                             @php
@@ -215,7 +222,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @endif
                         @endforeach
                     </tbody>
                 </table>
@@ -226,7 +232,7 @@
         {{-- Inactive Instructors Tab --}}
         <div class="tab-pane fade" id="inactive-instructors" role="tabpanel" aria-labelledby="inactive-instructors-tab">
 
-            @if($instructors->isEmpty())
+            @if($inactiveInstructors->isEmpty())
                 <div class="alert alert-warning shadow-sm rounded">No inactive instructors.</div>
             @else
             <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
@@ -235,21 +241,14 @@
                         <tr>
                             <th>Instructor Name</th>
                             <th>Email Address</th>
-                            <th class="text-center">Status</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($instructors as $instructor)
-                            @if(!$instructor->is_active)
+                        @foreach($inactiveInstructors as $instructor)
                                 <tr>
                                     <td>{{ $instructor->last_name }}, {{ $instructor->first_name }} {{ $instructor->middle_name }}</td>
                                     <td>{{ $instructor->email }}</td>
-                                    <td class="text-center">
-                                        <span class="badge border border-secondary text-secondary px-3 py-2 rounded-pill">
-                                            Inactive
-                                        </span>
-                                    </td>
                                     <td class="text-center">
                                             <button type="button"
                                                 class="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
@@ -263,71 +262,65 @@
                                         </button>
                                     </td>
                                 </tr>
-                            @endif
                         @endforeach
                     </tbody>
                 </table>
             </div>        
             @endif
         </div>
-    </div>
 
-    {{-- Pending Account Approvals --}}
-    <section class="mt-4">
-        <h2 class="text-xl font-semibold mb-3 text-gray-700 flex items-center">
-            <i class="bi bi-person-check-fill text-warning me-2 fs-5"></i>
-            Pending For Approvals
-        </h2>
-
-        @if($pendingAccounts->isEmpty())
-            <div class="alert alert-info shadow-sm rounded">No pending instructor applications.</div>
-        @else
-            <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
-                <table class="table table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Applicant Name</th>
-                            <th>Email Address</th>
-                            <th>Department</th>
-                            <th>Course</th>
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($pendingAccounts as $account)
+        {{-- Pending Approvals Tab --}}
+        <div class="tab-pane fade" id="pending-approvals" role="tabpanel" aria-labelledby="pending-approvals-tab">
+            @if($pendingAccounts->isEmpty())
+                <div class="alert alert-info shadow-sm rounded">No pending instructor applications.</div>
+            @else
+                <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead class="table-light">
                             <tr>
-                                <td>{{ $account->last_name }}, {{ $account->first_name }} {{ $account->middle_name }}</td>
-                                <td>{{ $account->email }}</td>
-                                <td>{{ $account->department?->department_code ?? 'N/A' }}</td>
-                                <td>{{ $account->course?->course_code ?? 'N/A' }}</td>
-                                <td class="text-center">
-                                    <button type="button"
-                                        class="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#confirmApproveModal"
-                                        data-id="{{ $account->id }}"
-                                        data-approve-url="{{ route('chairperson.accounts.approve', $account->id) }}"
-                                        data-name="{{ $account->last_name }}, {{ $account->first_name }}">
-                                        <i class="bi bi-check-circle-fill"></i> Approve
-                                    </button>
-
-                                    <button type="button"
-                                        class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1 ms-2"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#confirmRejectModal"
-                                        data-id="{{ $account->id }}"
-                                        data-reject-url="{{ route('chairperson.accounts.reject', $account->id) }}"
-                                        data-name="{{ $account->last_name }}, {{ $account->first_name }}">
-                                        <i class="bi bi-x-circle-fill"></i> Reject
-                                    </button>
-                                </td>
+                                <th>Applicant Name</th>
+                                <th>Email Address</th>
+                                <th>Department</th>
+                                <th>Course</th>
+                                <th class="text-center">Action</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-    </section>
+                        </thead>
+                        <tbody>
+                            @foreach($pendingAccounts as $account)
+                                <tr>
+                                    <td>{{ $account->last_name }}, {{ $account->first_name }} {{ $account->middle_name }}</td>
+                                    <td>{{ $account->email }}</td>
+                                    <td>{{ $account->department?->department_code ?? 'N/A' }}</td>
+                                    <td>{{ $account->course?->course_code ?? 'N/A' }}</td>
+                                    <td class="text-center">
+                                        <button type="button"
+                                            class="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmApproveModal"
+                                            data-id="{{ $account->id }}"
+                                            data-approve-url="{{ route('chairperson.accounts.approve', $account->id) }}"
+                                            data-name="{{ $account->last_name }}, {{ $account->first_name }}">
+                                            <i class="bi bi-check-circle-fill"></i> Approve
+                                        </button>
+
+                                        <button type="button"
+                                            class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1 ms-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmRejectModal"
+                                            data-id="{{ $account->id }}"
+                                            data-reject-url="{{ route('chairperson.accounts.reject', $account->id) }}"
+                                            data-name="{{ $account->last_name }}, {{ $account->first_name }}">
+                                            <i class="bi bi-x-circle-fill"></i> Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
 </div>
 
 
