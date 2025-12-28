@@ -330,6 +330,13 @@
                             <span>Academic Period</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.disaster-recovery.index') }}" 
+                           class="nav-link {{ request()->routeIs('admin.disaster-recovery.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-shield-check me-3"></i>
+                            <span>Disaster Recovery</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         @endif

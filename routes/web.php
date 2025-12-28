@@ -334,6 +334,21 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::post('/sessions/revoke', [AdminController::class, 'revokeSession'])->name('sessions.revoke');
     Route::post('/sessions/revoke-user', [AdminController::class, 'revokeUserSessions'])->name('sessions.revokeUser');
     Route::post('/sessions/revoke-all', [AdminController::class, 'revokeAllSessions'])->name('sessions.revokeAll');
+
+    // Disaster Recovery Routes (simplified & user-friendly)
+    Route::prefix('disaster-recovery')->name('disaster-recovery.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'index'])->name('index');
+        Route::post('/backup', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'createBackup'])->name('backup.create');
+        Route::get('/backup/{backup}/download', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'download'])->name('backup.download');
+        Route::get('/backup/{backup}/preview', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'preview'])->name('backup.preview');
+        Route::delete('/backup/{backup}', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'delete'])->name('backup.delete');
+        Route::post('/backup/{backup}/restore', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'restore'])->name('backup.restore');
+        Route::post('/schedule', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'schedule'])->name('schedule');
+        Route::post('/run-now', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'runNow'])->name('run-now');
+        Route::get('/activity', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'activity'])->name('activity');
+        Route::get('/activity/{auditLog}', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'showActivity'])->name('activity.show');
+        Route::post('/activity/{auditLog}/rollback', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'rollback'])->name('activity.rollback');
+    });
 });
 
 // VPAA Routes
