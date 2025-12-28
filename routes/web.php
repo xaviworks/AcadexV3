@@ -38,6 +38,14 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
+// Session check endpoint for AJAX validation (prevents back button to cached pages)
+Route::get('/session/check', function () {
+    if (!Auth::check()) {
+        return response()->json(['authenticated' => false], 401);
+    }
+    return response()->json(['authenticated' => true]);
+})->middleware('auth')->name('session.check');
+
 // Profile Management
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -132,6 +132,54 @@
                 }, 100);
             }
         });
+
+        // Session validity check on page visibility change (handles browser back button)
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // Quick session check via lightweight endpoint
+                fetch('{{ route("session.check") }}', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => {
+                    if (response.status === 401 || response.status === 419) {
+                        // Session expired or CSRF mismatch - redirect to login
+                        window.location.href = '{{ route("login") }}';
+                    }
+                })
+                .catch(() => {
+                    // Network error - may indicate session issue, reload page
+                    window.location.reload();
+                });
+            }
+        });
+
+        // Also check on pageshow for bfcache restoration
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Page was restored from bfcache - verify session
+                fetch('{{ route("session.check") }}', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => {
+                    if (response.status === 401 || response.status === 419) {
+                        window.location.href = '{{ route("login") }}';
+                    }
+                })
+                .catch(() => {
+                    window.location.reload();
+                });
+            }
+        });
     </script>
 
     <!-- Course Outcome Submenu Handler -->

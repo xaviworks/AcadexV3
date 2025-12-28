@@ -7,11 +7,16 @@
 
     <title>Select Academic Period - {{ config('app.name', 'Laravel') }}</title>
 
+    {{-- Bootstrap Icons --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('styles')
 </head>
 <body class="bg-[#EAF8E7] text-gray-900 dark:text-white">
     <main class="min-h-screen flex items-center justify-center p-4">
         @yield('content')
     </main>
+    @stack('scripts')
 </body>
 </html>
