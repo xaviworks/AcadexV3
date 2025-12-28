@@ -32,7 +32,7 @@ class DisasterRecoveryController extends Controller
 
         $backups = Backup::completed()
             ->latest()
-            ->take(10)
+            ->take(100)
             ->get();
 
         $latestBackup = $backups->first();
@@ -41,7 +41,7 @@ class DisasterRecoveryController extends Controller
         // Recent activity
         $recentActivity = AuditLog::with('user')
             ->latest()
-            ->take(5)
+            ->take(20)
             ->get();
 
         // Stats
@@ -50,7 +50,6 @@ class DisasterRecoveryController extends Controller
             'storage_used' => $storageInfo['total_size_formatted'] ?? '0 MB',
             'storage_bytes' => $storageInfo['total_size'] ?? 0,
             'last_backup' => $latestBackup?->created_at?->diffForHumans() ?? 'Never',
-            'changes_today' => AuditLog::whereDate('created_at', today())->count(),
         ];
 
         $schedule = json_decode(Setting::where('key', 'backup_schedule')->value('value') ?? '{}', true);
@@ -227,7 +226,7 @@ class DisasterRecoveryController extends Controller
     {
         Gate::authorize('admin');
         $auditLog->load('user');
-        return view('admin.disaster-recovery.activity-show', compact('auditLog'));
+        return view('admin.disaster-recovery.activity-show', ['log' => $auditLog]);
     }
 
     /**
@@ -292,7 +291,7 @@ class DisasterRecoveryController extends Controller
         try {
             $backup = $this->backupService->createFullBackup(
                 Auth::user(),
-                'Manual trigger - testing automatic backup'
+                'Manual backup triggered via dashboard'
             );
 
             return back()->with('success', "Manual backup completed! ({$backup->size_formatted})");

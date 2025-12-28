@@ -10,7 +10,7 @@
                     <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
                 </a>
             </div>
-            <h1 class="h4 text-dark fw-bold mb-0">📜 Activity Log</h1>
+            <h1 class="h4 text-dark fw-bold mb-0">Activity Log</h1>
             <p class="text-muted small mb-0">Track all changes made in the system</p>
         </div>
     </div>
@@ -96,6 +96,11 @@
                                             {{ $log->ip_address }}
                                         @endif
                                     </p>
+                                    @if($log->auditable_type === 'App\Models\Backup' && !empty($log->auditable->notes))
+                                        <div class="small text-muted fst-italic mt-1">
+                                            <i class="fas fa-sticky-note me-1 text-secondary"></i> "{{ $log->auditable->notes }}"
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="text-end">
                                     <div class="small text-muted mb-1">{{ $log->created_at->format('M d, Y h:i A') }}</div>

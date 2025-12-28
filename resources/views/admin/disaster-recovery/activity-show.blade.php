@@ -11,7 +11,7 @@
                 </a>
             </div>
             <h1 class="h4 text-dark fw-bold mb-0">
-                <i class="fas fa-file-alt text-info me-2"></i>Activity Details
+                </i>Activity Details
             </h1>
         </div>
         @if($log->event !== 'created' && $log->old_values)
@@ -42,43 +42,68 @@
         </div>
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-md-4 col-lg-2">
-                    <div class="bg-light rounded p-3 h-100">
-                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">Model</label>
+                <div class="col-md-4">
+                    <div class="bg-light rounded p-3 h-100 border">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">
+                            <i class="fas fa-cube me-1"></i> Model
+                        </label>
                         <span class="fw-bold text-dark">{{ class_basename($log->auditable_type) }}</span>
                     </div>
                 </div>
-                <div class="col-md-4 col-lg-2">
-                    <div class="bg-light rounded p-3 h-100">
-                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">Record ID</label>
-                        <span class="fw-bold text-dark">{{ $log->auditable_id }}</span>
+                <div class="col-md-4">
+                    <div class="bg-light rounded p-3 h-100 border">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">
+                            <i class="fas fa-hashtag me-1"></i> Record ID
+                        </label>
+                        <span class="fw-bold text-dark font-monospace">{{ $log->auditable_id }}</span>
                     </div>
                 </div>
-                <div class="col-md-4 col-lg-2">
-                    <div class="bg-light rounded p-3 h-100">
-                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">User</label>
+                <div class="col-md-4">
+                    <div class="bg-light rounded p-3 h-100 border">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">
+                            <i class="fas fa-user me-1"></i> User
+                        </label>
                         <span class="fw-bold text-dark">{{ $log->user?->name ?? 'System' }}</span>
                     </div>
                 </div>
-                <div class="col-md-4 col-lg-2">
-                    <div class="bg-light rounded p-3 h-100">
-                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">Email</label>
-                        <span class="fw-bold text-dark">{{ $log->user?->email ?? 'N/A' }}</span>
+                <div class="col-md-4">
+                    <div class="bg-light rounded p-3 h-100 border">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">
+                            <i class="fas fa-network-wired me-1"></i> IP Address
+                        </label>
+                        <span class="fw-bold text-dark font-monospace">{{ $log->ip_address ?? 'N/A' }}</span>
                     </div>
                 </div>
-                <div class="col-md-4 col-lg-2">
-                    <div class="bg-light rounded p-3 h-100">
-                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">IP Address</label>
-                        <span class="fw-bold text-dark">{{ $log->ip_address ?? 'N/A' }}</span>
+                <div class="col-md-4">
+                    <div class="bg-light rounded p-3 h-100 border">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">
+                            <i class="fas fa-desktop me-1"></i> Browser / OS
+                        </label>
+                        <span class="fw-bold text-dark text-truncate d-block" title="{{ $log->user_agent }}">
+                            {{ Str::limit($log->user_agent ?? 'N/A', 30) }}
+                        </span>
                     </div>
                 </div>
-                <div class="col-md-4 col-lg-2">
-                    <div class="bg-light rounded p-3 h-100">
-                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">Date & Time</label>
+                <div class="col-md-4">
+                    <div class="bg-light rounded p-3 h-100 border">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">
+                            <i class="far fa-clock me-1"></i> Date & Time
+                        </label>
                         <span class="fw-bold text-dark">{{ $log->created_at->format('M d, Y h:i A') }}</span>
                     </div>
                 </div>
             </div>
+            
+            @if($log->auditable_type === 'App\Models\Backup' && !empty($log->auditable->notes))
+                <div class="mt-3">
+                    <div class="bg-warning bg-opacity-10 border border-warning rounded p-3">
+                        <label class="text-warning small text-uppercase fw-bold d-block mb-1">
+                            <i class="fas fa-sticky-note me-1"></i> Notes
+                        </label>
+                        <span class="text-dark fw-medium">{{ $log->auditable->notes }}</span>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -125,8 +150,28 @@
             <div class="card-header bg-white py-3">
                 <h6 class="mb-0 fw-bold"><i class="fas fa-plus-circle text-success me-2"></i>Created Data</h6>
             </div>
-            <div class="card-body bg-dark">
-                <pre class="text-white mb-0" style="max-height: 300px; overflow-y: auto;"><code>{{ json_encode(is_array($log->new_values) ? $log->new_values : json_decode($log->new_values, true), JSON_PRETTY_PRINT) }}</code></pre>
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 30%">Field</th>
+                            <th style="width: 70%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $newValues = is_array($log->new_values) ? $log->new_values : json_decode($log->new_values, true) ?? [];
+                        @endphp
+                        @foreach($newValues as $field => $value)
+                            <tr>
+                                <td class="fw-bold bg-light">{{ Str::headline($field) }}</td>
+                                <td>
+                                    {{ is_array($value) ? json_encode($value) : $value }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     @endif
@@ -137,8 +182,28 @@
             <div class="card-header bg-white py-3">
                 <h6 class="mb-0 fw-bold"><i class="fas fa-trash-alt text-danger me-2"></i>Deleted Data</h6>
             </div>
-            <div class="card-body bg-dark">
-                <pre class="text-white mb-0" style="max-height: 300px; overflow-y: auto;"><code>{{ json_encode(is_array($log->old_values) ? $log->old_values : json_decode($log->old_values, true), JSON_PRETTY_PRINT) }}</code></pre>
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 30%">Field</th>
+                            <th style="width: 70%">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $oldValues = is_array($log->old_values) ? $log->old_values : json_decode($log->old_values, true) ?? [];
+                        @endphp
+                        @foreach($oldValues as $field => $value)
+                            <tr>
+                                <td class="fw-bold bg-light">{{ Str::headline($field) }}</td>
+                                <td>
+                                    {{ is_array($value) ? json_encode($value) : $value }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     @endif

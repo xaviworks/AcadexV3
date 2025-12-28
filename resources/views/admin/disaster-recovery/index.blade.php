@@ -22,56 +22,7 @@
 
     {{-- Stats --}}
     <div class="row g-4 mb-4">
-        <div class="col-lg-8">
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="text-muted text-uppercase small fw-bold mb-1">Total Backups</h6>
-                                    <h4 class="mb-0 fw-bold text-dark">{{ $stats['total_backups'] }}</h4>
-                                </div>
-                                <div class="bg-success bg-opacity-10 text-success rounded p-3">
-                                    <i class="fas fa-database fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="text-muted text-uppercase small fw-bold mb-1">Last Backup</h6>
-                                    <h4 class="mb-0 fw-bold text-dark">{{ $stats['last_backup'] }}</h4>
-                                </div>
-                                <div class="bg-info bg-opacity-10 text-info rounded p-3">
-                                    <i class="fas fa-clock fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="text-muted text-uppercase small fw-bold mb-1">Changes Today</h6>
-                                    <h4 class="mb-0 fw-bold text-dark">{{ $stats['changes_today'] }}</h4>
-                                </div>
-                                <div class="bg-warning bg-opacity-10 text-warning rounded p-3">
-                                    <i class="fas fa-clipboard-list fs-4"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
+        <div class="col-xl-6">
             <div class="card border-0 shadow-sm h-100 position-relative overflow-hidden">
                 <!-- Background decoration -->
                 <div class="position-absolute top-0 end-0 p-3 opacity-10" style="opacity: 0.05; transform: rotate(15deg); margin-right: -10px;">
@@ -122,6 +73,36 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted text-uppercase small fw-bold mb-1">Total Backups</h6>
+                            <h4 class="mb-0 fw-bold text-dark">{{ $stats['total_backups'] }}</h4>
+                        </div>
+                        <div class="bg-success bg-opacity-10 text-success rounded p-3">
+                            <i class="fas fa-database fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="text-muted text-uppercase small fw-bold mb-1">Last Backup</h6>
+                            <h4 class="mb-0 fw-bold text-dark">{{ $stats['last_backup'] }}</h4>
+                        </div>
+                        <div class="bg-info bg-opacity-10 text-info rounded p-3">
+                            <i class="fas fa-clock fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-4">
@@ -131,7 +112,7 @@
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold">Your Backups</h5>
                 </div>
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <div class="table-responsive" style="height: 700px; overflow-y: auto;">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                             <tr>
@@ -178,9 +159,11 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="fas fa-database fs-1 mb-3 opacity-25"></i>
-                                        <p class="mb-0">No backups found. Create one to get started.</p>
+                                    <td colspan="6" class="text-center text-muted align-middle" style="height: 600px;">
+                                        <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                                            <i class="fas fa-database fs-1 mb-3 opacity-25"></i>
+                                            <p class="mb-0">No backups found. Create one to get started.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
@@ -222,9 +205,9 @@
                         <small class="text-muted">
                             <i class="fas fa-info-circle me-1"></i> Keeps last 10 backups automatically.
                         </small>
-                        <form action="{{ route('admin.disaster-recovery.run-now') }}" method="POST" class="d-inline">
+                        <form id="runManualBackupForm" action="{{ route('admin.disaster-recovery.run-now') }}" method="POST" class="d-inline">
                             @csrf
-                            <button type="submit" class="btn btn-sm btn-link text-decoration-none">
+                            <button type="button" onclick="confirmRunNow()" class="btn btn-sm btn-link text-decoration-none">
                                 <i class="fas fa-play me-1"></i> Run Manual Backup Now
                             </button>
                         </form>
@@ -238,7 +221,7 @@
                     <h5 class="mb-0 fw-bold">Recent Activity</h5>
                     <a href="{{ route('admin.disaster-recovery.activity') }}" class="btn btn-sm btn-link text-decoration-none">View All</a>
                 </div>
-                <div class="list-group list-group-flush">
+                <div class="list-group list-group-flush" style="height: 440px; overflow-y: auto;">
                     @forelse($recentActivity as $log)
                         @php
                             $colors = ['created' => 'success', 'updated' => 'warning', 'deleted' => 'danger', 'restored' => 'info'];
@@ -264,7 +247,8 @@
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-4 text-muted">
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                            <i class="fas fa-history fs-1 mb-3 opacity-25"></i>
                             <p class="mb-0 small">No recent activity</p>
                         </div>
                     @endforelse
@@ -408,37 +392,96 @@
 
 async function showRestoreModal(id, date) {
     const { value: formValues } = await Swal.fire({
-        title: 'Restore Backup',
-        icon: 'warning',
+        title: '<span class="text-dark fw-bold">Restore System Backup</span>',
         html: `
-            <div class="alert alert-warning text-start">
-                <small>This will replace current data with backup from <b>${date}</b>.</small>
+            <div class="text-start mt-2">
+                <!-- Backup Details -->
+                <div class="bg-light rounded p-3 mb-4 border d-flex align-items-center">
+                    <div class="bg-white p-2 rounded border me-3 text-primary shadow-sm">
+                        <i class="fas fa-database fa-lg"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Restoring Point</div>
+                        <div class="fw-bold text-dark fs-5">${date}</div>
+                    </div>
+                </div>
+
+                <!-- Warning -->
+                <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger mb-4">
+                    <div class="d-flex">
+                        <i class="fas fa-exclamation-triangle fs-4 me-3 mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Warning: Data Overwrite</h6>
+                            <div class="small">This action will replace your current database with the selected backup. Any changes made after this backup date will be lost.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Option -->
+                <div class="mb-4">
+                    <div class="bg-white border rounded p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-check-label" for="swal-safety" style="cursor: pointer;">
+                                <span class="fw-bold text-dark">Create Safety Backup</span>
+                                <span class="d-block small text-muted">Recommended. Saves current state before restoring.</span>
+                            </label>
+                            <div class="form-check form-switch mb-0 ps-0">
+                                <input class="form-check-input ms-0" type="checkbox" id="swal-safety" style="cursor: pointer; transform: scale(1.3);">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmation & Auth -->
+                <div class="mb-2">
+                    <label class="form-label fw-bold small text-uppercase text-muted">Verification</label>
+                    
+                    <div class="form-check mb-3 user-select-none">
+                        <input class="form-check-input" type="checkbox" id="swal-confirm" style="cursor: pointer;">
+                        <label class="form-check-label fw-bold text-danger" for="swal-confirm" style="cursor: pointer;">
+                            I understand the risks and want to proceed
+                        </label>
+                    </div>
+                    
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white text-muted"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="swal-password" class="form-control" placeholder="Enter admin password">
+                    </div>
+                </div>
             </div>
-            <div class="form-check text-start mb-2">
-                <input class="form-check-input" type="checkbox" id="swal-safety" checked>
-                <label class="form-check-label" for="swal-safety">Create safety backup first</label>
-            </div>
-            <div class="form-check text-start mb-3">
-                <input class="form-check-input" type="checkbox" id="swal-confirm">
-                <label class="form-check-label" for="swal-confirm">I understand this overwrites data</label>
-            </div>
-            <input type="password" id="swal-password" class="swal2-input" placeholder="Enter your password">
         `,
         showCancelButton: true,
-        confirmButtonText: 'Restore Data',
-        confirmButtonColor: '#ffc107',
+        confirmButtonText: '<i class="fas fa-undo me-2"></i>Restore Backup',
+        confirmButtonColor: '#dc3545',
+        cancelButtonText: 'Cancel',
+        cancelButtonColor: '#6c757d',
         focusConfirm: false,
+        width: '550px',
+        customClass: {
+            confirmButton: 'btn btn-danger btn-lg px-4 shadow-sm',
+            cancelButton: 'btn btn-secondary btn-lg px-4 shadow-sm'
+        },
+        didOpen: () => {
+            const confirmBtn = Swal.getConfirmButton();
+            const confirmCheck = document.getElementById('swal-confirm');
+            const passwordInput = document.getElementById('swal-password');
+            
+            // Initial state
+            confirmBtn.disabled = true;
+            
+            function validate() {
+                confirmBtn.disabled = !(confirmCheck.checked && passwordInput.value.length > 0);
+            }
+
+            confirmCheck.addEventListener('change', validate);
+            passwordInput.addEventListener('input', validate);
+        },
         preConfirm: () => {
             const safety = document.getElementById('swal-safety').checked;
             const confirm = document.getElementById('swal-confirm').checked;
             const password = document.getElementById('swal-password').value;
 
-            if (!confirm) {
-                Swal.showValidationMessage('You must confirm that you understand the risks');
-                return false;
-            }
-            if (!password) {
-                Swal.showValidationMessage('Password is required');
+            if (!confirm || !password) {
                 return false;
             }
 
@@ -478,6 +521,22 @@ async function showRestoreModal(id, date) {
         document.body.appendChild(form);
         form.submit();
     }
+}
+
+function confirmRunNow() {
+    Swal.fire({
+        title: 'Run Manual Backup?',
+        text: "This will create a new backup immediately. The system will remain accessible.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Run Backup'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('runManualBackupForm').submit();
+        }
+    });
 }
 
 function showDeleteModal(id) {
