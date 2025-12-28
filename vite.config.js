@@ -7,7 +7,9 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/guest-entry.css',
-                'resources/js/app.js'
+                'resources/css/components/select-academic-period.css',
+                'resources/js/app.js',
+                'resources/js/pages/shared/select-academic-period.js'
             ],
             refresh: true,
         }),
