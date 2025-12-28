@@ -7,6 +7,8 @@ use App\Models\Course;
 use App\Models\TermGrade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class InstructorController extends Controller
@@ -47,13 +49,16 @@ class InstructorController extends Controller
             ->withCount('students')
             ->get();
 
+            // Optimize: Fetch graded counts for all subjects at once (prevent N+1)
+            $gradedCounts = TermGrade::whereIn('subject_id', $subjects->pluck('id'))
+                ->where('term', $term)
+                ->select('subject_id', DB::raw('COUNT(DISTINCT student_id) as graded_count'))
+                ->groupBy('subject_id')
+                ->pluck('graded_count', 'subject_id');
+
             foreach ($subjects as $subject) {
                 $totalStudents = $subject->students_count;
-
-                $graded = TermGrade::where('subject_id', $subject->id)
-                ->where('term', $term)
-                ->distinct('student_id')
-                    ->count('student_id');
+                $graded = $gradedCounts[$subject->id] ?? 0;
 
                 $subject->grade_status = match (true) {
                     $graded === 0 => 'not_started',
@@ -63,7 +68,7 @@ class InstructorController extends Controller
             }
         }
 
-        $courses = Course::all();
+        $courses = Cache::remember('courses:all', 3600, fn() => Course::all());
         $students = collect();
 
         if ($request->filled('subject_id')) {

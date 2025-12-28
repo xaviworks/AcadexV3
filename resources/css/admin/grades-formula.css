@@ -1,684 +1,708 @@
 /* Admin Grades Formula Pages Styles */
 
 .shadow-sm-sm {
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 .weight-editor-card {
-    border: 1px dashed rgba(25, 135, 84, 0.35);
+  border: 1px dashed rgba(25, 135, 84, 0.35);
 }
 
 /* Formula Option Cards (Subject Selection) */
 .formula-option-wrapper {
-    display: block;
-    position: relative;
+  display: block;
+  position: relative;
 }
 
 .formula-option-input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .formula-option-card {
-    border: 1px solid rgba(25, 135, 84, 0.18);
-    border-radius: 1.25rem;
-    background: #ffffff;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    position: relative;
-    overflow: hidden;
+  border: 1px solid rgba(25, 135, 84, 0.18);
+  border-radius: 1.25rem;
+  background: #ffffff;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .formula-option-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
 }
 
 .formula-option-card.is-selected {
-    border-color: #198754;
-    box-shadow: 0 22px 48px rgba(25, 135, 84, 0.22);
+  border-color: #198754;
+  box-shadow: 0 22px 48px rgba(25, 135, 84, 0.22);
 }
 
 .formula-option-card .formula-card-glow {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(25, 135, 84, 0.15), rgba(32, 201, 151, 0.12));
-    opacity: 0;
-    transform: scale(0.96);
-    transition: opacity 0.35s ease, transform 0.35s ease;
-    pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(25, 135, 84, 0.15), rgba(32, 201, 151, 0.12));
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+  pointer-events: none;
 }
 
 .formula-option-card.is-selected .formula-card-glow {
-    opacity: 1;
-    transform: scale(1);
+  opacity: 1;
+  transform: scale(1);
 }
 
 .formula-check {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #198754, #20c997);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    transform: scale(0.4);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #198754, #20c997);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transform: scale(0.4);
+  opacity: 0;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .formula-option-card.is-selected .formula-check {
-    opacity: 1;
-    transform: scale(1);
+  opacity: 1;
+  transform: scale(1);
 }
 
 .formula-option-card.pulse {
-    animation: formulaPulse 0.6s ease;
+  animation: formulaPulse 0.6s ease;
 }
 
 @keyframes formulaPulse {
-    0% {
-        transform: translateY(-4px) scale(0.99);
-    }
-    40% {
-        transform: translateY(-8px) scale(1.02);
-    }
-    100% {
-        transform: translateY(-4px) scale(1);
-    }
+  0% {
+    transform: translateY(-4px) scale(0.99);
+  }
+  40% {
+    transform: translateY(-8px) scale(1.02);
+  }
+  100% {
+    transform: translateY(-4px) scale(1);
+  }
 }
 
 .formula-weight-chip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    padding: 0.35rem 0.85rem;
-    border-radius: 999px;
-    background: rgba(25, 135, 84, 0.08);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #0f5132;
-    overflow: hidden;
-    transition: transform 0.3s ease;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(25, 135, 84, 0.08);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0f5132;
+  overflow: hidden;
+  transition: transform 0.3s ease;
 }
 
 .formula-weight-chip::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(25, 135, 84, 0.35), rgba(32, 201, 151, 0.35));
-    transform-origin: left center;
-    transform: scaleX(var(--chip-progress, 0));
-    transition: transform 0.4s ease;
-    opacity: 0.6;
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(25, 135, 84, 0.35), rgba(32, 201, 151, 0.35));
+  transform-origin: left center;
+  transform: scaleX(var(--chip-progress, 0));
+  transition: transform 0.4s ease;
+  opacity: 0.6;
 }
 
 .formula-weight-chip span {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
 }
 
 .formula-alert {
-    border-radius: 1rem;
-    border: none;
+  border-radius: 1rem;
+  border: none;
 }
 
 .btn-apply-formula {
-    border-radius: 999px;
-    padding: 0.4rem 1.6rem;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 999px;
+  padding: 0.4rem 1.6rem;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .btn-apply-formula:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-apply-formula:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(25, 135, 84, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(25, 135, 84, 0.25);
 }
 
 /* Wildcard Cards (Department & Course) */
 .wildcard-card {
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    min-height: 240px;
-    background: #ffffff;
+  position: relative;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  min-height: 240px;
+  background: #ffffff;
 }
 
 .wildcard-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+  transform: scale(1.05);
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
 }
 
 .wildcard-card.is-pressed {
-    transform: scale(0.99);
-    box-shadow: 0 14px 28px rgba(0,0,0,0.08);
+  transform: scale(0.99);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
 }
 
 .wildcard-card:focus-visible {
-    outline: 3px solid rgba(25, 135, 84, 0.45);
-    outline-offset: 4px;
+  outline: 3px solid rgba(25, 135, 84, 0.45);
+  outline-offset: 4px;
 }
 
 .wildcard-circle {
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 .wildcard-card:hover .wildcard-circle {
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    transform: translate(-50%, -55%) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translate(-50%, -55%) scale(1.05);
 }
 
 .wildcard-filter-btn {
-    transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .wildcard-filter-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(25, 135, 84, 0.15);
 }
 
 .wildcard-filter-btn.active {
-    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.25);
+  box-shadow: 0 6px 20px rgba(25, 135, 84, 0.25);
 }
 
 .badge-formula-label {
-    background-color: #ffffff;
-    color: #198754;
-    border: 1px solid rgba(25, 135, 84, 0.25);
-    font-weight: 600;
+  background-color: #ffffff;
+  color: #198754;
+  border: 1px solid rgba(25, 135, 84, 0.25);
+  font-weight: 600;
 }
 
 .wildcard-card .badge-formula-label {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    width: 100%;
-    line-height: 1.2;
-    padding: 0.45rem 0.75rem;
-    border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  width: 100%;
+  line-height: 1.2;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
 }
 
 .wildcard-title {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .bg-danger-subtle {
-    background-color: rgba(220, 53, 69, 0.15) !important;
-    color: #842029 !important;
+  background-color: rgba(220, 53, 69, 0.15) !important;
+  color: #842029 !important;
 }
 
 /* Template Selection Radio (Edit Global) */
 .form-check-input.structure-template-radio {
-    display: none;
+  display: none;
 }
 
 .form-check-input.structure-template-radio:checked + label .card {
-    border-color: #0dcaf0;
-    background-color: rgba(13, 202, 240, 0.1);
+  border-color: #0dcaf0;
+  background-color: rgba(13, 202, 240, 0.1);
 }
 
 .form-check-input.structure-template-radio + label .card {
-    cursor: pointer;
-    transition: all 0.2s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .form-check-input.structure-template-radio + label .card:hover {
-    border-color: #0dcaf0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(13, 202, 240, 0.2);
+  border-color: #0dcaf0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 202, 240, 0.2);
 }
 
 /* Wildcards Page Specific Styles */
 .section-scroll {
-    padding: 0.5rem 0.75rem 1.25rem;
+  padding: 0.5rem 0.75rem 1.25rem;
 }
 
 .modal-dialog-scrollable .modal-body {
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .component-item {
-    transition: all 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .component-item.ms-4 {
-    background: rgba(13, 110, 253, 0.02);
+  background: rgba(13, 110, 253, 0.02);
 }
 
 .component-item .add-subcomponent-btn {
-    transition: all 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .component-item .add-subcomponent-btn:hover {
-    transform: translateY(-1px);
+  transform: translateY(-1px);
 }
 
 .subcomponents-container {
-    padding-left: 0;
+  padding-left: 0;
 }
 
 .subcomponents-container > .component-item:last-child {
-    margin-bottom: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .bulk-layout-card {
-    background: #ffffff;
-    border-radius: 1.25rem;
-    border: 1px solid rgba(25, 135, 84, 0.12);
-    box-shadow: 0 14px 32px rgba(25, 135, 84, 0.08);
-    padding: 1.5rem;
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(25, 135, 84, 0.12);
+  box-shadow: 0 14px 32px rgba(25, 135, 84, 0.08);
+  padding: 1.5rem;
 }
 
 .bulk-course-scroll {
-    background: #ffffff;
-    border: 1px solid rgba(25, 135, 84, 0.12);
-    box-shadow: 0 10px 26px rgba(25, 135, 84, 0.07);
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    padding: 0.85rem 0.95rem 1.15rem;
-    flex: 1 1 auto;
+  background: #ffffff;
+  border: 1px solid rgba(25, 135, 84, 0.12);
+  box-shadow: 0 10px 26px rgba(25, 135, 84, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.85rem 0.95rem 1.15rem;
+  flex: 1 1 auto;
 }
 
 .formula-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    padding: 0.85rem 0.95rem;
-    flex: 1 1 auto;
-    background: #ffffff;
-    border: 1px solid rgba(25, 135, 84, 0.12) !important;
-    border-radius: 1rem;
-    box-shadow: 0 8px 22px rgba(25, 135, 84, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.85rem 0.95rem;
+  flex: 1 1 auto;
+  background: #ffffff;
+  border: 1px solid rgba(25, 135, 84, 0.12) !important;
+  border-radius: 1rem;
+  box-shadow: 0 8px 22px rgba(25, 135, 84, 0.08);
 }
 
 .bulk-course-card {
-    background: #ffffff;
-    border: 1px solid rgba(25, 135, 84, 0.2);
-    border-radius: 1rem;
-    padding: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #ffffff;
+  border: 1px solid rgba(25, 135, 84, 0.2);
+  border-radius: 1rem;
+  padding: 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .bulk-course-card:hover {
-    border-color: rgba(25, 135, 84, 0.45);
-    box-shadow: 0 12px 24px rgba(25, 135, 84, 0.1);
+  border-color: rgba(25, 135, 84, 0.45);
+  box-shadow: 0 12px 24px rgba(25, 135, 84, 0.1);
 }
 
 .bulk-course-card .form-check-input:checked ~ label {
-    color: #0f5132;
+  color: #0f5132;
 }
 
 .bulk-course-card.is-selected {
-    border-color: rgba(25, 135, 84, 0.6);
-    box-shadow: 0 16px 30px rgba(25, 135, 84, 0.12);
+  border-color: rgba(25, 135, 84, 0.6);
+  box-shadow: 0 16px 30px rgba(25, 135, 84, 0.12);
 }
 
 .bulk-course-card-header .course-label,
 .bulk-course-card-header .course-meta {
-    word-break: break-word;
+  word-break: break-word;
 }
 
 .bulk-course-card-header .bulk-course-toggle {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .bulk-course-subjects {
-    margin-top: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 .bulk-course-subject-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .course-formula-meta,
 .subject-formula-meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
 }
 
 .course-formula-chip,
 .subject-formula-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.3rem 0.75rem;
-    border-radius: 999px;
-    font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
 }
 
 .course-formula-chip {
-    font-size: 0.75rem;
+  font-size: 0.75rem;
 }
 
 .subject-formula-chip {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
 }
 
 .course-formula-chip-course,
 .subject-formula-chip-course {
-    background: rgba(25, 135, 84, 0.18);
-    color: #0f5132;
-    border: 1px solid rgba(25, 135, 84, 0.25);
+  background: rgba(25, 135, 84, 0.18);
+  color: #0f5132;
+  border: 1px solid rgba(25, 135, 84, 0.25);
 }
 
 .course-formula-chip-department,
 .subject-formula-chip-department {
-    background: rgba(13, 110, 253, 0.12);
-    color: #0a58ca;
-    border: 1px solid rgba(13, 110, 253, 0.24);
+  background: rgba(13, 110, 253, 0.12);
+  color: #0a58ca;
+  border: 1px solid rgba(13, 110, 253, 0.24);
 }
 
 .course-formula-chip-global,
 .subject-formula-chip-global {
-    background: rgba(108, 117, 125, 0.12);
-    color: #495057;
-    border: 1px solid rgba(108, 117, 125, 0.2);
+  background: rgba(108, 117, 125, 0.12);
+  color: #495057;
+  border: 1px solid rgba(108, 117, 125, 0.2);
 }
 
 .subject-formula-chip-subject {
-    background: rgba(111, 66, 193, 0.18);
-    color: #4b2a86;
-    border: 1px solid rgba(111, 66, 193, 0.26);
+  background: rgba(111, 66, 193, 0.18);
+  color: #4b2a86;
+  border: 1px solid rgba(111, 66, 193, 0.26);
 }
 
 .course-formula-label,
 .subject-formula-label {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 .course-formula-label {
-    font-size: 0.75rem;
+  font-size: 0.75rem;
 }
 
 .subject-formula-label {
-    font-size: 0.7rem;
+  font-size: 0.7rem;
 }
 
 .subject-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.35rem 0.65rem;
-    border-radius: 999px;
-    background: rgba(25, 135, 84, 0.12);
-    color: #0f5132;
-    max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(25, 135, 84, 0.12);
+  color: #0f5132;
+  max-width: 100%;
 }
 
 .subject-pill-warning {
-    background: rgba(220, 53, 69, 0.12);
-    color: #842029;
+  background: rgba(220, 53, 69, 0.12);
+  color: #842029;
 }
 
 .subject-pill-text {
-    white-space: normal;
-    word-break: break-word;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .subject-chip-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.45rem 0.6rem;
-    border-radius: 0.85rem;
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(25, 135, 84, 0.14);
-    box-shadow: 0 6px 16px rgba(25, 135, 84, 0.05);
-    min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(25, 135, 84, 0.14);
+  box-shadow: 0 6px 16px rgba(25, 135, 84, 0.05);
+  min-width: 180px;
 }
 
 .subject-chip-card .subject-pill {
-    width: 100%;
+  width: 100%;
 }
 
 .template-selection-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    padding: 0.85rem 0.95rem;
-    background: #ffffff;
-    border: 1px solid rgba(25, 135, 84, 0.12) !important;
-    border-radius: 1rem;
-    box-shadow: 0 8px 22px rgba(25, 135, 84, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.85rem 0.95rem;
+  background: #ffffff;
+  border: 1px solid rgba(25, 135, 84, 0.12) !important;
+  border-radius: 1rem;
+  box-shadow: 0 8px 22px rgba(25, 135, 84, 0.08);
 }
 
 .structure-template-card {
-    display: block;
-    border: 1px solid rgba(25, 135, 84, 0.2);
-    border-radius: 1rem;
-    background: #ffffff;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    cursor: pointer;
+  display: block;
+  border: 1px solid rgba(25, 135, 84, 0.2);
+  border-radius: 1rem;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  cursor: pointer;
 }
 
 .structure-template-card:hover,
 .structure-template-card:focus-within {
-    border-color: rgba(25, 135, 84, 0.45);
-    box-shadow: 0 14px 32px rgba(25, 135, 84, 0.12);
-    transform: translateY(-2px);
+  border-color: rgba(25, 135, 84, 0.45);
+  box-shadow: 0 14px 32px rgba(25, 135, 84, 0.12);
+  transform: translateY(-2px);
 }
 
 .structure-template-card.is-selected {
-    border-color: rgba(25, 135, 84, 0.6);
-    box-shadow: 0 18px 34px rgba(25, 135, 84, 0.16);
-    transform: translateY(-2px);
-    background: rgba(25, 135, 84, 0.02);
+  border-color: rgba(25, 135, 84, 0.6);
+  box-shadow: 0 18px 34px rgba(25, 135, 84, 0.16);
+  transform: translateY(-2px);
+  background: rgba(25, 135, 84, 0.02);
 }
 
 .structure-template-card.is-active {
-    border-color: rgba(25, 135, 84, 0.6);
-    box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
+  border-color: rgba(25, 135, 84, 0.6);
+  box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
 }
 
 .structure-template-card.is-loading {
-    opacity: 0.6;
-    pointer-events: none;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
-.structure-template-card input[type="radio"] {
-    cursor: pointer;
+.structure-template-card input[type='radio'] {
+  cursor: pointer;
 }
 
 .structure-template-card .template-status-badge {
-    align-self: flex-start;
+  align-self: flex-start;
 }
 
 .structure-template-card.is-active .template-status-badge {
-    background: rgba(25, 135, 84, 0.18) !important;
-    color: #0f5132 !important;
+  background: rgba(25, 135, 84, 0.18) !important;
+  color: #0f5132 !important;
 }
 
 .structure-template-card .js-template-apply {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .structure-template-card .js-template-apply:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(25, 135, 84, 0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(25, 135, 84, 0.18);
 }
 
 .structure-template-card .js-template-apply:disabled {
-    transform: none;
-    box-shadow: none;
-    opacity: 0.75;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.75;
 }
 
 .formula-card {
-    display: block;
-    border: 1px solid rgba(25, 135, 84, 0.2);
-    border-radius: 1rem;
-    background: #ffffff;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
+  display: block;
+  border: 1px solid rgba(25, 135, 84, 0.2);
+  border-radius: 1rem;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
 .formula-card:hover,
 .formula-card:focus-within {
-    border-color: rgba(25, 135, 84, 0.45);
-    box-shadow: 0 14px 32px rgba(25, 135, 84, 0.12);
+  border-color: rgba(25, 135, 84, 0.45);
+  box-shadow: 0 14px 32px rgba(25, 135, 84, 0.12);
 }
 
 .formula-card.is-selected {
-    border-color: rgba(25, 135, 84, 0.6);
-    box-shadow: 0 18px 34px rgba(25, 135, 84, 0.16);
+  border-color: rgba(25, 135, 84, 0.6);
+  box-shadow: 0 18px 34px rgba(25, 135, 84, 0.16);
 }
 
 .formula-card.formula-context-mismatch {
-    border-color: rgba(255, 193, 7, 0.45);
-    box-shadow: 0 14px 32px rgba(255, 193, 7, 0.18);
+  border-color: rgba(255, 193, 7, 0.45);
+  box-shadow: 0 14px 32px rgba(255, 193, 7, 0.18);
 }
 
 .formula-card.formula-context-mismatch.is-selected {
-    border-color: rgba(220, 53, 69, 0.6);
-    box-shadow: 0 20px 40px rgba(220, 53, 69, 0.2);
+  border-color: rgba(220, 53, 69, 0.6);
+  box-shadow: 0 20px 40px rgba(220, 53, 69, 0.2);
 }
 
 .formula-card.border-info {
-    border-width: 2px;
-    border-style: solid;
+  border-width: 2px;
+  border-style: solid;
 }
 
 .formula-card.border-info:hover {
-    border-color: rgba(13, 202, 240, 0.6);
-    box-shadow: 0 16px 36px rgba(13, 202, 240, 0.15);
+  border-color: rgba(13, 202, 240, 0.6);
+  box-shadow: 0 16px 36px rgba(13, 202, 240, 0.15);
 }
 
 .formula-context-row .badge {
-    font-size: 0.7rem;
+  font-size: 0.7rem;
 }
 
-.formula-card input[type="radio"] {
-    cursor: pointer;
+.formula-card input[type='radio'] {
+  cursor: pointer;
 }
 
 .formula-card-title {
-    word-break: break-word;
+  word-break: break-word;
 }
 
 .formula-list.formula-filter-fallback .formula-card.formula-fallback {
-    border-color: rgba(25, 135, 84, 0.65);
-    box-shadow: 0 20px 40px rgba(25, 135, 84, 0.2);
+  border-color: rgba(25, 135, 84, 0.65);
+  box-shadow: 0 20px 40px rgba(25, 135, 84, 0.2);
 }
 
 .formula-list.formula-filter-fallback .formula-card:not(.formula-fallback) {
-    opacity: 0.9;
+  opacity: 0.9;
 }
 
 .formula-card .btn-outline-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(13, 110, 253, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(13, 110, 253, 0.2);
 }
 
 .formula-card .btn-outline-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(220, 53, 69, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(220, 53, 69, 0.2);
 }
 
 .badge.bg-success-subtle {
-    background-color: rgba(25, 135, 84, 0.15) !important;
-    color: #0f5132 !important;
+  background-color: rgba(25, 135, 84, 0.15) !important;
+  color: #0f5132 !important;
 }
 
 .bg-warning-subtle {
-    background-color: rgba(255, 193, 7, 0.15) !important;
-    color: #664d03 !important;
+  background-color: rgba(255, 193, 7, 0.15) !important;
+  color: #664d03 !important;
 }
 
 .badge.bg-info-subtle {
-    background-color: rgba(13, 202, 240, 0.12) !important;
-    color: #055160 !important;
+  background-color: rgba(13, 202, 240, 0.12) !important;
+  color: #055160 !important;
 }
 
 .structure-card {
-    background: #ffffff;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #ffffff;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .structure-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(25, 135, 84, 0.18);
 }
 
 .structure-card .badge {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 .structure-card .badge.bg-primary {
-    font-size: 0.85rem;
-    padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.85rem;
 }
 
 .structure-card .badge.ps-3 {
-    font-size: 0.8rem;
-    border-left: 3px solid rgba(25, 135, 84, 0.3);
+  font-size: 0.8rem;
+  border-left: 3px solid rgba(25, 135, 84, 0.3);
 }
 
 .structure-card .d-flex.flex-wrap {
-    row-gap: 0.5rem;
+  row-gap: 0.5rem;
 }
 
 .structure-template-wrapper {
-    margin-top: 1.25rem;
-    padding: 1.25rem;
-    border-radius: 1.1rem;
-    border: 1px dashed rgba(25, 135, 84, 0.25);
-    background: rgba(25, 135, 84, 0.05);
-    box-shadow: 0 12px 28px rgba(25, 135, 84, 0.08);
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  border-radius: 1.1rem;
+  border: 1px dashed rgba(25, 135, 84, 0.25);
+  background: rgba(25, 135, 84, 0.05);
+  box-shadow: 0 12px 28px rgba(25, 135, 84, 0.08);
 }
 
 .structure-template-grid {
-    display: grid;
-    gap: 1.1rem;
+  display: grid;
+  gap: 1.1rem;
 }
 
 .structure-template-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: rgba(25, 135, 84, 0.1);
-    color: #198754;
-    font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(25, 135, 84, 0.1);
+  color: #198754;
+  font-weight: 600;
 }
 
 .structure-template-chip .bi {
-    font-size: 0.8rem;
+  font-size: 0.8rem;
 }
 
 .template-feedback {
-    font-size: 0.85rem;
+  font-size: 0.85rem;
 }
 
 .js-delete-formula {
-    transition: all 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .js-delete-formula:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 /* Ensure long badge/text content wraps */
@@ -687,54 +711,54 @@
 .structure-card .badge,
 .wildcard-card .badge-formula-label,
 .card .badge-formula-label {
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
-    display: inline-flex !important;
-    align-items: center;
-    max-width: 100%;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  display: inline-flex !important;
+  align-items: center;
+  max-width: 100%;
 }
 
 .badge-formula-label,
 .badge.bg-success-subtle,
 .badge.bg-light {
-    max-width: 100%;
+  max-width: 100%;
 }
 
 .badge-formula-label:empty {
-    display: none !important;
+  display: none !important;
 }
 
 /* Responsive */
 @media (min-width: 768px) {
-    .structure-template-grid {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
+  .structure-template-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
-    .section-scroll {
-        max-height: none;
-        padding: 0.5rem 0 1rem;
-    }
+  .section-scroll {
+    max-height: none;
+    padding: 0.5rem 0 1rem;
+  }
 }
 
 @media (max-width: 576px) {
-    .formula-option-card {
-        border-radius: 1rem;
-    }
+  .formula-option-card {
+    border-radius: 1rem;
+  }
 
-    .wildcard-card {
-        min-height: 200px;
-    }
+  .wildcard-card {
+    min-height: 200px;
+  }
 
-    .wildcard-circle {
-        width: 80px;
-        height: 80px;
-    }
+  .wildcard-circle {
+    width: 80px;
+    height: 80px;
+  }
 
-    .bulk-layout-card {
-        padding: 1.15rem;
-        border-radius: 1rem;
-    }
+  .bulk-layout-card {
+    padding: 1.15rem;
+    border-radius: 1rem;
+  }
 }

@@ -1,14 +1,17 @@
 # Alpine Store State Management - Usage Guide
 
 ## Overview
+
 This document demonstrates practical usage of Alpine stores integrated into Acadex. Alpine stores provide centralized, reactive state management for client-side UI interactions.
 
 ## Implemented Stores
 
 ### 1. Notifications Store (`$store.notifications`)
+
 **Purpose**: Centralized toast notification system replacing Laravel session flash messages.
 
 **Implementation Example** (`manage-grades.blade.php`):
+
 ```php
 <!-- BEFORE: Laravel Session Flash with Bootstrap -->
 @if(session('success'))
@@ -32,12 +35,14 @@ This document demonstrates practical usage of Alpine stores integrated into Acad
 ```
 
 **Available Methods**:
+
 - `notify.success(message)` - Green success toast with check icon
 - `notify.error(message)` - Red error toast with X icon  
 - `notify.warning(message)` - Yellow warning toast with exclamation icon
 - `notify.info(message)` - Blue info toast with info icon
 
 **Features**:
+
 - Auto-dismiss after 5 seconds
 - Slide-in/fade-out animations
 - Multiple notifications queued
@@ -47,9 +52,11 @@ This document demonstrates practical usage of Alpine stores integrated into Acad
 ---
 
 ### 2. Grades Store (`$store.grades`)
+
 **Purpose**: Track unsaved grade changes and manage term selection state.
 
 **Implementation Example** (`grade-script.blade.php`):
+
 ```javascript
 // BEFORE: Global variable pattern
 let hasUnsavedChanges = false;
@@ -75,6 +82,7 @@ function updateSaveButtonState() {
 ```
 
 **Visual Indicator** (`grade-table.blade.php`):
+
 ```html
 <!-- Alpine-powered unsaved changes badge -->
 <div x-data x-show="$store.grades.unsavedChanges" x-transition class="me-3">
@@ -86,12 +94,14 @@ function updateSaveButtonState() {
 ```
 
 **Available Methods**:
+
 - `gradeState.markChanged()` - Mark form as having unsaved changes
 - `gradeState.clearUnsaved()` - Clear unsaved changes flag
 - `gradeState.hasUnsaved()` - Check if there are unsaved changes
 - `gradeState.setTerm(term)` - Switch term with confirmation if unsaved
 
 **Features**:
+
 - Reactive UI updates across components
 - Automatic beforeunload warning
 - Confirmation modal on navigation with unsaved changes
@@ -99,6 +109,7 @@ function updateSaveButtonState() {
 - Integrates with existing showUnsavedChangesModal function
 
 **Replaced Global Variables**:
+
 - ✅ `hasUnsavedChanges` → `$store.grades.unsavedChanges`
 - ✅ All `hasUnsavedChanges = false` → `Alpine.store('grades').clearUnsaved()`
 - ✅ All `hasUnsavedChanges = true` → `Alpine.store('grades').markChanged()`
@@ -106,14 +117,17 @@ function updateSaveButtonState() {
 ---
 
 ### 3. Modal Store (`$store.modals`)
+
 **Purpose**: Centralized modal state management for opening/closing modals with data payloads.
 
 **Available Methods**:
+
 - `modal.open(modalId, data)` - Open modal with optional data payload
 - `modal.close()` - Close active modal
 - `modal.isOpen(modalId)` - Check if specific modal is active
 
 **Example Usage**:
+
 ```html
 <!-- Open modal with data -->
 <button @click="$store.modals.open('editStudent', { studentId: 123 })">
@@ -132,14 +146,17 @@ function updateSaveButtonState() {
 ---
 
 ### 4. Dashboard Store (`$store.dashboard`)
+
 **Purpose**: Persist dashboard filter selections across page refreshes using localStorage.
 
 **Available Methods**:
+
 - `filters.set(key, value)` - Set filter and save to localStorage
 - `filters.clear()` - Clear all filters
 - `filters.get(key)` - Get current filter value
 
 **Example Usage**:
+
 ```html
 <!-- Filter dropdowns -->
 <select @change="$store.dashboard.setFilter('department', $event.target.value)">
@@ -157,9 +174,11 @@ function updateSaveButtonState() {
 ---
 
 ### 5. Table Store (`$store.table`)
+
 **Purpose**: Manage table state including sorting, pagination, and row selection.
 
 **Available State**:
+
 - `sortColumn` - Current sort column
 - `sortDirection` - 'asc' or 'desc'
 - `currentPage` - Pagination current page
@@ -167,6 +186,7 @@ function updateSaveButtonState() {
 - `selectedRows` - Array of selected row IDs
 
 **Example Usage**:
+
 ```html
 <!-- Sortable table headers -->
 <th @click="$store.table.sort('name')" class="cursor-pointer">
@@ -185,14 +205,17 @@ function updateSaveButtonState() {
 ---
 
 ### 6. Preferences Store (`$store.preferences`)
+
 **Purpose**: Store user UI preferences (theme, sidebar state, display mode) with localStorage persistence.
 
 **Available State**:
+
 - `theme` - 'light' or 'dark'
 - `sidebarCollapsed` - Boolean sidebar state
 - `compactMode` - Boolean compact display mode
 
 **Example Usage**:
+
 ```html
 <!-- Theme toggle -->
 <button @click="$store.preferences.theme = $store.preferences.theme === 'light' ? 'dark' : 'light'">
@@ -210,6 +233,7 @@ function updateSaveButtonState() {
 ## Integration Files
 
 ### Core Files
+
 1. **`resources/js/stores.js`** - Alpine store definitions (7 stores)
 2. **`resources/js/store-helpers.js`** - Global helper functions (notify, gradeState, modal, filters)
 3. **`resources/views/components/toast-notifications.blade.php`** - Toast notification component
@@ -217,6 +241,7 @@ function updateSaveButtonState() {
 5. **`resources/views/layouts/app.blade.php`** - Includes toast component before @stack('scripts')
 
 ### Enhanced Pages
+
 1. **`resources/views/instructor/manage-grades.blade.php`** - Uses notification store for session flash
 2. **`resources/views/instructor/partials/grade-script.blade.php`** - Migrated from global variable to grades store
 3. **`resources/views/instructor/partials/grade-table.blade.php`** - Added Alpine unsaved changes badge
@@ -226,6 +251,7 @@ function updateSaveButtonState() {
 ## Benefits Over Legacy Patterns
 
 ### Before: Laravel Session Flash + Bootstrap
+
 ```php
 @if(session('success'))
     <div class="toast-container">
@@ -233,13 +259,17 @@ function updateSaveButtonState() {
     </div>
 @endif
 ```
+
 **Issues**: Not reusable, requires page refresh, no animations, manual DOM manipulation
 
 ### After: Alpine Notification Store
+
 ```javascript
 notify.success('Grade saved successfully!');
 ```
-**Benefits**: 
+
+**Benefits**:
+
 - ✅ Call from anywhere (Blade, inline scripts, Alpine components)
 - ✅ No page refresh needed
 - ✅ Smooth animations (slide-in/fade-out)
@@ -250,6 +280,7 @@ notify.success('Grade saved successfully!');
 ---
 
 ### Before: Global JavaScript Variables
+
 ```javascript
 let hasUnsavedChanges = false;
 
@@ -259,18 +290,23 @@ function clearChanges() {
 
 // No automatic UI updates
 ```
+
 **Issues**: Not reactive, must manually update UI, scattered state logic
 
 ### After: Alpine Grades Store
+
 ```javascript
 Alpine.store('grades').clearUnsaved(); // Reactive state update
 ```
+
 ```html
 <div x-show="$store.grades.unsavedChanges" x-transition>
     Unsaved changes detected
 </div>
 ```
+
 **Benefits**:
+
 - ✅ Reactive UI updates automatically
 - ✅ Centralized state management
 - ✅ Declarative templates with x-show
@@ -283,6 +319,7 @@ Alpine.store('grades').clearUnsaved(); // Reactive state update
 ## Best Practices
 
 1. **Use helper functions for simplicity**:
+
    ```javascript
    // Good - Simple and readable
    notify.success('Saved!');
@@ -292,6 +329,7 @@ Alpine.store('grades').clearUnsaved(); // Reactive state update
    ```
 
 2. **Check Alpine availability before store access**:
+
    ```javascript
    if (Alpine && Alpine.store) {
        Alpine.store('grades').markChanged();
@@ -299,6 +337,7 @@ Alpine.store('grades').clearUnsaved(); // Reactive state update
    ```
 
 3. **Use x-data for component-level state, stores for global state**:
+
    ```html
    <!-- Component-level: Use x-data -->
    <div x-data="{ open: false }">
@@ -317,6 +356,7 @@ Alpine.store('grades').clearUnsaved(); // Reactive state update
    - Consider for: last selected term, last viewed subject
 
 5. **Use x-transition for smooth animations**:
+
    ```html
    <div x-show="$store.grades.unsavedChanges" x-transition>
        <!-- Automatically animated show/hide -->
@@ -338,7 +378,7 @@ Alpine.store('grades').clearUnsaved(); // Reactive state update
 ## Quick Reference
 
 | Task | Code |
-|------|------|
+| ------ | ------ |
 | Show success toast | `notify.success('Message')` |
 | Show error toast | `notify.error('Message')` |
 | Mark grades changed | `gradeState.markChanged()` |
@@ -354,7 +394,9 @@ Alpine.store('grades').clearUnsaved(); // Reactive state update
 ---
 
 ## Testing
+
 Build successful: `npm run build` exits with code 0
+
 - app-ix97aHah.js (82.63 kB, gzip: 32.24 kB)
 - app-CCzK2OX3.css (58.23 kB, gzip: 9.77 kB)
 - Zero errors, zero warnings

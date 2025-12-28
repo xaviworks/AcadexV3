@@ -18,6 +18,7 @@ use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -3435,8 +3436,8 @@ class AdminController extends Controller
         // Show all users, including instructors (role 0)
         $users = User::orderBy('role', 'asc')->get();
 
-        $departments = Department::all();
-        $courses = Course::all();
+        $departments = Cache::remember('departments:all', 3600, fn() => Department::all());
+        $courses = Cache::remember('courses:all', 3600, fn() => Course::all());
 
         // Detect if the disabled_until column exists so the view can surface a migration notice
         $hasDisabledUntilColumn = Schema::hasColumn('users', 'disabled_until');
@@ -3871,8 +3872,6 @@ class AdminController extends Controller
             $sessionCount = DB::table('sessions')
                 ->where('user_id', $user->id)
                 ->count();
-        } else {
-            \Illuminate\Support\Facades\Log::debug("getUserSessionCount: skipped DB query; session driver={$driver}");
         }
 
         return response()->json([

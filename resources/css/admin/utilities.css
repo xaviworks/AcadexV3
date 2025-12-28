@@ -5,32 +5,32 @@
    =========================== */
 
 .bg-gradient-light {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .bg-gradient-green {
-    background: linear-gradient(135deg, #198754, #20c997);
+  background: linear-gradient(135deg, #198754, #20c997);
 }
 
 .bg-gradient-green-dark {
-    background: linear-gradient(135deg, #198754, #0f5132);
+  background: linear-gradient(135deg, #198754, #0f5132);
 }
 
 .bg-gradient-green-card {
-    background: linear-gradient(135deg, #198754, #20c997);
-    color: white;
+  background: linear-gradient(135deg, #198754, #20c997);
+  color: white;
 }
 
 .bg-gradient-danger {
-    background: linear-gradient(135deg, #dc3545, #c82333);
+  background: linear-gradient(135deg, #dc3545, #c82333);
 }
 
 .bg-gradient-green-soft {
-    background-color: #4ecd85;
+  background-color: #4ecd85;
 }
 
 .bg-gradient-overlay {
-    background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* ===========================
@@ -38,21 +38,21 @@
    =========================== */
 
 .text-primary-green {
-    color: #198754;
+  color: #198754;
 }
 
 .text-muted-gray {
-    color: #6c757d;
+  color: #6c757d;
 }
 
 .link-success-green {
-    color: #198754;
-    text-decoration: none;
+  color: #198754;
+  text-decoration: none;
 }
 
 .link-success-green:hover {
-    color: #0f5132;
-    text-decoration: underline;
+  color: #0f5132;
+  text-decoration: underline;
 }
 
 /* ===========================
@@ -60,51 +60,51 @@
    =========================== */
 
 .w-100-table {
-    width: 100%;
+  width: 100%;
 }
 
 .max-w-150 {
-    max-width: 150px;
+  max-width: 150px;
 }
 
 .max-w-180 {
-    max-width: 180px;
+  max-width: 180px;
 }
 
 .icon-xs {
-    font-size: 0.75rem;
+  font-size: 0.75rem;
 }
 
 .icon-sm {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
 }
 
 .icon-md {
-    font-size: 1rem;
+  font-size: 1rem;
 }
 
 .icon-lg {
-    font-size: 1.2rem;
+  font-size: 1.2rem;
 }
 
 .icon-xl {
-    font-size: 1.5rem;
+  font-size: 1.5rem;
 }
 
 .icon-xxl {
-    font-size: 4rem;
+  font-size: 4rem;
 }
 
 .icon-muted-gray {
-    color: #dee2e6;
+  color: #dee2e6;
 }
 
 .text-xs {
-    font-size: 0.75rem;
+  font-size: 0.75rem;
 }
 
 .text-sm {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
 }
 
 /* ===========================
@@ -112,25 +112,25 @@
    =========================== */
 
 .circle-icon-wrapper {
-    padding: 0.5rem;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .circle-icon-wrapper-lg {
-    padding: 0.75rem;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  padding: 0.75rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .password-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }
 
 /* ===========================
@@ -138,15 +138,15 @@
    =========================== */
 
 .min-vh-100 {
-    min-height: 100vh;
+  min-height: 100vh;
 }
 
 .header-height-80 {
-    height: 80px;
+  height: 80px;
 }
 
 .z-index-1050 {
-    z-index: 1050;
+  z-index: 1050;
 }
 
 /* ===========================
@@ -154,11 +154,11 @@
    =========================== */
 
 .d-none-important {
-    display: none !important;
+  display: none !important;
 }
 
 .d-block-important {
-    display: block !important;
+  display: block !important;
 }
 
 /* ===========================
@@ -166,11 +166,11 @@
    =========================== */
 
 .white-space-pre-wrap {
-    white-space: pre-wrap;
+  white-space: pre-wrap;
 }
 
 .fw-600 {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 /* ===========================
@@ -178,12 +178,12 @@
    =========================== */
 
 .breadcrumb-item a.link-success-green {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
 }
 
 .breadcrumb-item.active {
-    color: #6c757d;
-    font-size: 0.9rem;
+  color: #6c757d;
+  font-size: 0.9rem;
 }
 
 /* ===========================
@@ -191,13 +191,13 @@
    =========================== */
 
 .card-header-gradient {
-    background: linear-gradient(135deg, #198754, #20c997);
-    color: white;
-    padding: 1rem;
+  background: linear-gradient(135deg, #198754, #20c997);
+  color: white;
+  padding: 1rem;
 }
 
 .card-header-light {
-    background-color: #f8f9fa;
+  background-color: #f8f9fa;
 }
 
 /* ===========================
@@ -206,61 +206,63 @@
 
 /* Wildcard circle - complex positioning for department/course/wildcard cards */
 .wildcard-circle-positioned {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #4da674, #023336);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #4da674, #023336);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 /* Alternative wildcard circle variant */
 .wildcard-circle-alt {
-    background: linear-gradient(135deg, #23a362, #0b3d23);
+  background: linear-gradient(135deg, #23a362, #0b3d23);
 }
 
 /* Wildcard header height variations */
 .wildcard-header-green-reverse {
-    height: 80px;
-    background: linear-gradient(135deg, #0f5132, #198754);
+  height: 80px;
+  background: linear-gradient(135deg, #0f5132, #198754);
 }
 
 /* Alert positioning */
 .alert-fixed-bottom {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    margin: 1rem;
-    z-index: 1050;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 1rem;
+  z-index: 1050;
 }
 
 /* Custom datetime wrapper */
 .custom-datetime-wrapper {
-    display: none;
-    margin-top: 1rem;
+  display: none;
+  margin-top: 1rem;
 }
 
 .custom-datetime-wrapper.show {
-    display: block;
+  display: block;
 }
 
 /* Structure template card cursor */
 .cursor-pointer {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 /* Transition helpers */
 .transition-all {
-    transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .transition-transform-shadow {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }

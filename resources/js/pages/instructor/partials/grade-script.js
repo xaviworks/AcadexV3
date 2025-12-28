@@ -10,173 +10,173 @@ let termChangeInProgress = false;
 
 // Helper function to safely access Alpine grades store
 function getGradesStore() {
-    if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
-        return Alpine.store('grades');
-    }
-    return null;
+  if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
+    return Alpine.store('grades');
+  }
+  return null;
 }
 
 // Helper function to safely access Alpine loading store
 function getLoadingStore() {
-    if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
-        return Alpine.store('loading');
-    }
-    return null;
+  if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
+    return Alpine.store('loading');
+  }
+  return null;
 }
 
 export function bindGradeInputEvents() {
-    console.log("Binding grade input events...");
-    
-    // Add a small delay to ensure DOM is ready
-    setTimeout(() => {
-        // Safely query elements with null checks
-        const tableBody = document.getElementById('studentTableBody');
-        if (!tableBody) {
-            console.log("Table body not found, skipping grade input binding");
-            return;
+  console.log('Binding grade input events...');
+
+  // Add a small delay to ensure DOM is ready
+  setTimeout(() => {
+    // Safely query elements with null checks
+    const tableBody = document.getElementById('studentTableBody');
+    if (!tableBody) {
+      console.log('Table body not found, skipping grade input binding');
+      return;
+    }
+
+    const inputs = Array.from(tableBody.querySelectorAll('.grade-input') || []);
+    const itemsInputs = Array.from(document.querySelectorAll('.items-input') || []);
+    const courseOutcomeInputs = Array.from(document.querySelectorAll('.course-outcome-select') || []);
+    const saveButton = document.getElementById('saveGradesBtn');
+    form = document.getElementById('gradeForm'); // Target grade form explicitly
+    const studentSearch = document.getElementById('studentSearch');
+
+    // Set up form submission tracking
+    if (form) {
+      form.submitting = false;
+      form.addEventListener('submit', function (e) {
+        console.log('Form submit event fired');
+        this.submitting = true;
+        // Clear unsaved changes in Alpine store
+        const gradesStore = getGradesStore();
+        if (gradesStore) {
+          gradesStore.clearUnsaved();
         }
+      });
+    }
 
-        const inputs = Array.from(tableBody.querySelectorAll('.grade-input') || []);
-        const itemsInputs = Array.from(document.querySelectorAll('.items-input') || []);
-        const courseOutcomeInputs = Array.from(document.querySelectorAll('.course-outcome-select') || []);
-        const saveButton = document.getElementById('saveGradesBtn');
-        form = document.getElementById('gradeForm'); // Target grade form explicitly
-        const studentSearch = document.getElementById('studentSearch');
+    // Track changes
+    const originalValues = new Map();
+    const originalCourseOutcomes = new Map();
 
-        // Set up form submission tracking
-        if (form) {
-            form.submitting = false;
-            form.addEventListener('submit', function(e) {
-                console.log('Form submit event fired');
-                this.submitting = true;
-                // Clear unsaved changes in Alpine store
-                const gradesStore = getGradesStore();
-                if (gradesStore) {
-                    gradesStore.clearUnsaved();
-                }
-            });
+    // Store original values
+    inputs.forEach((input) => {
+      originalValues.set(input, input.value);
+    });
+    courseOutcomeInputs.forEach((input) => {
+      originalCourseOutcomes.set(input, input.value);
+    });
+
+    // Define checkForChanges function
+    checkForChanges = function () {
+      let hasChanges = false;
+      let hasInvalidInputs = false;
+
+      inputs.forEach((input) => {
+        // Check for changes from original value
+        if (input.value !== originalValues.get(input)) {
+          hasChanges = true;
         }
+        // Check for invalid inputs
+        if (input.classList.contains('is-invalid')) {
+          hasInvalidInputs = true;
+        }
+      });
 
-        // Track changes
-        const originalValues = new Map();
-        const originalCourseOutcomes = new Map();
+      courseOutcomeInputs.forEach((input) => {
+        if (input.value !== originalCourseOutcomes.get(input)) {
+          hasChanges = true;
+        }
+      });
 
-        // Store original values
-        inputs.forEach(input => {
-            originalValues.set(input, input.value);
+      return {
+        hasChanges,
+        hasInvalidInputs,
+      };
+    };
+
+    // Track changes for course outcome inputs (moved outside checkForChanges)
+    if (courseOutcomeInputs.length > 0) {
+      courseOutcomeInputs.forEach((input) => {
+        input.addEventListener('change', function () {
+          updateSaveButtonState();
         });
-        courseOutcomeInputs.forEach(input => {
-            originalCourseOutcomes.set(input, input.value);
-        });
+      });
+    }
 
-        // Define checkForChanges function
-        checkForChanges = function() {
-            let hasChanges = false;
-            let hasInvalidInputs = false;
+    // Function to update save button state
+    function updateSaveButtonState() {
+      if (!saveButton) return;
 
-            inputs.forEach(input => {
-                // Check for changes from original value
-                if (input.value !== originalValues.get(input)) {
-                    hasChanges = true;
-                }
-                // Check for invalid inputs
-                if (input.classList.contains('is-invalid')) {
-                    hasInvalidInputs = true;
-                }
-            });
+      const { hasChanges, hasInvalidInputs } = checkForChanges();
 
-            courseOutcomeInputs.forEach(input => {
-                if (input.value !== originalCourseOutcomes.get(input)) {
-                    hasChanges = true;
-                }
-            });
+      // Update Alpine store (with safety check for store existence)
+      if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
+        const gradesStore = Alpine.store('grades');
+        if (gradesStore) {
+          if (hasChanges) {
+            gradesStore.markChanged();
+          } else {
+            gradesStore.clearUnsaved();
+          }
+        }
+      }
 
-            return {
-                hasChanges,
-                hasInvalidInputs
-            };
-        };
+      // Update button state
+      saveButton.disabled = !hasChanges || hasInvalidInputs;
+      saveButton.classList.toggle('has-changes', hasChanges);
 
-        // Track changes for course outcome inputs (moved outside checkForChanges)
-        if (courseOutcomeInputs.length > 0) {
-            courseOutcomeInputs.forEach(input => {
-                input.addEventListener('change', function() {
-                    updateSaveButtonState();
-                });
-            });
+      // Update notification
+      const container = document.getElementById('unsavedNotificationContainer');
+
+      if (hasChanges) {
+        let message = 'You have unsaved changes';
+        if (hasInvalidInputs) {
+          message = 'Please correct invalid grades before saving';
         }
 
-        // Function to update save button state
-        function updateSaveButtonState() {
-            if (!saveButton) return;
-
-            const { hasChanges, hasInvalidInputs } = checkForChanges();
-            
-            // Update Alpine store (with safety check for store existence)
-            if (typeof Alpine !== 'undefined' && typeof Alpine.store === 'function') {
-                const gradesStore = Alpine.store('grades');
-                if (gradesStore) {
-                    if (hasChanges) {
-                        gradesStore.markChanged();
-                    } else {
-                        gradesStore.clearUnsaved();
-                    }
-                }
-            }
-
-            // Update button state
-            saveButton.disabled = !hasChanges || hasInvalidInputs;
-            saveButton.classList.toggle('has-changes', hasChanges);
-
-            // Update notification
-            const container = document.getElementById('unsavedNotificationContainer');
-            
-            if (hasChanges) {
-                let message = 'You have unsaved changes';
-                if (hasInvalidInputs) {
-                    message = 'Please correct invalid grades before saving';
-                }
-                
-                // Compact notification for beside save button
-                const compactNotificationHTML = `
+        // Compact notification for beside save button
+        const compactNotificationHTML = `
                     <div class="unsaved-notification-compact">
                         <i class="bi ${hasInvalidInputs ? 'bi-exclamation-triangle-fill text-danger' : 'bi-info-circle-fill text-warning'}"></i>
                         <span class="small">${message}</span>
                     </div>
                 `;
-                
-                // Show beside save button only
-                if (container) {
-                    container.innerHTML = compactNotificationHTML;
-                }
-            } else {
-                // Clear notification
-                if (container) {
-                    container.innerHTML = '';
-                }
-            }
 
-            // Update save button tooltip
-            if (hasInvalidInputs) {
-                saveButton.title = 'Please correct invalid grades before saving';
-            } else if (!hasChanges) {
-                saveButton.title = 'No changes to save';
-            } else {
-                saveButton.title = 'Save changes';
-            }
+        // Show beside save button only
+        if (container) {
+          container.innerHTML = compactNotificationHTML;
         }
+      } else {
+        // Clear notification
+        if (container) {
+          container.innerHTML = '';
+        }
+      }
 
-        console.log("Found items inputs:", itemsInputs.length);
+      // Update save button tooltip
+      if (hasInvalidInputs) {
+        saveButton.title = 'Please correct invalid grades before saving';
+      } else if (!hasChanges) {
+        saveButton.title = 'No changes to save';
+      } else {
+        saveButton.title = 'Save changes';
+      }
+    }
 
-        // Initialize data structures
-        const inputGrid = {};
-        const activityIds = new Set();
-        const studentIds = new Set();
+    console.log('Found items inputs:', itemsInputs.length);
 
-        // Create and append modal to body
-        let warningModalElement = document.getElementById('gradeWarningModal');
-        if (!warningModalElement) {
-            const modalHtml = `
+    // Initialize data structures
+    const inputGrid = {};
+    const activityIds = new Set();
+    const studentIds = new Set();
+
+    // Create and append modal to body
+    let warningModalElement = document.getElementById('gradeWarningModal');
+    if (!warningModalElement) {
+      const modalHtml = `
                 <div class="modal fade" id="gradeWarningModal" tabindex="-1" aria-labelledby="gradeWarningModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -212,585 +212,578 @@ export function bindGradeInputEvents() {
                     </div>
                 </div>`;
 
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            warningModalElement = document.getElementById('gradeWarningModal');
-        }
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      warningModalElement = document.getElementById('gradeWarningModal');
+    }
 
-        const warningModal = new bootstrap.Modal(warningModalElement, {
-            backdrop: false
-        });
+    const warningModal = new bootstrap.Modal(warningModalElement, {
+      backdrop: false,
+    });
 
-        // Function to show warning modal
-        function showWarningModal(invalidGrades, newMax) {
-            const tbody = document.querySelector('#invalidGradesTable tbody');
-            tbody.innerHTML = invalidGrades.map(grade => `
+    // Function to show warning modal
+    function showWarningModal(invalidGrades, newMax) {
+      const tbody = document.querySelector('#invalidGradesTable tbody');
+      tbody.innerHTML = invalidGrades
+        .map(
+          (grade) => `
                 <tr>
                     <td>${grade.student}</td>
                     <td class="text-danger">${grade.grade}</td>
                     <td>${newMax}</td>
                 </tr>
-            `).join('');
-            warningModal.show();
+            `
+        )
+        .join('');
+      warningModal.show();
+    }
+
+    // Validation function
+    function validateInput(input) {
+      const value = input.value.trim();
+      const max = parseInt(input.getAttribute('max'));
+
+      // Remove existing tooltip
+      const existingTooltip = input.parentNode.querySelector('.invalid-tooltip');
+      if (existingTooltip) {
+        existingTooltip.remove();
+      }
+
+      // Reset validation state
+      input.classList.remove('is-invalid');
+
+      if (value !== '') {
+        const numValue = parseInt(value);
+        // Check if the value is a valid number and within range (0 to max, inclusive)
+        if (isNaN(numValue) || numValue < 0 || numValue > max) {
+          input.classList.add('is-invalid');
+
+          // Create error message with icon
+          let errorHTML = '';
+          if (isNaN(numValue)) {
+            errorHTML = '<i class="bi bi-x-circle-fill"></i> Please enter a valid number';
+          } else if (numValue < 0) {
+            errorHTML = '<i class="bi bi-dash-circle-fill"></i> Score cannot be negative';
+          } else if (numValue > max) {
+            errorHTML = `<i class="bi bi-exclamation-circle-fill"></i> Maximum allowed score is ${max}`;
+          }
+
+          // Create and show tooltip
+          const tooltip = document.createElement('div');
+          tooltip.className = 'invalid-tooltip';
+          tooltip.innerHTML = `<div class="error-message">${errorHTML}</div>`;
+          input.parentNode.appendChild(tooltip);
+
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Validate all inputs
+    function validateAllInputs() {
+      let isValid = true;
+      inputs.forEach((input) => {
+        if (!validateInput(input)) {
+          isValid = false;
+        }
+      });
+      return isValid;
+    }
+
+    // New function to check if any grades exceed the new maximum
+    function checkGradesAgainstNewMax(activityId, newMax) {
+      const invalidGrades = [];
+      document.querySelectorAll(`.grade-input[data-activity="${activityId}"]`).forEach((gradeInput) => {
+        const value = parseInt(gradeInput.value);
+        if (!isNaN(value) && value > newMax) {
+          const studentName = gradeInput.closest('tr')?.querySelector('td')?.textContent.trim() || 'Unknown Student';
+          invalidGrades.push({
+            student: studentName,
+            grade: value,
+          });
+        }
+      });
+      return invalidGrades;
+    }
+
+    // Handle student search if element exists
+    if (studentSearch) {
+      studentSearch.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+        const rows = tableBody.querySelectorAll('.student-row');
+
+        rows.forEach(function (row) {
+          const studentName = row.querySelector('td')?.textContent.toLowerCase() || '';
+          row.style.display = studentName.includes(searchTerm) ? '' : 'none';
+        });
+      });
+    }
+
+    // Handle sorting
+    const sortFilter = document.getElementById('sortFilter');
+    if (sortFilter) {
+      // Function to sort the table
+      function sortTable(order) {
+        const rows = Array.from(tableBody.querySelectorAll('.student-row'));
+
+        rows.sort((a, b) => {
+          const nameA = a.querySelector('td')?.textContent.trim().toLowerCase() || '';
+          const nameB = b.querySelector('td')?.textContent.trim().toLowerCase() || '';
+
+          if (order === 'asc') {
+            return nameA.localeCompare(nameB);
+          } else if (order === 'desc') {
+            return nameB.localeCompare(nameA);
+          }
+          return 0;
+        });
+
+        // Clear the table body
+        tableBody.innerHTML = '';
+        // Append sorted rows
+        rows.forEach((row) => tableBody.appendChild(row));
+      }
+
+      // Sort initially in A to Z order
+      sortTable('asc');
+
+      // Handle sort filter changes
+      sortFilter.addEventListener('change', function () {
+        sortTable(this.value);
+      });
+    }
+
+    // Handle items inputs
+    if (itemsInputs.length > 0) {
+      itemsInputs.forEach((input) => {
+        if (!input) return; // Skip if input is null
+
+        // Prevent form submission on enter
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            this.blur(); // Remove focus to trigger change event
+          }
+        });
+
+        input.addEventListener('change', function (e) {
+          // Prevent any form submission
+          e.preventDefault();
+          e.stopPropagation();
+
+          const activityId = this.dataset.activityId;
+          const newValue = parseInt(this.value);
+          const oldValue = parseInt(this.defaultValue);
+
+          if (isNaN(newValue) || newValue < 1) {
+            showWarningModal([{ student: 'Error', grade: 'Invalid input' }], 1);
+            this.value = this.defaultValue;
+            return;
+          }
+
+          // Check if new maximum would invalidate existing grades
+          const invalidGrades = checkGradesAgainstNewMax(activityId, newValue);
+          if (newValue < oldValue && invalidGrades.length > 0) {
+            showWarningModal(invalidGrades, newValue);
+            this.value = oldValue;
+            return;
+          }
+
+          // Disable save button during the update
+          if (saveButton) {
+            saveButton.disabled = true;
+          }
+
+          fetch('/instructor/activities/' + activityId, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+            body: JSON.stringify({
+              number_of_items: newValue,
+              type: this.closest('th')?.querySelector('.fw-semibold')?.textContent.toLowerCase() || '',
+              title: this.closest('th')?.querySelector('.text-muted')?.textContent.trim() || '',
+            }),
+          })
+            .then(async (response) => {
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                console.error('Server response:', {
+                  status: response.status,
+                  statusText: response.statusText,
+                  data: errorData,
+                });
+                throw new Error(errorData?.message || `Server returned ${response.status}: ${response.statusText}`);
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (data.status === 'success') {
+                this.defaultValue = newValue;
+                let hasInvalidGrades = false;
+
+                document.querySelectorAll(`.grade-input[data-activity="${activityId}"]`).forEach((gradeInput) => {
+                  if (gradeInput) {
+                    const currentValue = parseInt(gradeInput.value);
+                    gradeInput.max = newValue;
+                    gradeInput.title = `Max: ${newValue}`;
+
+                    // Check if current value exceeds new max
+                    if (!isNaN(currentValue) && currentValue > newValue) {
+                      hasInvalidGrades = true;
+                      gradeInput.classList.add('is-invalid');
+                    } else {
+                      gradeInput.classList.remove('is-invalid');
+                    }
+                  }
+                });
+
+                // Update save button state
+                if (saveButton) {
+                  const isValid = validateAllInputs();
+                  saveButton.disabled = !isValid;
+                  saveButton.title = isValid ? '' : 'Please correct invalid grades before saving';
+                }
+
+                // Show warning if any grades became invalid
+                if (hasInvalidGrades) {
+                  showWarningModal(checkGradesAgainstNewMax(activityId, newValue), newValue);
+                }
+              } else {
+                throw new Error(data.message || 'Failed to update number of items');
+              }
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+              alert('Failed to update number of items: ' + error.message);
+              this.value = oldValue;
+
+              // Re-enable save button on error
+              if (saveButton) {
+                const isValid = validateAllInputs();
+                saveButton.disabled = !isValid;
+              }
+            });
+        });
+      });
+    }
+
+    // Handle grade inputs
+    if (inputs.length > 0) {
+      inputs.forEach((input) => {
+        if (!input) return; // Skip if input is null
+
+        const student = input.dataset.student;
+        const activity = input.dataset.activity;
+
+        if (student && activity) {
+          activityIds.add(activity);
+          studentIds.add(student);
+
+          if (!inputGrid[activity]) inputGrid[activity] = {};
+          inputGrid[activity][student] = input;
         }
 
-        // Validation function
-        function validateInput(input) {
-            const value = input.value.trim();
-            const max = parseInt(input.getAttribute('max'));
-            
-            // Remove existing tooltip
-            const existingTooltip = input.parentNode.querySelector('.invalid-tooltip');
-            if (existingTooltip) {
-                existingTooltip.remove();
+        // Real-time validation
+        input.addEventListener('input', () => {
+          validateInput(input);
+          updateSaveButtonState();
+        });
+
+        // Handle keyboard input
+        input.addEventListener('keypress', function (e) {
+          // Allow only numbers and control keys
+          if (!/^\d$/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+            e.preventDefault();
+            return;
+          }
+
+          const currentValue = this.value;
+          const max = parseInt(this.getAttribute('max'));
+
+          // Check if new value would exceed max
+          const newValue = parseInt(currentValue + e.key);
+          if (newValue > max) {
+            e.preventDefault();
+            showError(this, `Cannot exceed maximum score of ${max}`);
+          }
+
+          updateSaveButtonState();
+        });
+
+        // Handle up/down arrow keys for increment/decrement
+        input.addEventListener('keydown', function (e) {
+          const max = parseInt(this.getAttribute('max'));
+          const currentValue = parseInt(this.value) || 0;
+
+          if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentValue < max) {
+              this.value = currentValue + 1;
+              this.dispatchEvent(new Event('input'));
+            } else {
+              showError(this, `Cannot exceed maximum score of ${max}`);
             }
-            
-            // Reset validation state
-            input.classList.remove('is-invalid');
-            
-            if (value !== '') {
-                const numValue = parseInt(value);
-                // Check if the value is a valid number and within range (0 to max, inclusive)
-                if (isNaN(numValue) || numValue < 0 || numValue > max) {
-                    input.classList.add('is-invalid');
-                    
-                    // Create error message with icon
-                    let errorHTML = '';
-                    if (isNaN(numValue)) {
-                        errorHTML = '<i class="bi bi-x-circle-fill"></i> Please enter a valid number';
-                    } else if (numValue < 0) {
-                        errorHTML = '<i class="bi bi-dash-circle-fill"></i> Score cannot be negative';
-                    } else if (numValue > max) {
-                        errorHTML = `<i class="bi bi-exclamation-circle-fill"></i> Maximum allowed score is ${max}`;
-                    }
-                    
-                    // Create and show tooltip
-                    const tooltip = document.createElement('div');
-                    tooltip.className = 'invalid-tooltip';
-                    tooltip.innerHTML = `<div class="error-message">${errorHTML}</div>`;
-                    input.parentNode.appendChild(tooltip);
-                    
-                    return false;
-                }
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (currentValue > 0) {
+              this.value = currentValue - 1;
+              this.dispatchEvent(new Event('input'));
             }
-            return true;
-        }
+          }
+        });
 
-        // Validate all inputs
-        function validateAllInputs() {
-            let isValid = true;
-            inputs.forEach(input => {
-                if (!validateInput(input)) {
-                    isValid = false;
-                }
-            });
-            return isValid;
-        }
-
-        // New function to check if any grades exceed the new maximum
-        function checkGradesAgainstNewMax(activityId, newMax) {
-            const invalidGrades = [];
-            document.querySelectorAll(`.grade-input[data-activity="${activityId}"]`).forEach(gradeInput => {
-                const value = parseInt(gradeInput.value);
-                if (!isNaN(value) && value > newMax) {
-                    const studentName = gradeInput.closest('tr')?.querySelector('td')?.textContent.trim() || 'Unknown Student';
-                    invalidGrades.push({
-                        student: studentName,
-                        grade: value
-                    });
-                }
-            });
-            return invalidGrades;
-        }
-
-        // Handle student search if element exists
-        if (studentSearch) {
-            studentSearch.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                const rows = tableBody.querySelectorAll('.student-row');
-                
-                rows.forEach(function(row) {
-                    const studentName = row.querySelector('td')?.textContent.toLowerCase() || '';
-                    row.style.display = studentName.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
-
-        // Handle sorting
-        const sortFilter = document.getElementById('sortFilter');
-        if (sortFilter) {
-            // Function to sort the table
-            function sortTable(order) {
-                const rows = Array.from(tableBody.querySelectorAll('.student-row'));
-                
-                rows.sort((a, b) => {
-                    const nameA = a.querySelector('td')?.textContent.trim().toLowerCase() || '';
-                    const nameB = b.querySelector('td')?.textContent.trim().toLowerCase() || '';
-                    
-                    if (order === 'asc') {
-                        return nameA.localeCompare(nameB);
-                    } else if (order === 'desc') {
-                        return nameB.localeCompare(nameA);
-                    }
-                    return 0;
-                });
-                
-                // Clear the table body
-                tableBody.innerHTML = '';
-                // Append sorted rows
-                rows.forEach(row => tableBody.appendChild(row));
+        // Format number on blur
+        input.addEventListener('blur', function () {
+          const value = this.value.trim();
+          if (value !== '') {
+            const numValue = parseInt(value);
+            if (!isNaN(numValue)) {
+              this.value = numValue; // Remove leading zeros
             }
+          }
+        });
 
-            // Sort initially in A to Z order
-            sortTable('asc');
+        // Handle paste event
+        input.addEventListener('paste', function (e) {
+          e.preventDefault();
+          const pastedData = e.clipboardData.getData('text').trim();
+          const max = parseInt(this.getAttribute('max'));
 
-            // Handle sort filter changes
-            sortFilter.addEventListener('change', function() {
-                sortTable(this.value);
-            });
-        }
+          if (!/^\d+$/.test(pastedData)) {
+            showError(this, 'Only numbers can be pasted');
+            return;
+          }
 
-        // Handle items inputs
-        if (itemsInputs.length > 0) {
-            itemsInputs.forEach(input => {
-                if (!input) return; // Skip if input is null
-                
-                // Prevent form submission on enter
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        this.blur(); // Remove focus to trigger change event
-                    }
-                });
-                
-                input.addEventListener('change', function(e) {
-                    // Prevent any form submission
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const activityId = this.dataset.activityId;
-                    const newValue = parseInt(this.value);
-                    const oldValue = parseInt(this.defaultValue);
+          const numValue = parseInt(pastedData);
+          if (numValue > max) {
+            showError(this, `Cannot paste value greater than ${max}`);
+            return;
+          }
 
-                    if (isNaN(newValue) || newValue < 1) {
-                        showWarningModal([{ student: 'Error', grade: 'Invalid input' }], 1);
-                        this.value = this.defaultValue;
-                        return;
-                    }
+          this.value = numValue;
+          this.dispatchEvent(new Event('input'));
+        });
 
-                    // Check if new maximum would invalidate existing grades
-                    const invalidGrades = checkGradesAgainstNewMax(activityId, newValue);
-                    if (newValue < oldValue && invalidGrades.length > 0) {
-                        showWarningModal(invalidGrades, newValue);
-                        this.value = oldValue;
-                        return;
-                    }
+        // Helper function to show errors
+        function showError(input, message) {
+          // Remove any existing tooltip first
+          const existingTooltip = input.parentNode.querySelector('.invalid-tooltip');
+          if (existingTooltip) {
+            existingTooltip.remove();
+          }
 
-                    // Disable save button during the update
-                    if (saveButton) {
-                        saveButton.disabled = true;
-                    }
-
-                    fetch('/instructor/activities/' + activityId, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                        },
-                        body: JSON.stringify({
-                            number_of_items: newValue,
-                            type: this.closest('th')?.querySelector('.fw-semibold')?.textContent.toLowerCase() || '',
-                            title: this.closest('th')?.querySelector('.text-muted')?.textContent.trim() || ''
-                        })
-                    })
-                    .then(async response => {
-                        if (!response.ok) {
-                            const errorData = await response.json().catch(() => null);
-                            console.error('Server response:', {
-                                status: response.status,
-                                statusText: response.statusText,
-                                data: errorData
-                            });
-                            throw new Error(
-                                errorData?.message || 
-                                `Server returned ${response.status}: ${response.statusText}`
-                            );
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.status === 'success') {
-                            this.defaultValue = newValue;
-                            let hasInvalidGrades = false;
-                            
-                            document.querySelectorAll(`.grade-input[data-activity="${activityId}"]`).forEach(gradeInput => {
-                                if (gradeInput) {
-                                    const currentValue = parseInt(gradeInput.value);
-                                    gradeInput.max = newValue;
-                                    gradeInput.title = `Max: ${newValue}`;
-                                    
-                                    // Check if current value exceeds new max
-                                    if (!isNaN(currentValue) && currentValue > newValue) {
-                                        hasInvalidGrades = true;
-                                        gradeInput.classList.add('is-invalid');
-                                    } else {
-                                        gradeInput.classList.remove('is-invalid');
-                                    }
-                                }
-                            });
-
-                            // Update save button state
-                            if (saveButton) {
-                                const isValid = validateAllInputs();
-                                saveButton.disabled = !isValid;
-                                saveButton.title = isValid ? '' : 'Please correct invalid grades before saving';
-                            }
-
-                            // Show warning if any grades became invalid
-                            if (hasInvalidGrades) {
-                                showWarningModal(checkGradesAgainstNewMax(activityId, newValue), newValue);
-                            }
-                        } else {
-                            throw new Error(data.message || 'Failed to update number of items');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Failed to update number of items: ' + error.message);
-                        this.value = oldValue;
-                        
-                        // Re-enable save button on error
-                        if (saveButton) {
-                            const isValid = validateAllInputs();
-                            saveButton.disabled = !isValid;
-                        }
-                    });
-                });
-            });
-        }
-
-        // Handle grade inputs
-        if (inputs.length > 0) {
-            inputs.forEach(input => {
-                if (!input) return; // Skip if input is null
-                
-                const student = input.dataset.student;
-                const activity = input.dataset.activity;
-                
-                if (student && activity) {
-                    activityIds.add(activity);
-                    studentIds.add(student);
-                    
-                    if (!inputGrid[activity]) inputGrid[activity] = {};
-                    inputGrid[activity][student] = input;
-                }
-
-                // Real-time validation
-                input.addEventListener('input', () => {
-                    validateInput(input);
-                    updateSaveButtonState();
-                });
-                
-                // Handle keyboard input
-                input.addEventListener('keypress', function(e) {
-                    // Allow only numbers and control keys
-                    if (!/^\d$/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-                        e.preventDefault();
-                        return;
-                    }
-                    
-                    const currentValue = this.value;
-                    const max = parseInt(this.getAttribute('max'));
-                    
-                    // Check if new value would exceed max
-                    const newValue = parseInt(currentValue + e.key);
-                    if (newValue > max) {
-                        e.preventDefault();
-                        showError(this, `Cannot exceed maximum score of ${max}`);
-                    }
-
-                    updateSaveButtonState();
-                });
-
-                // Handle up/down arrow keys for increment/decrement
-                input.addEventListener('keydown', function(e) {
-                    const max = parseInt(this.getAttribute('max'));
-                    const currentValue = parseInt(this.value) || 0;
-
-                    if (e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        if (currentValue < max) {
-                            this.value = currentValue + 1;
-                            this.dispatchEvent(new Event('input'));
-                        } else {
-                            showError(this, `Cannot exceed maximum score of ${max}`);
-                        }
-                    } else if (e.key === 'ArrowDown') {
-                        e.preventDefault();
-                        if (currentValue > 0) {
-                            this.value = currentValue - 1;
-                            this.dispatchEvent(new Event('input'));
-                        }
-                    }
-                });
-
-                // Format number on blur
-                input.addEventListener('blur', function() {
-                    const value = this.value.trim();
-                    if (value !== '') {
-                        const numValue = parseInt(value);
-                        if (!isNaN(numValue)) {
-                            this.value = numValue; // Remove leading zeros
-                        }
-                    }
-                });
-
-                // Handle paste event
-                input.addEventListener('paste', function(e) {
-                    e.preventDefault();
-                    const pastedData = e.clipboardData.getData('text').trim();
-                    const max = parseInt(this.getAttribute('max'));
-                    
-                    if (!/^\d+$/.test(pastedData)) {
-                        showError(this, 'Only numbers can be pasted');
-                        return;
-                    }
-                    
-                    const numValue = parseInt(pastedData);
-                    if (numValue > max) {
-                        showError(this, `Cannot paste value greater than ${max}`);
-                        return;
-                    }
-                    
-                    this.value = numValue;
-                    this.dispatchEvent(new Event('input'));
-                });
-
-                // Helper function to show errors
-                function showError(input, message) {
-                    // Remove any existing tooltip first
-                    const existingTooltip = input.parentNode.querySelector('.invalid-tooltip');
-                    if (existingTooltip) {
-                        existingTooltip.remove();
-                    }
-
-                    const tooltip = document.createElement('div');
-                    tooltip.className = 'invalid-tooltip';
-                    tooltip.innerHTML = `
+          const tooltip = document.createElement('div');
+          tooltip.className = 'invalid-tooltip';
+          tooltip.innerHTML = `
                         <div class="error-message">
                             <i class="bi bi-exclamation-circle-fill"></i>
                             <span>${message}</span>
                         </div>
                     `;
-                    input.parentNode.appendChild(tooltip);
-                    input.classList.add('is-invalid');
-                    
-                    setTimeout(() => {
-                        tooltip.remove();
-                        const currentValue = parseInt(input.value);
-                        const max = parseInt(input.getAttribute('max'));
-                        if (!isNaN(currentValue) && currentValue >= 0 && currentValue <= max) {
-                            input.classList.remove('is-invalid');
-                        }
-                    }, 2000);
-                }
-                
-                // Clear error on focus
-                input.addEventListener('focus', function() {
-                    if (this.value.trim() === '') {
-                        this.classList.remove('is-invalid');
-                        const tooltip = this.parentNode.querySelector('.invalid-tooltip');
-                        if (tooltip) tooltip.remove();
-                    }
-                });
-            });
+          input.parentNode.appendChild(tooltip);
+          input.classList.add('is-invalid');
+
+          setTimeout(() => {
+            tooltip.remove();
+            const currentValue = parseInt(input.value);
+            const max = parseInt(input.getAttribute('max'));
+            if (!isNaN(currentValue) && currentValue >= 0 && currentValue <= max) {
+              input.classList.remove('is-invalid');
+            }
+          }, 2000);
         }
 
-        // Setup form validation if form exists
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
+        // Clear error on focus
+        input.addEventListener('focus', function () {
+          if (this.value.trim() === '') {
+            this.classList.remove('is-invalid');
+            const tooltip = this.parentNode.querySelector('.invalid-tooltip');
+            if (tooltip) tooltip.remove();
+          }
+        });
+      });
+    }
 
-                const { hasInvalidInputs } = checkForChanges();
-                
-                if (hasInvalidInputs) {
-                    alert('Please correct all invalid grades before submitting.');
-                    return;
-                }
+    // Setup form validation if form exists
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevent default form submission
 
-                // Show loading state using Alpine store
-                const loadingStore = getLoadingStore();
-                if (loadingStore) {
-                    loadingStore.start('saveGrades');
-                }
-                if (saveButton) {
-                    saveButton.disabled = true;
-                }
+        const { hasInvalidInputs } = checkForChanges();
 
-                // Clear unsaved changes in Alpine store before submitting
-                const gradesStoreSubmit = getGradesStore();
-                if (gradesStoreSubmit) {
-                    gradesStoreSubmit.clearUnsaved();
-                }
-                
-                // Get form data
-                const formData = new FormData(form);
-                
-                // Submit form using fetch
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(async response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
-                    
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => null);
-                        const message = errorData?.message || 'Failed to save grades. Please try again.';
-                        throw new Error(message);
-                    }
+        if (hasInvalidInputs) {
+          alert('Please correct all invalid grades before submitting.');
+          return;
+        }
 
-                    const contentType = response.headers.get('content-type') || '';
-                    console.log('Content-Type:', contentType);
-                    
-                    if (contentType.includes('application/json')) {
-                        return response.json();
-                    }
+        // Show loading state using Alpine store
+        const loadingStore = getLoadingStore();
+        if (loadingStore) {
+          loadingStore.start('saveGrades');
+        }
+        if (saveButton) {
+          saveButton.disabled = true;
+        }
 
-                    throw new Error('Unexpected server response format.');
-                })
-                .then(data => {
-                    console.log('Response data:', data);
-                    
-                    if (!data || data.status !== 'success') {
-                        throw new Error(data?.message || 'Failed to save grades.');
-                    }
+        // Clear unsaved changes in Alpine store before submitting
+        const gradesStoreSubmit = getGradesStore();
+        if (gradesStoreSubmit) {
+          gradesStoreSubmit.clearUnsaved();
+        }
 
-                    // Update original values after successful save
-                    inputs.forEach(input => {
-                        originalValues.set(input, input.value);
-                    });
-                    updateSaveButtonState();
+        // Get form data
+        const formData = new FormData(form);
 
-                    // Hide loading state using Alpine store
-                    const loadingStoreStop = getLoadingStore();
-                    if (loadingStoreStop) {
-                        loadingStoreStop.stop('saveGrades');
-                    }
-                    if (saveButton) {
-                        saveButton.disabled = true;
-                    }
+        // Submit form using fetch
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        })
+          .then(async (response) => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
 
-                    const refreshPromise = typeof window.refreshGradeSection === 'function'
-                        ? window.refreshGradeSection()
-                        : Promise.resolve();
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => null);
+              const message = errorData?.message || 'Failed to save grades. Please try again.';
+              throw new Error(message);
+            }
 
-                    return refreshPromise.then(() => data);
-                })
-                .then(data => {
-                    console.log('Showing notification with data:', data);
-                    const message = data?.message || 'Grades have been saved successfully.';
+            const contentType = response.headers.get('content-type') || '';
 
-                    const container = document.querySelector('.container-fluid');
-                    console.log('Container found:', container);
-                    
-                    if (container) {
-                        const successMessage = document.createElement('div');
-                        successMessage.className = 'alert alert-success alert-dismissible fade show';
-                        successMessage.innerHTML = `
+            if (contentType.includes('application/json')) {
+              return response.json();
+            }
+
+            throw new Error('Unexpected server response format.');
+          })
+          .then((data) => {
+            if (!data || data.status !== 'success') {
+              throw new Error(data?.message || 'Failed to save grades.');
+            }
+
+            // Update original values after successful save
+            inputs.forEach((input) => {
+              originalValues.set(input, input.value);
+            });
+            updateSaveButtonState();
+
+            // Hide loading state using Alpine store
+            const loadingStoreStop = getLoadingStore();
+            if (loadingStoreStop) {
+              loadingStoreStop.stop('saveGrades');
+            }
+            if (saveButton) {
+              saveButton.disabled = true;
+            }
+
+            const refreshPromise =
+              typeof window.refreshGradeSection === 'function' ? window.refreshGradeSection() : Promise.resolve();
+
+            return refreshPromise.then(() => data);
+          })
+          .then((data) => {
+            const message = data?.message || 'Grades have been saved successfully.';
+
+            const container = document.querySelector('.container-fluid');
+
+            if (container) {
+              const successMessage = document.createElement('div');
+              successMessage.className = 'alert alert-success alert-dismissible fade show';
+              successMessage.innerHTML = `
                             <strong>Success!</strong> ${message}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         `;
-                        container.insertBefore(successMessage, container.firstChild);
-                        console.log('Notification element inserted');
+              container.insertBefore(successMessage, container.firstChild);
 
-                        // Scroll to top to show the notification
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+              // Scroll to top to show the notification
+              window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                        // Remove success message after 5 seconds
-                        setTimeout(() => {
-                            successMessage.remove();
-                            console.log('Notification removed');
-                        }, 5000);
-                    } else {
-                        console.error('Container .container-fluid not found!');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert(error?.message || 'Failed to save grades. Please try again.');
-                    
-                    // Reset button state
-                    if (saveButton) {
-                        saveButton.disabled = false;
-                        saveButton.querySelector('.spinner-border')?.classList.add('d-none');
-                    }
-                });
-            });
+              // Remove success message after 5 seconds
+              setTimeout(() => {
+                successMessage.remove();
+              }, 5000);
+            } else {
+              console.error('Container .container-fluid not found!');
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            alert(error?.message || 'Failed to save grades. Please try again.');
+
+            // Reset button state
+            if (saveButton) {
+              saveButton.disabled = false;
+              saveButton.querySelector('.spinner-border')?.classList.add('d-none');
+            }
+          });
+      });
+    }
+
+    // Setup navigation sequence
+    const sequence = [];
+    const rows = Array.from(tableBody.querySelectorAll('.student-row'));
+    const activityColumns = Array.from(document.querySelectorAll('th')).slice(1, -1); // Skip student name column and final grade column
+
+    // Create sequence by going down each column first
+    activityColumns.forEach((_, colIndex) => {
+      rows.forEach((row) => {
+        const input = row.querySelectorAll('.grade-input')[colIndex];
+        if (input) sequence.push(input);
+      });
+    });
+
+    // Enhanced keyboard navigation with column-based flow
+    sequence.forEach((input, idx) => {
+      if (!input) return; // Skip if input is null
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab' || e.key === 'Enter') {
+          e.preventDefault();
+
+          // Get the next input in sequence
+          const next = sequence[idx + 1];
+          if (next) {
+            // Add visual feedback for current row
+            const currentRow = input.closest('tr');
+            if (currentRow) {
+              currentRow.classList.add('navigating');
+              setTimeout(() => currentRow.classList.remove('navigating'), 500);
+            }
+
+            // Focus and select next input
+            next.focus();
+            next.select();
+
+            // Add visual feedback for next row
+            const nextRow = next.closest('tr');
+            if (nextRow) {
+              nextRow.classList.add('navigating');
+              setTimeout(() => nextRow.classList.remove('navigating'), 500);
+            }
+
+            // Scroll the next input into view if needed
+            next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         }
+      });
+    });
 
-        // Setup navigation sequence
-        const sequence = [];
-        const rows = Array.from(tableBody.querySelectorAll('.student-row'));
-        const activityColumns = Array.from(document.querySelectorAll('th')).slice(1, -1); // Skip student name column and final grade column
-
-        // Create sequence by going down each column first
-        activityColumns.forEach((_, colIndex) => {
-            rows.forEach((row) => {
-                const input = row.querySelectorAll('.grade-input')[colIndex];
-                if (input) sequence.push(input);
-            });
-        });
-
-        // Enhanced keyboard navigation with column-based flow
-        sequence.forEach((input, idx) => {
-            if (!input) return; // Skip if input is null
-            
-            input.addEventListener('keydown', e => {
-                if (e.key === 'Tab' || e.key === 'Enter') {
-                    e.preventDefault();
-                    
-                    // Get the next input in sequence
-                    const next = sequence[idx + 1];
-                    if (next) {
-                        // Add visual feedback for current row
-                        const currentRow = input.closest('tr');
-                        if (currentRow) {
-                            currentRow.classList.add('navigating');
-                            setTimeout(() => currentRow.classList.remove('navigating'), 500);
-                        }
-                        
-                        // Focus and select next input
-                        next.focus();
-                        next.select();
-                        
-                        // Add visual feedback for next row
-                        const nextRow = next.closest('tr');
-                        if (nextRow) {
-                            nextRow.classList.add('navigating');
-                            setTimeout(() => nextRow.classList.remove('navigating'), 500);
-                        }
-
-                        // Scroll the next input into view if needed
-                        next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }
-            });
-        });
-
-        // Add styles for navigation feedback
-        let navigationStyle = document.getElementById('gradeNavigationStyle');
-        if (!navigationStyle) {
-            navigationStyle = document.createElement('style');
-            navigationStyle.id = 'gradeNavigationStyle';
-            navigationStyle.textContent = `
+    // Add styles for navigation feedback
+    let navigationStyle = document.getElementById('gradeNavigationStyle');
+    if (!navigationStyle) {
+      navigationStyle = document.createElement('style');
+      navigationStyle.id = 'gradeNavigationStyle';
+      navigationStyle.textContent = `
             .student-row.navigating {
                 background-color: rgba(25, 135, 84, 0.1) !important;
                 transition: background-color 0.3s ease;
@@ -836,330 +829,327 @@ export function bindGradeInputEvents() {
                 border-radius: 2px;
             }
         `;
-            document.head.appendChild(navigationStyle);
+      document.head.appendChild(navigationStyle);
+    }
+
+    // Initial state check
+    updateSaveButtonState();
+
+    // Add click handler for save button to prevent beforeunload warning
+    if (saveButton) {
+      saveButton.addEventListener('click', function (e) {
+        console.log('Save button clicked');
+        if (form) {
+          form.submitting = true;
+        }
+        // Clear unsaved changes in Alpine store
+        const gradesStoreSave = getGradesStore();
+        if (gradesStoreSave) {
+          gradesStoreSave.clearUnsaved();
         }
 
-        // Initial state check
-        updateSaveButtonState();
-        
-        // Add click handler for save button to prevent beforeunload warning
-        if (saveButton) {
-            saveButton.addEventListener('click', function(e) {
-                console.log('Save button clicked');
-                if (form) {
-                    form.submitting = true;
-                }
-                // Clear unsaved changes in Alpine store
-                const gradesStoreSave = getGradesStore();
-                if (gradesStoreSave) {
-                    gradesStoreSave.clearUnsaved();
-                }
-                
-                // Clear the notification immediately
-                const container = document.getElementById('unsavedNotificationContainer');
-                if (container) {
-                    container.innerHTML = '';
-                }
-            });
+        // Clear the notification immediately
+        const container = document.getElementById('unsavedNotificationContainer');
+        if (container) {
+          container.innerHTML = '';
         }
-        
-        // Initialize course outcome dropdowns
-        if (typeof initializeCourseOutcomeDropdowns === 'function') {
-            initializeCourseOutcomeDropdowns();
-        }
-    }, 100); // End setTimeout
+      });
+    }
+
+    // Initialize course outcome dropdowns
+    if (typeof initializeCourseOutcomeDropdowns === 'function') {
+      initializeCourseOutcomeDropdowns();
+    }
+  }, 100); // End setTimeout
 }
 
 // Refresh the grade section via AJAX so computed grades stay in sync after saving
 export function refreshGradeSection() {
-    return new Promise((resolve) => {
-        const section = document.getElementById('grade-section');
-        const gradeForm = document.getElementById('gradeForm');
-        if (!section || !gradeForm) {
-            resolve();
-            return;
+  return new Promise((resolve) => {
+    const section = document.getElementById('grade-section');
+    const gradeForm = document.getElementById('gradeForm');
+    if (!section || !gradeForm) {
+      resolve();
+      return;
+    }
+
+    const subjectId = gradeForm.querySelector('input[name="subject_id"]')?.value;
+    const termValue = gradeForm.querySelector('input[name="term"]')?.value;
+    if (!subjectId || !termValue) {
+      resolve();
+      return;
+    }
+
+    const overlay = document.getElementById('fadeOverlay');
+    overlay?.classList.add('active');
+
+    const refreshUrl = new URL(window.location.href);
+    refreshUrl.searchParams.set('subject_id', subjectId);
+    refreshUrl.searchParams.set('term', termValue);
+
+    fetch(refreshUrl.toString(), {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        Accept: 'text/html',
+      },
+      credentials: 'same-origin',
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to refresh grades');
+        }
+        return response.text();
+      })
+      .then((html) => {
+        const tempWrapper = document.createElement('div');
+        tempWrapper.innerHTML = html.trim();
+        const newSection = tempWrapper.querySelector('#grade-section');
+        if (!newSection) {
+          throw new Error('Grade section markup missing in response');
         }
 
-        const subjectId = gradeForm.querySelector('input[name="subject_id"]')?.value;
-        const termValue = gradeForm.querySelector('input[name="term"]')?.value;
-        if (!subjectId || !termValue) {
-            resolve();
-            return;
+        section.replaceWith(newSection);
+        form = document.getElementById('gradeForm');
+
+        if (typeof window.bindGradeInputEvents === 'function') {
+          window.bindGradeInputEvents();
+        }
+        if (typeof window.initializeCourseOutcomeDropdowns === 'function') {
+          window.initializeCourseOutcomeDropdowns();
+        }
+        if (typeof window.initializeStudentSearch === 'function') {
+          window.initializeStudentSearch();
+        }
+        if (typeof window.initializeActivityComponentGuard === 'function') {
+          window.initializeActivityComponentGuard();
+        }
+        if (typeof window.initializeTermStepperNavigation === 'function') {
+          window.initializeTermStepperNavigation();
         }
 
-        const overlay = document.getElementById('fadeOverlay');
-        overlay?.classList.add('active');
-
-        const refreshUrl = new URL(window.location.href);
-        refreshUrl.searchParams.set('subject_id', subjectId);
-        refreshUrl.searchParams.set('term', termValue);
-
-        fetch(refreshUrl.toString(), {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to refresh grades');
-            }
-            return response.text();
-        })
-        .then(html => {
-            const tempWrapper = document.createElement('div');
-            tempWrapper.innerHTML = html.trim();
-            const newSection = tempWrapper.querySelector('#grade-section');
-            if (!newSection) {
-                throw new Error('Grade section markup missing in response');
-            }
-
-            section.replaceWith(newSection);
-            form = document.getElementById('gradeForm');
-
-            if (typeof window.bindGradeInputEvents === 'function') {
-                window.bindGradeInputEvents();
-            }
-            if (typeof window.initializeCourseOutcomeDropdowns === 'function') {
-                window.initializeCourseOutcomeDropdowns();
-            }
-            if (typeof window.initializeStudentSearch === 'function') {
-                window.initializeStudentSearch();
-            }
-            if (typeof window.initializeActivityComponentGuard === 'function') {
-                window.initializeActivityComponentGuard();
-            }
-            if (typeof window.initializeTermStepperNavigation === 'function') {
-                window.initializeTermStepperNavigation();
-            }
-
-            resolve();
-        })
-        .catch(error => {
-            console.error('Unable to refresh grade section:', error);
-            alert('Grades were saved, but we could not reload the table automatically. Please refresh the page.');
-            resolve();
-        })
-        .finally(() => {
-            overlay?.classList.remove('active');
-        });
-    });
+        resolve();
+      })
+      .catch((error) => {
+        console.error('Unable to refresh grade section:', error);
+        alert('Grades were saved, but we could not reload the table automatically. Please refresh the page.');
+        resolve();
+      })
+      .finally(() => {
+        overlay?.classList.remove('active');
+      });
+  });
 }
 
 // Course Outcome Dropdown JavaScript
 export function initializeCourseOutcomeDropdowns() {
-    console.log('Initializing course outcome dropdowns...');
-    
-    // Find all dropdown elements
-    const dropdowns = document.querySelectorAll('.course-outcome-select');
-    
-    console.log('Dropdowns found:', dropdowns.length);
-    
-    // No need to add change handlers here as they're already handled by the main script
-    // The main script already tracks these elements and updates the save button state
+  console.log('Initializing course outcome dropdowns...');
+
+  // Find all dropdown elements
+  const dropdowns = document.querySelectorAll('.course-outcome-select');
+
+  console.log('Dropdowns found:', dropdowns.length);
+
+  // No need to add change handlers here as they're already handled by the main script
+  // The main script already tracks these elements and updates the save button state
 }
 
 export function initializeTermStepperNavigation() {
-    const termButtons = document.querySelectorAll('.term-step[data-term]');
-    if (!termButtons.length) {
-        return;
+  const termButtons = document.querySelectorAll('.term-step[data-term]');
+  if (!termButtons.length) {
+    return;
+  }
+
+  termButtons.forEach((button) => {
+    if (!button || button.dataset.termBound === 'true') {
+      return;
     }
 
-    termButtons.forEach(button => {
-        if (!button || button.dataset.termBound === 'true') {
-            return;
-        }
-
-        button.dataset.termBound = 'true';
-        button.addEventListener('click', (event) => {
-            event.preventDefault();
-            const targetTerm = button.dataset.term;
-            handleTermSelection(targetTerm);
-        });
+    button.dataset.termBound = 'true';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      const targetTerm = button.dataset.term;
+      handleTermSelection(targetTerm);
     });
+  });
 }
 
 function handleTermSelection(targetTerm) {
-    if (!targetTerm || termChangeInProgress) {
-        return;
+  if (!targetTerm || termChangeInProgress) {
+    return;
+  }
+
+  const currentActive = document.querySelector('.term-step.active');
+  const currentTerm = currentActive?.dataset.term || null;
+  if (currentTerm === targetTerm) {
+    return;
+  }
+
+  const proceedWithSwitch = () => {
+    const gradeForm = document.getElementById('gradeForm');
+    const subjectId = gradeForm?.querySelector('input[name="subject_id"]')?.value;
+    const termInput = gradeForm?.querySelector('input[name="term"]');
+
+    if (termInput) {
+      termInput.value = targetTerm;
     }
 
-    const currentActive = document.querySelector('.term-step.active');
-    const currentTerm = currentActive?.dataset.term || null;
-    if (currentTerm === targetTerm) {
-        return;
+    const updatedUrl = new URL(window.location.href);
+    if (subjectId) {
+      updatedUrl.searchParams.set('subject_id', subjectId);
+    }
+    updatedUrl.searchParams.set('term', targetTerm);
+    window.history.replaceState({}, '', updatedUrl.toString());
+
+    if (!gradeForm || !subjectId) {
+      window.location.href = updatedUrl.toString();
+      return;
     }
 
-    const proceedWithSwitch = () => {
-        const gradeForm = document.getElementById('gradeForm');
-        const subjectId = gradeForm?.querySelector('input[name="subject_id"]')?.value;
-        const termInput = gradeForm?.querySelector('input[name="term"]');
+    // Clear unsaved changes in Alpine store
+    const gradesStoreTerm = getGradesStore();
+    if (gradesStoreTerm) {
+      gradesStoreTerm.clearUnsaved();
+    }
 
-        if (termInput) {
-            termInput.value = targetTerm;
-        }
+    if (typeof window.refreshGradeSection === 'function') {
+      termChangeInProgress = true;
+      const refreshPromise = window.refreshGradeSection();
+      if (refreshPromise && typeof refreshPromise.finally === 'function') {
+        refreshPromise.finally(() => {
+          termChangeInProgress = false;
+        });
+      } else {
+        termChangeInProgress = false;
+      }
+    } else {
+      window.location.href = updatedUrl.toString();
+    }
+  };
 
-        const updatedUrl = new URL(window.location.href);
-        if (subjectId) {
-            updatedUrl.searchParams.set('subject_id', subjectId);
-        }
-        updatedUrl.searchParams.set('term', targetTerm);
-        window.history.replaceState({}, '', updatedUrl.toString());
-
-        if (!gradeForm || !subjectId) {
-            window.location.href = updatedUrl.toString();
-            return;
-        }
-
+  const formSubmitting = form ? form.submitting : false;
+  if (typeof checkForChanges === 'function' && !formSubmitting) {
+    const { hasChanges } = checkForChanges();
+    if (hasChanges) {
+      const confirmSwitch = () => {
         // Clear unsaved changes in Alpine store
-        const gradesStoreTerm = getGradesStore();
-        if (gradesStoreTerm) {
-            gradesStoreTerm.clearUnsaved();
-        }
+        const gsConfirm = getGradesStore();
+        if (gsConfirm) gsConfirm.clearUnsaved();
+        proceedWithSwitch();
+      };
 
-        if (typeof window.refreshGradeSection === 'function') {
-            termChangeInProgress = true;
-            const refreshPromise = window.refreshGradeSection();
-            if (refreshPromise && typeof refreshPromise.finally === 'function') {
-                refreshPromise.finally(() => {
-                    termChangeInProgress = false;
-                });
-            } else {
-                termChangeInProgress = false;
-            }
-        } else {
-            window.location.href = updatedUrl.toString();
-        }
-    };
-
-    const formSubmitting = form ? form.submitting : false;
-    if (typeof checkForChanges === 'function' && !formSubmitting) {
-        const { hasChanges } = checkForChanges();
-        if (hasChanges) {
-            const confirmSwitch = () => {
-                // Clear unsaved changes in Alpine store
-                const gsConfirm = getGradesStore();
-                if (gsConfirm) gsConfirm.clearUnsaved();
-                proceedWithSwitch();
-            };
-
-            if (typeof window.showUnsavedChangesModal === 'function') {
-                window.showUnsavedChangesModal(confirmSwitch);
-            } else if (confirm('You have unsaved changes that will be lost. Continue?')) {
-                confirmSwitch();
-            }
-            return;
-        }
+      if (typeof window.showUnsavedChangesModal === 'function') {
+        window.showUnsavedChangesModal(confirmSwitch);
+      } else if (confirm('You have unsaved changes that will be lost. Continue?')) {
+        confirmSwitch();
+      }
+      return;
     }
+  }
 
-    proceedWithSwitch();
+  proceedWithSwitch();
 }
 
 // Function to update course outcome dropdowns after term change
 export function updateCourseOutcomeDropdowns(subjectId, term) {
-    // Fetch course outcomes for the selected subject and term
-    fetch(`/instructor/course-outcomes?subject_id=${subjectId}&term=${term}`)
-        .then(response => response.json())
-        .then(data => {
-            const dropdowns = document.querySelectorAll('.course-outcome-select');
-            
-            dropdowns.forEach(dropdown => {
-                // Store current selection
-                const currentValue = dropdown.value;
-                
-                // Clear existing options except the first one
-                dropdown.innerHTML = '<option value="">Select Course Outcome</option>';
-                
-                if (Array.isArray(data) && data.length > 0) {
-                    // Add course outcome options
-                    data.forEach(outcome => {
-                        const option = document.createElement('option');
-                        option.value = outcome.id;
-                        option.textContent = `${outcome.code} - ${outcome.identifier}`;
-                        if (outcome.is_deleted) {
-                            option.classList.add('text-warning');
-                        }
-                        dropdown.appendChild(option);
-                    });
-                    
-                    // Restore previous selection if it still exists
-                    if (currentValue && dropdown.querySelector(`option[value="${currentValue}"]`)) {
-                        dropdown.value = currentValue;
-                    }
-                }
-            });
-        })
-        .catch(() => {
-            console.error('Error loading course outcomes for dropdowns');
-        });
+  // Fetch course outcomes for the selected subject and term
+  fetch(`/instructor/course-outcomes?subject_id=${subjectId}&term=${term}`)
+    .then((response) => response.json())
+    .then((data) => {
+      const dropdowns = document.querySelectorAll('.course-outcome-select');
+
+      dropdowns.forEach((dropdown) => {
+        // Store current selection
+        const currentValue = dropdown.value;
+
+        // Clear existing options except the first one
+        dropdown.innerHTML = '<option value="">Select Course Outcome</option>';
+
+        if (Array.isArray(data) && data.length > 0) {
+          // Add course outcome options
+          data.forEach((outcome) => {
+            const option = document.createElement('option');
+            option.value = outcome.id;
+            option.textContent = `${outcome.code} - ${outcome.identifier}`;
+            if (outcome.is_deleted) {
+              option.classList.add('text-warning');
+            }
+            dropdown.appendChild(option);
+          });
+
+          // Restore previous selection if it still exists
+          if (currentValue && dropdown.querySelector(`option[value="${currentValue}"]`)) {
+            dropdown.value = currentValue;
+          }
+        }
+      });
+    })
+    .catch(() => {
+      // Error loading course outcomes
+    });
 }
 
 // Setup beforeunload handler
 function setupBeforeUnloadHandler() {
-    window.addEventListener('beforeunload', function(e) {
-        // Don't show warning if form is being submitted or no unsaved changes
-        if (form && form.submitting) {
-            console.log('Form is being submitted, allowing navigation');
-            return;
-        }
-        
-        // Check Alpine store for unsaved changes
-        const gradesStoreCheck = getGradesStore();
-        const hasUnsaved = gradesStoreCheck ? gradesStoreCheck.unsavedChanges : false;
-        if (!hasUnsaved) {
-            console.log('No unsaved changes, allowing navigation');
-            return;
-        }
-        
-        if (typeof checkForChanges === 'function') {
-            const { hasChanges } = checkForChanges();
-            if (hasChanges) {
-                console.log('Unsaved changes detected, showing warning');
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            }
-        }
-    });
+  window.addEventListener('beforeunload', function (e) {
+    // Don't show warning if form is being submitted or no unsaved changes
+    if (form && form.submitting) {
+      return;
+    }
+
+    // Check Alpine store for unsaved changes
+    const gradesStoreCheck = getGradesStore();
+    const hasUnsaved = gradesStoreCheck ? gradesStoreCheck.unsavedChanges : false;
+    if (!hasUnsaved) {
+      return;
+    }
+
+    if (typeof checkForChanges === 'function') {
+      const { hasChanges } = checkForChanges();
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    }
+  });
 }
 
 // Setup link click handler for unsaved changes warning
 function setupLinkClickHandler() {
-    document.addEventListener('click', function(e) {
-        if (typeof checkForChanges === 'function') {
-            const { hasChanges } = checkForChanges();
-            if (hasChanges && (!form || !form.submitting)) {
-                const link = e.target.closest('a');
-                if (link && !link.hasAttribute('data-bs-toggle')) {
-                    e.preventDefault();
-                    
-                    // Use custom modal if available, otherwise fallback to confirm
-                    if (typeof window.showUnsavedChangesModal === 'function') {
-                        window.showUnsavedChangesModal(() => {
-                            // Clear unsaved changes in Alpine store
-                            const gs = getGradesStore();
-                            if (gs) gs.clearUnsaved();
-                            window.location.href = link.href;
-                        });
-                    } else {
-                        if (confirm('You have unsaved changes. Are you sure you want to leave this page?')) {
-                            // Clear unsaved changes in Alpine store
-                            const gs = getGradesStore();
-                            if (gs) gs.clearUnsaved();
-                            window.location.href = link.href;
-                        }
-                    }
-                }
+  document.addEventListener('click', function (e) {
+    if (typeof checkForChanges === 'function') {
+      const { hasChanges } = checkForChanges();
+      if (hasChanges && (!form || !form.submitting)) {
+        const link = e.target.closest('a');
+        if (link && !link.hasAttribute('data-bs-toggle')) {
+          e.preventDefault();
+
+          // Use custom modal if available, otherwise fallback to confirm
+          if (typeof window.showUnsavedChangesModal === 'function') {
+            window.showUnsavedChangesModal(() => {
+              // Clear unsaved changes in Alpine store
+              const gs = getGradesStore();
+              if (gs) gs.clearUnsaved();
+              window.location.href = link.href;
+            });
+          } else {
+            if (confirm('You have unsaved changes. Are you sure you want to leave this page?')) {
+              // Clear unsaved changes in Alpine store
+              const gs = getGradesStore();
+              if (gs) gs.clearUnsaved();
+              window.location.href = link.href;
             }
+          }
         }
-    });
+      }
+    }
+  });
 }
 
 // Add notification styles
 function addNotificationStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
+  const style = document.createElement('style');
+  style.textContent = `
         .btn-pulse {
             animation: pulse 2s infinite;
             box-shadow: 0 0 0 rgba(40, 167, 69, 0.4);
@@ -1282,26 +1272,26 @@ function addNotificationStyles() {
             opacity: 1;
         }
     `;
-    document.head.appendChild(style);
+  document.head.appendChild(style);
 }
 
 // Initialize everything when DOM is loaded
 export function initGradeScript() {
-    console.log("Grade script loaded");
-    bindGradeInputEvents();
-    initializeTermStepperNavigation();
-    initializeCourseOutcomeDropdowns();
-    setupBeforeUnloadHandler();
-    setupLinkClickHandler();
-    addNotificationStyles();
+  console.log('Grade script loaded');
+  bindGradeInputEvents();
+  initializeTermStepperNavigation();
+  initializeCourseOutcomeDropdowns();
+  setupBeforeUnloadHandler();
+  setupLinkClickHandler();
+  addNotificationStyles();
 }
 
 // Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize if we're on a grade page
-    if (document.getElementById('gradeForm') || document.getElementById('studentTableBody')) {
-        initGradeScript();
-    }
+document.addEventListener('DOMContentLoaded', function () {
+  // Only initialize if we're on a grade page
+  if (document.getElementById('gradeForm') || document.getElementById('studentTableBody')) {
+    initGradeScript();
+  }
 });
 
 // Export for external use

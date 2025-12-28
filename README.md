@@ -51,7 +51,7 @@ ACADEX is a comprehensive academic management system designed specifically for B
 
 ## 📁 Project Structure
 
-```
+```bash
 AcadexV3/
 ├── app/
 │   ├── Http/Controllers/     # Role-based controllers
@@ -82,6 +82,7 @@ AcadexV3/
 ## 🚀 Installation
 
 ### Prerequisites
+
 - PHP >= 8.2
 - Composer
 - Node.js >= 18.x
@@ -91,28 +92,33 @@ AcadexV3/
 ### Setup Steps
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/B0GARTT00/AcadexV3.git
    cd AcadexV3
    ```
 
 2. **Install PHP dependencies**
+
    ```bash
    composer install
    ```
 
 3. **Install JavaScript dependencies**
+
    ```bash
    npm install
    ```
 
 4. **Environment configuration**
+
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
 5. **Configure database** (edit `.env`)
+
    ```env
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
@@ -123,16 +129,19 @@ AcadexV3/
    ```
 
 6. **Run migrations and seeders**
+
    ```bash
    php artisan migrate --seed
    ```
 
 7. **Build assets**
+
    ```bash
    npm run build
    ```
 
 8. **Start development server**
+
    ```bash
    # Option 1: Use the dev script (runs all services)
    composer run dev
@@ -146,7 +155,7 @@ AcadexV3/
 ## 👥 User Roles
 
 | Role | ID | Access Level | Key Permissions |
-|------|-----|--------------|-----------------|
+| ------ | ----- | -------------- | ----------------- |
 | Instructor | 0 | Subject-level | Grade entry, student management, CO tracking |
 | Chairperson | 1 | Department-level | Instructor oversight, grade approval, department reports |
 | Dean | 2 | College-level | Cross-department monitoring, academic reporting |
@@ -159,6 +168,7 @@ AcadexV3/
 After seeding, you can log in with:
 
 **Admin Account:**
+
 - Email: `admin@brokenshire.edu.ph`
 - Password: (set during seeding)
 
@@ -167,6 +177,7 @@ After seeding, you can log in with:
 ## 📊 Database Schema
 
 ### Core Tables
+
 - `users` - System users with role-based access
 - `students` - Student records with soft delete
 - `subjects` - Course/subject catalog
@@ -180,6 +191,7 @@ After seeding, you can log in with:
 ## 🎨 CSS Architecture
 
 Organized modular CSS structure:
+
 - `layout/` - App layout, navigation, guest pages
 - `admin/` - Admin portal styles
 - `instructor/` - Instructor-specific styles
@@ -221,6 +233,7 @@ Proprietary software © 2025 Brokenshire College. All rights reserved.
 ## 🆘 Support
 
 For issues and questions:
+
 - Create an issue in the GitHub repository
 - Contact the development team
 
@@ -232,4 +245,4 @@ For issues and questions:
 
 ---
 
-**Built with ❤️ for Brokenshire College**
+## Built with ❤️ for Brokenshire College

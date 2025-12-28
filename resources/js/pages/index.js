@@ -1,9 +1,9 @@
 /**
  * Page Scripts Index
- * 
+ *
  * This file provides a registry of page-specific initialization functions.
  * Each page script should register itself via window exports.
- * 
+ *
  * Usage in Blade templates:
  * - Include the relevant page script via @vite or via script tag
  * - The script will auto-initialize when DOM is ready
@@ -71,72 +71,72 @@ import './vpaa/scores/course-outcome-departments.js';
  * @param {string} pageName - The page identifier
  */
 export function initPage(pageName) {
-    const initFunctions = {
-        // Admin
-        'admin.users': window.initAdminUsersPage,
-        'admin.sessions': window.initSessionsPage,
-        'admin.subjects': window.initAdminSubjectsPage,
-        'admin.departments': window.initAdminDepartmentsPage,
-        'admin.courses': window.initAdminCoursesPage,
-        'admin.structure-template-requests': window.initStructureTemplateRequestsPage,
-        'admin.grades-formula-course': window.initGradesFormulaCourse,
-        'admin.grades-formula-edit-global': window.initGradesFormulaEditGlobal,
-        'admin.grades-formula-department': window.initGradesFormulaDepartment,
-        'admin.grades-formula-select-period': window.initGradesFormulaSelectPeriod,
-        'admin.grades-formula-subject': window.initGradesFormulaSubject,
-        'admin.grades-formula-form': window.initGradesFormulaForm,
-        'admin.grades-formula-wildcards': window.initGradesFormulaWildcards,
-        
-        // Dashboard
-        'dashboard.instructor': window.initSubjectPerformanceChart,
-        'dashboard.chairperson': window.initChairpersonDashboard,
-        'dashboard.gecoordinator': window.initGECoordinatorDashboard,
-        
-        // Instructor
-        'instructor.manage-students': window.initManageStudentsPage,
-        'instructor.manage-grades': window.initManageGradesPage,
-        'instructor.course-outcomes': window.initCourseOutcomesPage,
-        'instructor.activities-create': window.initActivitiesCreatePage,
-        'instructor.grade-script': window.initGradeScript,
-        'instructor.auto-save-script': window.initAutoSaveScript,
-        'instructor.import-students': window.initImportStudentsPage,
-        'instructor.course-outcomes-wildcards': window.initCourseOutcomesWildcardsPage,
-        'instructor.course-outcomes-table': window.initCourseOutcomesTablePage,
-        'instructor.final-grades': window.initFinalGradesPage,
-        'instructor.course-outcome-results': window.initCourseOutcomeResultsPage,
-        'instructor.course-outcome-results-wildcards': window.initCourseOutcomeResultsWildcardsPage,
-        
-        // Chairperson
-        'chairperson.manage-instructors': window.initChairpersonManageInstructorsPage,
-        'chairperson.assign-subjects': window.initChairpersonAssignSubjectsPage,
-        'chairperson.co-course-chooser': window.initCOCourseChooserPage,
-        'chairperson.view-grades': window.initChairpersonViewGradesPage,
-        'chairperson.structure-template-create': window.initStructureTemplateCreatePage,
-        'chairperson.select-curriculum-subjects': window.initSelectCurriculumSubjectsPage,
-        
-        // GE Coordinator
-        'gecoordinator.manage-instructors': window.initGECoordinatorManageInstructorsPage,
-        'gecoordinator.students-by-year': window.initStudentsByYearPage,
-        'gecoordinator.assign-subjects': window.initAssignSubjectsPage,
-        'gecoordinator.select-curriculum-subjects': window.initSelectCurriculumSubjectsPage,
-        
-        // VPAA
-        'vpaa.departments': window.initVpaaDepartmentsPage,
-        'vpaa.students': window.initVpaaStudentsPage,
-        'vpaa.students-departments': window.initVpaaStudentsDepartmentsPage,
-        'vpaa.grades': window.initVpaaGradesPage,
-        'vpaa.course-outcome-attainment': window.initVpaaCourseOutcomeAttainmentPage,
-        'vpaa.course-outcome-results': window.initVpaaCourseOutcomeResultsPage,
-        'vpaa.course-outcome-results-wildcards': window.initVpaaCourseOutcomeResultsWildcardsPage,
-        'vpaa.course-outcome-departments': window.initVpaaCourseOutcomeDepartmentsPage,
-    };
+  const initFunctions = {
+    // Admin
+    'admin.users': window.initAdminUsersPage,
+    'admin.sessions': window.initSessionsPage,
+    'admin.subjects': window.initAdminSubjectsPage,
+    'admin.departments': window.initAdminDepartmentsPage,
+    'admin.courses': window.initAdminCoursesPage,
+    'admin.structure-template-requests': window.initStructureTemplateRequestsPage,
+    'admin.grades-formula-course': window.initGradesFormulaCourse,
+    'admin.grades-formula-edit-global': window.initGradesFormulaEditGlobal,
+    'admin.grades-formula-department': window.initGradesFormulaDepartment,
+    'admin.grades-formula-select-period': window.initGradesFormulaSelectPeriod,
+    'admin.grades-formula-subject': window.initGradesFormulaSubject,
+    'admin.grades-formula-form': window.initGradesFormulaForm,
+    'admin.grades-formula-wildcards': window.initGradesFormulaWildcards,
 
-    const initFn = initFunctions[pageName];
-    if (typeof initFn === 'function') {
-        initFn();
-    } else {
-        console.warn(`No initialization function found for page: ${pageName}`);
-    }
+    // Dashboard
+    'dashboard.instructor': window.initSubjectPerformanceChart,
+    'dashboard.chairperson': window.initChairpersonDashboard,
+    'dashboard.gecoordinator': window.initGECoordinatorDashboard,
+
+    // Instructor
+    'instructor.manage-students': window.initManageStudentsPage,
+    'instructor.manage-grades': window.initManageGradesPage,
+    'instructor.course-outcomes': window.initCourseOutcomesPage,
+    'instructor.activities-create': window.initActivitiesCreatePage,
+    'instructor.grade-script': window.initGradeScript,
+    'instructor.auto-save-script': window.initAutoSaveScript,
+    'instructor.import-students': window.initImportStudentsPage,
+    'instructor.course-outcomes-wildcards': window.initCourseOutcomesWildcardsPage,
+    'instructor.course-outcomes-table': window.initCourseOutcomesTablePage,
+    'instructor.final-grades': window.initFinalGradesPage,
+    'instructor.course-outcome-results': window.initCourseOutcomeResultsPage,
+    'instructor.course-outcome-results-wildcards': window.initCourseOutcomeResultsWildcardsPage,
+
+    // Chairperson
+    'chairperson.manage-instructors': window.initChairpersonManageInstructorsPage,
+    'chairperson.assign-subjects': window.initChairpersonAssignSubjectsPage,
+    'chairperson.co-course-chooser': window.initCOCourseChooserPage,
+    'chairperson.view-grades': window.initChairpersonViewGradesPage,
+    'chairperson.structure-template-create': window.initStructureTemplateCreatePage,
+    'chairperson.select-curriculum-subjects': window.initSelectCurriculumSubjectsPage,
+
+    // GE Coordinator
+    'gecoordinator.manage-instructors': window.initGECoordinatorManageInstructorsPage,
+    'gecoordinator.students-by-year': window.initStudentsByYearPage,
+    'gecoordinator.assign-subjects': window.initAssignSubjectsPage,
+    'gecoordinator.select-curriculum-subjects': window.initSelectCurriculumSubjectsPage,
+
+    // VPAA
+    'vpaa.departments': window.initVpaaDepartmentsPage,
+    'vpaa.students': window.initVpaaStudentsPage,
+    'vpaa.students-departments': window.initVpaaStudentsDepartmentsPage,
+    'vpaa.grades': window.initVpaaGradesPage,
+    'vpaa.course-outcome-attainment': window.initVpaaCourseOutcomeAttainmentPage,
+    'vpaa.course-outcome-results': window.initVpaaCourseOutcomeResultsPage,
+    'vpaa.course-outcome-results-wildcards': window.initVpaaCourseOutcomeResultsWildcardsPage,
+    'vpaa.course-outcome-departments': window.initVpaaCourseOutcomeDepartmentsPage,
+  };
+
+  const initFn = initFunctions[pageName];
+  if (typeof initFn === 'function') {
+    initFn();
+  } else {
+    console.warn(`No initialization function found for page: ${pageName}`);
+  }
 }
 
 // Export for global access

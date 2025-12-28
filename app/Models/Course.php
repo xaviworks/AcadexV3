@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @property int $id
@@ -30,8 +31,19 @@ class Course extends Model
         'department_id',
         'is_deleted',
         'created_by',
-        'updated_by',
+        'updated_by'
     ];
+
+    protected static function booted()
+    {
+        static::saved(function () {
+            Cache::forget('courses:all');
+        });
+
+        static::deleted(function () {
+            Cache::forget('courses:all');
+        });
+    }
 
     /**
      * Attribute casting

@@ -1,17 +1,20 @@
 # Session Management UI Consolidation
 
 ## Overview
+
 Merged the Active Sessions and User Logs into a single tabbed interface to reduce UI complexity while maintaining all functionality.
 
 ## Changes Made
 
 ### 1. View Update: `resources/views/admin/sessions.blade.php`
+
 - **Changed page title**: From "🔐 Active Sessions" to "🔐 Session Management"
 - **Added tab navigation**: Bootstrap 5 tabs with two tabs:
   - **Active Sessions Tab**: Shows all session data with statistics cards
   - **User Logs Tab**: Shows all user activity logs with date filtering
 
 ### 2. Controller Update: `app/Http/Controllers/AdminController.php`
+
 - **Updated `sessions()` method**:
   - Added `Request $request` parameter to handle date filtering
   - Added user logs query with optional date filtering
@@ -19,6 +22,7 @@ Merged the Active Sessions and User Logs into a single tabbed interface to reduc
   - Maintains all existing session management functionality
 
 ### 3. JavaScript Enhancement
+
 - **Dual DataTable initialization**:
   - `sessionsTable`: Handles active sessions table
   - `logsTable`: Handles user logs table
@@ -32,9 +36,10 @@ Merged the Active Sessions and User Logs into a single tabbed interface to reduc
 ## Features
 
 ### Active Sessions Tab
+
 - **Statistics Cards**: Total, Active, Expired sessions, and Unique Users
 - **Session Table**: Full session details with device/browser/platform info
-- **Actions**: 
+- **Actions**:
   - Revoke individual sessions
   - Revoke all user sessions
   - Revoke all sessions (emergency)
@@ -42,6 +47,7 @@ Merged the Active Sessions and User Logs into a single tabbed interface to reduc
 - **Password verification**: All revocation actions require admin password
 
 ### User Logs Tab
+
 - **Date Filtering**: Optional date picker to filter logs by specific date
 - **Event Type Badges**: Color-coded badges for different event types:
   - `login` → Success (green)
@@ -54,27 +60,35 @@ Merged the Active Sessions and User Logs into a single tabbed interface to reduc
 ## URL Structure
 
 ### Main Page
-```
+
+```bash
 GET /admin/sessions
 ```
+
 Shows Active Sessions tab by default.
 
 ### User Logs Tab
-```
+
+```bash
 GET /admin/sessions?tab=logs
 ```
+
 Opens directly to the User Logs tab.
 
 ### Date Filtered Logs
-```
+
+```bash
 GET /admin/sessions?tab=logs&date=2025-01-12
 ```
+
 Shows logs for a specific date.
 
 ## Technical Details
 
 ### DataTables Configuration
+
 Both tables use consistent configuration:
+
 - **Page Length**: 25 records per page
 - **Responsive**: Mobile-friendly layout
 - **Custom Styling**: Green theme matching admin design
@@ -82,11 +96,13 @@ Both tables use consistent configuration:
 - **Sorting**: Configurable per column
 
 ### Form Handling
+
 - **Date Filter Form**: `GET` method to preserve tab state
 - **Session Revocation Forms**: `POST` method with CSRF protection
 - **Password Verification**: Required for all administrative actions
 
 ### UI Consistency
+
 - **Color Scheme**: Primary green (`#0F4B36`), light green backgrounds (`#EAF8E7`)
 - **Icons**: Font Awesome 6 icons throughout
 - **Spacing**: Consistent padding and margins

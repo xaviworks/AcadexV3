@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @property int $id
@@ -21,6 +22,17 @@ class Department extends Model
     protected $fillable = [
         'department_code', 'department_description', 'is_deleted', 'created_by', 'updated_by'
     ];
+
+    protected static function booted()
+    {
+        static::saved(function () {
+            Cache::forget('departments:all');
+        });
+
+        static::deleted(function () {
+            Cache::forget('departments:all');
+        });
+    }
 
     public function courses()
     {

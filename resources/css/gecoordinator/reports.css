@@ -4,32 +4,34 @@
    COURSE CARDS
    =========================== */
 
-.course-card { 
-    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+.course-card {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-.course-card:hover { 
-    transform: translateY(-5px); 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important; 
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
 }
 
-.course-circle { 
-    transition: all 0.3s ease; 
+.course-circle {
+  transition: all 0.3s ease;
 }
 
-.course-card:hover .course-circle { 
-    transform: translate(-50%, -50%) scale(1.1); 
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2); 
+.course-card:hover .course-circle {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .course-circle h5 {
-    font-size: 1.1rem;
-    white-space: normal;
-    word-break: break-word;
-    text-align: center;
-    line-height: 1.1;
-    max-width: 70px;
-    margin: 0 auto;
+  font-size: 1.1rem;
+  white-space: normal;
+  word-break: break-word;
+  text-align: center;
+  line-height: 1.1;
+  max-width: 70px;
+  margin: 0 auto;
 }
 
 /* ===========================
@@ -37,7 +39,7 @@
    =========================== */
 
 @media (max-width: 600px) {
-    .course-circle h5 { 
-        font-size: 0.95rem; 
-    }
+  .course-circle h5 {
+    font-size: 0.95rem;
+  }
 }

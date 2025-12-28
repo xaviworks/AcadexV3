@@ -1,11 +1,13 @@
 # Session Management System - Implementation Guide
 
 ## Overview
+
 This document describes the comprehensive session management system implemented for the Acadex admin portal. The system provides full control over user login sessions, allowing administrators to monitor, track, and revoke active connections.
 
 ## Features Implemented
 
 ### 1. **Session Tracking & Monitoring**
+
 - Real-time tracking of all active user sessions
 - Device type detection (Desktop, Tablet, Mobile)
 - Browser and platform identification
@@ -13,17 +15,20 @@ This document describes the comprehensive session management system implemented 
 - Last activity timestamps with human-readable format
 
 ### 2. **Session Statistics Dashboard**
+
 - Total active sessions count
 - Active vs expired session breakdown
 - Unique users currently logged in
 - Visual statistics cards with icons
 
 ### 3. **Session Actions**
+
 - **Revoke Single Session**: Terminate a specific user session
 - **Revoke User Sessions**: Terminate all sessions for a specific user
 - **Revoke All Sessions**: Emergency termination of all user sessions (except admin's current session)
 
 ### 4. **Security Features**
+
 - Password confirmation required for all revocation actions
 - Protection against admin self-revocation
 - Session activity logging in `user_logs` table
@@ -71,6 +76,7 @@ This document describes the comprehensive session management system implemented 
 ## Database Schema
 
 ### Sessions Table (Extended)
+
 ```sql
 - id (string, primary)
 - user_id (bigint, nullable, indexed)
@@ -89,29 +95,34 @@ This document describes the comprehensive session management system implemented 
 ### For Administrators
 
 #### Accessing Session Management
+
 1. Navigate to Admin Dashboard
 2. Click "Active Sessions" in the sidebar
 3. View all current user sessions with detailed information
 
 #### Revoking a Single Session
+
 1. Locate the user session in the table
 2. Click the "Revoke" button in the Actions column
 3. Enter your admin password for confirmation
 4. Session will be immediately terminated
 
 #### Revoking All User Sessions
+
 1. Locate any session for the target user
 2. Click the "All" button next to the Revoke button
 3. Enter your admin password for confirmation
 4. All sessions for that user will be terminated
 
 #### Emergency: Revoking All Sessions
+
 1. Click the "Revoke All Sessions" button at the top
 2. Read the warning message carefully
 3. Enter your admin password for confirmation
 4. All user sessions (except yours) will be terminated
 
 ### Session Status Indicators
+
 - **Current**: Your active admin session (protected from revocation)
 - **Active**: Session is within the configured lifetime
 - **Expired**: Session has exceeded the lifetime but not yet garbage collected
@@ -119,12 +130,14 @@ This document describes the comprehensive session management system implemented 
 ## Technical Details
 
 ### Middleware Flow
+
 1. User makes an authenticated request
 2. `TrackSessionActivity` middleware intercepts the request
 3. Middleware updates the session metadata in the database
 4. Request continues to its destination
 
 ### Session Revocation Flow
+
 1. Admin initiates revocation action
 2. Password is verified against authenticated admin user
 3. Session record(s) deleted from database
@@ -135,13 +148,17 @@ This document describes the comprehensive session management system implemented 
 ### Security Considerations
 
 #### Password Protection
+
 All revocation actions require the admin's password to prevent unauthorized session termination.
 
 #### Self-Protection
+
 Admins cannot revoke their own active session to prevent lockout situations.
 
 #### Logging
+
 All session revocations are logged in the `user_logs` table with event types:
+
 - `session_revoked`: Single session terminated
 - `all_sessions_revoked`: All sessions for a user terminated
 - `bulk_sessions_revoked`: Emergency bulk termination
@@ -149,13 +166,17 @@ All session revocations are logged in the `user_logs` table with event types:
 ### Configuration
 
 #### Session Lifetime
+
 Configure session lifetime in `config/session.php`:
+
 ```php
 'lifetime' => env('SESSION_LIFETIME', 120), // minutes
 ```
 
 #### Session Driver
+
 Ensure database driver is enabled in `.env`:
+
 ```env
 SESSION_DRIVER=database
 ```
@@ -177,16 +198,19 @@ SESSION_DRIVER=database
 ## Deployment Steps
 
 1. **Backup Database**
+
    ```bash
    php artisan backup:run
    ```
 
 2. **Run Migration**
+
    ```bash
    php artisan migrate
    ```
 
 3. **Clear Cache**
+
    ```bash
    php artisan config:cache
    php artisan route:cache
@@ -201,22 +225,26 @@ SESSION_DRIVER=database
 ## Troubleshooting
 
 ### Sessions Not Tracked
+
 - Ensure `SESSION_DRIVER=database` in `.env`
 - Run `php artisan config:clear`
 - Verify jenssegers/agent package is installed
 
 ### Revocation Not Working
+
 - Check password verification logic
 - Verify session IDs are correct
 - Check database connection
 
 ### Middleware Not Executing
+
 - Verify middleware registration in `bootstrap/app.php`
 - Clear route cache: `php artisan route:clear`
 
 ## Future Enhancements
 
 ### Potential Features
+
 1. Session timeout warnings
 2. Email notifications on session revocation
 3. Session history tracking
@@ -236,23 +264,30 @@ SESSION_DRIVER=database
 ## API Endpoints
 
 ### GET /admin/sessions
+
 Display all active sessions
 
 ### POST /admin/sessions/revoke
+
 Revoke a single session
 Parameters:
+
 - `session_id`: string (required)
 - `password`: string (required)
 
 ### POST /admin/sessions/revoke-user
+
 Revoke all sessions for a user
 Parameters:
+
 - `user_id`: integer (required)
 - `password`: string (required)
 
 ### POST /admin/sessions/revoke-all
+
 Revoke all sessions except current admin
 Parameters:
+
 - `password`: string (required)
 
 ## Compliance Notes

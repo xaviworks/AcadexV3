@@ -4,11 +4,11 @@
  */
 
 export function initVpaaCourseOutcomeDepartmentsPage() {
-    document.querySelectorAll('#department-selection .subject-card[data-url]').forEach(card => {
-        card.addEventListener('click', () => {
-            window.location.href = card.dataset.url;
-        });
+  document.querySelectorAll('#department-selection .subject-card[data-url]').forEach((card) => {
+    card.addEventListener('click', () => {
+      window.location.href = card.dataset.url;
     });
+  });
 }
 
 // Auto-initialize on DOMContentLoaded

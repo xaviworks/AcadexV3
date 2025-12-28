@@ -1,6 +1,6 @@
 /**
  * GE Coordinator - Manage Instructors Page JavaScript
- * 
+ *
  * Handles modal interactions for instructor management:
  * - Approve/Reject pending instructor approvals
  * - Activate/Deactivate instructors
@@ -13,20 +13,20 @@
  * @param {Function} dataHandler - Function to handle data extraction and DOM updates
  */
 function setupModalHandler(modal, dataHandler) {
-    if (!modal) return;
+  if (!modal) return;
 
-    // Primary handler using Bootstrap's show.bs.modal event
-    modal.addEventListener('show.bs.modal', event => {
-        const button = event.relatedTarget;
-        if (!button) return;
-        dataHandler(button);
-    });
+  // Primary handler using Bootstrap's show.bs.modal event
+  modal.addEventListener('show.bs.modal', (event) => {
+    const button = event.relatedTarget;
+    if (!button) return;
+    dataHandler(button);
+  });
 
-    // Fallback click listeners for trigger buttons
-    const modalId = modal.getAttribute('id');
-    document.querySelectorAll(`[data-bs-target="#${modalId}"]`).forEach(btn => {
-        btn.addEventListener('click', () => dataHandler(btn));
-    });
+  // Fallback click listeners for trigger buttons
+  const modalId = modal.getAttribute('id');
+  document.querySelectorAll(`[data-bs-target="#${modalId}"]`).forEach((btn) => {
+    btn.addEventListener('click', () => dataHandler(btn));
+  });
 }
 
 /**
@@ -35,10 +35,12 @@ function setupModalHandler(modal, dataHandler) {
  * @returns {string|null} The instructor ID
  */
 function getInstructorId(button) {
-    return button.getAttribute('data-id') || 
-           button.getAttribute('data-instructor-id') || 
-           button.dataset.id || 
-           button.dataset.instructorId;
+  return (
+    button.getAttribute('data-id') ||
+    button.getAttribute('data-instructor-id') ||
+    button.dataset.id ||
+    button.dataset.instructorId
+  );
 }
 
 /**
@@ -47,10 +49,12 @@ function getInstructorId(button) {
  * @returns {string|null} The instructor name
  */
 function getInstructorName(button) {
-    return button.getAttribute('data-name') || 
-           button.getAttribute('data-instructor-name') || 
-           button.dataset.name || 
-           button.dataset.instructorName;
+  return (
+    button.getAttribute('data-name') ||
+    button.getAttribute('data-instructor-name') ||
+    button.dataset.name ||
+    button.dataset.instructorName
+  );
 }
 
 /**
@@ -59,110 +63,109 @@ function getInstructorName(button) {
  * @returns {string|null} The request ID
  */
 function getRequestId(button) {
-    return button.getAttribute('data-request-id') || 
-           button.dataset.requestId;
+  return button.getAttribute('data-request-id') || button.dataset.requestId;
 }
 
 /**
  * Initialize all modal handlers for the manage instructors page
  */
 function initGECoordinatorManageInstructorsPage() {
-    // Only run on GE Coordinator pages - check if URL contains 'gecoordinator'
-    if (!window.location.pathname.includes('gecoordinator')) {
-        return;
-    }
-    
-    // Approve instructor modal
-    const approveModal = document.getElementById('confirmApproveModal');
-    setupModalHandler(approveModal, (button) => {
-        const id = getInstructorId(button);
-        const name = getInstructorName(button);
-        
-        const form = document.getElementById('approveForm');
-        const nameEl = document.getElementById('approveName');
-        
-        if (id && form) form.action = `/gecoordinator/approvals/${id}/approve`;
-        if (name && nameEl) nameEl.textContent = name;
-    });
+  // Only run on GE Coordinator pages - check if URL contains 'gecoordinator'
+  if (!window.location.pathname.includes('gecoordinator')) {
+    return;
+  }
 
-    // Reject instructor modal
-    const rejectModal = document.getElementById('confirmRejectModal');
-    setupModalHandler(rejectModal, (button) => {
-        const id = getInstructorId(button);
-        const name = getInstructorName(button);
-        
-        const form = document.getElementById('rejectForm');
-        const nameEl = document.getElementById('rejectName');
-        
-        if (id && form) form.action = `/gecoordinator/approvals/${id}/reject`;
-        if (name && nameEl) nameEl.textContent = name;
-    });
+  // Approve instructor modal
+  const approveModal = document.getElementById('confirmApproveModal');
+  setupModalHandler(approveModal, (button) => {
+    const id = getInstructorId(button);
+    const name = getInstructorName(button);
 
-    // Deactivate instructor modal (for GE department instructors only)
-    const deactivateModal = document.getElementById('confirmDeactivateModal');
-    setupModalHandler(deactivateModal, (button) => {
-        const id = getInstructorId(button);
-        const name = getInstructorName(button);
-        
-        const form = document.getElementById('deactivateForm');
-        const nameEl = document.getElementById('instructorName');
-        
-        if (id && form) form.action = `/gecoordinator/instructors/${id}/deactivate`;
-        if (name && nameEl) nameEl.textContent = name;
-    });
+    const form = document.getElementById('approveForm');
+    const nameEl = document.getElementById('approveName');
 
-    // Remove GE Access modal (for non-GE department instructors)
-    const removeGEAccessModal = document.getElementById('confirmRemoveGEAccessModal');
-    setupModalHandler(removeGEAccessModal, (button) => {
-        const id = getInstructorId(button);
-        const name = getInstructorName(button);
-        
-        const form = document.getElementById('removeGEAccessForm');
-        const nameEl = document.getElementById('removeGEAccessName');
-        
-        // Uses the same deactivate endpoint - controller handles the logic
-        if (id && form) form.action = `/gecoordinator/instructors/${id}/deactivate`;
-        if (name && nameEl) nameEl.textContent = name;
-    });
+    if (id && form) form.action = `/gecoordinator/approvals/${id}/approve`;
+    if (name && nameEl) nameEl.textContent = name;
+  });
 
-    // Activate instructor modal
-    const activateModal = document.getElementById('confirmActivateModal');
-    setupModalHandler(activateModal, (button) => {
-        const id = getInstructorId(button);
-        const name = getInstructorName(button);
-        
-        const form = document.getElementById('activateForm');
-        const nameEl = document.getElementById('activateName');
-        
-        if (id && form) form.action = `/gecoordinator/instructors/${id}/activate`;
-        if (name && nameEl) nameEl.textContent = name;
-    });
+  // Reject instructor modal
+  const rejectModal = document.getElementById('confirmRejectModal');
+  setupModalHandler(rejectModal, (button) => {
+    const id = getInstructorId(button);
+    const name = getInstructorName(button);
 
-    // Approve GE subject request modal
-    const approveGERequestModal = document.getElementById('approveGERequestModal');
-    setupModalHandler(approveGERequestModal, (button) => {
-        const requestId = getRequestId(button);
-        const instructorName = getInstructorName(button);
-        
-        const form = document.getElementById('approveGERequestForm');
-        const nameEl = document.getElementById('approveGERequestName');
-        
-        if (requestId && form) form.action = `/gecoordinator/ge-requests/${requestId}/approve`;
-        if (instructorName && nameEl) nameEl.textContent = instructorName;
-    });
+    const form = document.getElementById('rejectForm');
+    const nameEl = document.getElementById('rejectName');
 
-    // Reject GE subject request modal
-    const rejectGERequestModal = document.getElementById('rejectGERequestModal');
-    setupModalHandler(rejectGERequestModal, (button) => {
-        const requestId = getRequestId(button);
-        const instructorName = getInstructorName(button);
-        
-        const form = document.getElementById('rejectGERequestForm');
-        const nameEl = document.getElementById('rejectGERequestName');
-        
-        if (requestId && form) form.action = `/gecoordinator/ge-requests/${requestId}/reject`;
-        if (instructorName && nameEl) nameEl.textContent = instructorName;
-    });
+    if (id && form) form.action = `/gecoordinator/approvals/${id}/reject`;
+    if (name && nameEl) nameEl.textContent = name;
+  });
+
+  // Deactivate instructor modal (for GE department instructors only)
+  const deactivateModal = document.getElementById('confirmDeactivateModal');
+  setupModalHandler(deactivateModal, (button) => {
+    const id = getInstructorId(button);
+    const name = getInstructorName(button);
+
+    const form = document.getElementById('deactivateForm');
+    const nameEl = document.getElementById('instructorName');
+
+    if (id && form) form.action = `/gecoordinator/instructors/${id}/deactivate`;
+    if (name && nameEl) nameEl.textContent = name;
+  });
+
+  // Remove GE Access modal (for non-GE department instructors)
+  const removeGEAccessModal = document.getElementById('confirmRemoveGEAccessModal');
+  setupModalHandler(removeGEAccessModal, (button) => {
+    const id = getInstructorId(button);
+    const name = getInstructorName(button);
+
+    const form = document.getElementById('removeGEAccessForm');
+    const nameEl = document.getElementById('removeGEAccessName');
+
+    // Uses the same deactivate endpoint - controller handles the logic
+    if (id && form) form.action = `/gecoordinator/instructors/${id}/deactivate`;
+    if (name && nameEl) nameEl.textContent = name;
+  });
+
+  // Activate instructor modal
+  const activateModal = document.getElementById('confirmActivateModal');
+  setupModalHandler(activateModal, (button) => {
+    const id = getInstructorId(button);
+    const name = getInstructorName(button);
+
+    const form = document.getElementById('activateForm');
+    const nameEl = document.getElementById('activateName');
+
+    if (id && form) form.action = `/gecoordinator/instructors/${id}/activate`;
+    if (name && nameEl) nameEl.textContent = name;
+  });
+
+  // Approve GE subject request modal
+  const approveGERequestModal = document.getElementById('approveGERequestModal');
+  setupModalHandler(approveGERequestModal, (button) => {
+    const requestId = getRequestId(button);
+    const instructorName = getInstructorName(button);
+
+    const form = document.getElementById('approveGERequestForm');
+    const nameEl = document.getElementById('approveGERequestName');
+
+    if (requestId && form) form.action = `/gecoordinator/ge-requests/${requestId}/approve`;
+    if (instructorName && nameEl) nameEl.textContent = instructorName;
+  });
+
+  // Reject GE subject request modal
+  const rejectGERequestModal = document.getElementById('rejectGERequestModal');
+  setupModalHandler(rejectGERequestModal, (button) => {
+    const requestId = getRequestId(button);
+    const instructorName = getInstructorName(button);
+
+    const form = document.getElementById('rejectGERequestForm');
+    const nameEl = document.getElementById('rejectGERequestName');
+
+    if (requestId && form) form.action = `/gecoordinator/ge-requests/${requestId}/reject`;
+    if (instructorName && nameEl) nameEl.textContent = instructorName;
+  });
 }
 
 // Export functions for use

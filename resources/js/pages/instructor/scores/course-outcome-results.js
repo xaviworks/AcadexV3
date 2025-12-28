@@ -6,7 +6,7 @@
 let currentTerm = null;
 
 function isCourseOutcomeResultsPage() {
-    return document.querySelector('[data-page="instructor.course-outcome-results"]');
+  return document.querySelector('[data-page="instructor.course-outcome-results"]');
 }
 
 // ==================== CUSTOM PRINT MODAL (No Bootstrap dependency) ====================
@@ -15,37 +15,37 @@ function isCourseOutcomeResultsPage() {
  * Open the print options modal using custom CSS-based modal
  */
 function coOpenPrintModal() {
-    const overlay = document.getElementById('coPrintModalOverlay');
-    if (overlay) {
-        overlay.classList.add('show');
-        document.body.style.overflow = 'hidden';
-        return;
-    }
-    
-    // Fallback to Bootstrap modal if custom one doesn't exist
-    const modalEl = document.getElementById('printOptionsModal');
-    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-    }
+  const overlay = document.getElementById('coPrintModalOverlay');
+  if (overlay) {
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+
+  // Fallback to Bootstrap modal if custom one doesn't exist
+  const modalEl = document.getElementById('printOptionsModal');
+  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }
 }
 
 /**
  * Close the print options modal
  */
 function coClosePrintModal() {
-    const overlay = document.getElementById('coPrintModalOverlay');
-    if (overlay) {
-        overlay.classList.remove('show');
-        document.body.style.overflow = '';
-        return;
-    }
-    
-    // Fallback to Bootstrap modal
-    const modalEl = document.getElementById('printOptionsModal');
-    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) modal.hide();
-    }
+  const overlay = document.getElementById('coPrintModalOverlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+    return;
+  }
+
+  // Fallback to Bootstrap modal
+  const modalEl = document.getElementById('printOptionsModal');
+  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+  }
 }
 
 // Expose globally IMMEDIATELY so onclick handlers work
@@ -53,298 +53,298 @@ window.coOpenPrintModal = coOpenPrintModal;
 window.coClosePrintModal = coClosePrintModal;
 
 function setDisplayType(type, icon, text) {
-    const currentIcon = document.getElementById('currentIcon');
-    const currentText = document.getElementById('currentText');
-    if (currentIcon) currentIcon.textContent = icon;
-    if (currentText) currentText.textContent = text;
+  const currentIcon = document.getElementById('currentIcon');
+  const currentText = document.getElementById('currentText');
+  if (currentIcon) currentIcon.textContent = icon;
+  if (currentText) currentText.textContent = text;
 
-    const scoreTypeSelect = document.getElementById('scoreType');
-    if (scoreTypeSelect) scoreTypeSelect.value = type;
+  const scoreTypeSelect = document.getElementById('scoreType');
+  if (scoreTypeSelect) scoreTypeSelect.value = type;
 
-    document.querySelectorAll('.dropdown-item').forEach(item => item.classList.remove('active'));
-    document.querySelectorAll('.dropdown-item').forEach(item => {
-        const handler = item.getAttribute('onclick') || '';
-        if (handler.includes(`'${type}'`)) item.classList.add('active');
-    });
+  document.querySelectorAll('.dropdown-item').forEach((item) => item.classList.remove('active'));
+  document.querySelectorAll('.dropdown-item').forEach((item) => {
+    const handler = item.getAttribute('onclick') || '';
+    if (handler.includes(`'${type}'`)) item.classList.add('active');
+  });
 
-    const dropdownElement = document.getElementById('displayTypeDropdown');
-    if (dropdownElement) {
-        const dropdown = bootstrap.Dropdown.getInstance(dropdownElement);
-        if (dropdown) dropdown.hide();
+  const dropdownElement = document.getElementById('displayTypeDropdown');
+  if (dropdownElement) {
+    const dropdown = bootstrap.Dropdown.getInstance(dropdownElement);
+    if (dropdown) dropdown.hide();
+  }
+
+  const termStepperContainer = document.getElementById('term-navigation-container');
+  const compactStepper = document.querySelector('.compact-stepper');
+  const stepperColumn = document.querySelector('.col-md-6.text-end');
+
+  if (type === 'passfail' || type === 'copasssummary') {
+    if (termStepperContainer) {
+      termStepperContainer.style.display = 'none';
+      termStepperContainer.style.visibility = 'hidden';
     }
-
-    const termStepperContainer = document.getElementById('term-navigation-container');
-    const compactStepper = document.querySelector('.compact-stepper');
-    const stepperColumn = document.querySelector('.col-md-6.text-end');
-
-    if (type === 'passfail' || type === 'copasssummary') {
-        if (termStepperContainer) {
-            termStepperContainer.style.display = 'none';
-            termStepperContainer.style.visibility = 'hidden';
-        }
-        if (compactStepper) {
-            compactStepper.style.display = 'none';
-            compactStepper.style.visibility = 'hidden';
-        }
-        if (stepperColumn) stepperColumn.style.display = 'none';
-    } else {
-        if (termStepperContainer) {
-            termStepperContainer.style.display = 'flex';
-            termStepperContainer.style.visibility = 'visible';
-        }
-        if (compactStepper) {
-            compactStepper.style.display = 'flex';
-            compactStepper.style.visibility = 'visible';
-        }
-        if (stepperColumn) stepperColumn.style.display = 'block';
+    if (compactStepper) {
+      compactStepper.style.display = 'none';
+      compactStepper.style.visibility = 'hidden';
     }
+    if (stepperColumn) stepperColumn.style.display = 'none';
+  } else {
+    if (termStepperContainer) {
+      termStepperContainer.style.display = 'flex';
+      termStepperContainer.style.visibility = 'visible';
+    }
+    if (compactStepper) {
+      compactStepper.style.display = 'flex';
+      compactStepper.style.visibility = 'visible';
+    }
+    if (stepperColumn) stepperColumn.style.display = 'block';
+  }
 
-    toggleScoreTypeWithValue(type);
+  toggleScoreTypeWithValue(type);
 }
 
 function toggleScoreTypeWithValue(type) {
-    const passfailTable = document.getElementById('passfail-table');
-    const copasssummaryTable = document.getElementById('copasssummary-table');
-    const mainTables = document.querySelectorAll('.main-table');
-    const termTables = document.querySelectorAll('.term-table');
-    const summaryLabel = document.getElementById('summaryLabel');
-    const termSummaryLabels = document.querySelectorAll('.term-summary-label');
-    const termStepperContainer = document.getElementById('term-navigation-container');
+  const passfailTable = document.getElementById('passfail-table');
+  const copasssummaryTable = document.getElementById('copasssummary-table');
+  const mainTables = document.querySelectorAll('.main-table');
+  const termTables = document.querySelectorAll('.term-table');
+  const summaryLabel = document.getElementById('summaryLabel');
+  const termSummaryLabels = document.querySelectorAll('.term-summary-label');
+  const termStepperContainer = document.getElementById('term-navigation-container');
 
-    if (type === 'passfail') {
-        if (passfailTable) passfailTable.style.display = 'block';
-        if (copasssummaryTable) copasssummaryTable.style.display = 'none';
-        mainTables.forEach(tbl => (tbl.style.display = 'none'));
-        termTables.forEach(tbl => (tbl.style.display = 'none'));
-        if (termStepperContainer) {
-            termStepperContainer.style.display = 'none';
-            termStepperContainer.style.visibility = 'hidden';
-        }
-        document.querySelectorAll('.passfail-term-table').forEach(tbl => (tbl.style.display = 'none'));
-    } else if (type === 'copasssummary') {
-        if (passfailTable) passfailTable.style.display = 'none';
-        if (copasssummaryTable) copasssummaryTable.style.display = 'block';
-        mainTables.forEach(tbl => (tbl.style.display = 'none'));
-        termTables.forEach(tbl => (tbl.style.display = 'none'));
-        if (termStepperContainer) {
-            termStepperContainer.style.display = 'none';
-            termStepperContainer.style.visibility = 'hidden';
-        }
-        document.querySelectorAll('.summary-term-table').forEach(tbl => (tbl.style.display = 'none'));
+  if (type === 'passfail') {
+    if (passfailTable) passfailTable.style.display = 'block';
+    if (copasssummaryTable) copasssummaryTable.style.display = 'none';
+    mainTables.forEach((tbl) => (tbl.style.display = 'none'));
+    termTables.forEach((tbl) => (tbl.style.display = 'none'));
+    if (termStepperContainer) {
+      termStepperContainer.style.display = 'none';
+      termStepperContainer.style.visibility = 'hidden';
+    }
+    document.querySelectorAll('.passfail-term-table').forEach((tbl) => (tbl.style.display = 'none'));
+  } else if (type === 'copasssummary') {
+    if (passfailTable) passfailTable.style.display = 'none';
+    if (copasssummaryTable) copasssummaryTable.style.display = 'block';
+    mainTables.forEach((tbl) => (tbl.style.display = 'none'));
+    termTables.forEach((tbl) => (tbl.style.display = 'none'));
+    if (termStepperContainer) {
+      termStepperContainer.style.display = 'none';
+      termStepperContainer.style.visibility = 'hidden';
+    }
+    document.querySelectorAll('.summary-term-table').forEach((tbl) => (tbl.style.display = 'none'));
+  } else {
+    if (passfailTable) passfailTable.style.display = 'none';
+    if (copasssummaryTable) copasssummaryTable.style.display = 'none';
+    if (termStepperContainer) {
+      termStepperContainer.style.display = 'flex';
+      termStepperContainer.style.visibility = 'visible';
+    }
+    document.querySelectorAll('.passfail-term-table').forEach((tbl) => (tbl.style.display = 'none'));
+    document.querySelectorAll('.summary-term-table').forEach((tbl) => (tbl.style.display = 'none'));
+
+    if (!currentTerm) {
+      mainTables.forEach((tbl) => (tbl.style.display = 'block'));
+      termTables.forEach((tbl) => (tbl.style.display = 'none'));
     } else {
-        if (passfailTable) passfailTable.style.display = 'none';
-        if (copasssummaryTable) copasssummaryTable.style.display = 'none';
-        if (termStepperContainer) {
-            termStepperContainer.style.display = 'flex';
-            termStepperContainer.style.visibility = 'visible';
-        }
-        document.querySelectorAll('.passfail-term-table').forEach(tbl => (tbl.style.display = 'none'));
-        document.querySelectorAll('.summary-term-table').forEach(tbl => (tbl.style.display = 'none'));
-
-        if (!currentTerm) {
-            mainTables.forEach(tbl => (tbl.style.display = 'block'));
-            termTables.forEach(tbl => (tbl.style.display = 'none'));
-        } else {
-            mainTables.forEach(tbl => (tbl.style.display = 'none'));
-            termTables.forEach(tbl => (tbl.style.display = 'none'));
-            const activeTerm = document.getElementById(`term-${currentTerm}`);
-            if (activeTerm) activeTerm.style.display = 'block';
-        }
-
-        document.querySelectorAll('.score-value').forEach(el => {
-            el.style.display = 'inline';
-            const score = el.getAttribute('data-score');
-            const percent = el.getAttribute('data-percentage');
-            el.classList.remove('text-success', 'text-danger');
-            if (type === 'score') {
-                el.textContent = score;
-            } else {
-                el.textContent = percent !== '' && percent !== null ? `${percent}%` : '-';
-                if (type === 'percentage' && percent !== '' && percent !== null && percent !== '-') {
-                    const percentValue = parseFloat(percent);
-                    if (percentValue >= 75) {
-                        el.classList.add('text-success');
-                    } else {
-                        el.classList.add('text-danger');
-                    }
-                }
-            }
-        });
+      mainTables.forEach((tbl) => (tbl.style.display = 'none'));
+      termTables.forEach((tbl) => (tbl.style.display = 'none'));
+      const activeTerm = document.getElementById(`term-${currentTerm}`);
+      if (activeTerm) activeTerm.style.display = 'block';
     }
 
-    if (type === 'percentage') {
-        if (summaryLabel && summaryLabel.closest('tr')) summaryLabel.closest('tr').style.display = 'none';
-        termSummaryLabels.forEach(label => label.closest('tr').style.display = 'none');
-    } else {
-        if (summaryLabel && summaryLabel.closest('tr')) {
-            summaryLabel.closest('tr').style.display = '';
-            summaryLabel.textContent = 'Total number of items';
+    document.querySelectorAll('.score-value').forEach((el) => {
+      el.style.display = 'inline';
+      const score = el.getAttribute('data-score');
+      const percent = el.getAttribute('data-percentage');
+      el.classList.remove('text-success', 'text-danger');
+      if (type === 'score') {
+        el.textContent = score;
+      } else {
+        el.textContent = percent !== '' && percent !== null ? `${percent}%` : '-';
+        if (type === 'percentage' && percent !== '' && percent !== null && percent !== '-') {
+          const percentValue = parseFloat(percent);
+          if (percentValue >= 75) {
+            el.classList.add('text-success');
+          } else {
+            el.classList.add('text-danger');
+          }
         }
-        termSummaryLabels.forEach(label => {
-            if (label.closest('tr')) {
-                label.closest('tr').style.display = '';
-                label.textContent = 'Total number of items';
-            }
-        });
+      }
+    });
+  }
+
+  if (type === 'percentage') {
+    if (summaryLabel && summaryLabel.closest('tr')) summaryLabel.closest('tr').style.display = 'none';
+    termSummaryLabels.forEach((label) => (label.closest('tr').style.display = 'none'));
+  } else {
+    if (summaryLabel && summaryLabel.closest('tr')) {
+      summaryLabel.closest('tr').style.display = '';
+      summaryLabel.textContent = 'Total number of items';
     }
+    termSummaryLabels.forEach((label) => {
+      if (label.closest('tr')) {
+        label.closest('tr').style.display = '';
+        label.textContent = 'Total number of items';
+      }
+    });
+  }
 }
 
 function toggleScoreType() {
-    const scoreTypeEl = document.getElementById('scoreType');
-    if (!scoreTypeEl) return;
-    toggleScoreTypeWithValue(scoreTypeEl.value);
+  const scoreTypeEl = document.getElementById('scoreType');
+  if (!scoreTypeEl) return;
+  toggleScoreTypeWithValue(scoreTypeEl.value);
 }
 
 function switchTerm(term, index) {
-    currentTerm = term;
-    const scoreTypeEl = document.getElementById('scoreType');
-    const scoreType = scoreTypeEl ? scoreTypeEl.value : 'raw';
+  currentTerm = term;
+  const scoreTypeEl = document.getElementById('scoreType');
+  const scoreType = scoreTypeEl ? scoreTypeEl.value : 'raw';
 
-    const combinedTable = document.getElementById('combined-table');
-    const termTables = document.querySelectorAll('.term-table');
-    const passfailTable = document.getElementById('passfail-table');
-    const copasssummaryTable = document.getElementById('copasssummary-table');
-    const passfailTermTables = document.querySelectorAll('.passfail-term-table');
-    const summaryTermTables = document.querySelectorAll('.summary-term-table');
+  const combinedTable = document.getElementById('combined-table');
+  const termTables = document.querySelectorAll('.term-table');
+  const passfailTable = document.getElementById('passfail-table');
+  const copasssummaryTable = document.getElementById('copasssummary-table');
+  const passfailTermTables = document.querySelectorAll('.passfail-term-table');
+  const summaryTermTables = document.querySelectorAll('.summary-term-table');
 
-    if (combinedTable) combinedTable.style.display = 'none';
-    termTables.forEach(tbl => (tbl.style.display = 'none'));
+  if (combinedTable) combinedTable.style.display = 'none';
+  termTables.forEach((tbl) => (tbl.style.display = 'none'));
 
-    if (scoreType === 'passfail') {
-        if (passfailTable) passfailTable.style.display = 'none';
-        passfailTermTables.forEach(tbl => (tbl.style.display = 'none'));
-        const activePassfailTable = document.getElementById(`passfail-term-${term}`);
-        if (activePassfailTable) activePassfailTable.style.display = 'block';
-    } else if (scoreType === 'copasssummary') {
-        if (copasssummaryTable) copasssummaryTable.style.display = 'none';
-        summaryTermTables.forEach(tbl => (tbl.style.display = 'none'));
-        const activeSummaryTable = document.getElementById(`summary-term-${term}`);
-        if (activeSummaryTable) activeSummaryTable.style.display = 'block';
+  if (scoreType === 'passfail') {
+    if (passfailTable) passfailTable.style.display = 'none';
+    passfailTermTables.forEach((tbl) => (tbl.style.display = 'none'));
+    const activePassfailTable = document.getElementById(`passfail-term-${term}`);
+    if (activePassfailTable) activePassfailTable.style.display = 'block';
+  } else if (scoreType === 'copasssummary') {
+    if (copasssummaryTable) copasssummaryTable.style.display = 'none';
+    summaryTermTables.forEach((tbl) => (tbl.style.display = 'none'));
+    const activeSummaryTable = document.getElementById(`summary-term-${term}`);
+    if (activeSummaryTable) activeSummaryTable.style.display = 'block';
+  } else {
+    const activeTable = document.getElementById(`term-${term}`);
+    if (activeTable) activeTable.style.display = 'block';
+  }
+
+  const allSteps = document.querySelectorAll('.compact-step');
+  allSteps.forEach((step, i) => {
+    step.classList.remove('active', 'completed', 'upcoming');
+    if (i === 0) {
+      step.classList.add('completed');
     } else {
-        const activeTable = document.getElementById(`term-${term}`);
-        if (activeTable) activeTable.style.display = 'block';
+      const termIndex = i - 1;
+      if (termIndex < index) {
+        step.classList.add('completed');
+      } else if (termIndex === index) {
+        step.classList.add('active');
+      } else {
+        step.classList.add('upcoming');
+      }
     }
+  });
 
-    const allSteps = document.querySelectorAll('.compact-step');
-    allSteps.forEach((step, i) => {
-        step.classList.remove('active', 'completed', 'upcoming');
-        if (i === 0) {
-            step.classList.add('completed');
-        } else {
-            const termIndex = i - 1;
-            if (termIndex < index) {
-                step.classList.add('completed');
-            } else if (termIndex === index) {
-                step.classList.add('active');
-            } else {
-                step.classList.add('upcoming');
-            }
-        }
-    });
-
-    const type = document.getElementById('scoreType')?.value || 'score';
-    document.querySelectorAll('.score-value').forEach(el => {
-        const score = el.getAttribute('data-score');
-        const percent = el.getAttribute('data-percentage');
-        el.textContent = type === 'score' ? score : (percent !== '' && percent !== null ? `${percent}%` : '-');
-    });
+  const type = document.getElementById('scoreType')?.value || 'score';
+  document.querySelectorAll('.score-value').forEach((el) => {
+    const score = el.getAttribute('data-score');
+    const percent = el.getAttribute('data-percentage');
+    el.textContent = type === 'score' ? score : percent !== '' && percent !== null ? `${percent}%` : '-';
+  });
 }
 
 function showAllTerms() {
-    currentTerm = null;
-    const scoreType = document.getElementById('scoreType')?.value || 'score';
+  currentTerm = null;
+  const scoreType = document.getElementById('scoreType')?.value || 'score';
 
-    const termTables = document.querySelectorAll('.term-table');
-    const passfailTermTables = document.querySelectorAll('.passfail-term-table');
-    const summaryTermTables = document.querySelectorAll('.summary-term-table');
+  const termTables = document.querySelectorAll('.term-table');
+  const passfailTermTables = document.querySelectorAll('.passfail-term-table');
+  const summaryTermTables = document.querySelectorAll('.summary-term-table');
 
-    termTables.forEach(tbl => (tbl.style.display = 'none'));
-    passfailTermTables.forEach(tbl => (tbl.style.display = 'none'));
-    summaryTermTables.forEach(tbl => (tbl.style.display = 'none'));
+  termTables.forEach((tbl) => (tbl.style.display = 'none'));
+  passfailTermTables.forEach((tbl) => (tbl.style.display = 'none'));
+  summaryTermTables.forEach((tbl) => (tbl.style.display = 'none'));
 
-    if (scoreType === 'passfail') {
-        const passfailTable = document.getElementById('passfail-table');
-        if (passfailTable) passfailTable.style.display = 'block';
-    } else if (scoreType === 'copasssummary') {
-        const copasssummaryTable = document.getElementById('copasssummary-table');
-        if (copasssummaryTable) copasssummaryTable.style.display = 'block';
+  if (scoreType === 'passfail') {
+    const passfailTable = document.getElementById('passfail-table');
+    if (passfailTable) passfailTable.style.display = 'block';
+  } else if (scoreType === 'copasssummary') {
+    const copasssummaryTable = document.getElementById('copasssummary-table');
+    if (copasssummaryTable) copasssummaryTable.style.display = 'block';
+  } else {
+    const combinedTable = document.getElementById('combined-table');
+    if (combinedTable) combinedTable.style.display = 'block';
+  }
+
+  const allSteps = document.querySelectorAll('.compact-step');
+  allSteps.forEach((step, i) => {
+    step.classList.remove('active', 'completed', 'upcoming');
+    if (i === 0) {
+      step.classList.add('active');
     } else {
-        const combinedTable = document.getElementById('combined-table');
-        if (combinedTable) combinedTable.style.display = 'block';
+      step.classList.add('upcoming');
     }
+  });
 
-    const allSteps = document.querySelectorAll('.compact-step');
-    allSteps.forEach((step, i) => {
-        step.classList.remove('active', 'completed', 'upcoming');
-        if (i === 0) {
-            step.classList.add('active');
-        } else {
-            step.classList.add('upcoming');
-        }
-    });
-
-    toggleScoreType();
+  toggleScoreType();
 }
 
 function coPrintTable() {
-    coPrintSpecificTable('combined');
+  coPrintSpecificTable('combined');
 }
 
 function coPrintSpecificTable(tableType) {
-    const bannerUrl = window.bannerUrl || '/images/banner-header.png';
-    const academicPeriod = window.academicPeriod || 'N/A';
-    const semester = window.semester || 'N/A';
-    const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const subjectInfo = window.subjectInfo || 'Course Outcome Results';
-    const courseCode = window.courseCode || 'N/A';
-    const subjectDescription = window.subjectDescription || 'N/A';
-    const units = window.units || 'N/A';
-    const courseSection = window.courseSection || 'N/A';
+  const bannerUrl = window.bannerUrl || '/images/banner-header.png';
+  const academicPeriod = window.academicPeriod || 'N/A';
+  const semester = window.semester || 'N/A';
+  const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const subjectInfo = window.subjectInfo || 'Course Outcome Results';
+  const courseCode = window.courseCode || 'N/A';
+  const subjectDescription = window.subjectDescription || 'N/A';
+  const units = window.units || 'N/A';
+  const courseSection = window.courseSection || 'N/A';
 
-    let content = '';
-    let reportTitle = '';
-    switch (tableType) {
-        case 'prelim':
-            content = getPrintTableContent('prelim');
-            reportTitle = 'Course Outcome Attainment Results - Prelim Term';
-            break;
-        case 'midterm':
-            content = getPrintTableContent('midterm');
-            reportTitle = 'Course Outcome Attainment Results - Midterm';
-            break;
-        case 'prefinal':
-            content = getPrintTableContent('prefinal');
-            reportTitle = 'Course Outcome Attainment Results - Prefinal Term';
-            break;
-        case 'final':
-            content = getPrintTableContent('final');
-            reportTitle = 'Course Outcome Attainment Results - Final Term';
-            break;
-        case 'combined':
-            content = getPrintTableContent('combined');
-            reportTitle = 'Course Outcome Attainment Results - All Terms Combined';
-            break;
-        case 'passfail':
-            content = getPassFailContent();
-            reportTitle = 'Course Outcome Pass/Fail Analysis Report';
-            break;
-        case 'copasssummary':
-            content = getCourseOutcomeSummaryContent();
-            reportTitle = 'Course Outcomes Summary Dashboard Report';
-            break;
-        case 'all':
-            content = getAllTablesContent();
-            reportTitle = 'Complete Course Outcome Attainment Report';
-            break;
-        default:
-            content = getPrintTableContent('combined');
-            reportTitle = 'Course Outcome Attainment Results';
-    }
+  let content = '';
+  let reportTitle = '';
+  switch (tableType) {
+    case 'prelim':
+      content = getPrintTableContent('prelim');
+      reportTitle = 'Course Outcome Attainment Results - Prelim Term';
+      break;
+    case 'midterm':
+      content = getPrintTableContent('midterm');
+      reportTitle = 'Course Outcome Attainment Results - Midterm';
+      break;
+    case 'prefinal':
+      content = getPrintTableContent('prefinal');
+      reportTitle = 'Course Outcome Attainment Results - Prefinal Term';
+      break;
+    case 'final':
+      content = getPrintTableContent('final');
+      reportTitle = 'Course Outcome Attainment Results - Final Term';
+      break;
+    case 'combined':
+      content = getPrintTableContent('combined');
+      reportTitle = 'Course Outcome Attainment Results - All Terms Combined';
+      break;
+    case 'passfail':
+      content = getPassFailContent();
+      reportTitle = 'Course Outcome Pass/Fail Analysis Report';
+      break;
+    case 'copasssummary':
+      content = getCourseOutcomeSummaryContent();
+      reportTitle = 'Course Outcomes Summary Dashboard Report';
+      break;
+    case 'all':
+      content = getAllTablesContent();
+      reportTitle = 'Complete Course Outcome Attainment Report';
+      break;
+    default:
+      content = getPrintTableContent('combined');
+      reportTitle = 'Course Outcome Attainment Results';
+  }
 
-    const printWindow = window.open('', '', 'width=900,height=650');
-    if (!printWindow) return;
+  const printWindow = window.open('', '', 'width=900,height=650');
+  if (!printWindow) return;
 
-    printWindow.document.write(`
+  printWindow.document.write(`
         <html>
             <head>
                 <title>${reportTitle}</title>
@@ -406,201 +406,220 @@ function coPrintSpecificTable(tableType) {
             </body>
         </html>
     `);
-    printWindow.document.close();
-    setTimeout(() => printWindow.print(), 500);
+  printWindow.document.close();
+  setTimeout(() => printWindow.print(), 500);
 }
 
 function getPrintTableContent(termType) {
-    let tableSelector = '';
-    let termTitle = '';
-    switch (termType) {
-        case 'prelim': tableSelector = '#term-prelim table'; termTitle = 'Prelim Term Results'; break;
-        case 'midterm': tableSelector = '#term-midterm table'; termTitle = 'Midterm Results'; break;
-        case 'prefinal': tableSelector = '#term-prefinal table'; termTitle = 'Prefinal Term Results'; break;
-        case 'final': tableSelector = '#term-final table'; termTitle = 'Final Term Results'; break;
-        case 'combined': tableSelector = '#combined-table table'; termTitle = 'All Terms Combined'; break;
+  let tableSelector = '';
+  let termTitle = '';
+  switch (termType) {
+    case 'prelim':
+      tableSelector = '#term-prelim table';
+      termTitle = 'Prelim Term Results';
+      break;
+    case 'midterm':
+      tableSelector = '#term-midterm table';
+      termTitle = 'Midterm Results';
+      break;
+    case 'prefinal':
+      tableSelector = '#term-prefinal table';
+      termTitle = 'Prefinal Term Results';
+      break;
+    case 'final':
+      tableSelector = '#term-final table';
+      termTitle = 'Final Term Results';
+      break;
+    case 'combined':
+      tableSelector = '#combined-table table';
+      termTitle = 'All Terms Combined';
+      break;
+  }
+
+  const table = document.querySelector(tableSelector);
+  if (!table) return '<p>No data available for the selected term.</p>';
+
+  let tableHTML = '<div class="term-section">';
+  if (termType !== 'combined') tableHTML += `<h3 class="term-title">${termTitle}</h3>`;
+  tableHTML += '<table class="print-table">';
+
+  const rows = table.querySelectorAll('tr');
+  const currentScoreType = document.getElementById('scoreType')?.value || 'score';
+
+  rows.forEach((row) => {
+    const isHeader = row.closest('thead') !== null;
+    const tag = isHeader ? 'th' : 'td';
+    if (currentScoreType === 'percentage' && !isHeader) {
+      const firstCell = row.querySelector('td');
+      if (firstCell && firstCell.textContent.includes('Total number of items')) return;
     }
 
-    const table = document.querySelector(tableSelector);
-    if (!table) return '<p>No data available for the selected term.</p>';
-
-    let tableHTML = '<div class="term-section">';
-    if (termType !== 'combined') tableHTML += `<h3 class="term-title">${termTitle}</h3>`;
-    tableHTML += '<table class="print-table">';
-
-    const rows = table.querySelectorAll('tr');
-    const currentScoreType = document.getElementById('scoreType')?.value || 'score';
-
-    rows.forEach(row => {
-        const isHeader = row.closest('thead') !== null;
-        const tag = isHeader ? 'th' : 'td';
-        if (currentScoreType === 'percentage' && !isHeader) {
-            const firstCell = row.querySelector('td');
-            if (firstCell && firstCell.textContent.includes('Total number of items')) return;
-        }
-
-        tableHTML += '<tr>';
-        const cells = row.querySelectorAll(isHeader ? 'th' : 'td');
-        cells.forEach(cell => {
-            let cellContent = cell.textContent.trim();
-            let cellClass = '';
-            let cellAttrs = '';
-            if (cell.hasAttribute('colspan')) cellAttrs += ` colspan="${cell.getAttribute('colspan')}"`;
-            if (cell.hasAttribute('rowspan')) cellAttrs += ` rowspan="${cell.getAttribute('rowspan')}"`;
-            if (cell.classList.contains('bg-primary') || cell.classList.contains('text-white')) cellClass += ' bg-primary text-white';
-            if (cell.classList.contains('table-success')) cellClass += ' table-success';
-            if (cell.classList.contains('align-middle')) cellClass += ' align-middle';
-            if (cell.classList.contains('text-center')) cellClass += ' text-center';
-            if (cell.classList.contains('fw-bold')) cellClass += ' fw-bold';
-            if (cell.classList.contains('bg-light')) cellClass += ' bg-light';
-            if (cell.classList.contains('score-value') || /^\d+$/.test(cellContent)) cellClass += ' score-value';
-            else if (cellContent.includes('%')) cellClass += ' percentage-value';
-            else if (cell.textContent.includes('Average') || cell.classList.contains('average-cell')) cellClass += ' average-cell';
-            if (cell.style && cell.style.cssText) cellAttrs += ` style="${cell.style.cssText}"`;
-            tableHTML += `<${tag}${cellAttrs} class="${cellClass.trim()}">${cellContent}</${tag}>`;
-        });
-        tableHTML += '</tr>';
+    tableHTML += '<tr>';
+    const cells = row.querySelectorAll(isHeader ? 'th' : 'td');
+    cells.forEach((cell) => {
+      let cellContent = cell.textContent.trim();
+      let cellClass = '';
+      let cellAttrs = '';
+      if (cell.hasAttribute('colspan')) cellAttrs += ` colspan="${cell.getAttribute('colspan')}"`;
+      if (cell.hasAttribute('rowspan')) cellAttrs += ` rowspan="${cell.getAttribute('rowspan')}"`;
+      if (cell.classList.contains('bg-primary') || cell.classList.contains('text-white'))
+        cellClass += ' bg-primary text-white';
+      if (cell.classList.contains('table-success')) cellClass += ' table-success';
+      if (cell.classList.contains('align-middle')) cellClass += ' align-middle';
+      if (cell.classList.contains('text-center')) cellClass += ' text-center';
+      if (cell.classList.contains('fw-bold')) cellClass += ' fw-bold';
+      if (cell.classList.contains('bg-light')) cellClass += ' bg-light';
+      if (cell.classList.contains('score-value') || /^\d+$/.test(cellContent)) cellClass += ' score-value';
+      else if (cellContent.includes('%')) cellClass += ' percentage-value';
+      else if (cell.textContent.includes('Average') || cell.classList.contains('average-cell'))
+        cellClass += ' average-cell';
+      if (cell.style && cell.style.cssText) cellAttrs += ` style="${cell.style.cssText}"`;
+      tableHTML += `<${tag}${cellAttrs} class="${cellClass.trim()}">${cellContent}</${tag}>`;
     });
+    tableHTML += '</tr>';
+  });
 
-    tableHTML += '</table></div>';
-    return tableHTML;
+  tableHTML += '</table></div>';
+  return tableHTML;
 }
 
 function getAllTablesContent() {
-    const terms = ['prelim', 'midterm', 'prefinal', 'final'];
-    let content = '';
-    terms.forEach((term, index) => {
-        if (index > 0) content += '<div class="page-break"></div>';
-        content += getPrintTableContent(term);
-    });
-    content += '<div class="page-break"></div>';
-    content += getPrintTableContent('combined');
-    content += '<div class="page-break"></div>';
-    content += getPassFailContent();
-    content += '<div class="page-break"></div>';
-    content += getCourseOutcomeSummaryContent();
-    return content;
+  const terms = ['prelim', 'midterm', 'prefinal', 'final'];
+  let content = '';
+  terms.forEach((term, index) => {
+    if (index > 0) content += '<div class="page-break"></div>';
+    content += getPrintTableContent(term);
+  });
+  content += '<div class="page-break"></div>';
+  content += getPrintTableContent('combined');
+  content += '<div class="page-break"></div>';
+  content += getPassFailContent();
+  content += '<div class="page-break"></div>';
+  content += getCourseOutcomeSummaryContent();
+  return content;
 }
 
 function getPassFailContent() {
-    const passFailTable = document.querySelector('#passfail-table table');
-    if (!passFailTable) return '<p>No Pass/Fail analysis data available.</p>';
+  const passFailTable = document.querySelector('#passfail-table table');
+  if (!passFailTable) return '<p>No Pass/Fail analysis data available.</p>';
 
-    let content = '<div class="term-section">';
-    content += '<h3 class="term-title">Pass/Fail Analysis Summary</h3>';
-    content += '<table class="print-table">';
+  let content = '<div class="term-section">';
+  content += '<h3 class="term-title">Pass/Fail Analysis Summary</h3>';
+  content += '<table class="print-table">';
 
-    const rows = passFailTable.querySelectorAll('tr');
-    rows.forEach(row => {
-        const isHeader = row.closest('thead') !== null;
-        const tag = isHeader ? 'th' : 'td';
-        content += '<tr>';
-        const cells = row.querySelectorAll(isHeader ? 'th' : 'td');
-        cells.forEach(cell => {
-            let cellContent = cell.textContent.trim();
-            let cellClass = '';
-            let cellAttrs = '';
-            if (cell.hasAttribute('colspan')) cellAttrs += ` colspan="${cell.getAttribute('colspan')}"`;
-            if (cell.hasAttribute('rowspan')) cellAttrs += ` rowspan="${cell.getAttribute('rowspan')}"`;
-            if (cell.classList.contains('table-success')) cellClass += ' table-success';
-            if (cell.classList.contains('text-center')) cellClass += ' text-center';
-            if (cell.classList.contains('fw-bold')) cellClass += ' fw-bold';
-            if (cell.classList.contains('bg-light')) cellClass += ' bg-light';
-            content += `<${tag}${cellAttrs} class="${cellClass.trim()}">${cellContent}</${tag}>`;
-        });
-        content += '</tr>';
+  const rows = passFailTable.querySelectorAll('tr');
+  rows.forEach((row) => {
+    const isHeader = row.closest('thead') !== null;
+    const tag = isHeader ? 'th' : 'td';
+    content += '<tr>';
+    const cells = row.querySelectorAll(isHeader ? 'th' : 'td');
+    cells.forEach((cell) => {
+      let cellContent = cell.textContent.trim();
+      let cellClass = '';
+      let cellAttrs = '';
+      if (cell.hasAttribute('colspan')) cellAttrs += ` colspan="${cell.getAttribute('colspan')}"`;
+      if (cell.hasAttribute('rowspan')) cellAttrs += ` rowspan="${cell.getAttribute('rowspan')}"`;
+      if (cell.classList.contains('table-success')) cellClass += ' table-success';
+      if (cell.classList.contains('text-center')) cellClass += ' text-center';
+      if (cell.classList.contains('fw-bold')) cellClass += ' fw-bold';
+      if (cell.classList.contains('bg-light')) cellClass += ' bg-light';
+      content += `<${tag}${cellAttrs} class="${cellClass.trim()}">${cellContent}</${tag}>`;
     });
+    content += '</tr>';
+  });
 
-    content += '</table></div>';
-    return content;
+  content += '</table></div>';
+  return content;
 }
 
 function getCourseOutcomeSummaryContent() {
-    const summaryTable = document.querySelector('#copasssummary-table table');
-    if (!summaryTable) return '<p>No Course Outcomes Summary data available.</p>';
+  const summaryTable = document.querySelector('#copasssummary-table table');
+  if (!summaryTable) return '<p>No Course Outcomes Summary data available.</p>';
 
-    let content = '<div class="term-section">';
-    content += '<h3 class="term-title">Course Outcomes Summary Dashboard</h3>';
-    content += '<table class="print-table">';
+  let content = '<div class="term-section">';
+  content += '<h3 class="term-title">Course Outcomes Summary Dashboard</h3>';
+  content += '<table class="print-table">';
 
-    const rows = summaryTable.querySelectorAll('tr');
-    rows.forEach(row => {
-        const isHeader = row.closest('thead') !== null;
-        const tag = isHeader ? 'th' : 'td';
-        content += '<tr>';
-        const cells = row.querySelectorAll(isHeader ? 'th' : 'td');
-        cells.forEach(cell => {
-            let cellContent = cell.textContent.trim();
-            let cellClass = '';
-            let cellAttrs = '';
-            if (cell.hasAttribute('colspan')) cellAttrs += ` colspan="${cell.getAttribute('colspan')}"`;
-            if (cell.hasAttribute('rowspan')) cellAttrs += ` rowspan="${cell.getAttribute('rowspan')}"`;
-            if (cell.classList.contains('table-success')) cellClass += ' table-success';
-            if (cell.classList.contains('text-center')) cellClass += ' text-center';
-            if (cell.classList.contains('fw-bold')) cellClass += ' fw-bold';
-            if (cell.classList.contains('bg-light')) cellClass += ' bg-light';
-            if (cell.classList.contains('average-cell')) cellClass += ' average-cell';
-            if (cellContent.includes('%')) cellClass += ' percentage-value';
-            content += `<${tag}${cellAttrs} class="${cellClass.trim()}">${cellContent}</${tag}>`;
-        });
-        content += '</tr>';
+  const rows = summaryTable.querySelectorAll('tr');
+  rows.forEach((row) => {
+    const isHeader = row.closest('thead') !== null;
+    const tag = isHeader ? 'th' : 'td';
+    content += '<tr>';
+    const cells = row.querySelectorAll(isHeader ? 'th' : 'td');
+    cells.forEach((cell) => {
+      let cellContent = cell.textContent.trim();
+      let cellClass = '';
+      let cellAttrs = '';
+      if (cell.hasAttribute('colspan')) cellAttrs += ` colspan="${cell.getAttribute('colspan')}"`;
+      if (cell.hasAttribute('rowspan')) cellAttrs += ` rowspan="${cell.getAttribute('rowspan')}"`;
+      if (cell.classList.contains('table-success')) cellClass += ' table-success';
+      if (cell.classList.contains('text-center')) cellClass += ' text-center';
+      if (cell.classList.contains('fw-bold')) cellClass += ' fw-bold';
+      if (cell.classList.contains('bg-light')) cellClass += ' bg-light';
+      if (cell.classList.contains('average-cell')) cellClass += ' average-cell';
+      if (cellContent.includes('%')) cellClass += ' percentage-value';
+      content += `<${tag}${cellAttrs} class="${cellClass.trim()}">${cellContent}</${tag}>`;
     });
+    content += '</tr>';
+  });
 
-    content += '</table></div>';
-    return content;
+  content += '</table></div>';
+  return content;
 }
 
 function dismissWarning() {
-    const warningAlert = document.querySelector('.alert-warning');
-    if (!warningAlert) return;
-    warningAlert.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
-    warningAlert.style.opacity = '0';
-    warningAlert.style.transform = 'translateY(-10px)';
-    setTimeout(() => { warningAlert.style.display = 'none'; }, 300);
+  const warningAlert = document.querySelector('.alert-warning');
+  if (!warningAlert) return;
+  warningAlert.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+  warningAlert.style.opacity = '0';
+  warningAlert.style.transform = 'translateY(-10px)';
+  setTimeout(() => {
+    warningAlert.style.display = 'none';
+  }, 300);
 }
 
 function refreshData() {
-    const refreshButton = document.querySelector('button[onclick="refreshData()"]');
-    if (!refreshButton) return;
-    const originalHTML = refreshButton.innerHTML;
-    refreshButton.innerHTML = '<i class="bi bi-arrow-clockwise me-2 spin"></i>Refreshing...';
-    refreshButton.disabled = true;
-    const style = document.createElement('style');
-    style.textContent = `.spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
-    document.head.appendChild(style);
-    setTimeout(() => window.location.reload(), 1000);
+  const refreshButton = document.querySelector('button[onclick="refreshData()"]');
+  if (!refreshButton) return;
+  const originalHTML = refreshButton.innerHTML;
+  refreshButton.innerHTML = '<i class="bi bi-arrow-clockwise me-2 spin"></i>Refreshing...';
+  refreshButton.disabled = true;
+  const style = document.createElement('style');
+  style.textContent = `.spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+  document.head.appendChild(style);
+  setTimeout(() => window.location.reload(), 1000);
 }
 
 export function initCourseOutcomeResultsPage() {
-    if (!isCourseOutcomeResultsPage()) return;
+  if (!isCourseOutcomeResultsPage()) return;
 
-    // Expose remaining functions for inline handlers in Blade
-    Object.assign(window, {
-        setDisplayType,
-        toggleScoreType,
-        toggleScoreTypeWithValue,
-        switchTerm,
-        showAllTerms,
-        coPrintTable,
-        coPrintSpecificTable,
-        dismissWarning,
-        refreshData,
+  // Expose remaining functions for inline handlers in Blade
+  Object.assign(window, {
+    setDisplayType,
+    toggleScoreType,
+    toggleScoreTypeWithValue,
+    switchTerm,
+    showAllTerms,
+    coPrintTable,
+    coPrintSpecificTable,
+    dismissWarning,
+    refreshData,
+  });
+
+  toggleScoreType();
+  document.querySelectorAll('.term-step').forEach((step) => {
+    step.addEventListener('click', () => {
+      setTimeout(() => {
+        const tableContainer = document.querySelector('.results-card:not([style*="display: none"])');
+        if (tableContainer) {
+          tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     });
+  });
 
-    toggleScoreType();
-    document.querySelectorAll('.term-step').forEach(step => {
-        step.addEventListener('click', () => {
-            setTimeout(() => {
-                const tableContainer = document.querySelector('.results-card:not([style*="display: none"])');
-                if (tableContainer) {
-                    tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
-        });
-    });
-
-    // Default to percentage view on load
-    setDisplayType('percentage', '📊', 'Percentage');
+  // Default to percentage view on load
+  setDisplayType('percentage', '📊', 'Percentage');
 }
 
 document.addEventListener('DOMContentLoaded', initCourseOutcomeResultsPage);

@@ -2,138 +2,138 @@
 
 /* Card Hover Effects */
 .card {
-    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover .position-absolute {
-    transform: translate(-50%, -50%) scale(1.1) !important;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+  transform: translate(-50%, -50%) scale(1.1) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
 .mini-stat-card {
-    transition: all 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .card:hover .mini-stat-card {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .hover-lift {
-    transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .hover-lift:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Dashboard Hover Effects */
 .transition-all {
-    transition: all 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .hover-bg-opacity-25:hover {
-    background-opacity: 0.25 !important;
+  background-opacity: 0.25 !important;
 }
 
 /* Green Theme Colors */
 .bg-primary-subtle {
-    background-color: rgba(78, 205, 133, 0.1) !important;
+  background-color: rgba(78, 205, 133, 0.1) !important;
 }
 
 .text-primary {
-    color: #4ecd85 !important;
+  color: #4ecd85 !important;
 }
 
 .bg-soft-primary {
-    background-color: rgba(13, 110, 253, 0.1);
+  background-color: rgba(13, 110, 253, 0.1);
 }
 
 .bg-soft-success {
-    background-color: rgba(25, 135, 84, 0.1);
+  background-color: rgba(25, 135, 84, 0.1);
 }
 
 .bg-soft-info {
-    background-color: rgba(13, 202, 240, 0.1);
+  background-color: rgba(13, 202, 240, 0.1);
 }
 
 .bg-soft-warning {
-    background-color: rgba(255, 193, 7, 0.1);
+  background-color: rgba(255, 193, 7, 0.1);
 }
 
 .bg-success-subtle {
-    background-color: rgba(25, 135, 84, 0.1);
+  background-color: rgba(25, 135, 84, 0.1);
 }
 
 /* Form Styles */
 .form-label {
-    color: #495057;
-    font-weight: 600;
+  color: #495057;
+  font-weight: 600;
 }
 
 .form-select:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+  border-color: #198754;
+  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
 }
 
 .btn-primary {
-    background-color: #198754;
-    border-color: #198754;
+  background-color: #198754;
+  border-color: #198754;
 }
 
 .btn-primary:hover {
-    background-color: #0f5132;
-    border-color: #0f5132;
+  background-color: #0f5132;
+  border-color: #0f5132;
 }
 
 /* Breadcrumb Styles */
 .breadcrumb-item a {
-    color: #198754;
-    text-decoration: none;
+  color: #198754;
+  text-decoration: none;
 }
 
 .breadcrumb-item a:hover {
-    color: #0f5132;
-    text-decoration: underline;
+  color: #0f5132;
+  text-decoration: underline;
 }
 
 /* VPAA Read-Only Styles */
 .vpaa-readonly form {
-    display: none !important;
+  display: none !important;
 }
 
 .vpaa-readonly .notification-bell {
-    display: none !important;
+  display: none !important;
 }
 
-.vpaa-readonly [data-bs-target="#printOptionsModal"],
+.vpaa-readonly [data-bs-target='#printOptionsModal'],
 .vpaa-readonly #printOptionsModal,
 .vpaa-readonly #warningModal {
-    display: none !important;
+  display: none !important;
 }
 
-.vpaa-readonly a[href*="/instructor/course-outcome-attainments"],
-.vpaa-readonly a[href*="/instructor/course_outcomes"],
-.vpaa-readonly a[href*="/instructor/grades"] {
-    display: none !important;
+.vpaa-readonly a[href*='/instructor/course-outcome-attainments'],
+.vpaa-readonly a[href*='/instructor/course_outcomes'],
+.vpaa-readonly a[href*='/instructor/grades'] {
+  display: none !important;
 }
 
 .vpaa-readonly .card-body.text-center .mt-3 {
-    display: none !important;
+  display: none !important;
 }
 
 /* Global fallback for VPAA view */
-body.vpaa-view a[href*="/instructor/course_outcomes"],
-body.vpaa-view a[href*="/instructor/course-outcome-attainments"],
-body.vpaa-view a[href*="/instructor/grades"],
+body.vpaa-view a[href*='/instructor/course_outcomes'],
+body.vpaa-view a[href*='/instructor/course-outcome-attainments'],
+body.vpaa-view a[href*='/instructor/grades'],
 body.vpaa-view .notification-bell,
-body.vpaa-view [data-bs-target="#printOptionsModal"],
+body.vpaa-view [data-bs-target='#printOptionsModal'],
 body.vpaa-view #printOptionsModal,
 body.vpaa-view #warningModal {
-    display: none !important;
+  display: none !important;
 }
 
 body.vpaa-view .card-body.text-center .mt-3 small.text-muted {
-    display: none !important;
+  display: none !important;
 }

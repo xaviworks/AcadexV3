@@ -4,7 +4,7 @@
  */
 
 function isFinalGradesPage() {
-    return document.querySelector('[data-page="instructor.final-grades"]');
+  return document.querySelector('[data-page="instructor.final-grades"]');
 }
 
 // ==================== CUSTOM PRINT MODAL (No Bootstrap dependency) ====================
@@ -13,37 +13,37 @@ function isFinalGradesPage() {
  * Open the print options modal using custom CSS-based modal
  */
 function fgOpenPrintModal() {
-    const overlay = document.getElementById('fgPrintModalOverlay');
-    if (overlay) {
-        overlay.classList.add('show');
-        document.body.style.overflow = 'hidden';
-        return;
-    }
-    
-    // Fallback to Bootstrap modal if custom one doesn't exist
-    const modalEl = document.getElementById('printOptionsModal');
-    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(modalEl).show();
-    }
+  const overlay = document.getElementById('fgPrintModalOverlay');
+  if (overlay) {
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+
+  // Fallback to Bootstrap modal if custom one doesn't exist
+  const modalEl = document.getElementById('printOptionsModal');
+  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }
 }
 
 /**
  * Close the print options modal
  */
 function fgClosePrintModal() {
-    const overlay = document.getElementById('fgPrintModalOverlay');
-    if (overlay) {
-        overlay.classList.remove('show');
-        document.body.style.overflow = '';
-        return;
-    }
-    
-    // Fallback to Bootstrap modal
-    const modalEl = document.getElementById('printOptionsModal');
-    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) modal.hide();
-    }
+  const overlay = document.getElementById('fgPrintModalOverlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+    return;
+  }
+
+  // Fallback to Bootstrap modal
+  const modalEl = document.getElementById('printOptionsModal');
+  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+  }
 }
 
 // Expose globally IMMEDIATELY so onclick handlers work
@@ -52,166 +52,189 @@ window.fgClosePrintModal = fgClosePrintModal;
 
 // Print HTML via hidden iframe (preferred) with window.open fallback
 function fgPrintHtml(html) {
-    try {
-        const iframe = document.createElement('iframe');
-        iframe.style.position = 'fixed';
-        iframe.style.right = '0';
-        iframe.style.bottom = '0';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        iframe.style.border = '0';
-        iframe.style.visibility = 'hidden';
-        iframe.setAttribute('id', 'aca_print_iframe');
-        
-        // Use srcdoc when available
-        if ('srcdoc' in iframe) {
-            iframe.srcdoc = html;
-        } else {
-            // Fallback for older browsers — use a Blob URL to avoid printing the current page URL
-            try {
-                const blob = new Blob([html], { type: 'text/html' });
-                iframe.src = URL.createObjectURL(blob);
-            } catch (e) {
-                iframe.src = 'about:blank';
-            }
-        }
-        document.body.appendChild(iframe);
+  try {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.visibility = 'hidden';
+    iframe.setAttribute('id', 'aca_print_iframe');
 
-        const onLoad = () => {
-            try {
-                const win = iframe.contentWindow || iframe;
-                win.focus();
-                // Give browser a moment to render
-                setTimeout(() => {
-                    try {
-                        win.print();
-                    } finally {
-                        // Remove iframe after printing
-                        setTimeout(() => { document.body.removeChild(iframe); }, 500);
-                    }
-                }, 250);
-            } catch (e) {
-                console.error('Iframe print failed, falling back to window.open', e);
-                try { document.body.removeChild(iframe); } catch (e2) {}
-                // Fallback to Blob URL opened in new window (better than opening a route)
-                try {
-                    const blob2 = new Blob([html], { type: 'text/html' });
-                    const blobUrl = URL.createObjectURL(blob2);
-                    const w = window.open(blobUrl, '_blank', 'width=900,height=650');
-                    if (!w) { alert('Please allow pop-ups to print the report.'); return; }
-                    // Attempt to print once the new window loads
-                    w.addEventListener('load', function(){
-                        try { w.print(); } finally { setTimeout(() => URL.revokeObjectURL(blobUrl), 1000); }
-                    });
-                } catch (e2) {
-                    const w = window.open('', '', 'width=900,height=650');
-                    if (!w) { alert('Please allow pop-ups to print the report.'); return; }
-                    w.document.open(); w.document.write(html); w.document.close();
-                    setTimeout(() => w.print(), 400);
-                }
-            }
-        };
-
-        if ('srcdoc' in iframe) {
-            iframe.onload = onLoad;
-        } else {
-            // Write content into iframe
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            doc.open(); doc.write(html); doc.close();
-            onLoad();
-        }
-    } catch (e) {
-        console.error('printHtml error', e);
-        // Last resort fallback
-        const w = window.open('', '', 'width=900,height=650');
-        if (!w) { alert('Please allow pop-ups to print the report.'); return; }
-        w.document.open(); w.document.write(html); w.document.close();
-        setTimeout(() => w.print(), 400);
+    // Use srcdoc when available
+    if ('srcdoc' in iframe) {
+      iframe.srcdoc = html;
+    } else {
+      // Fallback for older browsers — use a Blob URL to avoid printing the current page URL
+      try {
+        const blob = new Blob([html], { type: 'text/html' });
+        iframe.src = URL.createObjectURL(blob);
+      } catch (e) {
+        iframe.src = 'about:blank';
+      }
     }
+    document.body.appendChild(iframe);
+
+    const onLoad = () => {
+      try {
+        const win = iframe.contentWindow || iframe;
+        win.focus();
+        // Give browser a moment to render
+        setTimeout(() => {
+          try {
+            win.print();
+          } finally {
+            // Remove iframe after printing
+            setTimeout(() => {
+              document.body.removeChild(iframe);
+            }, 500);
+          }
+        }, 250);
+      } catch (e) {
+        console.error('Iframe print failed, falling back to window.open', e);
+        try {
+          document.body.removeChild(iframe);
+        } catch (e2) {}
+        // Fallback to Blob URL opened in new window (better than opening a route)
+        try {
+          const blob2 = new Blob([html], { type: 'text/html' });
+          const blobUrl = URL.createObjectURL(blob2);
+          const w = window.open(blobUrl, '_blank', 'width=900,height=650');
+          if (!w) {
+            alert('Please allow pop-ups to print the report.');
+            return;
+          }
+          // Attempt to print once the new window loads
+          w.addEventListener('load', function () {
+            try {
+              w.print();
+            } finally {
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+            }
+          });
+        } catch (e2) {
+          const w = window.open('', '', 'width=900,height=650');
+          if (!w) {
+            alert('Please allow pop-ups to print the report.');
+            return;
+          }
+          w.document.open();
+          w.document.write(html);
+          w.document.close();
+          setTimeout(() => w.print(), 400);
+        }
+      }
+    };
+
+    if ('srcdoc' in iframe) {
+      iframe.onload = onLoad;
+    } else {
+      // Write content into iframe
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      doc.open();
+      doc.write(html);
+      doc.close();
+      onLoad();
+    }
+  } catch (e) {
+    console.error('printHtml error', e);
+    // Last resort fallback
+    const w = window.open('', '', 'width=900,height=650');
+    if (!w) {
+      alert('Please allow pop-ups to print the report.');
+      return;
+    }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    setTimeout(() => w.print(), 400);
+  }
 }
 
 // Helper to format numeric score strings: drop trailing .00
 function formatScore(txt) {
-    if (!txt && txt !== 0) return '';
-    const raw = String(txt).trim();
-    // Extract numeric portion (allow negative, decimals)
-    const cleaned = raw.replace(/[^0-9.\-]/g, '');
-    if (cleaned === '') return raw;
-    const n = parseFloat(cleaned);
-    if (isNaN(n)) return raw;
-    if (Math.abs(n - Math.round(n)) < 0.0001) return String(Math.round(n));
-    return String(Math.round(n * 100) / 100);
+  if (!txt && txt !== 0) return '';
+  const raw = String(txt).trim();
+  // Extract numeric portion (allow negative, decimals)
+  const cleaned = raw.replace(/[^0-9.\-]/g, '');
+  if (cleaned === '') return raw;
+  const n = parseFloat(cleaned);
+  if (isNaN(n)) return raw;
+  if (Math.abs(n - Math.round(n)) < 0.0001) return String(Math.round(n));
+  return String(Math.round(n * 100) / 100);
 }
 
 // Print specific table function (handles both summary and term sheets)
 export function fgPrintSpecificTable(tableType) {
-    const pageData = window.pageData || {};
-    const currentSubjectId = pageData.currentSubjectId;
-    const termReportUrl = pageData.termReportUrl;
-    const bannerUrl = pageData.bannerUrl;
-    
-    if (!currentSubjectId) {
-        alert('Please select a subject first.');
-        return;
-    }
+  const pageData = window.pageData || {};
+  const currentSubjectId = pageData.currentSubjectId;
+  const termReportUrl = pageData.termReportUrl;
+  const bannerUrl = pageData.bannerUrl;
 
-    if (tableType === 'summary') {
-        // Print the final summary table
-        printFinalSummary();
-    } else {
-        // Print individual term sheet — fetch HTML then print via iframe to avoid about:blank footers
-        const url = new URL(termReportUrl);
-        url.searchParams.set('subject_id', currentSubjectId);
-        url.searchParams.set('term', tableType);
+  if (!currentSubjectId) {
+    alert('Please select a subject first.');
+    return;
+  }
 
-        fetch(url.toString(), {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Unable to prepare the term sheet.');
-            }
-            return response.text();
-        })
-        .then(html => {
-            fgPrintHtml(html);
-        })
-        .catch(error => {
-            console.error(error);
-            alert(error.message || 'Failed to generate the term sheet. Please try again.');
-        });
-    }
+  if (tableType === 'summary') {
+    // Print the final summary table
+    printFinalSummary();
+  } else {
+    // Print individual term sheet — fetch HTML then print via iframe to avoid about:blank footers
+    const url = new URL(termReportUrl);
+    url.searchParams.set('subject_id', currentSubjectId);
+    url.searchParams.set('term', tableType);
+
+    fetch(url.toString(), {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        Accept: 'text/html',
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Unable to prepare the term sheet.');
+        }
+        return response.text();
+      })
+      .then((html) => {
+        fgPrintHtml(html);
+      })
+      .catch((error) => {
+        console.error(error);
+        alert(error.message || 'Failed to generate the term sheet. Please try again.');
+      });
+  }
 }
 
 // Print Final Summary Function
 export function fgPrintFinalSummary() {
-    const pageData = window.pageData || {};
-    const content = document.getElementById('print-area')?.innerHTML || '';
-    
-    const subjectCode = pageData.subjectCode || '';
-    const subjectDesc = pageData.subjectDesc || '';
-    const subject = `${subjectCode} - ${subjectDesc}`;
-    
-    const passedStudents = pageData.passedStudents || 0;
-    const failedStudents = pageData.failedStudents || 0;
-    const totalStudents = pageData.totalStudents || 0;
-    const passRate = pageData.passRate || 0;
-    const academicPeriod = pageData.academicPeriod || '';
-    const semester = pageData.semester || '';
-    const units = pageData.units || 'N/A';
-    const courseSection = pageData.courseSection || 'N/A';
-    const bannerUrl = pageData.bannerUrl || '';
+  const pageData = window.pageData || {};
+  const content = document.getElementById('print-area')?.innerHTML || '';
 
-    const currentDate = new Date().toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
+  const subjectCode = pageData.subjectCode || '';
+  const subjectDesc = pageData.subjectDesc || '';
+  const subject = `${subjectCode} - ${subjectDesc}`;
 
-    const html = `
+  const passedStudents = pageData.passedStudents || 0;
+  const failedStudents = pageData.failedStudents || 0;
+  const totalStudents = pageData.totalStudents || 0;
+  const passRate = pageData.passRate || 0;
+  const academicPeriod = pageData.academicPeriod || '';
+  const semester = pageData.semester || '';
+  const units = pageData.units || 'N/A';
+  const courseSection = pageData.courseSection || 'N/A';
+  const bannerUrl = pageData.bannerUrl || '';
+
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const html = `
         <html>
             <head>
                 <title>Grade Report - ${subject}</title>
@@ -508,7 +531,9 @@ export function fgPrintFinalSummary() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${Array.from(document.querySelectorAll('#print-area tbody tr')).map((row, index) => `
+                            ${Array.from(document.querySelectorAll('#print-area tbody tr'))
+                              .map(
+                                (row, index) => `
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${row.cells[0].textContent.trim()}</td>
@@ -518,14 +543,18 @@ export function fgPrintFinalSummary() {
                                     <td>${formatScore(row.cells[4].textContent)}</td>
                                     <td>${formatScore(row.cells[5].textContent)}</td>
                                     <td>
-                                        ${row.cells[6].textContent.trim().includes('Passed') 
+                                        ${
+                                          row.cells[6].textContent.trim().includes('Passed')
                                             ? `<span class="print-badge passed">Passed</span>`
                                             : row.cells[6].textContent.trim().includes('Failed')
-                                            ? `<span class="print-badge failed">Failed</span>`
-                                            : row.cells[6].textContent.trim()}
+                                              ? `<span class="print-badge failed">Failed</span>`
+                                              : row.cells[6].textContent.trim()
+                                        }
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `
+                              )
+                              .join('')}
                         </tbody>
                     </table>
                 </div>
@@ -538,38 +567,38 @@ export function fgPrintFinalSummary() {
             </body>
         </html>
     `;
-    
-    // Use iframe-based printing to avoid browser URL footers when possible
-    fgPrintHtml(html);
+
+  // Use iframe-based printing to avoid browser URL footers when possible
+  fgPrintHtml(html);
 }
 
 export function initFinalGradesPage() {
-    if (!isFinalGradesPage()) return;
+  if (!isFinalGradesPage()) return;
 
-    // View Notes Modal Handler
-    const viewStudentNameDisplay = document.getElementById('viewStudentNameDisplay');
-    const viewNotesContent = document.getElementById('viewNotesContent');
+  // View Notes Modal Handler
+  const viewStudentNameDisplay = document.getElementById('viewStudentNameDisplay');
+  const viewNotesContent = document.getElementById('viewNotesContent');
 
-    // Handle view notes button click
-    document.querySelectorAll('.view-notes-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const studentName = this.dataset.studentName;
-            const notes = this.dataset.notes || 'No notes available.';
-            
-            // Populate modal
-            if (viewStudentNameDisplay) {
-                viewStudentNameDisplay.textContent = studentName;
-            }
-            if (viewNotesContent) {
-                viewNotesContent.textContent = notes;
-            }
-            
-            // Show modal
-            if (typeof window.modal !== 'undefined') {
-                window.modal.open('viewNotesModal', { studentName, notes });
-            }
-        });
+  // Handle view notes button click
+  document.querySelectorAll('.view-notes-btn').forEach((button) => {
+    button.addEventListener('click', function () {
+      const studentName = this.dataset.studentName;
+      const notes = this.dataset.notes || 'No notes available.';
+
+      // Populate modal
+      if (viewStudentNameDisplay) {
+        viewStudentNameDisplay.textContent = studentName;
+      }
+      if (viewNotesContent) {
+        viewNotesContent.textContent = notes;
+      }
+
+      // Show modal
+      if (typeof window.modal !== 'undefined') {
+        window.modal.open('viewNotesModal', { studentName, notes });
+      }
     });
+  });
 }
 
 // Auto-initialize on DOMContentLoaded
