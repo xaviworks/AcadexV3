@@ -43,7 +43,7 @@
         </h1>    
     </div>
 
-    <!-- Right: Notifications + Profile Dropdown -->
+    <!-- Right: Reload + Notifications + Profile Dropdown -->
     <div class="d-flex align-items-center gap-2">
         @php
             $user = Auth::user();
@@ -53,6 +53,29 @@
             $lastName = $nameParts[count($nameParts) - 1] ?? '';
             $displayName = $firstName . ' ' . $lastName;
         @endphp
+        
+        <!-- Hard Refresh Button -->
+        <div x-data="{ showTooltip: false }" class="position-relative">
+            <button @click="hardRefresh()" 
+                    @mouseenter="showTooltip = true" 
+                    @mouseleave="showTooltip = false"
+                    type="button" 
+                    class="btn btn-link text-white p-2" 
+                    style="min-width: 50px; min-height: 50px;">
+                <i class="bi bi-arrow-clockwise fs-4" style="display: inline-block; line-height: 1;"></i>
+            </button>
+            <div x-show="showTooltip" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="position-absolute bg-dark text-white px-2 py-1 rounded shadow-sm"
+                 style="top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 0.75rem; z-index: 1060;">
+                Hard Refresh (Clear Cache)
+            </div>
+        </div>
         
         <!-- Notification Bell -->
         @if($showNotifications)
@@ -169,6 +192,36 @@
 </header>
 
 {{-- Styles: resources/css/layout/navigation.css --}}
+
+{{-- Hard Refresh Function --}}
+<script>
+function hardRefresh() {
+    // Clear browser cache and reload
+    if ('caches' in window) {
+        // Clear all service worker caches
+        caches.keys().then(function(names) {
+            for (let name of names) {
+                caches.delete(name);
+            }
+        });
+    }
+    
+    // Clear localStorage cache (if any app-specific cache exists)
+    const cacheKeys = Object.keys(localStorage).filter(key => 
+        key.includes('cache') || key.includes('Cache')
+    );
+    cacheKeys.forEach(key => localStorage.removeItem(key));
+    
+    // Clear sessionStorage
+    sessionStorage.clear();
+    
+    // Force hard reload (bypass browser cache)
+    // location.reload(true) is deprecated, using cache-busting URL instead
+    const url = new URL(window.location.href);
+    url.searchParams.set('_refresh', Date.now());
+    window.location.href = url.toString();
+}
+</script>
 
 @if($showNotifications ?? false)
 <script>
