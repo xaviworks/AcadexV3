@@ -44,7 +44,7 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold small">Date</label>
-                    <input type="date" name="date" class="form-control" value="{{ request('date') }}">
+                    <input type="date" name="date" class="form-control" value="{{ request('date', date('Y-m-d')) }}">
                 </div>
                 <div class="col-md-3">
                     <div class="d-flex gap-2">
