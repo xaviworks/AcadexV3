@@ -216,7 +216,7 @@
         <div class="card-body">
             <div class="row g-4">
                 @if($log->old_values)
-                    <div class="col-md-6">
+                    <div class="{{ $log->new_values ? 'col-md-6' : 'col-12' }}">
                         <label class="form-label fw-bold text-muted small">Old Values</label>
                         <div class="bg-dark rounded p-3">
                             <pre class="text-white mb-0 small" style="max-height: 200px; overflow-y: auto;"><code>{{ json_encode(is_array($log->old_values) ? $log->old_values : json_decode($log->old_values, true), JSON_PRETTY_PRINT) }}</code></pre>
@@ -224,10 +224,30 @@
                     </div>
                 @endif
                 @if($log->new_values)
-                    <div class="col-md-6">
+                    <div class="{{ $log->old_values ? 'col-md-6' : 'col-12' }}">
                         <label class="form-label fw-bold text-muted small">New Values</label>
                         <div class="bg-dark rounded p-3">
                             <pre class="text-white mb-0 small" style="max-height: 200px; overflow-y: auto;"><code>{{ json_encode(is_array($log->new_values) ? $log->new_values : json_decode($log->new_values, true), JSON_PRETTY_PRINT) }}</code></pre>
+                        </div>
+                    </div>
+                @endif
+                
+                <div class="col-12">
+                    <hr class="text-muted opacity-25">
+                </div>
+
+                <div class="{{ $log->metadata ? 'col-md-6' : 'col-12' }} d-flex flex-column">
+                    <label class="form-label fw-bold text-muted small">User Agent</label>
+                    <div class="bg-dark rounded p-3 flex-grow-1 d-flex align-items-center">
+                        <pre class="text-white mb-0 small w-100" style="white-space: pre-wrap;"><code>{{ $log->user_agent ?? 'N/A' }}</code></pre>
+                    </div>
+                </div>
+
+                @if($log->metadata)
+                    <div class="col-md-6 d-flex flex-column">
+                        <label class="form-label fw-bold text-muted small">Metadata</label>
+                        <div class="bg-dark rounded p-3 flex-grow-1">
+                            <pre class="text-white mb-0 small" style="max-height: 200px; overflow-y: auto;"><code>{{ json_encode(is_array($log->metadata) ? $log->metadata : json_decode($log->metadata, true), JSON_PRETTY_PRINT) }}</code></pre>
                         </div>
                     </div>
                 @endif

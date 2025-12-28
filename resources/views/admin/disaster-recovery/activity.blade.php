@@ -33,27 +33,22 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form action="{{ route('admin.disaster-recovery.activity') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-3">
+                <div class="col-md-5">
                     <label class="form-label fw-bold small">Event Type</label>
                     <select name="event" class="form-select">
                         <option value="">All Events</option>
                         <option value="created" {{ request('event') === 'created' ? 'selected' : '' }}>Created</option>
-                        <option value="updated" {{ request('event') === 'updated' ? 'selected' : '' }}>Updated</option>
+                        <option value="restored" {{ request('event') === 'restored' ? 'selected' : '' }}>Restored</option>
                         <option value="deleted" {{ request('event') === 'deleted' ? 'selected' : '' }}>Deleted</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label fw-bold small">Search</label>
-                    <input type="text" name="search" class="form-control" 
-                           placeholder="User or model..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <label class="form-label fw-bold small">Date</label>
                     <input type="date" name="date" class="form-control" value="{{ request('date') }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-warning text-white">
+                        <button type="submit" class="btn btn-warning text-white flex-grow-1">
                             <i class="fas fa-filter me-1"></i> Filter
                         </button>
                         <a href="{{ route('admin.disaster-recovery.activity') }}" class="btn btn-outline-secondary">
