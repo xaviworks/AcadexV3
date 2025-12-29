@@ -59,7 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/user/two-factor-authentication', [TwoFactorAuthenticationController::class, 'destroy'])->name('two-factor.disable');
     Route::post('/user/two-factor-authentication/confirm', [TwoFactorAuthenticationController::class, 'confirm'])->name('two-factor.confirm');
     Route::post('/user/two-factor-authentication/reveal-qr', [TwoFactorAuthenticationController::class, 'revealQR'])->name('two-factor.reveal-qr');
-    Route::get('/user/two-factor-recovery-codes', [TwoFactorAuthenticationController::class, 'showRecoveryCodes'])->name('two-factor.recovery-codes');
+    Route::post('/user/two-factor-recovery-codes/show', [TwoFactorAuthenticationController::class, 'showRecoveryCodes'])->name('two-factor.recovery-codes');
     Route::post('/user/two-factor-recovery-codes', [TwoFactorAuthenticationController::class, 'regenerateRecoveryCodes'])->name('two-factor.recovery-codes.store');
 });
 

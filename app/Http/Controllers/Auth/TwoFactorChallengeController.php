@@ -29,10 +29,12 @@ class TwoFactorChallengeController extends Controller
         $request->validate([
             'code' => ['required', 'string'],
             'device_fingerprint' => ['nullable', 'string'],
+            'recovery' => ['nullable', 'string'],
         ]);
 
         $userId = session()->get('auth.2fa.id');
         $fingerprint = $request->input('device_fingerprint') ?? session()->get('auth.2fa.fingerprint');
+        $isRecoveryMode = $request->input('recovery') === '1';
 
         if (!$userId) {
             return redirect()->route('login');
@@ -48,8 +50,26 @@ class TwoFactorChallengeController extends Controller
              return redirect()->intended(route('dashboard'));
         }
 
-        $google2fa = new Google2FA();
-        $valid = $google2fa->verifyKey($user->two_factor_secret, $request->code);
+        $valid = false;
+        
+        if ($isRecoveryMode) {
+            // Verify recovery code
+            $recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
+            
+            if (is_array($recoveryCodes) && in_array($request->code, $recoveryCodes)) {
+                $valid = true;
+                
+                // Remove used recovery code
+                $recoveryCodes = array_values(array_diff($recoveryCodes, [$request->code]));
+                $user->forceFill([
+                    'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
+                ])->save();
+            }
+        } else {
+            // Verify authenticator code
+            $google2fa = new Google2FA();
+            $valid = $google2fa->verifyKey($user->two_factor_secret, $request->code);
+        }
 
         if ($valid) {
             // Mark 2FA as confirmed on first successful challenge
@@ -91,7 +111,11 @@ class TwoFactorChallengeController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        return back()->withErrors(['code' => 'The provided two factor authentication code was invalid.']);
+        $errorMessage = $isRecoveryMode 
+            ? 'The provided recovery code was invalid or has already been used.'
+            : 'The provided two factor authentication code was invalid.';
+
+        return back()->withErrors(['code' => $errorMessage]);
     }
 
     public function destroy(Request $request)

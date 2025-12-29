@@ -95,13 +95,34 @@ class TwoFactorAuthenticationController extends Controller
      */
     public function showRecoveryCodes(Request $request)
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
+        try {
+            $request->validate([
+                'password' => ['required', 'current_password'],
+            ]);
 
-        return response()->json([
-            'recovery_codes' => json_decode(decrypt($request->user()->two_factor_recovery_codes)),
-        ]);
+            $recoveryCodes = json_decode(decrypt($request->user()->two_factor_recovery_codes));
+
+            // Ensure we have valid recovery codes
+            if (!$recoveryCodes || !is_array($recoveryCodes) || count($recoveryCodes) === 0) {
+                return response()->json([
+                    'message' => 'No recovery codes found. Please regenerate your codes.',
+                ], 404);
+            }
+
+            return response()->json([
+                'recovery_codes' => $recoveryCodes,
+            ], 200);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Invalid password. Please try again.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while retrieving recovery codes.',
+            ], 500);
+        }
     }
 
     /**
@@ -109,18 +130,46 @@ class TwoFactorAuthenticationController extends Controller
      */
     public function regenerateRecoveryCodes(Request $request)
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
+        try {
+            $request->validate([
+                'password' => ['required', 'current_password'],
+            ]);
 
-        $request->user()->forceFill([
-            'two_factor_recovery_codes' => encrypt(json_encode(
-                \Illuminate\Support\Collection::times(8, function () {
-                    return \Illuminate\Support\Str::random(10) . '-' . \Illuminate\Support\Str::random(10);
-                })->all()
-            )),
-        ])->save();
+            // Generate new recovery codes
+            $newCodes = \Illuminate\Support\Collection::times(8, function () {
+                return \Illuminate\Support\Str::random(10) . '-' . \Illuminate\Support\Str::random(10);
+            })->all();
 
-        return back()->with('status', 'recovery-codes-regenerated');
+            $request->user()->forceFill([
+                'two_factor_recovery_codes' => encrypt(json_encode($newCodes)),
+            ])->save();
+
+            // Return new codes in JSON for AJAX requests
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'recovery_codes' => $newCodes,
+                    'message' => 'Recovery codes regenerated successfully.'
+                ], 200);
+            }
+
+            // Fallback for non-AJAX requests
+            return back()->with('status', 'recovery-codes-regenerated');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Invalid password. Please try again.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => 'An error occurred while regenerating recovery codes.',
+                ], 500);
+            }
+            throw $e;
+        }
     }
 }
