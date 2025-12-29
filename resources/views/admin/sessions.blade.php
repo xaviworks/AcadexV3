@@ -505,14 +505,45 @@
     {{-- JavaScript moved to: resources/js/pages/admin/sessions.js --}}
     
     @if(session('success'))
-        <script>notify.success('{{ session('success') }}');</script>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '{{ session('success') }}',
+                timer: 3000,
+                showConfirmButton: true,
+                confirmButtonColor: '#198754'
+            });
+        </script>
+    @endif
+
+    @if(session('info'))
+        <script>
+            Swal.fire({
+                icon: 'info',
+                title: 'Information',
+                text: '{{ session('info') }}',
+                timer: 3000,
+                showConfirmButton: true,
+                confirmButtonColor: '#0dcaf0'
+            });
+        </script>
     @endif
 
     @if($errors->any())
         <script>
-            @foreach($errors->all() as $error)
-                notify.error('{{ $error }}');
-            @endforeach
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                html: `
+                    <ul class="text-start mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                `,
+                confirmButtonColor: '#dc3545'
+            });
         </script>
     @endif
 @endpush
