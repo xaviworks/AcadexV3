@@ -3909,7 +3909,9 @@ class AdminController extends Controller
                 DB::raw('CONCAT(users.first_name, " ", users.last_name) as user_name'),
                 'users.email',
                 'users.role',
-                'users.is_active'
+                'users.is_active',
+                'users.two_factor_secret',
+                'users.two_factor_confirmed_at'
             )
             ->whereNotNull('sessions.user_id')
             ->orderByDesc('sessions.last_activity');
@@ -4070,6 +4072,74 @@ class AdminController extends Controller
         return back()
             ->withErrors(['user_id' => 'No active sessions found for this user.'])
             ->withInput();
+    }
+
+    /**
+     * Reset 2FA for a specific user (admin action).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function reset2FA(Request $request)
+    {
+        Gate::authorize('admin');
+
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'password' => 'required|string',
+        ]);
+
+        // Verify admin password
+        if (!Hash::check($request->input('password'), Auth::user()->password)) {
+            return back()
+                ->withErrors(['password' => 'The provided password is incorrect.'])
+                ->withInput();
+        }
+
+        $userId = $request->input('user_id');
+        
+        // Prevent admin from resetting their own 2FA
+        if ($userId === Auth::id()) {
+            return back()
+                ->withErrors(['user_id' => 'You cannot reset your own 2FA. Please use your profile settings.'])
+                ->withInput();
+        }
+
+        // Get user info
+        $user = User::findOrFail($userId);
+
+        // Check if user has 2FA enabled
+        if (!$user->two_factor_secret) {
+            return back()
+                ->with('info', "{$user->full_name} does not have two-factor authentication enabled.");
+        }
+
+        // Disable 2FA for the user
+        $user->forceFill([
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+        ])->save();
+
+        // Also clear trusted devices
+        $user->devices()->delete();
+
+        // Log the 2FA reset action
+        DB::table('user_logs')->insert([
+            'user_id' => $userId,
+            'event_type' => '2fa_reset_by_admin',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'browser' => (new \Jenssegers\Agent\Agent())->browser(),
+            'device' => (new \Jenssegers\Agent\Agent())->device(),
+            'platform' => (new \Jenssegers\Agent\Agent())->platform(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('admin.sessions')
+            ->with('success', "Two-factor authentication has been reset for {$user->full_name}. They will need to set it up again if needed.");
     }
 
     /**

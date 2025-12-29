@@ -61,6 +61,12 @@ class TwoFactorChallengeController extends Controller
 
             Auth::login($user);
             session()->forget(['auth.2fa.id', 'auth.2fa.fingerprint']);
+            
+            // Store device fingerprint in session for middleware to use
+            if ($fingerprint) {
+                session()->put('device_fingerprint', $fingerprint);
+            }
+            
             session()->regenerate();
 
             // Save device as trusted

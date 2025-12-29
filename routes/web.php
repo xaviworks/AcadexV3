@@ -342,7 +342,7 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     // Session Management Routes
     Route::get('/sessions', [AdminController::class, 'sessions'])->name('sessions');
     Route::post('/sessions/revoke', [AdminController::class, 'revokeSession'])->name('sessions.revoke');
-    Route::post('/sessions/revoke-user', [AdminController::class, 'revokeUserSessions'])->name('sessions.revokeUser');
+    Route::post('/sessions/reset-2fa', [AdminController::class, 'reset2FA'])->name('sessions.reset2fa');
     Route::post('/sessions/revoke-all', [AdminController::class, 'revokeAllSessions'])->name('sessions.revokeAll');
 
     // Disaster Recovery Routes (simplified & user-friendly)

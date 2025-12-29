@@ -41,7 +41,7 @@
             <div class="alert alert-info mb-3 d-flex align-items-start">
                 <i class="fas fa-info-circle me-2 mt-1"></i>
                 <div>
-                    <small>You can revoke individual sessions or all sessions for a specific user. <strong>Your current session is protected</strong> from revocation.</small>
+                    <small>You can revoke individual sessions or reset 2FA for a specific user. <strong>Your current session is protected</strong> from revocation.</small>
                 </div>
             </div>
 
@@ -55,12 +55,13 @@
                                     <th>User</th>
                                     <th>Role</th>
                                     <th>Status</th>
+                                    <th style="min-width: 120px;">2FA Status</th>
                                     <th>Device</th>
                                     <th>Browser</th>
                                     <th>Platform</th>
                                     <th>IP Address</th>
                                     <th>Device Fingerprint</th>
-                                    <th>Last Activity</th>
+                                    <th style="min-width: 140px;">Last Activity</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -98,6 +99,17 @@
                                         @else
                                             <span class="session-status-badge session-status-expired">
                                                 <i class="fas fa-times-circle"></i> Expired
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($session->two_factor_secret && $session->two_factor_confirmed_at)
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-shield-alt"></i> Enabled
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-shield-alt"></i> Disabled
                                             </span>
                                         @endif
                                     </td>
@@ -143,10 +155,10 @@
                                                         title="Revoke this session">
                                                     <i class="fas fa-ban"></i>
                                                 </button>
-                                                <button class="action-btn btn-revoke-all" 
-                                                        onclick="confirmRevokeUser({{ $session->user_id }}, '{{ $session->user_name }}')"
-                                                        title="Revoke all user sessions">
-                                                    <i class="fas fa-user-times"></i>
+                                                <button class="action-btn btn-reset-2fa" 
+                                                        onclick="confirmReset2FA({{ $session->user_id }}, '{{ $session->user_name }}')"
+                                                        title="Reset 2FA for this user">
+                                                    <i class="fas fa-shield-halved"></i>
                                                 </button>
                                             </div>
                                         @else
@@ -419,32 +431,36 @@
     </div>
 </div>
 
-{{-- Revoke User Sessions Modal --}}
-<div class="modal fade" id="revokeUserModal" tabindex="-1" aria-labelledby="revokeUserModalLabel" aria-hidden="true">
+{{-- Reset 2FA Modal --}}
+<div class="modal fade" id="reset2FAModal" tabindex="-1" aria-labelledby="reset2FAModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="revokeUserModalLabel">Revoke All User Sessions</h5>
+                <h5 class="modal-title" id="reset2FAModalLabel">Reset Two-Factor Authentication</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="revoke-user-form" action="{{ route('admin.sessions.revokeUser') }}" method="POST">
+            <form id="reset-2fa-form" action="{{ route('admin.sessions.reset2fa') }}" method="POST">
                 @csrf
-                <input type="hidden" name="user_id" id="revoke-user-id">
+                <input type="hidden" name="user_id" id="reset-2fa-user-id">
                 <div class="modal-body">
-                    <p>You are about to revoke <strong>all sessions</strong> for <strong id="revoke-all-user-name"></strong>.</p>
+                    <p>You are about to <strong>disable two-factor authentication</strong> for <strong id="reset-2fa-user-name"></strong>.</p>
                     <p class="text-warning mb-3">
                         <i class="fas fa-exclamation-triangle me-1"></i>
-                        This will immediately log out the user from all their active devices and browsers.
+                        This will remove their 2FA protection. They will need to re-enable and configure 2FA again if needed.
                     </p>
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Use this when a user has lost access to their authenticator app or device.
+                    </div>
                     <div class="mt-3">
                         <label class="form-label fw-bold">Confirm Your Password</label>
-                        <input type="password" name="password" id="revoke-user-password" class="form-control" required 
+                        <input type="password" name="password" id="reset-2fa-password" class="form-control" required 
                                placeholder="Enter your admin password" autofocus>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">Revoke All Sessions</button>
+                    <button type="submit" class="btn btn-warning">Reset 2FA</button>
                 </div>
             </form>
         </div>

@@ -44,6 +44,20 @@
   font-size: 0.75rem;
 }
 
+/* Activity time styling */
+.activity-time {
+  font-weight: 600;
+  color: #212529;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.activity-date {
+  color: #6c757d;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
 /* Device icon styling */
 .device-icon-wrapper {
   display: flex;
@@ -108,6 +122,18 @@
   color: white !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(253, 126, 20, 0.3);
+}
+
+.btn-reset-2fa {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+
+.btn-reset-2fa:hover {
+  background-color: #ffb300 !important;
+  color: #000 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
 }
 
 /* Role badges */
