@@ -186,6 +186,7 @@ body {
   flex-direction: column;
   min-height: 0; /* Critical for nested flex scrolling */
   overflow: hidden;
+  height: 100%; /* Ensure it fills the wrapper */
 }
 
 .sidebar-content {
@@ -194,7 +195,10 @@ body {
   min-height: 0; /* Allow flex item to shrink below content size for scrolling */
   overflow-y: auto !important;
   overflow-x: hidden;
-  padding-bottom: 60px; /* Space for version display */
+  padding-bottom: 1rem;
+  padding-right: 0.5rem; /* Space for scrollbar */
+  /* Force scrolling behavior */
+  -webkit-overflow-scrolling: touch;
 }
 
 .sidebar-section {
@@ -202,6 +206,11 @@ body {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-section:last-child {
+  margin-bottom: 2rem; /* Extra space at the bottom for the last section */
 }
 
 .sidebar-section ul {
@@ -219,12 +228,29 @@ body {
 }
 
 .sidebar-section h6 {
-  color: var(--section-text);
-  font-size: 0.75rem;
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.7rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0 0.25rem;
+  line-height: 1.2;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+.sidebar-heading {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
 }
 
 .sidebar-link {
@@ -474,6 +500,7 @@ i,
   border-bottom: 1px solid var(--border-color);
   transform: translateZ(0);
   backface-visibility: hidden;
+  flex-shrink: 0; /* Don't shrink - keep at top */
 }
 
 .logo-wrapper {
@@ -644,14 +671,16 @@ body {
 
 /* Version display at sidebar bottom */
 .version-display {
-  padding: 1rem;
-  font-size: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.7rem;
   color: var(--menu-text);
-  opacity: 0.7;
-  border-top: 1px solid var(--border-color);
+  opacity: 0.6;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   text-align: center;
   flex-shrink: 0; /* Don't shrink - keep at bottom */
   background-color: var(--primary-green);
+  position: relative;
+  z-index: 10;
 }
 
 /* Sign Out Modal Enhancements */

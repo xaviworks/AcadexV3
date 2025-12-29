@@ -230,20 +230,10 @@ document.addEventListener('alpine:init', () => {
         notifications: [],
         unreadCount: 0,
         showDropdown: false,
-        pollInterval: null,
         
         init() {
             this.fetchNotifications();
-            // Poll every 30 seconds
-            this.pollInterval = setInterval(() => {
-                this.fetchUnreadCount();
-            }, 30000);
-        },
-        
-        destroy() {
-            if (this.pollInterval) {
-                clearInterval(this.pollInterval);
-            }
+            // Automatic polling removed - notifications refresh when dropdown is opened
         },
         
         async fetchNotifications() {
@@ -254,18 +244,6 @@ document.addEventListener('alpine:init', () => {
                 this.unreadCount = data.count;
             } catch (error) {
                 console.error('Error fetching notifications:', error);
-            }
-        },
-        
-        async fetchUnreadCount() {
-            try {
-                const response = await fetch('{{ route("notifications.unread-count") }}');
-                const data = await response.json();
-                if (data.count !== this.unreadCount) {
-                    this.fetchNotifications(); // Refresh if count changed
-                }
-            } catch (error) {
-                console.error('Error fetching count:', error);
             }
         },
         

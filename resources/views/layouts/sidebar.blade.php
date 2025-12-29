@@ -26,13 +26,13 @@
         {{-- Instructor --}}
         @if ($role === 0)
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">ACADEMIC RECORDS</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Class Management</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('instructor.students.index') }}" 
                            class="nav-link {{ request()->routeIs('instructor.students.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-people me-3"></i>
-                            <span>Manage Students</span>
+                            <span>Students</span>
                         </a>
                     </li>
                     
@@ -40,7 +40,7 @@
                         <a href="{{ route('instructor.activities.index') }}" 
                            class="nav-link {{ request()->routeIs('instructor.activities.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-journal-text me-3"></i>
-                            <span>Manage Activities</span>
+                            <span>Activities</span>
                         </a>
                     </li>
                     
@@ -48,7 +48,7 @@
                         <a href="{{ route('instructor.grades.index') }}" 
                            class="nav-link {{ request()->routeIs('instructor.grades.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-pencil-square me-3"></i>
-                            <span>Manage Grades</span>
+                            <span>Grades</span>
                         </a>
                     </li>
                     
@@ -56,20 +56,20 @@
                         <a href="{{ route('instructor.final-grades.index') }}" 
                            class="nav-link {{ request()->routeIs('instructor.final-grades.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-graph-up me-3"></i>
-                            <span>View Grades</span>
+                            <span>Final Grades</span>
                         </a>
                     </li>
                 </ul>
             </div>
             
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">REPORTS</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Course Outcomes</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('instructor.course_outcomes.index') }}" 
                            class="nav-link {{ request()->routeIs('instructor.course_outcomes.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-book me-3"></i>
-                            <span>View Course Outcome</span>
+                            <span>View Outcomes</span>
                         </a>
                     </li>
                     
@@ -77,7 +77,7 @@
                         <a href="{{ route('instructor.course-outcome-attainments.index') }}"
                            class="nav-link {{ request()->routeIs('instructor.course-outcome-attainments.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-award me-3"></i>
-                            <span>Course Outcome Attainment</span>
+                            <span>Attainment Report</span>
                         </a>
                     </li>
                 </ul>
@@ -94,15 +94,28 @@
             @endphp
 
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">DEPARTMENT MANAGEMENT</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">People</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('chairperson.instructors') }}" 
                            class="nav-link {{ request()->routeIs('chairperson.instructors') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-people me-3"></i>
-                            <span>Manage Instructors</span>
+                            <span>Instructors</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('chairperson.studentsByYear') }}" 
+                           class="nav-link {{ request()->routeIs('chairperson.studentsByYear') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-person-lines-fill me-3"></i>
+                            <span>Students</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h6 class="px-3 mb-2 sidebar-heading">Courses</h6>
+                <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('chairperson.assign-subjects') }}" 
                            class="nav-link {{ request()->routeIs('chairperson.assign-subjects') ? 'active' : '' }} d-flex align-items-center sidebar-link">
@@ -118,12 +131,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('chairperson.studentsByYear') }}" 
-                           class="nav-link {{ request()->routeIs('chairperson.studentsByYear') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-person-lines-fill me-3"></i>
-                            <span>Manage Students</span>
+                        <a href="{{ route('chairperson.course_outcomes.index') }}" 
+                           class="nav-link {{ request()->routeIs('chairperson.course_outcomes.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-book me-3"></i>
+                            <span>Course Outcomes</span>
                         </a>
                     </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h6 class="px-3 mb-2 sidebar-heading">Grades & Assessment</h6>
+                <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('chairperson.viewGrades') }}"     
                            class="nav-link {{ request()->routeIs('chairperson.viewGrades') ? 'active' : '' }} d-flex align-items-center sidebar-link">
@@ -131,12 +150,6 @@
                             <span>View Grades</span>
                         </a>
                     </li>
-                </ul>
-            </div>
-
-            <div class="sidebar-section">
-                <h6 class="px-3 mb-2">DATA MANAGEMENT</h6>
-                <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('chairperson.structureTemplates.index') }}" 
                            class="nav-link {{ request()->routeIs('chairperson.structureTemplates.*') ? 'active' : '' }} d-flex align-items-center justify-content-between sidebar-link">
@@ -151,25 +164,18 @@
                             </div>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('chairperson.course_outcomes.index') }}" 
-                           class="nav-link {{ request()->routeIs('chairperson.course_outcomes.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-book me-3"></i>
-                            <span>Manage Course Outcome</span>
-                        </a>
-                    </li>
                 </ul>
             </div>
 
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">REPORTS</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Reports</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center sidebar-link chairperson-reports-toggle {{ $isReportsActive ? 'active' : '' }}" 
                            onclick="toggleChairpersonReportsMenu()"
                            style="cursor: pointer;">
                             <i class="bi bi-bar-chart-line me-3" style="width: 20px; text-align: center; display: inline-block; flex-shrink: 0;"></i>
-                            <span style="flex: 1;">Reports</span>
+                            <span style="flex: 1;">Outcomes Summary</span>
                             <i class="bi bi-chevron-down ms-auto chairperson-reports-chevron {{ $isReportsActive ? 'rotated' : '' }}" style="flex-shrink: 0;"></i>
                         </a>
                         <div class="chairperson-reports-submenu {{ $isReportsActive ? 'show' : '' }}" id="chairpersonReportsSubmenu">
@@ -178,21 +184,21 @@
                                     <a href="{{ route('chairperson.reports.co-program') }}" 
                                        class="nav-link {{ request()->routeIs('chairperson.reports.co-program') ? 'active' : '' }} d-flex align-items-center sidebar-link submenu-link">
                                         <i class="bi bi-diagram-3 me-3"></i>
-                                        <span>Program Outcomes Summary</span>
+                                        <span>By Program</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('chairperson.reports.co-course') }}" 
                                        class="nav-link {{ request()->routeIs('chairperson.reports.co-course') ? 'active' : '' }} d-flex align-items-center sidebar-link submenu-link">
                                         <i class="bi bi-book me-3"></i>
-                                        <span>Course Outcomes Summary</span>
+                                        <span>By Course</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('chairperson.reports.co-student') }}" 
                                        class="nav-link {{ request()->routeIs('chairperson.reports.co-student') ? 'active' : '' }} d-flex align-items-center sidebar-link submenu-link">
                                         <i class="bi bi-person-lines-fill me-3"></i>
-                                        <span>Student Outcomes Summary</span>
+                                        <span>By Student</span>
                                     </a>
                                 </li>
                             </ul>
@@ -205,54 +211,54 @@
         {{-- Dean --}}
         @if ($role === 2)
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">ACADEMIC OVERVIEW</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Overview</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('dean.instructors') }}" 
                            class="nav-link {{ request()->routeIs('dean.instructors') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-people me-3"></i>
-                            <span>View Instructors</span>
+                            <span>Instructors</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('dean.students') }}" 
                            class="nav-link {{ request()->routeIs('dean.students') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-mortarboard me-3"></i>
-                            <span>View Students</span>
+                            <span>Students</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('dean.grades') }}" 
                            class="nav-link {{ request()->routeIs('dean.grades') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-clipboard-data me-3"></i>
-                            <span>View Grades</span>
+                            <span>Grades</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">REPORTS</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Reports</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('dean.reports.co-program') }}" 
                            class="nav-link {{ request()->routeIs('dean.reports.co-program') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-diagram-3 me-3"></i>
-                            <span>Program CO Summary</span>
+                            <span>By Program</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('dean.reports.co-course') }}" 
                            class="nav-link {{ request()->routeIs('dean.reports.co-course') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-book me-3"></i>
-                            <span>Course CO Summary</span>
+                            <span>By Course</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('dean.reports.co-student') }}" 
                            class="nav-link {{ request()->routeIs('dean.reports.co-student') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-person-lines-fill me-3"></i>
-                            <span>Student CO Report</span>
+                            <span>By Student</span>
                         </a>
                     </li>
                 </ul>
@@ -262,15 +268,28 @@
         {{-- Admin --}}
         @if ($role === 3)
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">SYSTEM ADMINISTRATION</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">System Monitoring</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('admin.sessions') }}" 
                            class="nav-link {{ request()->routeIs('admin.sessions*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-shield-lock me-3"></i>
-                            <span>Session & Activity Monitor</span>
+                            <span>Sessions & Activity</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.disaster-recovery.index') }}" 
+                           class="nav-link {{ request()->routeIs('admin.disaster-recovery.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-shield-check me-3"></i>
+                            <span>Disaster Recovery</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h6 class="px-3 mb-2 sidebar-heading">Academic Structure</h6>
+                <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('admin.departments') }}" 
                            class="nav-link {{ request()->routeIs('admin.departments') ? 'active' : '' }} d-flex align-items-center sidebar-link">
@@ -293,10 +312,30 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('admin.users') }}" 
+                           class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-people me-3"></i>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.academicPeriods') }}" 
+                           class="nav-link {{ request()->routeIs('admin.academicPeriods') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-calendar3 me-3"></i>
+                            <span>Academic Periods</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h6 class="px-3 mb-2 sidebar-heading">Grading Configuration</h6>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
                         <a href="{{ route('admin.gradesFormula') }}" 
                            class="nav-link {{ request()->routeIs('admin.gradesFormula') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-sliders me-3"></i>
-                            <span>Grades Formula</span>
+                            <span>Grade Formulas</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -316,27 +355,6 @@
                             </div>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.users') }}" 
-                           class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-people me-3"></i>
-                            <span>Users</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.academicPeriods') }}" 
-                           class="nav-link {{ request()->routeIs('admin.academicPeriods') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-calendar3 me-3"></i>
-                            <span>Academic Period</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.disaster-recovery.index') }}" 
-                           class="nav-link {{ request()->routeIs('admin.disaster-recovery.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-shield-check me-3"></i>
-                            <span>Disaster Recovery</span>
-                        </a>
-                    </li>
                 </ul>
             </div>
         @endif
@@ -344,61 +362,61 @@
         {{-- GE Coordinator --}}
         @if ($role === 4)
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">GE COORDINATION</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">People</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('gecoordinator.instructors') }}"
                            class="nav-link {{ request()->routeIs('gecoordinator.instructors') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-people me-3"></i>
-                            <span>Manage Instructors</span>
+                            <span>Instructors</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('gecoordinator.studentsByYear') }}"
+                           class="nav-link {{ request()->routeIs('gecoordinator.studentsByYear') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-person-lines-fill me-3"></i>
+                            <span>Students</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">ACADEMIC RECORDS</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Courses</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('gecoordinator.assign-subjects') }}"
                            class="nav-link {{ request()->routeIs('gecoordinator.assign-subjects') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-journal-plus me-3" style="width: 20px; text-align: center; display: inline-block; flex-shrink: 0;"></i>
+                            <i class="bi bi-journal-plus me-3"></i>
                             <span>Manage Courses</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('curriculum.selectSubjects') }}"
                            class="nav-link {{ request()->routeIs('curriculum.selectSubjects') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-file-earmark-arrow-up me-3" style="width: 20px; text-align: center; display: inline-block; flex-shrink: 0;"></i>
+                            <i class="bi bi-file-earmark-arrow-up me-3"></i>
                             <span>Import Courses</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('gecoordinator.viewGrades') }}"
                            class="nav-link {{ request()->routeIs('gecoordinator.viewGrades') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-clipboard-data me-3" style="width: 20px; text-align: center; display: inline-block; flex-shrink: 0;"></i>
-                            <span>View Grades</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('gecoordinator.studentsByYear') }}"
-                           class="nav-link {{ request()->routeIs('gecoordinator.studentsByYear') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-person-lines-fill me-3" style="width: 20px; text-align: center; display: inline-block; flex-shrink: 0;"></i>
-                            <span>View Students</span>
+                            <i class="bi bi-clipboard-data me-3"></i>
+                            <span>Grades</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">REPORTS</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Reports</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center sidebar-link manage-co-toggle"
                            onclick="toggleManageCOMenu()"
                            style="cursor: pointer;">
                             <i class="bi bi-book me-3"></i>
-                            <span style="flex: 1;">Manage Course Outcome</span>
+                            <span style="flex: 1;">Outcomes Summary</span>
                             <i class="bi bi-chevron-down ms-auto manage-co-chevron" style="flex-shrink: 0;"></i>
                         </a>
                         <div class="manage-co-submenu ms-3 mt-2" id="manageCOSubmenu">
@@ -407,21 +425,21 @@
                                     <a href="{{ route('gecoordinator.reports.co-program') }}" 
                                        class="nav-link {{ request()->routeIs('gecoordinator.reports.co-program') ? 'active' : '' }} d-flex align-items-center sidebar-link py-2">
                                         <i class="bi bi-diagram-3 me-3"></i>
-                                        <span>Program Outcomes Summary</span>
+                                        <span>By Program</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('gecoordinator.reports.co-course') }}" 
                                        class="nav-link {{ request()->routeIs('gecoordinator.reports.co-course') ? 'active' : '' }} d-flex align-items-center sidebar-link py-2">
                                         <i class="bi bi-book me-3"></i>
-                                        <span>Course Outcomes Summary</span>
+                                        <span>By Course</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('gecoordinator.reports.co-student') }}" 
                                        class="nav-link {{ request()->routeIs('gecoordinator.reports.co-student') ? 'active' : '' }} d-flex align-items-center sidebar-link py-2">
                                         <i class="bi bi-person-lines-fill me-3"></i>
-                                        <span>Student Outcomes Summary</span>
+                                        <span>By Student</span>
                                     </a>
                                 </li>
                             </ul>
@@ -434,51 +452,56 @@
         {{-- VPAA --}}
         @if ($role === 5)
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">ACADEMIC RECORDS</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Overview</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('vpaa.departments') }}" 
                            class="nav-link {{ request()->routeIs('vpaa.departments') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-building me-3"></i>
-                            <span>Departments Overview</span>
+                            <span>Departments</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('vpaa.students') }}" 
                            class="nav-link {{ request()->routeIs('vpaa.students') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-people-fill me-3"></i>
-                            <span>Students Overview</span>
+                            <span>Students</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2">REPORTS</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">Reports</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('vpaa.reports.co-program') }}" 
                            class="nav-link {{ request()->routeIs('vpaa.reports.co-program') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-diagram-3 me-3"></i>
-                            <span>Program Outcomes Summary</span>
+                            <span>By Program</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('vpaa.reports.co-course') }}" 
                            class="nav-link {{ request()->routeIs('vpaa.reports.co-course') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-book me-3"></i>
-                            <span>Course Outcomes Summary</span>
+                            <span>By Course</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('vpaa.reports.co-student') }}" 
                            class="nav-link {{ request()->routeIs('vpaa.reports.co-student') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-person-lines-fill me-3"></i>
-                            <span>Student Outcomes Summary</span>
+                            <span>By Student</span>
                         </a>
                     </li>
                 </ul>
             </div>
         @endif
+    </div>
+    
+    <!-- Version Display -->
+    <div class="version-display">
+        Acadex System v1.5.5
     </div>
 </div>
