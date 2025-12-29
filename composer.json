@@ -10,11 +10,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bacon/bacon-qr-code": "^3.0",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^12.0",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
-        "maatwebsite/excel": "^3.1"
+        "maatwebsite/excel": "^3.1",
+        "pragmarx/google2fa-laravel": "^2.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.16",

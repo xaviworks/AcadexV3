@@ -46,11 +46,21 @@ Route::get('/session/check', function () {
     return response()->json(['authenticated' => true]);
 })->middleware('auth')->name('session.check');
 
+use App\Http\Controllers\Profile\TwoFactorAuthenticationController;
+
 // Profile Management
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // 2FA Routes
+    Route::post('/user/two-factor-authentication', [TwoFactorAuthenticationController::class, 'store'])->name('two-factor.enable');
+    Route::delete('/user/two-factor-authentication', [TwoFactorAuthenticationController::class, 'destroy'])->name('two-factor.disable');
+    Route::post('/user/two-factor-authentication/confirm', [TwoFactorAuthenticationController::class, 'confirm'])->name('two-factor.confirm');
+    Route::post('/user/two-factor-authentication/reveal-qr', [TwoFactorAuthenticationController::class, 'revealQR'])->name('two-factor.reveal-qr');
+    Route::get('/user/two-factor-recovery-codes', [TwoFactorAuthenticationController::class, 'showRecoveryCodes'])->name('two-factor.recovery-codes');
+    Route::post('/user/two-factor-recovery-codes', [TwoFactorAuthenticationController::class, 'regenerateRecoveryCodes'])->name('two-factor.recovery-codes.store');
 });
 
 // Academic Period Selection

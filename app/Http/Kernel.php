@@ -15,7 +15,7 @@ class Kernel extends HttpKernel
      * Runs during every request to your application.
      */
     protected $middleware = [
-        NoCacheHeaders::class, // ✅ Applies no-cache headers to all responses
+        NoCacheHeaders::class, // Applies no-cache headers to all responses
     ];
 
     /**

@@ -16,8 +16,9 @@
         }
     </style>
 
-    <form method="POST" action="{{ route('login') }}" class="w-full max-w-sm mx-auto text-white">
+    <form method="POST" action="{{ route('login') }}" class="w-full max-w-sm mx-auto text-white" id="login-form">
         @csrf
+        <input type="hidden" name="device_fingerprint" id="device_fingerprint">
 
         <!-- Email Username -->
         <div class="mb-4">
@@ -138,6 +139,39 @@
             const togglePassword = document.getElementById('togglePassword');
             const passwordField = document.getElementById('password');
 
+            // Generate device fingerprint and hash it
+            const generateFingerprint = async () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('browser fingerprint', 2, 2);
+                
+                const fingerprintData = JSON.stringify({
+                    canvas: canvas.toDataURL(),
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    plugins: Array.from(navigator.plugins || []).map(p => p.name).join(','),
+                });
+
+                // Hash the fingerprint using SHA-256
+                const encoder = new TextEncoder();
+                const data = encoder.encode(fingerprintData);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                return hashHex;
+            };
+
+            // Set the hashed fingerprint
+            generateFingerprint().then(hash => {
+                document.getElementById('device_fingerprint').value = hash;
+            });
+
             emailField.addEventListener('input', () => {
                 if (emailField.value.includes('@')) {
                     warning.classList.remove('hidden');
@@ -175,50 +209,7 @@
                 }
             });
 
-            // Generate device fingerprint using browser properties
-            function generateFingerprint() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                ctx.textBaseline = 'top';
-                ctx.font = '14px Arial';
-                ctx.fillText('Browser fingerprint', 2, 2);
-                const canvasData = canvas.toDataURL();
-                
-                const data = [
-                    navigator.userAgent,
-                    navigator.language,
-                    navigator.languages ? navigator.languages.join(',') : '',
-                    screen.colorDepth,
-                    screen.width + 'x' + screen.height,
-                    screen.availWidth + 'x' + screen.availHeight,
-                    new Date().getTimezoneOffset(),
-                    navigator.hardwareConcurrency || 'unknown',
-                    navigator.deviceMemory || 'unknown',
-                    navigator.platform,
-                    canvasData.substring(0, 100) // Use part of canvas fingerprint
-                ].join('|||');
-                
-                // Simple hash function
-                let hash = 0;
-                for (let i = 0; i < data.length; i++) {
-                    const char = data.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + char;
-                    hash = hash & hash;
-                }
-                return Math.abs(hash).toString(16);
-            }
 
-            // Add fingerprint to form immediately
-            const loginForm = document.querySelector('form[action*="login"]');
-            if (loginForm) {
-                const fingerprint = generateFingerprint();
-                
-                let fpInput = document.createElement('input');
-                fpInput.type = 'hidden';
-                fpInput.name = 'device_fingerprint';
-                fpInput.value = fingerprint;
-                loginForm.appendChild(fpInput);
-            }
         });
     </script>
 @endsection

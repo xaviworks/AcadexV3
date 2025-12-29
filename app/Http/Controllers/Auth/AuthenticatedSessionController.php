@@ -65,6 +65,36 @@ class AuthenticatedSessionController extends Controller
             }
         }
 
+        // 2FA Check for New Device
+        $deviceFingerprint = $request->input('device_fingerprint');
+        if ($user->two_factor_secret) {
+             // If 2FA is not yet confirmed, always require challenge to complete setup
+             // Otherwise, only require for new devices
+             $requireChallenge = !$user->two_factor_confirmed_at;
+             
+             if (!$requireChallenge) {
+                 $isKnownDevice = $user->devices()->where('device_fingerprint', $deviceFingerprint)->exists();
+                 $requireChallenge = !$isKnownDevice;
+             }
+             
+             if ($requireChallenge) {
+                 // Store 2FA data in session BEFORE logging out
+                 $request->session()->put('auth.2fa.id', $user->id);
+                 $request->session()->put('auth.2fa.fingerprint', $deviceFingerprint);
+                 
+                 Auth::logout();
+                 $request->session()->regenerate();
+                 
+                 return redirect()->route('two-factor.login');
+             }
+             
+             // Update last used for known device
+             $user->devices()->where('device_fingerprint', $deviceFingerprint)->update([
+                 'last_used_at' => now(),
+                 'ip_address' => $request->ip(),
+             ]);
+        }
+
         $this->sanitizeIntendedUrl($request, $user);
 
         // Regenerate the session to prevent session fixation

@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\UnverifiedEmailVerificationPromptController;
 use App\Http\Controllers\Auth\UnverifiedVerifyEmailController;
 use App\Http\Controllers\Auth\UnverifiedEmailVerificationNotificationController;
 use App\Http\Controllers\Auth\UnverifiedLogoutController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -25,6 +26,15 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    Route::get('two-factor-challenge', [TwoFactorChallengeController::class, 'create'])
+        ->name('two-factor.login');
+
+    Route::post('two-factor-challenge', [TwoFactorChallengeController::class, 'store'])
+        ->name('two-factor.login.store');
+
+    Route::post('two-factor-challenge/cancel', [TwoFactorChallengeController::class, 'destroy'])
+        ->name('two-factor.login.cancel');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

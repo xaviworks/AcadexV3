@@ -84,6 +84,26 @@ class GoogleAuthController extends Controller
                 }
             }
 
+            // 2FA Check for Google Login
+            $deviceFingerprint = request()->input('device_fingerprint');
+            if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
+                $isKnownDevice = $user->devices()->where('device_fingerprint', $deviceFingerprint)->exists();
+                
+                if (!$isKnownDevice) {
+                    // Store user info and redirect to 2FA challenge
+                    session()->put('auth.2fa.id', $user->id);
+                    session()->put('auth.2fa.fingerprint', $deviceFingerprint);
+                    
+                    return redirect()->route('two-factor.login');
+                }
+                
+                // Update last used for known device
+                $user->devices()->where('device_fingerprint', $deviceFingerprint)->update([
+                    'last_used_at' => now(),
+                    'ip_address' => request()->ip(),
+                ]);
+            }
+
             // Log the user in
             Auth::login($user, true);
 

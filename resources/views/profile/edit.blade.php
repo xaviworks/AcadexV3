@@ -111,6 +111,31 @@
                 </form>
             </div>
         </div>
+
+        <!-- Two Factor Authentication -->
+        <div class="content-wrapper">
+            @include('profile.partials.two-factor-authentication-form')
+        </div>
     </div>
 </div>
+
+@if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof notify !== 'undefined') {
+                notify.success('{{ session('success') }}');
+            }
+        });
+    </script>
+@endif
+
+@if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof notify !== 'undefined') {
+                notify.error('{{ session('error') }}');
+            }
+        });
+    </script>
+@endif
 @endsection

@@ -1,4 +1,4 @@
-<header class="px-4 py-3 shadow-sm d-flex justify-content-between align-items-center header-stable" style="background-color: var(--dark-green); color: white; height: 70px; position: sticky; top: 0; z-index: 1000; will-change: transform;">
+<header class="px-4 py-3 shadow-sm d-flex justify-content-between align-items-center header-stable" style="background-color: var(--dark-green); color: white; height: 70px; position: sticky; top: 0; z-index: 1020;">
     <!-- Left: Current Academic Period -->
     <div class="d-flex align-items-center" style="width: 400px; flex-shrink: 0;">
         <h1 class="mb-0 d-flex align-items-center" style="line-height: 1; width: 100%; height: 34px; font-size: 1rem; font-weight: 600;">

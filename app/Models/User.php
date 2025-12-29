@@ -45,27 +45,43 @@ class User extends Authenticatable
         'course_id',
         'is_universal',
         'disabled_until',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     /**
      * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
-     * The attributes that should be cast to native types.
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'role' => 'integer',
         'is_active' => 'boolean',
+        'can_teach_ge' => 'boolean',
         'is_universal' => 'boolean',
         'disabled_until' => 'datetime',
+        'two_factor_confirmed_at' => 'datetime',
     ];
+
+    public function devices()
+    {
+        return $this->hasMany(UserDevice::class);
+    }
+
 
     /**
      * Accessor to get the full name of the user.
