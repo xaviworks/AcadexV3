@@ -20,6 +20,7 @@
                 <table id="coursesTable" class="table table-bordered table-hover mb-0">
                     <thead class="table-success">
                         <tr>
+                            <th>ID</th>
                             <th>Code</th>
                             <th>Description</th>
                             <th>Department</th>
@@ -29,6 +30,7 @@
                     <tbody>
                         @forelse($courses as $course)
                             <tr>
+                                <td>{{ $course->id }}</td>
                                 <td class="fw-semibold">{{ $course->course_code }}</td>
                                 <td>{{ $course->course_description }}</td>
                                 <td>

@@ -1,45 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
-    <div class="row mb-3">
-        <div class="col">
-            <nav aria-label="breadcrumb" class="mb-2">
-                <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green">
-                            <i class="bi bi-house-door me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.gradesFormula', ['view' => 'formulas']) }}" class="text-decoration-none link-success-green">
-                            <i class="bi bi-sliders me-1"></i>Grades Formula
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.structureTemplateRequests.index') }}" class="text-decoration-none link-success-green">
-                            Formula Requests
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ $request->label }}</li>
-                </ol>
-            </nav>
-
-            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-circle bg-gradient-green">
-                        <i class="bi bi-clipboard-check text-white icon-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-1 text-primary-green">{{ $request->label }}</h3>
-                        <p class="text-muted mb-0">Formula Request Details</p>
-                    </div>
-                </div>
-                <a href="{{ route('admin.structureTemplateRequests.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Back to Requests
-                </a>
-            </div>
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-clipboard-check-fill text-success me-2"></i>{{ $request->label }}</h1>
+            <p class="text-muted mb-0">Formula Request Details</p>
         </div>
+        <a href="{{ route('admin.structureTemplateRequests.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Requests
+        </a>
     </div>
 
     @if (session('success'))

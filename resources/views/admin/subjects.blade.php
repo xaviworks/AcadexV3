@@ -18,7 +18,7 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table id="subjectsTable" class="table table-hover align-middle w-100-table">
-                    <thead class="table-light">
+                    <thead class="table-success">
                         <tr>
                             <th>ID</th>
                             <th>Code</th>
