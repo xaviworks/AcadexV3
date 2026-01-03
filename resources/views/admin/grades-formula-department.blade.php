@@ -273,7 +273,7 @@
                             <div class="d-flex flex-column gap-2 mt-4">
                                 @if($summary['missing_subject_count'] > 0)
                                     <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
-                                        ⚠️ {{ $summary['missing_subject_count'] }} subject{{ $summary['missing_subject_count'] === 1 ? '' : 's' }} pending
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ $summary['missing_subject_count'] }} subject{{ $summary['missing_subject_count'] === 1 ? '' : 's' }} pending
                                     </span>
                                 @endif
                                 <span class="badge px-3 py-2 fw-semibold rounded-pill {{ $summary['has_formula'] ? 'bg-success' : 'bg-secondary' }}">

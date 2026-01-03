@@ -5,7 +5,7 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 text-dark fw-bold mb-0">📚 Courses</h1>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-book-fill text-success me-2"></i>Courses</h1>
             <p class="text-muted mb-0">Manage academic courses (subjects)</p>
         </div>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#subjectModal">

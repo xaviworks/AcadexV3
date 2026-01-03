@@ -5,7 +5,7 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 text-dark fw-bold mb-0">🎓 Programs</h1>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-mortarboard-fill text-success me-2"></i>Programs</h1>
             <p class="text-muted mb-0">Manage academic programs and courses</p>
         </div>
         <button class="btn btn-success" onclick="showCourseModal()">

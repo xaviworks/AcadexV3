@@ -5,7 +5,7 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h4 text-dark fw-bold mb-0">🛡️ Disaster Recovery</h1>
+            <h1 class="h4 text-dark fw-bold mb-0"><i class="bi bi-shield-fill-check text-success me-2"></i>Disaster Recovery</h1>
             <p class="text-muted small mb-0">Manage system backups and restore points</p>
         </div>
         <div class="d-flex gap-2">

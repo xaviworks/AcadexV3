@@ -244,7 +244,7 @@
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
                                     @if ($hasSubjectFormula)
                                         <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 shadow-sm-sm">
-                                            <i class="bi bi-stars me-1"></i>Custom subject formula active
+                                            <i class="bi bi-patch-check-fill me-1"></i>Custom subject formula active
                                         </span>
                                         <span class="text-muted small">Applying a structure template will replace the current override.</span>
                                     @else
