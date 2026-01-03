@@ -3,39 +3,26 @@
 @section('content')
 {{-- Styles: resources/css/admin/users.css --}}
 @push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
-        .user-avatar-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        
         #usersTable {
             font-size: 0.95rem;
         }
         
         #usersTable thead th {
-            padding: 1.25rem 1rem;
+            padding: 1rem;
             font-weight: 600;
             font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             border-bottom: 2px solid #dee2e6;
             white-space: nowrap;
             position: relative;
         }
         
         #usersTable tbody td {
-            padding: 1.5rem 1rem;
+            padding: 1rem;
             vertical-align: middle;
-            line-height: 1.6;
+            line-height: 1.5;
             position: relative;
         }
         
@@ -50,32 +37,15 @@
             z-index: 1;
         }
         
-        #usersTable .fw-semibold {
-            font-size: 1rem;
-            color: #1e293b;
-            margin-bottom: 2px;
-        }
-        
-        #usersTable small {
-            font-size: 0.875rem;
-            line-height: 1.4;
-        }
-        
         #usersTable .badge {
-            padding: 0.5rem 0.85rem;
-            font-size: 0.8125rem;
-            font-weight: 500;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
             border-radius: 6px;
             white-space: nowrap;
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
-            min-width: fit-content;
-        }
-        
-        #usersTable .session-count {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
+            gap: 0.25rem;
         }
         
         #usersTable th:nth-child(3),
@@ -95,75 +65,13 @@
         
         #usersTable th:nth-child(6),
         #usersTable td:nth-child(6) {
-            min-width: 80px;
-            width: 80px;
+            min-width: 120px;
+            width: 120px;
             overflow: visible;
-        }
-        
-        .dropdown {
-            position: relative;
-        }
-        
-        .dropdown.show {
-            z-index: 1060;
-        }
-        
-        .dropdown-menu {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-            border-radius: 8px;
-            padding: 0.5rem 0;
-            min-width: 200px;
-            z-index: 1060;
-            margin-top: 0.125rem;
-            background-color: #fff;
-            border: 1px solid rgba(0,0,0,.15);
-            position: fixed !important;
         }
         
         .table-responsive {
             overflow-x: auto;
-        }
-        
-        .dropdown-item {
-            padding: 0.625rem 1.25rem;
-            font-size: 0.9375rem;
-        }
-        
-        .dropdown-item i {
-            width: 20px;
-        }
-        
-        .dropdown-item:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .dropdown-item.text-danger:hover {
-            background-color: #fff5f5;
-            color: #dc3545 !important;
-        }
-        
-        .dropdown-item.text-success:hover {
-            background-color: #f0fdf4;
-            color: #198754 !important;
-        }
-        
-        .dropdown-item.text-warning:hover {
-            background-color: #fffbeb;
-            color: #ffc107 !important;
-        }
-        
-        .dropdown-toggle::after {
-            display: none;
-        }
-        
-        .btn-light {
-            background-color: #f8f9fa;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .btn-light:hover {
-            background-color: #e9ecef;
-            border-color: #d0d0d0;
         }
     </style>
 @endpush
@@ -192,7 +100,7 @@
 <div class="container-fluid py-4">
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h4 text-dark fw-bold mb-0"><i class="bi bi-people-fill text-success me-2"></i>Users</h1>
+        <h1 class="h4 text-dark fw-bold mb-0"><i class="fas fa-users text-success me-2"></i>Users</h1>
         <button class="btn btn-success" onclick="openModal()">+ Add User</button>
     </div>
 
@@ -250,24 +158,19 @@
                         @forelse($users as $user)
                             <tr>
                                 <td>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="user-avatar-circle bg-primary text-white">
-                                            {{ strtoupper(substr($user->first_name ?? $user->name, 0, 1)) }}
-                                        </div>
-                                        <div>
-                                            @php
-                                                $fullName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
-                                                $displayName = $fullName ?: $user->name;
-                                            @endphp
-                                            <div class="fw-semibold mb-1">{{ $displayName }}</div>
-                                            @if($fullName && $fullName !== $user->name)
-                                                <small class="text-muted">{{ $user->name }}</small>
-                                            @endif
-                                        </div>
+                                    <div class="user-info">
+                                        @php
+                                            $fullName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+                                            $displayName = $fullName ?: $user->name;
+                                        @endphp
+                                        <span class="user-name">{{ $displayName }}</span>
+                                        @if($fullName && $fullName !== $user->name)
+                                            <small class="user-email">{{ $user->name }}</small>
+                                        @endif
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="text-muted">{{ $user->email }}</div>
+                                    <small class="user-email">{{ $user->email }}</small>
                                 </td>
                                 <td class="text-center">
                                     @switch($user->role)
@@ -295,19 +198,17 @@
                                 </td>
                                 <td class="text-center">
                                     @if ($user->is_active)
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-check-circle"></i>
-                                            <span>Active</span>
+                                        <span class="session-status-badge session-status-active">
+                                            <i class="fas fa-circle"></i> Active
                                         </span>
                                     @else
-                                        <span class="badge bg-danger">
-                                            <i class="bi bi-x-circle"></i>
-                                            <span>Disabled</span>
+                                        <span class="session-status-badge session-status-expired">
+                                            <i class="fas fa-times-circle"></i> Disabled
                                         </span>
                                         @if (isset($hasDisabledUntilColumn) && $hasDisabledUntilColumn && $user->disabled_until)
                                             @php $until = new \Carbon\Carbon($user->disabled_until); @endphp
-                                            <div class="mt-2">
-                                                <small class="text-muted d-block">
+                                            <div class="mt-1">
+                                                <small class="text-muted d-block" style="font-size: 0.7rem;">
                                                     @if ($until->year >= 9999)
                                                         Indefinitely
                                                     @else
@@ -322,56 +223,46 @@
                                     @if($user->two_factor_secret)
                                         @if($user->two_factor_confirmed_at)
                                             <span class="badge bg-success" title="2FA is enabled and confirmed">
-                                                <i class="fas fa-shield-halved"></i>
-                                                <span>Active</span>
+                                                <i class="fas fa-shield-alt"></i> Enabled
                                             </span>
                                         @else
                                             <span class="badge bg-warning text-dark" title="2FA is enabled but not confirmed">
-                                                <i class="fas fa-shield-halved"></i>
-                                                <span>Pending</span>
+                                                <i class="fas fa-shield-alt"></i> Pending
                                             </span>
                                         @endif
                                     @else
                                         <span class="badge bg-secondary" title="2FA is not enabled">
-                                            <i class="fas fa-shield-slash"></i>
-                                            <span>Disabled</span>
+                                            <i class="fas fa-shield-alt"></i> Disabled
                                         </span>
                                     @endif
                                 </td>
                                 <td class="text-center">
                                     @if(auth()->id() !== $user->id)
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end">
-                                                @if($user->is_active)
-                                                    <li>
-                                                        <a class="dropdown-item text-danger" href="#" @click.prevent="modal.open('chooseDisableModal', { userId: {{ $user->id }}, userName: {{ json_encode($user->name) }} })">
-                                                            <i class="bi bi-person-slash me-2"></i>Disable Account
-                                                        </a>
-                                                    </li>
-                                                @else
-                                                    <li>
-                                                        <a class="dropdown-item text-success" href="#" onclick="event.preventDefault(); enableUser({{ $user->id }}, {{ json_encode($user->name) }})">
-                                                            <i class="bi bi-person-check me-2"></i>Enable Account
-                                                        </a>
-                                                    </li>
-                                                @endif
-                                                
-                                                @if($user->two_factor_secret)
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li>
-                                                        <a class="dropdown-item text-warning" href="#" onclick="event.preventDefault(); confirmReset2FAUser({{ $user->id }}, {{ json_encode($user->name) }})">
-                                                            <i class="fas fa-shield-halved me-2"></i>Reset 2FA
-                                                        </a>
-                                                    </li>
-                                                @endif
-                                            </ul>
+                                        <div class="action-btn-group">
+                                            @if($user->is_active)
+                                                <button class="action-btn btn-revoke" 
+                                                        @click="modal.open('chooseDisableModal', { userId: {{ $user->id }}, userName: {{ json_encode($user->name) }} })"
+                                                        title="Disable this account">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            @else
+                                                <button class="action-btn btn-enable" 
+                                                        onclick="enableUser({{ $user->id }}, {{ json_encode($user->name) }})"
+                                                        title="Enable this account">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            @endif
+                                            @if($user->two_factor_secret)
+                                                <button class="action-btn btn-reset-2fa" 
+                                                        onclick="confirmReset2FAUser({{ $user->id }}, {{ json_encode($user->name) }})"
+                                                        title="Reset 2FA for this user">
+                                                    <i class="fas fa-shield-halved"></i>
+                                                </button>
+                                            @endif
                                         </div>
                                     @else
-                                        <span class="badge bg-secondary" title="You cannot modify your own account">
-                                            <i class="bi bi-lock-fill"></i> You
+                                        <span class="your-session-badge">
+                                            <i class="fas fa-circle-check"></i> You
                                         </span>
                                     @endif
                                 </td>

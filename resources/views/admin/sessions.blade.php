@@ -13,7 +13,7 @@
             <i class="fas fa-shield-alt text-success"></i> Session & Activity Monitor
         </h1>
         <button class="btn btn-danger btn-sm" onclick="confirmRevokeAll()">
-            <i class="fas fa-ban me-2"></i>Revoke All Sessions
+            <i class="fas fa-users-slash me-2"></i>Revoke All Sessions
         </button>
     </div>
 
@@ -55,7 +55,6 @@
                                     <th>User</th>
                                     <th>Role</th>
                                     <th>Status</th>
-                                    <th style="min-width: 120px;">2FA Status</th>
                                     <th>Device</th>
                                     <th>Browser</th>
                                     <th>Platform</th>
@@ -103,17 +102,6 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if($session->two_factor_secret && $session->two_factor_confirmed_at)
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-shield-alt"></i> Enabled
-                                            </span>
-                                        @else
-                                            <span class="badge bg-secondary">
-                                                <i class="fas fa-shield-alt"></i> Disabled
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
                                         <div class="device-icon-wrapper">
                                             <span class="device-icon">
                                                 @if($session->device_type === 'Desktop')
@@ -149,18 +137,11 @@
                                     </td>
                                     <td class="text-center">
                                         @if(!$session->is_current && $session->user_id && $session->user_name)
-                                            <div class="action-btn-group">
-                                                <button class="action-btn btn-revoke" 
-                                                        onclick="confirmRevoke('{{ $session->id }}', '{{ $session->user_name }}')"
-                                                        title="Revoke this session">
-                                                    <i class="fas fa-ban"></i>
-                                                </button>
-                                                <button class="action-btn btn-reset-2fa" 
-                                                        onclick="confirmReset2FA({{ $session->user_id }}, '{{ $session->user_name }}')"
-                                                        title="Reset 2FA for this user">
-                                                    <i class="fas fa-shield-halved"></i>
-                                                </button>
-                                            </div>
+                                            <button class="action-btn btn-revoke" 
+                                                    onclick="confirmRevoke('{{ $session->id }}', '{{ $session->user_name }}')"
+                                                    title="Revoke this session">
+                                                <i class="fas fa-user-slash"></i>
+                                            </button>
                                         @elseif($session->is_current)
                                             <span class="your-session-badge">
                                                 <i class="fas fa-circle-check"></i> Current Session
