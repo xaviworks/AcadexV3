@@ -58,8 +58,10 @@ window.enableUser = async function (userId, userName) {
     .then((data) => {
       loading.stop('enableUser');
       if (data.success) {
-        notify.success(data.message);
-        setTimeout(() => location.reload(), 1500);
+        // Store message in sessionStorage to show after reload
+        sessionStorage.setItem('userActionMessage', data.message);
+        sessionStorage.setItem('userActionType', 'success');
+        location.reload();
       } else {
         notify.error(data.message || 'Failed to re-enable user');
       }
@@ -350,8 +352,10 @@ function initAdminUsersPage() {
         .then((data) => {
           if (data && data.success) {
             modal.close();
-            notify.success(data.message);
-            setTimeout(() => location.reload(), 2000);
+            // Store message in sessionStorage to show after reload
+            sessionStorage.setItem('userActionMessage', data.message);
+            sessionStorage.setItem('userActionType', 'success');
+            location.reload();
           } else {
             throw data?.message || 'Failed to disable user.';
           }
@@ -651,7 +655,27 @@ function initAdminUsersPage() {
 }
 
 // Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', initAdminUsersPage);
+document.addEventListener('DOMContentLoaded', () => {
+  // Check for stored messages from page reload
+  const storedMessage = sessionStorage.getItem('userActionMessage');
+  const messageType = sessionStorage.getItem('userActionType');
+
+  if (storedMessage) {
+    // Display the message
+    if (messageType === 'success') {
+      notify.success(storedMessage);
+    } else if (messageType === 'error') {
+      notify.error(storedMessage);
+    }
+
+    // Clear the stored message
+    sessionStorage.removeItem('userActionMessage');
+    sessionStorage.removeItem('userActionType');
+  }
+
+  // Initialize the rest of the page
+  initAdminUsersPage();
+});
 
 // Export for module usage
 export { initAdminUsersPage };

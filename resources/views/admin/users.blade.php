@@ -4,6 +4,168 @@
 {{-- Styles: resources/css/admin/users.css --}}
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        .user-avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        
+        #usersTable {
+            font-size: 0.95rem;
+        }
+        
+        #usersTable thead th {
+            padding: 1.25rem 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+            position: relative;
+        }
+        
+        #usersTable tbody td {
+            padding: 1.5rem 1rem;
+            vertical-align: middle;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        #usersTable tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        #usersTable tbody tr:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        #usersTable .fw-semibold {
+            font-size: 1rem;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+        
+        #usersTable small {
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+        
+        #usersTable .badge {
+            padding: 0.5rem 0.85rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            border-radius: 6px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            min-width: fit-content;
+        }
+        
+        #usersTable .session-count {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        #usersTable th:nth-child(3),
+        #usersTable td:nth-child(3) {
+            min-width: 140px;
+        }
+        
+        #usersTable th:nth-child(4),
+        #usersTable td:nth-child(4) {
+            min-width: 120px;
+        }
+        
+        #usersTable th:nth-child(5),
+        #usersTable td:nth-child(5) {
+            min-width: 110px;
+        }
+        
+        #usersTable th:nth-child(6),
+        #usersTable td:nth-child(6) {
+            min-width: 80px;
+            width: 80px;
+            overflow: visible;
+        }
+        
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown.show {
+            z-index: 1060;
+        }
+        
+        .dropdown-menu {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 200px;
+            z-index: 1060;
+            margin-top: 0.125rem;
+            background-color: #fff;
+            border: 1px solid rgba(0,0,0,.15);
+            position: fixed !important;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .dropdown-item {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.9375rem;
+        }
+        
+        .dropdown-item i {
+            width: 20px;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .dropdown-item.text-danger:hover {
+            background-color: #fff5f5;
+            color: #dc3545 !important;
+        }
+        
+        .dropdown-item.text-success:hover {
+            background-color: #f0fdf4;
+            color: #198754 !important;
+        }
+        
+        .dropdown-item.text-warning:hover {
+            background-color: #fffbeb;
+            color: #ffc107 !important;
+        }
+        
+        .dropdown-toggle::after {
+            display: none;
+        }
+        
+        .btn-light {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .btn-light:hover {
+            background-color: #e9ecef;
+            border-color: #d0d0d0;
+        }
+    </style>
 @endpush
 
 @push('head')
@@ -34,6 +196,28 @@
         <button class="btn btn-success" onclick="openModal()">+ Add User</button>
     </div>
 
+    {{-- Success/Error Messages --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    
+    @if(session('info'))
+        <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-info-circle me-2"></i>{{ session('info') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     {{-- Warning Message --}}
     @if (isset($hasDisabledUntilColumn) && ! $hasDisabledUntilColumn)
         <div class="alert alert-danger mb-4">
@@ -48,38 +232,44 @@
     </div>
 
     {{-- Users Table --}}
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table id="usersTable" class="table table-hover align-middle w-100-table">
-                    <thead class="table-light">
+                <table id="usersTable" class="table table-bordered table-hover mb-0">
+                    <thead class="table-success">
                         <tr>
-                            <th>Username</th>
-                            <th>User Role</th>
-                            <th>Active Sessions</th>
-                            <th class="text-center">Actions</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th class="text-center">Role</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">2FA</th>
+                            <th class="text-center" style="width: 100px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($users as $user)
                             <tr>
-                                <td class="fw-semibold">
-                                    {{ $user->name }}
-                                    @if ($user->is_active)
-                                        <span class="ms-2 badge bg-success-subtle text-success fw-semibold">Active</span>
-                                    @else
-                                        <span class="ms-2 badge bg-secondary text-white fw-semibold">Disabled</span>
-                                        @if (isset($hasDisabledUntilColumn) && $hasDisabledUntilColumn && $user->disabled_until)
-                                                    @php $until = new \Carbon\Carbon($user->disabled_until); @endphp
-                                                    @if ($until->year >= 9999)
-                                                        <small class="d-block text-muted mt-1">Indefinitely</small>
-                                                    @else
-                                                        <small class="d-block text-muted mt-1">Until: {{ $until->format('M d, Y h:i A') }}</small>
-                                                    @endif
-                                                @endif
-                                    @endif
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="user-avatar-circle bg-primary text-white">
+                                            {{ strtoupper(substr($user->first_name ?? $user->name, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            @php
+                                                $fullName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+                                                $displayName = $fullName ?: $user->name;
+                                            @endphp
+                                            <div class="fw-semibold mb-1">{{ $displayName }}</div>
+                                            @if($fullName && $fullName !== $user->name)
+                                                <small class="text-muted">{{ $user->name }}</small>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
+                                    <div class="text-muted">{{ $user->email }}</div>
+                                </td>
+                                <td class="text-center">
                                     @switch($user->role)
                                         @case(0)
                                             <span class="badge bg-secondary">Instructor</span>
@@ -104,31 +294,85 @@
                                     @endswitch
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge bg-info session-count" data-user-id="{{ $user->id }}">
-                                        <i class="bi bi-hourglass-split"></i> Loading...
-                                    </span>
+                                    @if ($user->is_active)
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i>
+                                            <span>Active</span>
+                                        </span>
+                                    @else
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle"></i>
+                                            <span>Disabled</span>
+                                        </span>
+                                        @if (isset($hasDisabledUntilColumn) && $hasDisabledUntilColumn && $user->disabled_until)
+                                            @php $until = new \Carbon\Carbon($user->disabled_until); @endphp
+                                            <div class="mt-2">
+                                                <small class="text-muted d-block">
+                                                    @if ($until->year >= 9999)
+                                                        Indefinitely
+                                                    @else
+                                                        Until: {{ $until->format('M d, Y') }}
+                                                    @endif
+                                                </small>
+                                            </div>
+                                        @endif
+                                    @endif
                                 </td>
                                 <td class="text-center">
-                                    @if($user->is_active)
-                                        @if(auth()->id() !== $user->id)
-                                            <button type="button" class="btn btn-sm btn-danger" @click="modal.open('chooseDisableModal', { userId: {{ $user->id }}, userName: {{ json_encode($user->name) }} })" title="Disable Account">
-                                                <i class="bi bi-person-slash"></i> Disable
-                                            </button>
+                                    @if($user->two_factor_secret)
+                                        @if($user->two_factor_confirmed_at)
+                                            <span class="badge bg-success" title="2FA is enabled and confirmed">
+                                                <i class="fas fa-shield-halved"></i>
+                                                <span>Active</span>
+                                            </span>
                                         @else
-                                            {{-- Current user cannot disable themselves; show disabled state with tooltip --}}
-                                            <button type="button" class="btn btn-sm btn-danger disabled" title="You cannot disable your own account" disabled>
-                                                <i class="bi bi-person-slash"></i> Disable
-                                            </button>
+                                            <span class="badge bg-warning text-dark" title="2FA is enabled but not confirmed">
+                                                <i class="fas fa-shield-halved"></i>
+                                                <span>Pending</span>
+                                            </span>
                                         @endif
                                     @else
-                                        <span class="badge bg-secondary px-3 py-2">Disabled</span>
-                                        @if(auth()->id() !== $user->id)
-                                            <button type="button" class="btn btn-sm btn-success ms-2" onclick="enableUser({{ $user->id }}, {{ json_encode($user->name) }})" title="Re-enable Account">
-                                                <i class="bi bi-person-plus"></i> Enable
+                                        <span class="badge bg-secondary" title="2FA is not enabled">
+                                            <i class="fas fa-shield-slash"></i>
+                                            <span>Disabled</span>
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if(auth()->id() !== $user->id)
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
+                                                <i class="bi bi-three-dots-vertical"></i>
                                             </button>
-                                        @else
-                                            {{-- Self-enabled account: no action (user can't re-enable themself while logged out) --}}
-                                        @endif
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                @if($user->is_active)
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="#" @click.prevent="modal.open('chooseDisableModal', { userId: {{ $user->id }}, userName: {{ json_encode($user->name) }} })">
+                                                            <i class="bi bi-person-slash me-2"></i>Disable Account
+                                                        </a>
+                                                    </li>
+                                                @else
+                                                    <li>
+                                                        <a class="dropdown-item text-success" href="#" onclick="event.preventDefault(); enableUser({{ $user->id }}, {{ json_encode($user->name) }})">
+                                                            <i class="bi bi-person-check me-2"></i>Enable Account
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                                
+                                                @if($user->two_factor_secret)
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item text-warning" href="#" onclick="event.preventDefault(); confirmReset2FAUser({{ $user->id }}, {{ json_encode($user->name) }})">
+                                                            <i class="fas fa-shield-halved me-2"></i>Reset 2FA
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </div>
+                                    @else
+                                        <span class="badge bg-secondary" title="You cannot modify your own account">
+                                            <i class="bi bi-lock-fill"></i> You
+                                        </span>
                                     @endif
                                 </td>
                             </tr>
@@ -433,9 +677,47 @@
                                placeholder="Re-enter your password">
                     </div>
                 </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Reset 2FA Modal --}}
+<div class="modal fade" id="reset2FAUserModal" tabindex="-1" aria-labelledby="reset2FAUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="reset2FAUserModalLabel">
+                    <i class="fas fa-shield-halved me-2"></i>Reset Two-Factor Authentication
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reset-2fa-user-form" action="{{ route('admin.sessions.reset2fa') }}" method="POST">
+                @csrf
+                <input type="hidden" name="user_id" id="reset-2fa-user-user-id">
+                <div class="modal-body">
+                    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
+                        <i class="fas fa-exclamation-triangle mt-1"></i>
+                        <div>
+                            <strong>Warning:</strong> You are about to reset 2FA for <strong id="reset-2fa-user-user-name"></strong>.
+                        </div>
+                    </div>
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-info-circle me-1"></i>
+                        This will remove their two-factor authentication settings. The user will need to set up 2FA again if they want to re-enable it.
+                    </p>
+                    <div class="mt-3">
+                        <label class="form-label fw-bold">Confirm Your Password</label>
+                        <input type="password" name="password" id="reset-2fa-user-password" class="form-control" required 
+                               placeholder="Enter your admin password" autofocus>
+                    </div>
+                </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
-                    <button type="submit" class="btn btn-success">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-shield-halved me-1"></i>Reset 2FA
+                    </button>
                 </div>
             </form>
         </div>
@@ -860,6 +1142,27 @@
                 });
             });
         });
+        
+        // Reset 2FA functionality
+        window.confirmReset2FAUser = function(userId, userName) {
+            const modalEl = document.getElementById('reset2FAUserModal');
+            if (!modalEl) return;
+            
+            document.getElementById('reset-2fa-user-user-id').value = userId;
+            document.getElementById('reset-2fa-user-user-name').textContent = userName;
+            
+            const bsModal = new bootstrap.Modal(modalEl);
+            bsModal.show();
+            
+            // Focus on password input after modal opens
+            setTimeout(() => {
+                const passwordInput = document.getElementById('reset-2fa-user-password');
+                if (passwordInput) {
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            }, 100);
+        };
     </script>
 @endpush
 {{-- DataTables initialization is handled by resources/js/pages/admin/users.js --}}

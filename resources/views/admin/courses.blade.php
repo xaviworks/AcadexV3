@@ -14,11 +14,11 @@
     </div>
 
     {{-- Courses Table --}}
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
+    <div class="card shadow-sm" style="overflow: visible;">
+        <div class="card-body p-0" style="overflow: visible;">
             <div class="table-responsive">
-                <table id="coursesTable" class="table table-hover align-middle w-100-table">
-                    <thead class="table-light">
+                <table id="coursesTable" class="table table-bordered table-hover mb-0">
+                    <thead class="table-success">
                         <tr>
                             <th>Code</th>
                             <th>Description</th>

@@ -148,7 +148,7 @@
                                         <small class="activity-date">{{ $session->last_activity_date }}</small>
                                     </td>
                                     <td class="text-center">
-                                        @if(!$session->is_current)
+                                        @if(!$session->is_current && $session->user_id && $session->user_name)
                                             <div class="action-btn-group">
                                                 <button class="action-btn btn-revoke" 
                                                         onclick="confirmRevoke('{{ $session->id }}', '{{ $session->user_name }}')"
@@ -161,9 +161,13 @@
                                                     <i class="fas fa-shield-halved"></i>
                                                 </button>
                                             </div>
-                                        @else
+                                        @elseif($session->is_current)
                                             <span class="your-session-badge">
                                                 <i class="fas fa-circle-check"></i> Current Session
+                                            </span>
+                                        @else
+                                            <span class="text-muted text-xs">
+                                                <i class="fas fa-user-slash"></i> No user
                                             </span>
                                         @endif
                                     </td>
