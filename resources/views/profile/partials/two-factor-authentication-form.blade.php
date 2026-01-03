@@ -78,8 +78,8 @@
                     </div>
                 </div>
                 
-                @if(auth()->user()->role === 3 && auth()->user()->two_factor_confirmed_at)
-                    {{-- Recovery Codes Section (Admin Only) --}}
+                @if(auth()->user()->role === 3)
+                    {{-- Recovery Codes Section (Admin Only - shown when 2FA is enabled) --}}
                     <div class="p-5 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-orange-200 rounded-lg mt-4 shadow-sm">
                         <div class="flex items-start gap-3 mb-4">
                             <div class="flex-shrink-0 mt-1">
@@ -98,7 +98,7 @@
                                     </span>
                                 </div>
                                 <p class="text-sm text-gray-700 leading-relaxed">
-                                    {{ __('Recovery codes are your backup access method. If you lose your authenticator device, these codes will allow you to regain access to your account.') }}
+                                    {{ __('Recovery codes are your backup access method. If you lose your authenticator device, these codes will allow you to regain access to your account. These codes are available immediately after enabling 2FA.') }}
                                 </p>
                             </div>
                         </div>
