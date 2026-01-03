@@ -1,20 +1,20 @@
-# 🎓 ACADEX - An Outcome-Based Grading System
+# ACADEX - An Outcome-Based Grading System
 
 **Version 3.0** | Academic Records & Grading Management System for Brokenshire College
 
-## 📋 About ACADEX
+## About ACADEX
 
 ACADEX is a comprehensive academic management system designed specifically for Brokenshire College to streamline grade management, student records, and course outcome tracking across multiple departments and programs.
 
 ### Key Features
 
 - **Multi-Role Portal System**
-  - 👨‍🏫 Instructor Portal - Grade entry, student management, course outcome tracking
-  - 👔 Chairperson Portal - Department oversight, instructor management, grade approval
-  - 🎖️ Dean Portal - College-wide academic monitoring and reporting
-  - 🌐 GE Coordinator Portal - General Education subject management
-  - 📊 VPAA Portal - Institutional academic oversight and analytics
-  - 🔧 Admin Portal - System configuration, user management, academic period setup
+  - Instructor Portal - Grade entry, student management, course outcome tracking
+  - Chairperson Portal - Department oversight, instructor management, grade approval
+  - Dean Portal - College-wide academic monitoring and reporting
+  - GE Coordinator Portal - General Education subject management
+  - VPAA Portal - Institutional academic oversight and analytics
+  - Admin Portal - System configuration, user management, academic period setup
 
 - **Grade Management**
   - Configurable grading formulas (Quiz 40%, OCR 20%, Exam 40%)
@@ -40,16 +40,24 @@ ACADEX is a comprehensive academic management system designed specifically for B
   - Auto-generation of academic years
   - Period-specific data isolation
 
-## 🛠️ Technology Stack
+- **Security & Session Management**
+  - Two-Factor Authentication (2FA) with TOTP
+  - Session & Activity Monitor with real-time session tracking
+  - User account enable/disable with duration options
+  - Device fingerprinting and activity logging
+  - Secure password policies
+
+## Technology Stack
 
 - **Backend**: Laravel 12.x (PHP 8.2+)
 - **Frontend**: Blade templating, Alpine.js 3.x, Bootstrap 5.3
 - **Build Tool**: Vite 6.4
 - **Database**: MySQL/MariaDB
 - **Styling**: Custom CSS architecture with PostCSS
-- **Icons**: Bootstrap Icons
+- **Icons**: Font Awesome 6.x, Bootstrap Icons
+- **Authentication**: Laravel Breeze with 2FA (TOTP)
 
-## 📁 Project Structure
+## Project Structure
 
 ```bash
 AcadexV3/
@@ -79,7 +87,7 @@ AcadexV3/
     └── web.php                # All application routes
 ```
 
-## 🚀 Installation
+## Installation
 
 ### Prerequisites
 
@@ -152,7 +160,7 @@ AcadexV3/
    npm run dev
    ```
 
-## 👥 User Roles
+## User Roles
 
 | Role | ID | Access Level | Key Permissions |
 | ------ | ----- | -------------- | ----------------- |
@@ -163,7 +171,7 @@ AcadexV3/
 | GE Coordinator | 4 | GE Subject-level | General Education subject management |
 | VPAA | 5 | Institution-level | Institutional oversight, comprehensive analytics |
 
-## 🔑 Default Credentials
+## Default Credentials
 
 After seeding, you can log in with:
 
@@ -174,7 +182,7 @@ After seeding, you can log in with:
 
 **Note:** All user emails use the `@brokenshire.edu.ph` domain.
 
-## 📊 Database Schema
+## Database Schema
 
 ### Core Tables
 
@@ -188,7 +196,7 @@ After seeding, you can log in with:
 - `course_outcomes` - Course outcome definitions
 - `course_outcome_attainments` - CO performance tracking
 
-## 🎨 CSS Architecture
+## CSS Architecture
 
 Organized modular CSS structure:
 
@@ -200,7 +208,7 @@ Organized modular CSS structure:
 
 **Build output:** ~124 kB (gzip: ~22 kB)
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run tests
@@ -210,7 +218,7 @@ composer test
 php artisan test --filter=GradeCalculationTest
 ```
 
-## 📝 Development Workflow
+## Development Workflow
 
 1. **Branch naming**: `feature/feature-name` or `fix/bug-name`
 2. **Commit messages**: Follow conventional commits
@@ -218,7 +226,7 @@ php artisan test --filter=GradeCalculationTest
 4. **Database changes**: Create migrations, never modify existing ones
 5. **Testing**: Write tests for new features
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -226,18 +234,18 @@ php artisan test --filter=GradeCalculationTest
 4. Run tests and ensure build succeeds
 5. Submit a pull request
 
-## 📄 License
+## License
 
 Proprietary software © 2025 Brokenshire College. All rights reserved.
 
-## 🆘 Support
+## Support
 
 For issues and questions:
 
 - Create an issue in the GitHub repository
 - Contact the development team
 
-## 🔄 Version History
+## Version History
 
 - **v3.0** - Current version with modular CSS architecture
 - **v2.0** - Enhanced multi-role portal system
@@ -245,4 +253,4 @@ For issues and questions:
 
 ---
 
-## Built with ❤️ for Brokenshire College
+Built for Brokenshire College
