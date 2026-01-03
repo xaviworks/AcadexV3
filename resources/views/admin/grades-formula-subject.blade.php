@@ -20,62 +20,16 @@
         return $url . '?' . http_build_query($queryParams);
     };
 @endphp
-<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
-    <div class="row mb-2">
-        <div class="col">
-            <nav aria-label="breadcrumb" class="mb-2">
-                <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green text-sm">
-                            <i class="bi bi-house-door me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none link-success-green text-sm">
-                            <i class="bi bi-sliders me-1"></i>Grades Formula
-                        </a>
-                    </li>
-                    @if($department)
-                        <li class="breadcrumb-item">
-                            <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="text-decoration-none link-success-green text-sm">
-                                {{ $department->department_code }} Department
-                            </a>
-                        </li>
-                    @endif
-                    @if($course)
-                        <li class="breadcrumb-item">
-                            <a href="{{ $buildRoute('admin.gradesFormula.course', ['department' => $department->id, 'course' => $course->id]) }}" class="text-decoration-none link-success-green text-sm">
-                                {{ $course->course_code }} Course
-                            </a>
-                        </li>
-                    @endif
-                    <li class="breadcrumb-item active text-muted-gray text-sm" aria-current="page">
-                        {{ $subject->subject_code }} Subject
-                    </li>
-                </ol>
-            </nav>
-
-            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
-                <div class="d-flex align-items-center">
-                    <div class="p-2 rounded-circle me-2 bg-gradient-green">
-                        <i class="bi bi-journal-text text-white icon-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="fw-bold mb-0 text-primary-green">
-                            {{ $subject->subject_code }} · {{ $subject->subject_description }}
-                        </h4>
-                        <small class="text-muted">
-                            Inspect formulas across all levels before editing this subject's grading scale.
-                        </small>
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ $buildRoute('admin.gradesFormula.edit.subject', ['subject' => $subject->id]) }}" class="btn btn-success btn-sm rounded-pill shadow-sm">
-                        <i class="bi bi-pencil-square me-1"></i>{{ $subjectFormula ? 'Edit Subject Formula' : 'Create Subject Formula' }}
-                    </a>
-                </div>
-            </div>
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-book-fill text-success me-2"></i>{{ $subject->subject_code }} · {{ $subject->subject_description }}</h1>
+            <p class="text-muted mb-0">Inspect formulas across all levels before editing this subject's grading scale</p>
         </div>
+        <a href="{{ $buildRoute('admin.gradesFormula.edit.subject', ['subject' => $subject->id]) }}" class="btn btn-success btn-sm">
+            <i class="bi bi-pencil-square me-1"></i>{{ $subjectFormula ? 'Edit Subject Formula' : 'Create Subject Formula' }}
+        </a>
     </div>
 
     <div class="d-flex justify-content-end mb-3">

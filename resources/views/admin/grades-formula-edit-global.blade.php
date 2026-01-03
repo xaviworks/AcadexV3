@@ -30,13 +30,16 @@
     $backRoute = route('admin.gradesFormula', array_merge($queryParams, ['view' => 'formulas']));
 @endphp
 
-<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
-    <div class="row mb-3">
-        <div class="col">
-            <a href="{{ $backRoute }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Back to Formulas
-            </a>
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-sliders-fill text-success me-2"></i>Edit Global Formula</h1>
+            <p class="text-muted mb-0">Modify the global grading formula structure</p>
         </div>
+        <a href="{{ $backRoute }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Formulas
+        </a>
     </div>
 
     <div class="row">

@@ -20,55 +20,20 @@
         return $url . '?' . http_build_query($queryParams);
     };
 @endphp
-<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
-    <div class="row mb-2">
-        <div class="col">
-            <nav aria-label="breadcrumb" class="mb-2">
-                <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green text-sm">
-                            <i class="bi bi-house-door me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none link-success-green text-sm">
-                            <i class="bi bi-sliders me-1"></i>Grades Formula
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="text-decoration-none link-success-green text-sm">
-                            {{ $department->department_code }} Department
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active text-muted-gray text-sm" aria-current="page">
-                        {{ $course->course_code }} Course
-                    </li>
-                </ol>
-            </nav>
-
-            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
-                <div class="d-flex align-items-center">
-                    <div class="p-2 rounded-circle me-2 bg-gradient-green">
-                        <i class="bi bi-journal-check text-white icon-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="fw-bold mb-0 text-primary-green">
-                            {{ $course->course_code }} · {{ $course->course_description }}
-                        </h4>
-                        <small class="text-muted">
-                            Review course formula and drill down into subject weighting.
-                        </small>
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="btn btn-outline-success btn-sm rounded-pill shadow-sm">
-                        <i class="bi bi-arrow-left me-1"></i>Back to Department
-                    </a>
-                    <a href="{{ $buildRoute('admin.gradesFormula.edit.course', ['department' => $department->id, 'course' => $course->id]) }}" class="btn btn-success btn-sm rounded-pill shadow-sm">
-                        <i class="bi bi-pencil-square me-1"></i>{{ $needsCourseFormula ? 'Create Course Formula' : 'Edit Course Formula' }}
-                    </a>
-                </div>
-            </div>
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-mortarboard-fill text-success me-2"></i>{{ $course->course_code }} · {{ $course->course_description }}</h1>
+            <p class="text-muted mb-0">Review course formula and drill down into subject weighting</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back to Department
+            </a>
+            <a href="{{ $buildRoute('admin.gradesFormula.edit.course', ['department' => $department->id, 'course' => $course->id]) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-pencil-square me-1"></i>{{ $needsCourseFormula ? 'Create Course Formula' : 'Edit Course Formula' }}
+            </a>
         </div>
     </div>
     <div class="d-flex justify-content-end mb-3">
@@ -172,33 +137,35 @@
                     $subject = $summary['subject'];
                 @endphp
                 <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                    <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow" data-status="{{ $summary['status'] }}" data-url="{{ $buildRoute('admin.gradesFormula.subject', ['subject' => $subject->id]) }}">
-                        {{-- Top header --}}
-                        <div class="position-relative header-height-80 bg-gradient-green-soft">
-                            <div class="wildcard-circle-positioned">
-                                <h5 class="mb-0 text-white fw-bold">{{ $subject->subject_code }}</h5>
+                    <a href="{{ $buildRoute('admin.gradesFormula.subject', ['subject' => $subject->id]) }}" class="text-decoration-none text-reset">
+                        <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow" data-status="{{ $summary['status'] }}" data-url="{{ $buildRoute('admin.gradesFormula.subject', ['subject' => $subject->id]) }}">
+                            {{-- Top header --}}
+                            <div class="position-relative header-height-80 bg-gradient-green-soft">
+                                <div class="wildcard-circle-positioned">
+                                    <h5 class="mb-0 text-white fw-bold">{{ $subject->subject_code }}</h5>
+                                </div>
+                            </div>
+
+                            {{-- Card body --}}
+                            <div class="card-body pt-5 text-center">
+                                <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $subject->subject_description }}">
+                                    {{ $subject->subject_description }}
+                                </h6>
+                                <p class="text-muted small mb-3">{{ $summary['scope_text'] }}</p>
+
+                                {{-- Footer badges --}}
+                                <div class="d-flex flex-column gap-2 mt-4">
+                                    <span class="badge px-3 py-2 fw-semibold rounded-pill {{ $summary['has_formula'] ? 'bg-success' : 'bg-secondary' }}">
+                                        @if($summary['has_formula'])
+                                            ✓ {{ $summary['formula_scope'] }}
+                                        @else
+                                            {{ $summary['formula_scope'] }}
+                                        @endif
+                                    </span>
+                                </div>
                             </div>
                         </div>
-
-                        {{-- Card body --}}
-                        <div class="card-body pt-5 text-center">
-                            <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $subject->subject_description }}">
-                                {{ $subject->subject_description }}
-                            </h6>
-                            <p class="text-muted small mb-3">{{ $summary['scope_text'] }}</p>
-
-                            {{-- Footer badges --}}
-                            <div class="d-flex flex-column gap-2 mt-4">
-                                <span class="badge px-3 py-2 fw-semibold rounded-pill {{ $summary['has_formula'] ? 'bg-success' : 'bg-secondary' }}">
-                                    @if($summary['has_formula'])
-                                        ✓ {{ $summary['formula_scope'] }}
-                                    @else
-                                        {{ $summary['formula_scope'] }}
-                                    @endif
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                    </a>
                 </div>
             @endforeach
         </div>

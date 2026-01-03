@@ -1,22 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-3 py-5 bg-gradient-light min-vh-100">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8 col-xxl-6">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-5">
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="p-3 rounded-circle bg-gradient-green">
-                            <i class="bi bi-calendar2-week text-white icon-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="fw-bold mb-1 text-primary-green">Select Academic Period</h3>
-                            <p class="text-muted mb-0">Choose which academic period you want to manage formulas for. You can switch periods at any time.</p>
-                        </div>
-                    </div>
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-calendar-week-fill text-success me-2"></i>Select Academic Period</h1>
+            <p class="text-muted mb-0">Choose which academic period you want to manage formulas for</p>
+        </div>
+    </div>
 
-                    <form method="GET" action="{{ route('admin.gradesFormula') }}" id="grades-formula-period-form" class="d-grid gap-4">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ route('admin.gradesFormula') }}" id="grades-formula-period-form" class="d-grid gap-4">
                         <div>
                             <label for="academic-period-select" class="form-label fw-semibold text-success">Academic Period</label>
                             <select class="form-select form-select-lg" id="academic-period-select" required>

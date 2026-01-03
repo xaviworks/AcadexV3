@@ -127,37 +127,27 @@
 @endphp
 
 @section('content')
-<div class="container-fluid px-3 py-3 bg-gradient-light min-vh-100">
-    <div class="row mb-2">
-        <div class="col">
-            <nav aria-label="breadcrumb" class="mb-2">
-                <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard') }}" class="text-decoration-none link-success-green">
-                            <i class="bi bi-house-door me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">
-                        <i class="bi bi-sliders me-1"></i>Grades Formula
-                    </li>
-                </ol>
-            </nav>
-
-            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
-                <div class="d-flex align-items-center">
-                    <div class="p-2 rounded-circle me-2 bg-gradient-green">
-                        <i class="bi bi-sliders text-white icon-lg"></i>
-                    </div>
-                    <div>
-                        <h4 class="fw-bold mb-0 text-primary-green">Grades Formula Management</h4>
-                        <small class="text-muted">Select a wildcard to manage its grading scale</small>
-                    </div>
-                </div>
-                <a href="{{ route('admin.gradesFormula') }}" class="btn btn-outline-success btn-sm rounded-pill shadow-sm">
-                    <i class="bi bi-calendar-week me-1"></i>Change Academic Period
-                </a>
-            </div>
+<div class="container-fluid py-4">
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-sliders-fill text-success me-2"></i>Grades Formula Management</h1>
+            <p class="text-muted mb-0">Select a wildcard to manage its grading scale</p>
         </div>
+        <form method="GET" action="{{ route('admin.gradesFormula') }}" class="d-flex align-items-center gap-2">
+            <label class="text-success fw-semibold mb-0"><i class="bi bi-calendar-week me-1"></i>Academic Period:</label>
+            <select name="academic_period_id" class="form-select form-select-sm" style="width: auto; min-width: 200px;" onchange="this.form.submit()">
+                <option value="">All Periods</option>
+                @foreach($academicPeriods ?? [] as $period)
+                    <option value="{{ $period->id }}" {{ request('academic_period_id') == $period->id ? 'selected' : '' }}>
+                        {{ $period->academic_year }} - {{ $period->semester }}
+                    </option>
+                @endforeach
+            </select>
+            @if(request('view'))
+                <input type="hidden" name="view" value="{{ request('view') }}">
+            @endif
+        </form>
     </div>
 
     @if (session('success'))
