@@ -182,36 +182,38 @@
                     <h6 class="mb-0 fw-bold"><i class="fas fa-clock text-info me-2"></i>Automatic Backup Schedule</h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.disaster-recovery.schedule') }}" method="POST" class="row g-3 align-items-end">
+                    <form action="{{ route('admin.disaster-recovery.schedule') }}" method="POST">
                         @csrf
-                        <div class="col-md-5">
-                            <label class="form-label small text-muted fw-bold">Frequency</label>
-                            <select name="frequency" class="form-select" onchange="toggleTimeInput(this.value)">
-                                <option value="never" {{ ($schedule['frequency'] ?? 'never') === 'never' ? 'selected' : '' }}>Disabled</option>
-                                <option value="daily" {{ ($schedule['frequency'] ?? '') === 'daily' ? 'selected' : '' }}>Daily</option>
-                                <option value="weekly" {{ ($schedule['frequency'] ?? '') === 'weekly' ? 'selected' : '' }}>Weekly (Sunday)</option>
-                                <option value="monthly" {{ ($schedule['frequency'] ?? '') === 'monthly' ? 'selected' : '' }}>Monthly (1st)</option>
-                            </select>
+                        <div class="row g-2 mb-2">
+                            <div class="col-7">
+                                <label class="form-label small text-muted fw-bold mb-1">Frequency</label>
+                                <select name="frequency" class="form-select form-select-sm" onchange="toggleTimeInput(this.value)">
+                                    <option value="never" {{ ($schedule['frequency'] ?? 'never') === 'never' ? 'selected' : '' }}>Disabled</option>
+                                    <option value="daily" {{ ($schedule['frequency'] ?? '') === 'daily' ? 'selected' : '' }}>Daily</option>
+                                    <option value="weekly" {{ ($schedule['frequency'] ?? '') === 'weekly' ? 'selected' : '' }}>Weekly (Sunday)</option>
+                                    <option value="monthly" {{ ($schedule['frequency'] ?? '') === 'monthly' ? 'selected' : '' }}>Monthly (1st)</option>
+                                </select>
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label small text-muted fw-bold mb-1">Time</label>
+                                <input type="time" name="time" class="form-control form-control-sm" value="{{ $schedule['time'] ?? '00:00' }}" {{ ($schedule['frequency'] ?? 'never') === 'never' ? 'disabled' : '' }}>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-muted fw-bold">Time</label>
-                            <input type="time" name="time" class="form-control" value="{{ $schedule['time'] ?? '00:00' }}" {{ ($schedule['frequency'] ?? 'never') === 'never' ? 'disabled' : '' }}>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-primary w-100">Save</button>
-                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100 mb-2">
+                            <i class="fas fa-save me-1"></i> Save Schedule
+                        </button>
                     </form>
-                    <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i> Keeps last 10 backups automatically.
-                        </small>
-                        <form id="runManualBackupForm" action="{{ route('admin.disaster-recovery.run-now') }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="button" onclick="confirmRunNow()" class="btn btn-sm btn-link text-decoration-none">
-                                <i class="fas fa-play me-1"></i> Run Manual Backup Now
-                            </button>
-                        </form>
+                    
+                    <div class="alert alert-info border-0 bg-info bg-opacity-10 text-info py-2 px-2 mb-2">
+                        <small><i class="fas fa-info-circle me-1"></i> Keeps last 10 backups automatically.</small>
                     </div>
+                    
+                    <form id="runManualBackupForm" action="{{ route('admin.disaster-recovery.run-now') }}" method="POST">
+                        @csrf
+                        <button type="button" onclick="confirmRunNow()" class="btn btn-success btn-sm w-100">
+                            <i class="fas fa-play me-1"></i> Run Manual Backup Now
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -221,7 +223,7 @@
                     <h5 class="mb-0 fw-bold">Recent Activity</h5>
                     <a href="{{ route('admin.disaster-recovery.activity') }}" class="btn btn-sm btn-link text-decoration-none">View All</a>
                 </div>
-                <div class="list-group list-group-flush" style="height: 440px; overflow-y: auto;">
+                <div class="list-group list-group-flush" style="height: 400px; overflow-y: auto;">
                     @forelse($recentActivity as $log)
                         @php
                             $colors = ['created' => 'success', 'updated' => 'warning', 'deleted' => 'danger', 'restored' => 'info'];
