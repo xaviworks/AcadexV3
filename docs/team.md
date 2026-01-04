@@ -17,7 +17,6 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
 
 <div class="team-grid">
   <div class="team-card team-lead">
-    <img src="https://ui-avatars.com/api/?name=Junn+Xavier+Adalid&background=166534&color=fff&size=200" alt="Junn Xavier Adalid">
     <h3>Junn Xavier Adalid</h3>
     <p>Project Manager / System Analyst / Full-Stack Developer</p>
   </div>
@@ -29,43 +28,36 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
 
 <div class="team-grid">
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Rumel+Eumague&background=22c55e&color=fff&size=200" alt="Rumel Eumague">
     <h3>Rumel Eumague</h3>
     <p>UI/UX Designer</p>
   </div>
   
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Nico+Andre+Monajan&background=22c55e&color=fff&size=200" alt="Nico Andre Monajan">
     <h3>Nico Andre Monajan</h3>
     <p>Quality Assurance Engineer</p>
   </div>
   
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Landy+Bustamante+Palagtiw&background=22c55e&color=fff&size=200" alt="Landy Bustamante Palagtiw">
     <h3>Landy Bustamante Palagtiw</h3>
     <p>Database Manager</p>
   </div>
   
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Kyle+Lamigo&background=22c55e&color=fff&size=200" alt="Kyle Lamigo">
     <h3>Kyle Lamigo</h3>
     <p>Backend Developer</p>
   </div>
   
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Nj+Palicte&background=22c55e&color=fff&size=200" alt="Nj Palicte">
     <h3>Nj Palicte</h3>
     <p>Backend Developer</p>
   </div>
   
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Bam+Jielove+Pasa&background=22c55e&color=fff&size=200" alt="Bam Jielove Pasa">
     <h3>Bam Jielove Pasa</h3>
     <p>Frontend Developer</p>
   </div>
   
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Chesedh+Morales&background=22c55e&color=fff&size=200" alt="Chesedh Morales">
     <h3>Chesedh Morales</h3>
     <p>Frontend Developer</p>
   </div>
@@ -77,13 +69,11 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
 
 <div class="team-grid">
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Leah+Arguelles&background=16a34a&color=fff&size=200" alt="Leah Arguelles">
     <h3>Leah Arguelles</h3>
     <p>Documentation Specialist</p>
   </div>
   
   <div class="team-card">
-    <img src="https://ui-avatars.com/api/?name=Harold+Porras&background=16a34a&color=fff&size=200" alt="Harold Porras">
     <h3>Harold Porras</h3>
     <p>Documentation Specialist</p>
   </div>
