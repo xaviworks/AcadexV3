@@ -30,27 +30,43 @@
     background-color: #f0fdf4 !important;
   }
   
-  /* Buttons */
+  /* ALL Buttons - Green */
+  .btn,
   .btn-primary,
-  .btn-primary:hover {
+  a.btn,
+  a.btn-primary,
+  .main-content .btn,
+  .main-content .btn-primary,
+  .main-content a.btn-primary {
     background-color: #22c55e !important;
+    background-image: none !important;
     border-color: #22c55e !important;
     color: white !important;
   }
   
-  .btn-primary:hover {
+  .btn:hover,
+  .btn-primary:hover,
+  a.btn:hover,
+  a.btn-primary:hover,
+  .main-content .btn:hover,
+  .main-content .btn-primary:hover {
     background-color: #16a34a !important;
     border-color: #16a34a !important;
+    color: white !important;
   }
   
-  /* Secondary button */
-  .btn:not(.btn-primary) {
+  /* Secondary/outline button */
+  .btn-outline,
+  .main-content a.btn:not(.btn-primary) {
+    background-color: white !important;
     color: #166534 !important;
-    border-color: #166534 !important;
+    border: 2px solid #166534 !important;
   }
   
-  .btn:not(.btn-primary):hover {
+  .btn-outline:hover,
+  .main-content a.btn:not(.btn-primary):hover {
     background-color: #f0fdf4 !important;
+    color: #14532d !important;
   }
   
   /* Headers */
@@ -59,6 +75,21 @@
   .main-content h3,
   .main-content h4 {
     color: #166534 !important;
+  }
+  
+  /* Body text - more visible */
+  .main-content,
+  .main-content p,
+  .main-content li {
+    color: #1f2937 !important;
+    font-size: 16px !important;
+    line-height: 1.7 !important;
+  }
+  
+  /* Subtitle text */
+  .fs-6 {
+    color: #374151 !important;
+    font-size: 1.125rem !important;
   }
   
   /* Site title */
@@ -83,16 +114,33 @@
     background-color: #f0fdf4 !important;
   }
   
+  /* Table text */
+  .main-content table td {
+    color: #1f2937 !important;
+  }
+  
   /* Code blocks */
   .main-content code {
     background-color: #f0fdf4 !important;
     border: 1px solid #dcfce7 !important;
+    color: #166534 !important;
   }
   
-  /* Footer */
+  /* Footer - hide "Just the Docs" text */
   .site-footer {
     border-top-color: #22c55e !important;
     background-color: #f0fdf4 !important;
+  }
+  
+  .site-footer p:last-child,
+  .site-footer a[href*="just-the-docs"] {
+    display: none !important;
+  }
+  
+  /* Hide the theme attribution completely */
+  .site-footer > p:has(a[href*="just-the-docs"]),
+  .site-footer p:contains("Just the Docs") {
+    display: none !important;
   }
   
   /* Selection */
@@ -116,4 +164,10 @@
   .site-header {
     border-bottom: 2px solid #22c55e !important;
   }
+  
+  /* Navigation text */
+  .nav-list-link {
+    color: #374151 !important;
+  }
 </style>
+
