@@ -1,5 +1,5 @@
 title: ACADEX
-description: Academic Excellence Management System
+description: "Acadex: An Outcome Based Grading System"
 remote_theme: just-the-docs/just-the-docs@v0.10.0
 plugins:
   - jekyll-remote-theme
@@ -18,8 +18,8 @@ search:
 # Navigation
 nav_sort: case_insensitive
 
-# Footer
-footer_content: "ACADEX - Academic Excellence Management System. Built with Laravel 12."
+# Footer - custom only
+footer_content: ""
 
 # Back to top link
 back_to_top: true

@@ -30,40 +30,40 @@
     background-color: #f0fdf4 !important;
   }
   
-  /* ALL Buttons - Green */
-  .btn,
+  /* Primary Button - Dark Green */
   .btn-primary,
-  a.btn,
   a.btn-primary,
-  .main-content .btn,
   .main-content .btn-primary,
   .main-content a.btn-primary {
-    background-color: #22c55e !important;
+    background-color: #166534 !important;
     background-image: none !important;
-    border-color: #22c55e !important;
+    border-color: #166534 !important;
     color: white !important;
   }
   
-  .btn:hover,
   .btn-primary:hover,
-  a.btn:hover,
   a.btn-primary:hover,
-  .main-content .btn:hover,
-  .main-content .btn-primary:hover {
-    background-color: #16a34a !important;
-    border-color: #16a34a !important;
+  .main-content .btn-primary:hover,
+  .main-content a.btn-primary:hover {
+    background-color: #14532d !important;
+    border-color: #14532d !important;
     color: white !important;
   }
   
-  /* Secondary/outline button */
-  .btn-outline,
+  /* Secondary/outline button - Light Green */
+  .btn:not(.btn-primary),
+  a.btn:not(.btn-primary),
+  .main-content .btn:not(.btn-primary),
   .main-content a.btn:not(.btn-primary) {
     background-color: white !important;
+    background-image: none !important;
     color: #166534 !important;
-    border: 2px solid #166534 !important;
+    border: 2px solid #22c55e !important;
   }
   
-  .btn-outline:hover,
+  .btn:not(.btn-primary):hover,
+  a.btn:not(.btn-primary):hover,
+  .main-content .btn:not(.btn-primary):hover,
   .main-content a.btn:not(.btn-primary):hover {
     background-color: #f0fdf4 !important;
     color: #14532d !important;
@@ -126,20 +126,22 @@
     color: #166534 !important;
   }
   
-  /* Footer - hide "Just the Docs" text */
+  /* Footer */
   .site-footer {
     border-top-color: #22c55e !important;
     background-color: #f0fdf4 !important;
   }
   
-  .site-footer p:last-child,
-  .site-footer a[href*="just-the-docs"] {
+  /* HIDE "This site uses Just the Docs" completely */
+  .site-footer > p:last-of-type:not(.text-small),
+  .site-footer a[href*="just-the-docs"],
+  .site-footer p:has(a[href*="just-the-docs"]) {
     display: none !important;
   }
   
-  /* Hide the theme attribution completely */
-  .site-footer > p:has(a[href*="just-the-docs"]),
-  .site-footer p:contains("Just the Docs") {
+  /* Hide any paragraph containing "documentation theme" */
+  p:empty,
+  .site-footer > :not(.text-small) {
     display: none !important;
   }
   
@@ -169,5 +171,60 @@
   .nav-list-link {
     color: #374151 !important;
   }
+  
+  /* Team cards */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+    margin: 32px 0;
+  }
+  
+  .team-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #dcfce7;
+  }
+  
+  .team-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+  
+  .team-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    border: 3px solid #22c55e;
+  }
+  
+  .team-card h3 {
+    font-size: 1rem !important;
+    margin-bottom: 8px !important;
+    color: #166534 !important;
+  }
+  
+  .team-card p {
+    font-size: 0.875rem !important;
+    color: #6b7280 !important;
+    margin: 0 !important;
+  }
+  
+  .team-lead {
+    border: 2px solid #22c55e;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  }
+  
+  .team-lead img {
+    border-color: #166534;
+    border-width: 4px;
+  }
 </style>
+
 
