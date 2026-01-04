@@ -79,19 +79,19 @@ echo.
 echo $functionText = @"
 echo.
 echo # ACADEX CLI
-echo function acadex {
-echo     ^& '%GIT_BASH%' '%ACADEX_PATH%' @args
-echo }
+echo function acadex ^{
+echo     ^& '$bashPath' '$acadexPath' @args
+echo ^}
 echo "@
 echo.
-echo $profileContent = if (Test-Path $PROFILE^) { Get-Content $PROFILE -Raw } else { '' }
+echo $profileContent = if ^(Test-Path $PROFILE^) ^{ Get-Content $PROFILE -Raw ^} else ^{ '' ^}
 echo.
-echo if ($profileContent -notmatch 'function acadex') {
+echo if ^($profileContent -notmatch 'function acadex'^) ^{
 echo     Add-Content -Path $PROFILE -Value "`n$functionText"
 echo     Write-Host 'Function added successfully!' -ForegroundColor Green
-echo } else {
+echo ^} else ^{
 echo     Write-Host 'Function already exists in profile' -ForegroundColor Yellow
-echo }
+echo ^}
 ) > "%TEMP_PS1%"
 
 REM Execute the PowerShell script
