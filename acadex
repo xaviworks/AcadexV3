@@ -1,0 +1,438 @@
+#!/bin/bash
+
+# ACADEX - Custom command wrapper for AcadexV3
+# Usage: ./acadex <command> [arguments]
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Project root directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Display help
+show_help() {
+    echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║${NC}                 ${GREEN}ACADEX${NC} - AcadexV3 Commands                ${BLUE}║${NC}"
+    echo -e "${BLUE}╚══════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${YELLOW}Usage:${NC} acadex <command> [arguments]"
+    echo ""
+    echo -e "${YELLOW}Available Commands:${NC}"
+    echo ""
+    echo -e "  ${BLUE}Setup & Installation:${NC}"
+    echo -e "  ${GREEN}setup${NC}           First-time full installation"
+    echo -e "  ${GREEN}install:2fa${NC}     Install 2FA packages (existing install)"
+    echo -e "  ${GREEN}check${NC}           Check system requirements"
+    echo ""
+    echo -e "  ${BLUE}Development:${NC}"
+    echo -e "  ${GREEN}serve${NC}           Start production servers (Laravel + Queue + Scheduler)"
+    echo -e "  ${GREEN}dev${NC}             Start dev servers (Laravel + Queue + Logs + Vite)"
+    echo -e "  ${GREEN}build${NC}           Build assets for production (npm run build)"
+    echo -e "  ${GREEN}start${NC}           Start Laravel server only"
+    echo ""
+    echo -e "  ${BLUE}Testing:${NC}"
+    echo -e "  ${GREEN}test${NC}            Run PHPUnit tests"
+    echo -e "  ${GREEN}test:coverage${NC}   Run tests with coverage"
+    echo ""
+    echo -e "  ${BLUE}Database:${NC}"
+    echo -e "  ${GREEN}migrate${NC}         Run database migrations"
+    echo -e "  ${GREEN}migrate:fresh${NC}   Fresh migration with seeders"
+    echo -e "  ${GREEN}seed${NC}            Run database seeders"
+    echo -e "  ${GREEN}tinker${NC}          Start Laravel Tinker"
+    echo ""
+    echo -e "  ${BLUE}Maintenance:${NC}"
+    echo -e "  ${GREEN}cache:clear${NC}     Clear all caches"
+    echo -e "  ${GREEN}optimize${NC}        Optimize the application"
+    echo -e "  ${GREEN}logs${NC}            Tail Laravel logs"
+    echo ""
+    echo -e "  ${BLUE}Code Quality:${NC}"
+    echo -e "  ${GREEN}analyze${NC}         Run PHPStan static analysis"
+    echo -e "  ${GREEN}format${NC}          Format code with Pint"
+    echo ""
+    echo -e "  ${BLUE}Dependencies:${NC}"
+    echo -e "  ${GREEN}install${NC}         Install all dependencies"
+    echo -e "  ${GREEN}update${NC}          Update all dependencies"
+    echo ""
+    echo -e "  ${BLUE}Other:${NC}"
+    echo -e "  ${GREEN}routes${NC}          List all routes"
+    echo -e "  ${GREEN}queue${NC}           Start queue worker"
+    echo -e "  ${GREEN}schedule${NC}        Run scheduled tasks"
+    echo -e "  ${GREEN}docs${NC}            Open ACADEX documentation"
+    echo ""
+    echo -e "${YELLOW}Examples:${NC}"
+    echo -e "  acadex setup          # First-time installation"
+    echo -e "  acadex dev            # Start development"
+    echo -e "  acadex test           # Run tests"
+    echo -e "  acadex migrate:fresh  # Reset database"
+    echo ""
+}
+
+# Command handlers
+case "$1" in
+    setup)
+        echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${BLUE}║${NC}            ${GREEN}ACADEX${NC} - First Time Installation              ${BLUE}║${NC}"
+        echo -e "${BLUE}╚══════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        
+        # Step 1: Check requirements
+        echo -e "${YELLOW}[1/9]${NC} Checking requirements..."
+        
+        # Check PHP
+        if command -v php &> /dev/null; then
+            PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")
+            echo -e "  ${GREEN}✓${NC} PHP $PHP_VERSION found"
+        else
+            echo -e "  ${RED}✗${NC} PHP not found. Please install PHP 8.2+"
+            exit 1
+        fi
+        
+        # Check Composer
+        if command -v composer &> /dev/null; then
+            echo -e "  ${GREEN}✓${NC} Composer found"
+        else
+            echo -e "  ${RED}✗${NC} Composer not found. Please install Composer"
+            exit 1
+        fi
+        
+        # Check Node
+        if command -v node &> /dev/null; then
+            NODE_VERSION=$(node -v)
+            echo -e "  ${GREEN}✓${NC} Node.js $NODE_VERSION found"
+        else
+            echo -e "  ${RED}✗${NC} Node.js not found. Please install Node.js"
+            exit 1
+        fi
+        
+        # Check npm
+        if command -v npm &> /dev/null; then
+            echo -e "  ${GREEN}✓${NC} npm found"
+        else
+            echo -e "  ${RED}✗${NC} npm not found. Please install npm"
+            exit 1
+        fi
+        
+        echo ""
+        
+        # Step 2: Copy .env
+        echo -e "${YELLOW}[2/9]${NC} Setting up environment file..."
+        if [ ! -f .env ]; then
+            if [ -f .env.example ]; then
+                cp .env.example .env
+                echo -e "  ${GREEN}✓${NC} Created .env from .env.example"
+            else
+                echo -e "  ${RED}✗${NC} .env.example not found!"
+                exit 1
+            fi
+        else
+            echo -e "  ${GREEN}✓${NC} .env already exists"
+        fi
+        echo ""
+        
+        # Step 3: Install Composer dependencies
+        echo -e "${YELLOW}[3/9]${NC} Installing Composer dependencies..."
+        echo -e "  ${BLUE}→${NC} This includes: Laravel, Excel, 2FA, Socialite, etc."
+        composer install --no-interaction
+        if [ $? -eq 0 ]; then
+            echo -e "  ${GREEN}✓${NC} Composer dependencies installed"
+        else
+            echo -e "  ${RED}✗${NC} Composer install failed!"
+            exit 1
+        fi
+        echo ""
+        
+        # Step 4: Install npm dependencies
+        echo -e "${YELLOW}[4/9]${NC} Installing npm dependencies..."
+        npm install
+        if [ $? -eq 0 ]; then
+            echo -e "  ${GREEN}✓${NC} npm dependencies installed"
+        else
+            echo -e "  ${RED}✗${NC} npm install failed!"
+            exit 1
+        fi
+        echo ""
+        
+        # Step 5: Generate app key
+        echo -e "${YELLOW}[5/9]${NC} Generating application key..."
+        if grep -q "APP_KEY=base64:" .env; then
+            echo -e "  ${GREEN}✓${NC} APP_KEY already set"
+        else
+            php artisan key:generate --ansi
+            echo -e "  ${GREEN}✓${NC} APP_KEY generated"
+        fi
+        echo ""
+        
+        # Step 6: Database setup prompt
+        echo -e "${YELLOW}[6/9]${NC} Database configuration..."
+        echo -e "  ${BLUE}→${NC} Please configure your database in .env file"
+        echo -e "  ${BLUE}→${NC} DB_CONNECTION, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD"
+        echo ""
+        read -p "  Have you configured the database? (y/n): " db_configured
+        if [ "$db_configured" != "y" ] && [ "$db_configured" != "Y" ]; then
+            echo -e "  ${YELLOW}!${NC} Please configure the database in .env and run: acadex migrate"
+            echo ""
+        else
+            # Step 7: Run migrations
+            echo ""
+            echo -e "${YELLOW}[7/9]${NC} Running database migrations..."
+            php artisan migrate --force
+            if [ $? -eq 0 ]; then
+                echo -e "  ${GREEN}✓${NC} Migrations completed"
+            else
+                echo -e "  ${RED}✗${NC} Migration failed! Check your database configuration."
+            fi
+            echo ""
+            
+            # Seeding prompt
+            read -p "  Run database seeders? (y/n): " run_seeders
+            if [ "$run_seeders" = "y" ] || [ "$run_seeders" = "Y" ]; then
+                php artisan db:seed --force
+                echo -e "  ${GREEN}✓${NC} Database seeded"
+            fi
+        fi
+        echo ""
+        
+        # Step 8: Build assets
+        echo -e "${YELLOW}[8/9]${NC} Building frontend assets..."
+        npm run build
+        if [ $? -eq 0 ]; then
+            echo -e "  ${GREEN}✓${NC} Assets built"
+        else
+            echo -e "  ${RED}✗${NC} Build failed!"
+        fi
+        echo ""
+        
+        # Step 9: Optimize
+        echo -e "${YELLOW}[9/9]${NC} Optimizing application..."
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
+        echo -e "  ${GREEN}✓${NC} Application optimized"
+        echo ""
+        
+        # Done!
+        echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${BLUE}║${NC}              ${GREEN}✓ Installation Complete!${NC}                    ${BLUE}║${NC}"
+        echo -e "${BLUE}╚══════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        echo -e "${YELLOW}Next steps:${NC}"
+        echo -e "  1. Configure your .env file (database, mail, etc.)"
+        echo -e "  2. Run ${GREEN}acadex dev${NC} to start development servers"
+        echo -e "  3. Visit ${BLUE}http://localhost:8000${NC}"
+        echo ""
+        ;;
+    
+    install:2fa)
+        echo -e "${GREEN}Installing 2FA packages...${NC}"
+        echo ""
+        composer require pragmarx/google2fa-laravel bacon/bacon-qr-code
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo -e "${GREEN}✓ 2FA packages installed successfully!${NC}"
+            echo -e "  - pragmarx/google2fa-laravel"
+            echo -e "  - bacon/bacon-qr-code"
+        else
+            echo -e "${RED}✗ Installation failed!${NC}"
+            exit 1
+        fi
+        ;;
+    
+    check)
+        echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${BLUE}║${NC}              ${GREEN}ACADEX${NC} - System Requirements                ${BLUE}║${NC}"
+        echo -e "${BLUE}╚══════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        
+        # PHP
+        echo -e "${YELLOW}PHP:${NC}"
+        if command -v php &> /dev/null; then
+            PHP_VERSION=$(php -v | head -n 1)
+            echo -e "  ${GREEN}✓${NC} $PHP_VERSION"
+        else
+            echo -e "  ${RED}✗${NC} PHP not found (required: 8.2+)"
+        fi
+        
+        # Composer
+        echo -e "${YELLOW}Composer:${NC}"
+        if command -v composer &> /dev/null; then
+            COMPOSER_VERSION=$(composer --version)
+            echo -e "  ${GREEN}✓${NC} $COMPOSER_VERSION"
+        else
+            echo -e "  ${RED}✗${NC} Composer not found"
+        fi
+        
+        # Node.js
+        echo -e "${YELLOW}Node.js:${NC}"
+        if command -v node &> /dev/null; then
+            NODE_VERSION=$(node -v)
+            echo -e "  ${GREEN}✓${NC} Node.js $NODE_VERSION"
+        else
+            echo -e "  ${RED}✗${NC} Node.js not found"
+        fi
+        
+        # npm
+        echo -e "${YELLOW}npm:${NC}"
+        if command -v npm &> /dev/null; then
+            NPM_VERSION=$(npm -v)
+            echo -e "  ${GREEN}✓${NC} npm $NPM_VERSION"
+        else
+            echo -e "  ${RED}✗${NC} npm not found"
+        fi
+        
+        # Git
+        echo -e "${YELLOW}Git:${NC}"
+        if command -v git &> /dev/null; then
+            GIT_VERSION=$(git --version)
+            echo -e "  ${GREEN}✓${NC} $GIT_VERSION"
+        else
+            echo -e "  ${RED}✗${NC} Git not found"
+        fi
+        
+        echo ""
+        
+        # Project status
+        echo -e "${YELLOW}Project Status:${NC}"
+        
+        if [ -f .env ]; then
+            echo -e "  ${GREEN}✓${NC} .env file exists"
+        else
+            echo -e "  ${RED}✗${NC} .env file missing"
+        fi
+        
+        if [ -d vendor ]; then
+            echo -e "  ${GREEN}✓${NC} Composer dependencies installed"
+        else
+            echo -e "  ${RED}✗${NC} Composer dependencies not installed"
+        fi
+        
+        if [ -d node_modules ]; then
+            echo -e "  ${GREEN}✓${NC} npm dependencies installed"
+        else
+            echo -e "  ${RED}✗${NC} npm dependencies not installed"
+        fi
+        
+        if [ -d public/build ]; then
+            echo -e "  ${GREEN}✓${NC} Assets built"
+        else
+            echo -e "  ${RED}✗${NC} Assets not built (run: acadex build)"
+        fi
+        
+        echo ""
+        ;;
+    
+    serve)
+        echo -e "${GREEN}Starting production servers (Laravel + Queue + Scheduler)...${NC}"
+        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80" \
+            "php artisan serve" \
+            "php artisan queue:work --tries=3 --timeout=90" \
+            "php artisan schedule:work" \
+            --names=server,queue,scheduler
+        ;;
+    dev)
+        echo -e "${GREEN}Starting development servers (Laravel + Queue + Logs + Vite)...${NC}"
+        npx concurrently -c "#93c5fd,#c4b5fd,#fb7185,#fdba74" \
+            "php artisan serve" \
+            "php artisan queue:work --tries=3 --timeout=90" \
+            "php artisan pail --timeout=0" \
+            "npm run dev" \
+            --names=server,queue,logs,vite
+        ;;
+    build)
+        echo -e "${GREEN}Building assets for production...${NC}"
+        npm run build
+        ;;
+    start)
+        echo -e "${GREEN}Starting Laravel server only...${NC}"
+        php artisan serve
+        ;;
+    test)
+        echo -e "${GREEN}Running tests...${NC}"
+        php artisan test "${@:2}"
+        ;;
+    test:coverage)
+        echo -e "${GREEN}Running tests with coverage...${NC}"
+        php artisan test --coverage "${@:2}"
+        ;;
+    migrate)
+        echo -e "${GREEN}Running migrations...${NC}"
+        php artisan migrate "${@:2}"
+        ;;
+    migrate:fresh)
+        echo -e "${YELLOW}Running fresh migration with seeders...${NC}"
+        php artisan migrate:fresh --seed "${@:2}"
+        ;;
+    seed)
+        echo -e "${GREEN}Running seeders...${NC}"
+        php artisan db:seed "${@:2}"
+        ;;
+    tinker)
+        echo -e "${GREEN}Starting Tinker...${NC}"
+        php artisan tinker
+        ;;
+    cache:clear)
+        echo -e "${GREEN}Clearing all caches...${NC}"
+        php artisan config:clear
+        php artisan cache:clear
+        php artisan route:clear
+        php artisan view:clear
+        echo -e "${GREEN}All caches cleared!${NC}"
+        ;;
+    optimize)
+        echo -e "${GREEN}Optimizing application...${NC}"
+        php artisan optimize
+        ;;
+    logs)
+        echo -e "${GREEN}Tailing Laravel logs...${NC}"
+        tail -f storage/logs/laravel.log
+        ;;
+    analyze)
+        echo -e "${GREEN}Running PHPStan analysis...${NC}"
+        ./vendor/bin/phpstan analyse "${@:2}"
+        ;;
+    format)
+        echo -e "${GREEN}Formatting code with Pint...${NC}"
+        ./vendor/bin/pint "${@:2}"
+        ;;
+    install)
+        echo -e "${GREEN}Installing dependencies...${NC}"
+        composer install
+        npm install
+        echo -e "${GREEN}Dependencies installed!${NC}"
+        ;;
+    update)
+        echo -e "${GREEN}Updating dependencies...${NC}"
+        composer update
+        npm update
+        echo -e "${GREEN}Dependencies updated!${NC}"
+        ;;
+    routes)
+        echo -e "${GREEN}Listing routes...${NC}"
+        php artisan route:list "${@:2}"
+        ;;
+    queue)
+        echo -e "${GREEN}Starting queue worker...${NC}"
+        php artisan queue:work "${@:2}"
+        ;;
+    schedule)
+        echo -e "${GREEN}Running scheduled tasks...${NC}"
+        php artisan schedule:run
+        ;;
+    docs)
+        echo -e "${GREEN}Opening ACADEX documentation...${NC}"
+        open "https://xaviworks.github.io/AcadexV3/"
+        ;;
+    help|--help|-h|"")
+        show_help
+        ;;
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        echo ""
+        show_help
+        exit 1
+        ;;
+esac
