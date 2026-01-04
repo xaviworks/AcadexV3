@@ -1,13 +1,15 @@
 ---
 layout: default
 title: CLI Commands
+nav_order: 3
+description: "ACADEX CLI command reference"
 ---
 
 # ACADEX CLI Commands
+{: .fs-9 }
 
-The ACADEX CLI provides convenient shortcuts for common development tasks.
-
-[Back to Home](.)
+Convenient shortcuts for common development tasks.
+{: .fs-6 .fw-300 }
 
 ---
 
@@ -370,4 +372,3 @@ acadex -h
 
 ---
 
-[Back to Home](.)

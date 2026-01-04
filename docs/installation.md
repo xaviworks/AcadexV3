@@ -1,13 +1,15 @@
 ---
 layout: default
-title: Installation Guide
+title: Installation
+nav_order: 2
+description: "ACADEX installation guide"
 ---
 
 # Installation Guide
+{: .fs-9 }
 
 Complete guide for setting up ACADEX on your local machine.
-
-[Back to Home](.)
+{: .fs-6 .fw-300 }
 
 ---
 
@@ -298,4 +300,3 @@ After installation:
 
 ---
 
-[Back to Home](.)

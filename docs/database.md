@@ -1,13 +1,15 @@
 ---
 layout: default
-title: Database Setup
+title: Database
+nav_order: 5
+description: "ACADEX database setup guide"
 ---
 
 # Database Setup
+{: .fs-9 }
 
 Guide for setting up and managing the ACADEX database.
-
-[Back to Home](.)
+{: .fs-6 .fw-300 }
 
 ---
 
@@ -291,4 +293,3 @@ php artisan cache:clear
 
 ---
 
-[Back to Home](.)

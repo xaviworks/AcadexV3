@@ -1,13 +1,15 @@
 ---
 layout: default
 title: Configuration
+nav_order: 4
+description: "ACADEX configuration guide"
 ---
 
 # Configuration
+{: .fs-9 }
 
-Guide for configuring ACADEX environment and settings.
-
-[Back to Home](.)
+Environment and application settings guide.
+{: .fs-6 .fw-300 }
 
 ---
 
@@ -226,4 +228,3 @@ php artisan pail
 
 ---
 
-[Back to Home](.)

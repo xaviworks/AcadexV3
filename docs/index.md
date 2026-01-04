@@ -1,44 +1,54 @@
 ---
 layout: default
 title: Home
+nav_order: 1
+description: "ACADEX - Academic Excellence Management System documentation"
+permalink: /
 ---
 
 # ACADEX Documentation
+{: .fs-9 }
 
-**Academic Excellence Management System** - A Laravel 12 based student information and grading system.
+Academic Excellence Management System - A comprehensive Laravel 12 based student information and grading system.
+{: .fs-6 .fw-300 }
+
+[Get Started](installation){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[View on GitHub](https://github.com/xaviworks/AcadexV3){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
 ## Quick Links
 
-- [Installation Guide](installation)
-- [CLI Commands](commands)
-- [Configuration](configuration)
-- [Database Setup](database)
+| Documentation | Description |
+|:--------------|:------------|
+| [Installation Guide](installation) | Complete setup instructions |
+| [CLI Commands](commands) | ACADEX command line tools |
+| [Configuration](configuration) | Environment and settings |
+| [Database Setup](database) | Database configuration |
 
 ---
 
 ## Overview
 
-ACADEX is a comprehensive academic management system built with:
+ACADEX is built with modern technologies:
 
 - **Laravel 12** - PHP Framework
 - **Laravel Breeze** - Authentication scaffolding
 - **Alpine.js** - Lightweight JavaScript framework
 - **Tailwind CSS** - Utility-first CSS framework
-- **Maatwebsite Excel** - Excel import/export functionality
+- **Maatwebsite Excel** - Excel import/export
 - **Google 2FA** - Two-factor authentication
 
 ---
 
 ## System Requirements
 
-| Requirement | Version |
-|-------------|---------|
-| PHP | 8.2 or higher |
-| Node.js | 18.x or higher |
+| Requirement | Minimum Version |
+|:------------|:----------------|
+| PHP | 8.2+ |
+| Node.js | 18.x+ |
 | Composer | 2.x |
-| npm | 9.x or higher |
+| npm | 9.x+ |
 | MySQL/MariaDB | 8.0+ / 10.4+ |
 
 ---
@@ -61,10 +71,15 @@ Visit [http://localhost:8000](http://localhost:8000) to access the application.
 
 ---
 
-## Features
+## Key Features
 
-- Multi-role authentication (Admin, Chairperson, Faculty, Student)
-- Two-factor authentication (2FA)
+### Multi-role Authentication
+Support for Admin, Chairperson, Faculty, and Student roles with granular permissions.
+
+### Two-Factor Authentication
+Enhanced security with Google Authenticator 2FA support for all users.
+
+### Additional Features
 - Student grade management
 - Excel import/export for student data
 - Real-time session management
@@ -75,7 +90,7 @@ Visit [http://localhost:8000](http://localhost:8000) to access the application.
 
 ## Support
 
-For issues and feature requests, please visit the [GitHub Issues](https://github.com/xaviworks/AcadexV3/issues) page.
+For issues and feature requests, visit the [GitHub Issues](https://github.com/xaviworks/AcadexV3/issues) page.
 
 ---
 
