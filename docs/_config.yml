@@ -9,9 +9,6 @@ plugins:
 baseurl: "/AcadexV3"
 url: "https://xaviworks.github.io"
 
-# Use default green color scheme
-color_scheme: nil
-
 # Search
 search_enabled: true
 search:
