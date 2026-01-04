@@ -9,22 +9,14 @@ plugins:
 baseurl: "/AcadexV3"
 url: "https://xaviworks.github.io"
 
-# Color scheme (custom green theme)
-color_scheme: acadex
-
-# Logo
-logo: "/images/logo.png"
+# Use default green color scheme
+color_scheme: nil
 
 # Search
 search_enabled: true
 search:
   heading_level: 2
   previews: 3
-  preview_words_before: 5
-  preview_words_after: 10
-  tokenizer_separator: /[\s/]+/
-  rel_url: true
-  button: false
 
 # Navigation
 nav_sort: case_insensitive
