@@ -130,36 +130,163 @@ Visit [http://localhost:8000](http://localhost:8000)
 
 ---
 
-## Setting Up the ACADEX CLI Alias
+## Installing the ACADEX Command
 
-To use `acadex` command from anywhere without `./`:
+### Easy Installation (Recommended) 🚀
 
-### For macOS/Linux (Zsh)
+**For Mac/Linux Users:**
 
-Add to `~/.zshrc`:
+1. Open Terminal and go to your project folder:
+   ```bash
+   cd /path/to/AcadexV3
+   ```
 
+2. Run the installer:
+   ```bash
+   ./install-cli.sh
+   ```
+
+3. Activate it:
+   ```bash
+   source ~/.zshrc
+   ```
+
+4. Test it:
+   ```bash
+   acadex check
+   ```
+
+✅ Done! The installer automatically detects your system and sets everything up.
+
+---
+
+**For Windows Users:**
+
+1. Open PowerShell and go to your project folder:
+   ```powershell
+   cd C:\path\to\AcadexV3
+   ```
+
+2. Run the installer:
+   ```powershell
+   .\install-cli.bat
+   ```
+
+3. Close and reopen PowerShell
+
+4. Test it:
+   ```powershell
+   acadex check
+   ```
+
+✅ Done! The installer sets up everything automatically.
+
+---
+
+### Manual Installation (Alternative)
+
+<details>
+<summary>Click here for manual installation steps</summary>
+
+#### For Mac Users
+
+1. **Open Terminal** and go to your project folder:
+   ```bash
+   cd /path/to/AcadexV3
+   ```
+
+2. **Get the full path** by typing:
+   ```bash
+   pwd
+   ```
+   Copy the result (example: `/Users/yourname/AcadexV3`)
+
+3. **Open your shell configuration file:**
+   ```bash
+   nano ~/.zshrc
+   ```
+   
+   *Note: If you use bash instead, use `nano ~/.bashrc`*
+
+4. **Add this line at the end** (replace with your actual path):
+   ```bash
+   alias acadex="/Users/yourname/AcadexV3/acadex"
+   ```
+
+5. **Save the file:**
+   - Press `Control + X`
+   - Press `Y` to confirm
+   - Press `Enter`
+
+6. **Activate the changes:**
+   ```bash
+   source ~/.zshrc
+   ```
+
+7. **Test it:**
+   ```bash
+   acadex check
+   ```
+
+#### For Windows Users
+
+1. **Open PowerShell** and go to your project folder:
+   ```powershell
+   cd C:\path\to\AcadexV3
+   ```
+
+2. **Get the full path:**
+   ```powershell
+   pwd
+   ```
+   Copy the result (example: `C:\Users\YourName\AcadexV3`)
+
+3. **Create a PowerShell profile** (if you don't have one):
+   ```powershell
+   if (!(Test-Path -Path $PROFILE)) {
+       New-Item -ItemType File -Path $PROFILE -Force
+   }
+   ```
+
+4. **Open the profile file:**
+   ```powershell
+   notepad $PROFILE
+   ```
+
+5. **Add this function** (replace with your actual path):
+   ```powershell
+   function acadex {
+       bash "C:\Users\YourName\AcadexV3\acadex" @args
+   }
+   ```
+
+6. **Save and close** Notepad
+
+7. **Restart PowerShell** and test:
+   ```powershell
+   acadex check
+   ```
+
+</details>
+
+---
+
+### Quick Method (No Installation)
+
+If you don't want to install the command globally, run it directly from the project folder:
+
+**Mac/Linux:**
 ```bash
-alias acadex="/path/to/AcadexV3/acadex"
+cd /path/to/AcadexV3
+./acadex setup
+./acadex dev
 ```
 
-Then reload:
-
-```bash
-source ~/.zshrc
-```
-
-### For macOS/Linux (Bash)
-
-Add to `~/.bashrc`:
-
-```bash
-alias acadex="/path/to/AcadexV3/acadex"
-```
-
-Then reload:
-
-```bash
-source ~/.bashrc
+**Windows:**
+```powershell
+cd C:\path\to\AcadexV3
+bash acadex setup
+bash acadex dev
 ```
 
 ---
