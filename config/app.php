@@ -35,6 +35,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Grade Encryption
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, sensitive grade data (scores, term grades, final grades)
+    | will be encrypted at rest using Laravel's encryption. This adds an
+    | extra layer of security for confidential academic data.
+    |
+    | Set ENCRYPT_GRADES=false in your .env to disable this feature.
+    | Note: Enabling this on existing data requires a migration script.
+    |
+    */
+
+    'encrypt_grades' => (bool) env('ENCRYPT_GRADES', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
     |
