@@ -7,7 +7,7 @@ echo   ACADEX CLI Installer for Windows
 echo ======================================
 echo.
 
-REM Check if Git is installed
+REM Check if Git is installed and find Git Bash
 where git >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Git is not installed or not in PATH
@@ -21,15 +21,43 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo Git Bash detected!
+REM Find Git Bash executable
+set "GIT_BASH="
+for %%i in (
+    "C:\Program Files\Git\bin\bash.exe"
+    "C:\Program Files (x86)\Git\bin\bash.exe"
+    "%ProgramFiles%\Git\bin\bash.exe"
+    "%ProgramFiles(x86)%\Git\bin\bash.exe"
+    "%LOCALAPPDATA%\Programs\Git\bin\bash.exe"
+) do (
+    if exist %%i (
+        set "GIT_BASH=%%~i"
+        goto :found_bash
+    )
+)
+
+REM Try to find bash in PATH
+where bash >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+    for /f "delims=" %%i in ('where bash') do set "GIT_BASH=%%i"
+    goto :found_bash
+)
+
+echo ERROR: Could not find bash.exe
+echo.
+echo Git is installed, but bash.exe was not found.
+echo Please make sure Git Bash is installed.
+echo.
+pause
+exit /b 1
+
+:found_bash
+echo Git Bash found at: %GIT_BASH%
 echo.
 
 REM Get the current directory
 set "SCRIPT_DIR=%~dp0"
 set "ACADEX_PATH=%SCRIPT_DIR%acadex"
-
-REM Convert Windows path to Unix-style path for Git Bash
-set "ACADEX_PATH=%ACADEX_PATH:\=/%"
 
 echo Project location: %SCRIPT_DIR%
 echo.
@@ -41,8 +69,36 @@ echo.
 echo Adding acadex function to PowerShell profile...
 echo.
 
-REM Add the function to PowerShell profile
-powershell -Command "$functionText = \"`n# ACADEX CLI`nfunction acadex {`n    $acadexPath = '%ACADEX_PATH%'`n    & bash $acadexPath @args`n}`n\"; $profileContent = if (Test-Path $PROFILE) { Get-Content $PROFILE -Raw } else { '' }; if ($profileContent -notmatch 'function acadex') { Add-Content -Path $PROFILE -Value $functionText; Write-Host 'Function added successfully!' -ForegroundColor Green } else { Write-Host 'Function already exists in profile' -ForegroundColor Yellow }"
+REM Create a temporary PowerShell script to add the function
+set "TEMP_PS1=%TEMP%\acadex-install.ps1"
+(
+echo # ACADEX CLI Installation Script
+echo $bashPath = '%GIT_BASH%'
+echo $acadexPath = '%ACADEX_PATH%'
+echo.
+echo $functionText = @"
+echo.
+echo # ACADEX CLI
+echo function acadex {
+echo     ^& '%GIT_BASH%' '%ACADEX_PATH%' @args
+echo }
+echo "@
+echo.
+echo $profileContent = if (Test-Path $PROFILE^) { Get-Content $PROFILE -Raw } else { '' }
+echo.
+echo if ($profileContent -notmatch 'function acadex') {
+echo     Add-Content -Path $PROFILE -Value "`n$functionText"
+echo     Write-Host 'Function added successfully!' -ForegroundColor Green
+echo } else {
+echo     Write-Host 'Function already exists in profile' -ForegroundColor Yellow
+echo }
+) > "%TEMP_PS1%"
+
+REM Execute the PowerShell script
+powershell -ExecutionPolicy Bypass -File "%TEMP_PS1%"
+
+REM Clean up
+del "%TEMP_PS1%" >nul 2>nul
 
 echo.
 echo ======================================
