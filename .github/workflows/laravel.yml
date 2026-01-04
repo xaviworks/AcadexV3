@@ -80,8 +80,14 @@ jobs:
         with:
           php-version: '8.2'
 
+      - name: Copy .env
+        run: php -r "copy('.env.example', '.env');"
+
       - name: Install Dependencies
         run: composer install --prefer-dist --no-progress
+
+      - name: Generate Application Key
+        run: php artisan key:generate
 
       - name: Security Check
         run: composer audit
