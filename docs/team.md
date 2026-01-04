@@ -34,7 +34,7 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
   
   <div class="team-card">
     <h3>Nico Andre Monajan</h3>
-    <p>Quality Assurance Engineer</p>
+    <p>Quality Assurance</p>
   </div>
   
   <div class="team-card">
@@ -70,7 +70,7 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
 <div class="team-grid">
   <div class="team-card">
     <h3>Leah Arguelles</h3>
-    <p>Documentation Specialist</p>
+    <p>Head Documentation Specialist</p>
   </div>
   
   <div class="team-card">
