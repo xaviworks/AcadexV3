@@ -2,14 +2,14 @@
 layout: default
 title: Home
 nav_order: 1
-description: "ACADEX - Academic Excellence Management System documentation"
+description: "ACADEX - An Outcome Based Grading System documentation"
 permalink: /
 ---
 
 # ACADEX Documentation
 {: .fs-9 }
 
-Academic Excellence Management System - A comprehensive Laravel 12 based student information and grading system.
+An Outcome Based Grading System - A comprehensive Laravel 12 based student information and grading system.
 {: .fs-6 .fw-300 }
 
 [Get Started](installation){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
@@ -94,5 +94,5 @@ For issues and feature requests, visit the [GitHub Issues](https://github.com/xa
 
 ---
 
-**ACADEX** - Academic Excellence Management System  
+**ACADEX** - An Outcome Based Grading System  
 Built with Laravel 12
