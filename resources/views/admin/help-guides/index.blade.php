@@ -8,9 +8,9 @@
             <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-question-circle-fill text-success me-2"></i>Help Guides</h1>
             <p class="text-muted mb-0">Manage help guides for different user roles</p>
         </div>
-        <a href="{{ route('admin.help-guides.create') }}" class="btn btn-success">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createGuideModal">
             <i class="bi bi-plus-lg me-1"></i> Create Guide
-        </a>
+        </button>
     </div>
 
     {{-- Success/Error Messages via Bootbox --}}
@@ -38,9 +38,9 @@
                     <div class="text-muted">
                         <i class="bi bi-inbox display-4 d-block mb-3"></i>
                         <p class="mb-2">No help guides created yet.</p>
-                        <a href="{{ route('admin.help-guides.create') }}" class="btn btn-success btn-sm">
+                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createGuideModal">
                             <i class="bi bi-plus-lg me-1"></i> Create Your First Guide
-                        </a>
+                        </button>
                     </div>
                 </div>
             @else
@@ -110,9 +110,18 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="action-btn-group">
-                                            <a href="{{ route('admin.help-guides.edit', $guide) }}" class="action-btn btn-edit" title="Edit">
+                                            <button type="button" class="action-btn btn-edit edit-guide" 
+                                                    data-id="{{ $guide->id }}"
+                                                    data-title="{{ $guide->title }}"
+                                                    data-content="{{ $guide->content }}"
+                                                    data-visible-roles="{{ json_encode($guide->visible_roles) }}"
+                                                    data-sort-order="{{ $guide->sort_order }}"
+                                                    data-is-active="{{ $guide->is_active ? '1' : '0' }}"
+                                                    data-attachments="{{ json_encode($guide->attachments->map(fn($a) => ['id' => $a->id, 'file_name' => $a->file_name, 'file_size' => $a->human_file_size])) }}"
+                                                    data-legacy-attachment="{{ $guide->attachment_name ?? '' }}"
+                                                    title="Edit">
                                                 <i class="bi bi-pencil-fill"></i>
-                                            </a>
+                                            </button>
                                             <button type="button" class="action-btn btn-delete delete-guide" data-id="{{ $guide->id }}" data-title="{{ $guide->title }}" title="Delete">
                                                 <i class="bi bi-trash-fill"></i>
                                             </button>
@@ -166,9 +175,206 @@
         </div>
     </div>
 </div>
+
+{{-- Create Guide Modal --}}
+<div class="modal fade" id="createGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Create Help Guide</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="createGuideForm" action="{{ route('admin.help-guides.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    {{-- Title --}}
+                    <div class="mb-3">
+                        <label for="create_title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="create_title" name="title" placeholder="Enter a descriptive title..." required>
+                    </div>
+                    
+                    {{-- Content --}}
+                    <div class="mb-3">
+                        <label for="create_content" class="form-label fw-semibold">Content <span class="text-danger">*</span></label>
+                        <textarea class="form-control summernote-editor" id="create_content" name="content"></textarea>
+                    </div>
+
+                    <div class="row">
+                        {{-- Visibility --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Visible To <span class="text-danger">*</span></label>
+                            <div class="border rounded p-3 bg-light" style="max-height: 180px; overflow-y: auto;">
+                                @foreach($availableRoles as $roleId => $roleName)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="visible_roles[]" value="{{ $roleId }}" id="create_role_{{ $roleId }}">
+                                        <label class="form-check-label" for="create_role_{{ $roleId }}">{{ $roleName }}</label>
+                                    </div>
+                                @endforeach
+                                <div class="mt-2 pt-2 border-top">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="toggleAllRoles('create', true)">Select All</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAllRoles('create', false)">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Settings --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Settings</label>
+                            <div class="border rounded p-3 bg-light">
+                                <div class="mb-3">
+                                    <label for="create_sort_order" class="form-label small">Display Priority</label>
+                                    <select class="form-select form-select-sm" id="create_sort_order" name="sort_order" style="max-width: 150px;">
+                                        <option value="0">High (Top)</option>
+                                        <option value="50" selected>Normal</option>
+                                        <option value="100">Low (Bottom)</option>
+                                    </select>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="create_is_active" name="is_active" value="1" checked>
+                                    <label class="form-check-label" for="create_is_active">
+                                        <span class="text-success fw-semibold"><i class="bi bi-eye-fill me-1"></i>Visible to Users</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Attachments --}}
+                    <div class="mb-3">
+                        <label for="create_attachments" class="form-label fw-semibold">PDF Attachments (Optional)</label>
+                        <input type="file" class="form-control" id="create_attachments" name="attachments[]" accept=".pdf,application/pdf" multiple>
+                        <div class="form-text">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i>
+                            Only PDF files. Max 10MB per file. Maximum 10 files.
+                        </div>
+                        <div id="createFilesPreview" class="d-none mt-2">
+                            <div class="border rounded p-2 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold small">Selected Files:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFiles('create')"><i class="bi bi-x"></i> Clear</button>
+                                </div>
+                                <div id="createFilesList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg me-1"></i> Create Guide
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Edit Guide Modal --}}
+<div class="modal fade" id="editGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Help Guide</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editGuideForm" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    {{-- Title --}}
+                    <div class="mb-3">
+                        <label for="edit_title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="edit_title" name="title" placeholder="Enter a descriptive title..." required>
+                    </div>
+                    
+                    {{-- Content --}}
+                    <div class="mb-3">
+                        <label for="edit_content" class="form-label fw-semibold">Content <span class="text-danger">*</span></label>
+                        <textarea class="form-control summernote-editor" id="edit_content" name="content"></textarea>
+                    </div>
+
+                    <div class="row">
+                        {{-- Visibility --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Visible To <span class="text-danger">*</span></label>
+                            <div class="border rounded p-3 bg-light" style="max-height: 180px; overflow-y: auto;">
+                                @foreach($availableRoles as $roleId => $roleName)
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="visible_roles[]" value="{{ $roleId }}" id="edit_role_{{ $roleId }}">
+                                        <label class="form-check-label" for="edit_role_{{ $roleId }}">{{ $roleName }}</label>
+                                    </div>
+                                @endforeach
+                                <div class="mt-2 pt-2 border-top">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="toggleAllRoles('edit', true)">Select All</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAllRoles('edit', false)">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Settings --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Settings</label>
+                            <div class="border rounded p-3 bg-light">
+                                <div class="mb-3">
+                                    <label for="edit_sort_order" class="form-label small">Display Priority</label>
+                                    <select class="form-select form-select-sm" id="edit_sort_order" name="sort_order" style="max-width: 150px;">
+                                        <option value="0">High (Top)</option>
+                                        <option value="50">Normal</option>
+                                        <option value="100">Low (Bottom)</option>
+                                    </select>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="edit_is_active" name="is_active" value="1">
+                                    <label class="form-check-label" for="edit_is_active">
+                                        <span class="text-success fw-semibold"><i class="bi bi-eye-fill me-1"></i>Visible to Users</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Existing Attachments --}}
+                    <div class="mb-3" id="editExistingAttachments">
+                        <label class="form-label fw-semibold">Current Attachments</label>
+                        <div id="editAttachmentsList" class="border rounded p-2 bg-light">
+                            <p class="text-muted small mb-0">No attachments</p>
+                        </div>
+                        <input type="hidden" name="remove_attachment" id="edit_remove_attachment" value="0">
+                    </div>
+
+                    {{-- Add More Attachments --}}
+                    <div class="mb-3">
+                        <label for="edit_attachments" class="form-label fw-semibold">Add More Attachments (Optional)</label>
+                        <input type="file" class="form-control" id="edit_attachments" name="attachments[]" accept=".pdf,application/pdf" multiple>
+                        <div class="form-text">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i>
+                            Only PDF files. Max 10MB per file. Maximum 10 files.
+                        </div>
+                        <div id="editFilesPreview" class="d-none mt-2">
+                            <div class="border rounded p-2 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold small">Selected Files:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFiles('edit')"><i class="bi bi-x"></i> Clear</button>
+                                </div>
+                                <div id="editFilesList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i> Update Guide
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('styles')
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
 <style>
     /* Help Guides Table Styles - Matching Sessions Table Design */
     
@@ -373,6 +579,55 @@
         outline: none;
     }
 
+    /* Modal styles */
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #198754;
+    }
+
+    .note-editor.note-frame {
+        border-radius: 0.375rem;
+    }
+
+    .note-editor .note-toolbar {
+        background-color: #f8f9fa;
+    }
+
+    .note-editor.note-frame .note-editing-area .note-editable {
+        min-height: 150px;
+    }
+
+    /* Attachment item in modal */
+    .attachment-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .attachment-item:last-child {
+        border-bottom: none;
+    }
+
+    .attachment-item .attachment-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        overflow: hidden;
+    }
+
+    .attachment-item .attachment-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 300px;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .guide-title,
@@ -386,12 +641,25 @@
             height: 32px;
         }
     }
-</style>
+</link>
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Summernote config
+    const summernoteConfig = {
+        height: 200,
+        placeholder: 'Write the help guide content here...',
+        toolbar: [
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['para', ['ul', 'ol']],
+            ['insert', ['link']],
+            ['view', ['codeview']]
+        ]
+    };
+
     // Initialize DataTable
     if ($.fn.DataTable && $('#guidesTable').length) {
         $('#guidesTable').DataTable({
@@ -412,6 +680,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Initialize Summernote for Create modal when shown
+    const createModal = document.getElementById('createGuideModal');
+    createModal.addEventListener('shown.bs.modal', function() {
+        if (!$('#create_content').hasClass('note-editor')) {
+            $('#create_content').summernote({
+                ...summernoteConfig,
+                callbacks: {
+                    onChange: function(contents) {
+                        $('#create_content').val(contents);
+                    }
+                }
+            });
+        }
+    });
+
+    // Reset Create modal on close
+    createModal.addEventListener('hidden.bs.modal', function() {
+        document.getElementById('createGuideForm').reset();
+        $('#create_content').summernote('code', '');
+        clearFiles('create');
+    });
+
+    // Initialize Summernote for Edit modal when shown
+    const editModal = document.getElementById('editGuideModal');
+    editModal.addEventListener('shown.bs.modal', function() {
+        if (!$('#edit_content').hasClass('note-editor')) {
+            $('#edit_content').summernote({
+                ...summernoteConfig,
+                callbacks: {
+                    onChange: function(contents) {
+                        $('#edit_content').val(contents);
+                    }
+                }
+            });
+        }
+    });
+
+    // Reset Edit modal on close
+    editModal.addEventListener('hidden.bs.modal', function() {
+        document.getElementById('editGuideForm').reset();
+        $('#edit_content').summernote('code', '');
+        clearFiles('edit');
+    });
+
     // Delete handler
     document.querySelectorAll('.delete-guide').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -424,6 +736,215 @@ document.addEventListener('DOMContentLoaded', function() {
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         });
     });
+
+    // Edit handler
+    document.querySelectorAll('.edit-guide').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const title = this.dataset.title;
+            const content = this.dataset.content;
+            const visibleRoles = JSON.parse(this.dataset.visibleRoles || '[]');
+            const sortOrder = parseInt(this.dataset.sortOrder) || 50;
+            const isActive = this.dataset.isActive === '1';
+            const attachments = JSON.parse(this.dataset.attachments || '[]');
+            const legacyAttachment = this.dataset.legacyAttachment || '';
+
+            // Set form action
+            document.getElementById('editGuideForm').action = `{{ url('admin/help-guides') }}/${id}`;
+
+            // Set title
+            document.getElementById('edit_title').value = title;
+
+            // Set content (will be set after Summernote initializes)
+            document.getElementById('edit_content').value = content;
+            
+            // Wait for modal to be shown then set Summernote content
+            setTimeout(() => {
+                if ($('#edit_content').hasClass('note-editor') || $('#edit_content').next('.note-editor').length) {
+                    $('#edit_content').summernote('code', content);
+                }
+            }, 300);
+
+            // Set visible roles
+            document.querySelectorAll('#editGuideModal input[name="visible_roles[]"]').forEach(cb => {
+                cb.checked = visibleRoles.includes(parseInt(cb.value));
+            });
+
+            // Set sort order (map to closest priority)
+            let priority = sortOrder <= 25 ? '0' : (sortOrder <= 75 ? '50' : '100');
+            document.getElementById('edit_sort_order').value = priority;
+
+            // Set is_active
+            document.getElementById('edit_is_active').checked = isActive;
+
+            // Reset remove_attachment
+            document.getElementById('edit_remove_attachment').value = '0';
+
+            // Build existing attachments list
+            const attachmentsList = document.getElementById('editAttachmentsList');
+            const existingSection = document.getElementById('editExistingAttachments');
+            
+            if (attachments.length > 0 || legacyAttachment) {
+                let html = '';
+                
+                // Legacy attachment
+                if (legacyAttachment) {
+                    html += `
+                        <div class="attachment-item" id="legacy-attachment-item">
+                            <div class="attachment-info">
+                                <i class="bi bi-file-pdf text-danger"></i>
+                                <span class="attachment-name">${legacyAttachment}</span>
+                                <span class="badge bg-secondary">Legacy</span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLegacyAttachment()">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                // Multiple attachments
+                attachments.forEach(att => {
+                    html += `
+                        <div class="attachment-item" id="attachment-item-${att.id}">
+                            <div class="attachment-info">
+                                <i class="bi bi-file-pdf text-danger"></i>
+                                <span class="attachment-name">${att.file_name}</span>
+                                <span class="badge bg-secondary">${att.file_size}</span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAttachmentForDeletion(${att.id})">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                attachmentsList.innerHTML = html;
+                existingSection.style.display = 'block';
+            } else {
+                attachmentsList.innerHTML = '<p class="text-muted small mb-0">No attachments</p>';
+                existingSection.style.display = 'block';
+            }
+
+            // Show modal
+            new bootstrap.Modal(document.getElementById('editGuideModal')).show();
+        });
+    });
+
+    // File input handlers
+    setupFileInput('create_attachments', 'createFilesPreview', 'createFilesList');
+    setupFileInput('edit_attachments', 'editFilesPreview', 'editFilesList');
 });
+
+// Setup file input preview
+function setupFileInput(inputId, previewId, listId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    const list = document.getElementById(listId);
+    
+    if (!input) return;
+    
+    input.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            let hasError = false;
+            
+            for (const file of this.files) {
+                if (file.size > maxSize) {
+                    window.notify.error(`File Too Large: "${file.name}" exceeds 10MB limit.`);
+                    hasError = true;
+                    break;
+                }
+            }
+            
+            if (hasError) {
+                this.value = '';
+                preview.classList.add('d-none');
+                return;
+            }
+            
+            if (this.files.length > 10) {
+                window.notify.error('Too Many Files: Maximum 10 files allowed.');
+                this.value = '';
+                preview.classList.add('d-none');
+                return;
+            }
+            
+            list.innerHTML = '';
+            for (const file of this.files) {
+                const div = document.createElement('div');
+                div.className = 'd-flex align-items-center py-1 border-bottom';
+                div.innerHTML = `
+                    <i class="bi bi-file-pdf text-danger me-2"></i>
+                    <span class="small flex-grow-1 text-truncate">${file.name}</span>
+                    <span class="badge bg-secondary ms-2">${formatFileSize(file.size)}</span>
+                `;
+                list.appendChild(div);
+            }
+            
+            preview.classList.remove('d-none');
+        } else {
+            preview.classList.add('d-none');
+        }
+    });
+}
+
+// Toggle all role checkboxes
+function toggleAllRoles(prefix, checked) {
+    document.querySelectorAll(`#${prefix}GuideModal input[name="visible_roles[]"]`).forEach(cb => {
+        cb.checked = checked;
+    });
+}
+
+// Clear selected files
+function clearFiles(prefix) {
+    const input = document.getElementById(`${prefix}_attachments`);
+    const preview = document.getElementById(`${prefix}FilesPreview`);
+    
+    if (input) input.value = '';
+    if (preview) preview.classList.add('d-none');
+}
+
+// Remove legacy attachment (mark for deletion)
+function removeLegacyAttachment() {
+    document.getElementById('edit_remove_attachment').value = '1';
+    const item = document.getElementById('legacy-attachment-item');
+    if (item) {
+        item.style.opacity = '0.5';
+        item.style.textDecoration = 'line-through';
+        item.querySelector('button').disabled = true;
+    }
+}
+
+// Mark attachment for deletion (for AJAX delete or hidden input approach)
+let attachmentsToDelete = [];
+function markAttachmentForDeletion(attachmentId) {
+    attachmentsToDelete.push(attachmentId);
+    
+    // Add hidden input to form
+    const form = document.getElementById('editGuideForm');
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'delete_attachments[]';
+    input.value = attachmentId;
+    form.appendChild(input);
+    
+    // Visual feedback
+    const item = document.getElementById(`attachment-item-${attachmentId}`);
+    if (item) {
+        item.style.opacity = '0.5';
+        item.style.textDecoration = 'line-through';
+        item.querySelector('button').disabled = true;
+    }
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
 </script>
 @endpush

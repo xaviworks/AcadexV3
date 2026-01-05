@@ -148,6 +148,8 @@ class HelpGuideController extends Controller
             'attachments' => 'nullable|array|max:10',
             'attachments.*' => 'file|max:10240|mimes:pdf',
             'remove_attachment' => 'boolean',
+            'delete_attachments' => 'nullable|array',
+            'delete_attachments.*' => 'integer|exists:help_guide_attachments,id',
         ], [
             'visible_roles.required' => 'Please select at least one role that can view this guide.',
             'visible_roles.min' => 'Please select at least one role that can view this guide.',
@@ -157,9 +159,20 @@ class HelpGuideController extends Controller
             'attachments.*.mimes' => 'Only PDF files are allowed.',
         ]);
 
-        // Handle attachment removal
+        // Handle legacy attachment removal
         if ($request->boolean('remove_attachment')) {
             $helpGuide->deleteAttachment();
+        }
+
+        // Handle multiple attachment deletions
+        if ($request->has('delete_attachments')) {
+            foreach ($request->input('delete_attachments') as $attachmentId) {
+                $attachment = $helpGuide->attachments()->find($attachmentId);
+                if ($attachment) {
+                    Storage::disk('public')->delete($attachment->file_path);
+                    $attachment->delete();
+                }
+            }
         }
 
         // Handle new attachment upload
