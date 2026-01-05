@@ -13,7 +13,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-<body class="bg-[#EAF8E7] text-gray-900 dark:text-white">
+<body style="background-color: #EAF8E7;" class="text-gray-900 dark:text-white">
     <main class="min-h-screen flex items-center justify-center p-4">
         @yield('content')
     </main>
