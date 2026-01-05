@@ -32,43 +32,81 @@
             // Dashboard tutorial - COMPREHENSIVE
             'admin-dashboard': {
                 title: 'Admin Dashboard Overview',
-                description: 'Learn how to monitor system activity, user statistics, and login patterns',
+                description: 'Learn how to monitor system activity, user statistics, login patterns, and security metrics',
                 steps: [
                     {
-                        target: '.hover-lift:first-child',
+                        target: '.container-fluid h2, .fw-bold.text-dark',
+                        title: 'Admin Control Panel',
+                        content: 'Welcome to the Admin Control Panel! This is your central hub for monitoring system health, user activity, and security metrics. The dashboard provides real-time insights into how users interact with Acadex.',
+                        position: 'bottom'
+                    },
+                    {
+                        target: '.hover-lift:first-child, .col-md-3:first-child .card',
                         title: 'Total Users Card',
-                        content: 'This card shows the total number of registered users in the system. The number updates in real-time as users are added or removed.',
+                        content: 'This card displays the total number of registered accounts in the system, including Instructors, Chairpersons, Deans, GE Coordinators, VPAA, and Admins. Use this to track overall system adoption.',
                         position: 'bottom'
                     },
                     {
-                        target: '.hover-lift:nth-child(2)',
+                        target: '.hover-lift:nth-child(2), .col-md-3:nth-child(2) .card',
                         title: 'Successful Logins Today',
-                        content: 'Monitor how many successful logins occurred today. This helps you understand daily system usage and peak activity periods.',
+                        content: 'Shows the count of successful login attempts for the current day. A healthy system should show consistent daily logins. Sudden drops may indicate technical issues or user problems.',
                         position: 'bottom'
                     },
                     {
-                        target: '.hover-lift:nth-child(3)',
+                        target: '.hover-lift:nth-child(3), .col-md-3:nth-child(3) .card',
                         title: 'Failed Login Attempts',
-                        content: 'Track failed login attempts today. High numbers may indicate brute-force attacks, forgotten passwords, or security concerns that need attention.',
+                        content: 'SECURITY METRIC: Tracks failed login attempts today. Monitor this closely - sudden spikes could indicate: brute-force attacks, credential stuffing, or users having password issues. Consider enabling account lockouts if this is consistently high.',
                         position: 'bottom'
                     },
                     {
-                        target: '.table-responsive',
-                        title: 'Hourly Login Activity Table',
-                        content: 'This table shows login activity broken down by hour. Highlighted rows indicate peak usage hours. Use this to plan maintenance windows during low-activity periods.',
-                        position: 'top'
+                        target: '.hover-lift:nth-child(4), .col-md-3:nth-child(4) .card',
+                        title: 'Active Users Percentage',
+                        content: 'Shows what percentage of registered users logged in today. This engagement metric helps you understand system utilization. Low percentages during academic periods may warrant investigation.',
+                        position: 'bottom'
                     },
                     {
-                        target: 'select[name="year"]',
-                        title: 'Year Filter',
-                        content: 'Use this dropdown to view monthly login statistics for different years. This helps track long-term usage trends and compare activity across academic years.',
+                        target: '.col-lg-8 .card, .card:has(.bi-graph-up)',
+                        title: 'Hourly Login Activity Panel',
+                        content: 'This detailed table breaks down login activity by hour. It shows successful logins (green badges), failed attempts (red badges), and success rate with visual progress bars. Use this to identify peak usage times.',
+                        position: 'bottom'
+                    },
+                    {
+                        target: '.table-responsive table thead',
+                        title: 'Activity Table Headers',
+                        content: 'The table columns show: Hour (12 AM to 11 PM), Successful Logins count, Failed Attempts count, and Success Rate percentage. Each row represents one hour of the selected day.',
+                        position: 'bottom'
+                    },
+                    {
+                        target: '.table-active, .table-responsive tbody tr:first-child',
+                        title: 'Peak Activity Hours',
+                        content: 'Highlighted rows (with subtle background) indicate peak activity hours - the times with highest total login attempts. Plan system maintenance and updates during off-peak hours to minimize user disruption.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.progress-bar, .progress',
+                        title: 'Success Rate Indicators',
+                        content: 'Visual progress bars show the success rate for each time period. Colors indicate health: Green (90%+) = Excellent, Blue (70-89%) = Good, Yellow (50-69%) = Needs attention, Red (<50%) = Investigate immediately.',
+                        position: 'left',
+                        optional: true
+                    },
+                    {
+                        target: '.col-lg-4 .card, .card:has(.bi-calendar-check)',
+                        title: 'Monthly Overview Panel',
+                        content: 'This panel shows login trends across the entire year. Compare month-over-month activity to identify seasonal patterns, such as increased usage during enrollment periods or reduced activity during breaks.',
                         position: 'left'
                     },
                     {
-                        target: 'canvas, .chart-container',
-                        title: 'Login Trends Chart',
-                        content: 'The chart visualizes login patterns over time. Hover over data points to see exact numbers for each month.',
-                        position: 'top',
+                        target: 'select[name="year"]',
+                        title: 'Year Selection Filter',
+                        content: 'Use this dropdown to view statistics from previous years. Compare year-over-year trends to track system growth and identify long-term patterns in user engagement.',
+                        position: 'left'
+                    },
+                    {
+                        target: '.col-lg-4 .bg-light, .col-lg-4 .mb-3:first-of-type',
+                        title: 'Monthly Statistics Display',
+                        content: 'Each month shows: successful logins (green badge), failed attempts (red badge), and a progress bar indicating success rate. Highlighted months indicate highest activity periods.',
+                        position: 'left',
                         optional: true
                     }
                 ]
@@ -572,62 +610,153 @@
             // Grades Formula - Wildcards (Main) tutorial - COMPREHENSIVE
             'admin-grades-formula': {
                 title: 'Grades Formula Management',
-                description: 'Learn how to configure grading scales, formulas, and structure templates at all levels',
+                description: 'Learn how to configure grading scales, structure templates, global formulas, and department baselines',
                 steps: [
+                    {
+                        target: '.container-fluid h1, .h3.text-dark.fw-bold',
+                        title: 'Grades Formula Management',
+                        content: 'Welcome to the Grades Formula Management system! This is the central hub for configuring how student grades are calculated across the entire institution. You can set up structure templates, global formulas, and department-specific baselines.',
+                        position: 'bottom'
+                    },
                     {
                         target: 'select[name="academic_period_id"]',
                         title: 'Academic Period Filter',
-                        content: 'Filter formulas by academic period. Select "All Periods" to see global formulas or choose a specific semester.',
+                        content: 'Filter formulas by academic period. Select "All Periods" to view global formulas that apply across all semesters, or choose a specific period to see period-specific configurations.',
                         position: 'bottom'
                     },
                     {
-                        target: '.wildcard-section-btn[data-section-target="overview"], button:contains("Overview")',
-                        title: 'Overview Tab',
-                        content: 'The Overview shows all departments as "wildcard" cards. Each card represents a department\'s formula status. Click any card to drill down.',
-                        position: 'bottom'
-                    },
-                    {
-                        target: '.wildcard-section-btn[data-section-target="formulas"], button:contains("Formulas")',
-                        title: 'Structure Formulas Tab',
-                        content: 'View and manage structure templates here. Create new templates, edit existing ones, or delete unused formulas.',
-                        position: 'bottom'
-                    },
-                    {
-                        target: '.bg-success.bg-opacity-10, .card-body .badge',
+                        target: '.bg-gradient-green-card, .card.bg-gradient-green-card',
                         title: 'Wildcard Summary Card',
-                        content: 'This summary shows: Total departments, how many have custom catalog formulas, and how many use the system baseline.',
+                        content: 'This summary shows the overall formula status: total departments, how many have custom formula catalogs, and how many use the system baseline. Use this as a quick health check for your grading configurations.',
+                        position: 'bottom'
+                    },
+                    {
+                        target: '.wildcard-section-btn[data-section-target="overview"]',
+                        title: 'Overview Tab',
+                        content: 'The Overview tab displays all departments as "wildcard" cards. Each card represents a department and shows its formula status: whether it has a custom baseline or uses the global default. Click any department to drill down into its course and subject formulas.',
+                        position: 'bottom'
+                    },
+                    {
+                        target: '.wildcard-section-btn[data-section-target="formulas"]',
+                        title: 'Formulas Tab',
+                        content: 'The Formulas tab is where you manage: 1) Structure Templates (reusable grading blueprints), 2) Global Formulas (department-independent formulas), and 3) Department Baselines. This is your primary configuration workspace.',
+                        position: 'bottom'
+                    },
+                    {
+                        target: 'form select[name="semester"]',
+                        title: 'Semester Filter',
+                        content: 'Further filter the department view by semester: 1st, 2nd, or Summer. This helps focus on specific periods when managing large numbers of courses.',
                         position: 'bottom',
                         optional: true
                     },
                     {
-                        target: '.wildcard-filter-btn[data-filter="all"]',
-                        title: 'Filter All',
-                        content: 'Show all department wildcards regardless of their formula status.',
-                        position: 'bottom'
+                        target: '#overview-department-grid .wildcard-card:first-of-type, .wildcard-card:first-of-type',
+                        title: 'Department Wildcard Card',
+                        content: 'Each card represents a department. The code appears in the circle, description below. Badge colors indicate status: Green checkmark = has custom baseline, Gray = using global default. Yellow/Red warnings show courses or subjects needing configuration.',
+                        position: 'bottom',
+                        optional: true
                     },
                     {
-                        target: '.wildcard-filter-btn[data-filter="custom"]',
-                        title: 'Filter Custom Formulas',
-                        content: 'Show only departments that have custom formula catalogs defined.',
-                        position: 'bottom'
+                        target: '.badge.bg-success.text-white.px-3',
+                        title: 'Baseline Status Badge',
+                        content: 'This badge shows the current baseline formula being used. When departments don\'t have custom formulas, they inherit from the global baseline, ensuring all courses have a valid grading configuration.',
+                        position: 'left',
+                        optional: true
                     },
                     {
-                        target: '.wildcard-filter-btn[data-filter="default"]',
-                        title: 'Filter Default/Baseline',
-                        content: 'Show only departments using the system default formula (no customization).',
-                        position: 'bottom'
-                    },
-                    {
-                        target: '.wildcard-card, .department-card',
-                        title: 'Department Card',
-                        content: 'Click any department card to enter that department and manage its course and subject formulas. The badge shows if it has custom formulas.',
+                        target: '.badge.bg-warning',
+                        title: 'Pending Configuration Warnings',
+                        content: 'Yellow or red warning badges indicate courses or subjects that need formula configuration. Address these to ensure all grades can be calculated correctly.',
                         position: 'bottom',
                         optional: true
                     },
                     {
                         target: 'a[href*="structure-template-requests"]',
-                        title: 'View Requests',
-                        content: 'Chairpersons can submit formula requests. Click here to review pending submissions and approve or reject them.',
+                        title: 'Formula Requests Link',
+                        content: 'Chairpersons can submit formula template requests for approval. Click here to review pending submissions. Approved templates become available system-wide.',
+                        position: 'left',
+                        optional: true
+                    }
+                ]
+            },
+            
+            // Grades Formula - Formulas Section tutorial - COMPREHENSIVE
+            'admin-grades-formula-formulas': {
+                title: 'Formula Templates & Global Formulas',
+                description: 'Learn how to create and manage structure templates, global formulas, and department baselines',
+                steps: [
+                    {
+                        target: '#open-create-template',
+                        title: 'Create Structure Template',
+                        content: 'Structure Templates are reusable grading blueprints. Create templates for common course types like "Lecture Only" (theory courses) or "Lecture + Lab" (courses with practical components). Templates define the activity types and their weight distribution.',
+                        position: 'left'
+                    },
+                    {
+                        target: 'button[data-bs-target="#create-formula-modal"]',
+                        title: 'Create Global Formula',
+                        content: 'Global Formulas are department-independent configurations that can be applied across the entire institution. They use a structure template as their base and can be period-specific or apply to all periods.',
+                        position: 'left'
+                    },
+                    {
+                        target: '.structure-card:first-of-type, .card:has(.badge.bg-success-subtle)',
+                        title: 'Structure Template Card',
+                        content: 'Each template card shows: Name, Description, and Activity Weights as colored badges. Blue badges represent composite components (like Lecture or Lab sections), green badges show individual activities (Quiz, Exam, etc.) with their percentages.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.structure-card .badge.bg-primary, .badge.bg-primary.text-white',
+                        title: 'Composite Components',
+                        content: 'Blue badges indicate COMPOSITE components - these are major grade sections like "Lecture Component 60%" or "Lab Component 40%". They contain sub-activities whose percentages are relative to their parent component.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.structure-card .badge.bg-success-subtle, .badge:has(.bi-arrow-return-right)',
+                        title: 'Sub-Activities',
+                        content: 'Green badges with arrows are SUB-ACTIVITIES under a composite component. For example, under "Lecture Component 60%", you might have "Quizzes 40%" and "Exams 60%" - these percentages are relative to the Lecture Component, not the total grade.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.structure-card .btn-outline-secondary',
+                        title: 'Edit Template',
+                        content: 'Click Edit to modify an existing template\'s structure, weights, or description. Changes affect how the template appears when creating new formulas, but don\'t automatically update existing formulas.',
+                        position: 'left',
+                        optional: true
+                    },
+                    {
+                        target: '.js-delete-structure-template, .btn-outline-danger:has(.bi-trash)',
+                        title: 'Delete Template',
+                        content: 'Remove a structure template that\'s no longer needed. Note: Templates in use by existing formulas may have restrictions on deletion to maintain data integrity.',
+                        position: 'left',
+                        optional: true
+                    },
+                    {
+                        target: '.formula-card.border-info:first-of-type, .card:has(.bi-globe2)',
+                        title: 'Global Formula Card',
+                        content: 'Global Formula cards show: Formula name, scope (which periods it applies to), and hierarchical weight badges. These formulas can be applied to any course regardless of department.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.badge.bg-info-subtle.text-info',
+                        title: 'Department-Independent Badge',
+                        content: 'This badge indicates the formula is global and not tied to any specific department. It can be used by any instructor when configuring their subject grades.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.formula-card[data-department-id], .card:has(.badge.bg-success.fw-semibold)',
+                        title: 'Department Baseline Card',
+                        content: 'Department Baseline cards show each department\'s default formula configuration. If a department has a custom baseline (green border), courses in that department inherit it. Otherwise, they use the global formula.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: 'a.btn-outline-success[href*="edit.department"]',
+                        title: 'Configure Department Baseline',
+                        content: 'Click to set up or modify a department\'s baseline formula. This formula becomes the default for all courses and subjects in that department unless they have their own custom configuration.',
                         position: 'left',
                         optional: true
                     }
@@ -664,7 +793,7 @@
                         position: 'bottom'
                     },
                     {
-                        target: '.badge.bg-success, .badge:contains("Baseline")',
+                        target: '.badge.bg-success',
                         title: 'Current Baseline Formula',
                         content: 'This badge shows which formula is the current baseline for this department. All courses inherit this unless they have custom formulas.',
                         position: 'left',
@@ -689,7 +818,7 @@
                         position: 'bottom'
                     },
                     {
-                        target: 'a[href*="formulas.create"], .btn:contains("Create Catalog")',
+                        target: 'a[href*="formulas.create"]',
                         title: 'Create Catalog Formula',
                         content: 'Add a new formula to the department catalog. These templates can be selected by instructors when setting up their subjects.',
                         position: 'left',
@@ -755,7 +884,7 @@
                         position: 'bottom'
                     },
                     {
-                        target: '.badge:contains("Fallback"), .fw-semibold:contains("Fallback")',
+                        target: '.alert-info',
                         title: 'Active Fallback Information',
                         content: 'Shows which formula subjects will use if they don\'t have a custom one: Course Formula (if set) or Department Baseline.',
                         position: 'left',
@@ -821,7 +950,7 @@
                         optional: true
                     },
                     {
-                        target: '.card:contains("Formula Details"), .formula-details-card',
+                        target: '.card.border-0.shadow-sm',
                         title: 'Formula Details',
                         content: 'Shows complete formula configuration: Base Score, Scale Multiplier, Passing Grade, and all activity type weights.',
                         position: 'bottom',
@@ -834,14 +963,14 @@
                         position: 'top'
                     },
                     {
-                        target: 'button[type="submit"]:contains("Apply"), .btn:contains("Apply Formula")',
+                        target: 'button[type="submit"].btn-primary',
                         title: 'Apply Selected Formula',
                         content: 'Click to apply the selected catalog formula to this subject. Previous settings will be replaced.',
                         position: 'left',
                         optional: true
                     },
                     {
-                        target: '.badge:contains("Source"), .formula-source',
+                        target: '.badge.bg-info',
                         title: 'Formula Source',
                         content: 'Shows where the current formula comes from: Subject-level (custom), Course-level, or Department-level.',
                         position: 'bottom',
@@ -869,7 +998,7 @@
                         optional: true
                     },
                     {
-                        target: '.card-header:contains("Weight"), .weight-section',
+                        target: '.card-header',
                         title: 'Weight Distribution Section',
                         content: 'Configure how different activity types contribute to the final grade. All weights must sum to 100%.',
                         position: 'bottom'
@@ -882,7 +1011,7 @@
                         optional: true
                     },
                     {
-                        target: '.weight-total, .badge:contains("Total")',
+                        target: '.badge.bg-primary',
                         title: 'Weight Total Indicator',
                         content: 'The total shows the sum of all weights. Must equal exactly 100% before you can save.',
                         position: 'bottom',
@@ -914,13 +1043,13 @@
                         optional: true
                     },
                     {
-                        target: 'button[type="submit"].btn-success, .btn:contains("Save")',
+                        target: 'button[type="submit"].btn-success',
                         title: 'Save Formula',
                         content: 'Click to save your formula. Changes apply immediately to all subjects using this formula.',
                         position: 'top'
                     },
                     {
-                        target: '.btn-outline-secondary, a:contains("Cancel")',
+                        target: '.btn-outline-secondary',
                         title: 'Cancel Changes',
                         content: 'Discard your changes and return to the previous page without saving.',
                         position: 'top',
@@ -931,78 +1060,116 @@
             
             // Structure Template Requests tutorial - COMPREHENSIVE
             'admin-structure-template-requests': {
-                title: 'Formula Request Review',
-                description: 'Learn how to review, approve, and reject chairperson formula submissions',
+                title: 'Formula Template Request Review',
+                description: 'Learn how to review, approve, and reject chairperson formula template submissions',
                 steps: [
                     {
-                        target: 'a[href*="status=all"], .btn:contains("All Requests")',
+                        target: '.container-fluid h1, .h3.text-dark.fw-bold',
+                        title: 'Structure Formula Requests',
+                        content: 'Welcome to the Formula Request Review system! Chairpersons can submit custom formula templates for their departments. As an admin, you review these submissions and decide whether to approve them for system-wide use or request modifications.',
+                        position: 'bottom'
+                    },
+                    {
+                        target: 'a[href*="gradesFormula"][href*="formulas"], .btn-outline-secondary',
+                        title: 'Back to Grades Formula',
+                        content: 'Click here to return to the main Grades Formula Management page where you can manage structure templates and formulas.',
+                        position: 'left'
+                    },
+                    {
+                        target: 'a[href*="status=all"]',
                         title: 'All Requests Filter',
-                        content: 'View all formula requests regardless of status. Gives you a complete picture of submission history.',
+                        content: 'View the complete history of all formula requests regardless of their status. This gives you a full audit trail of submissions from all chairpersons.',
                         position: 'bottom'
                     },
                     {
-                        target: 'a[href*="status=pending"], .btn-warning',
-                        title: 'Pending Requests',
-                        content: 'Filter to see only pending requests awaiting your review. The badge shows how many need attention.',
+                        target: 'a[href*="status=pending"]',
+                        title: 'Pending Requests Filter',
+                        content: 'PRIORITY VIEW: Filter to see only pending requests awaiting your review. The badge shows how many requests need your attention. Process these promptly to avoid blocking chairpersons.',
                         position: 'bottom'
                     },
                     {
-                        target: 'a[href*="status=approved"], .btn:contains("Approved")',
-                        title: 'Approved Requests',
-                        content: 'View previously approved formulas. These are now available system-wide for chairpersons to use.',
+                        target: 'a[href*="status=approved"]',
+                        title: 'Approved Requests Filter',
+                        content: 'View previously approved formula templates. These templates are now part of the system catalog and can be used by chairpersons and instructors when configuring their courses.',
                         position: 'bottom'
                     },
                     {
-                        target: 'a[href*="status=rejected"], .btn:contains("Rejected")',
-                        title: 'Rejected Requests',
-                        content: 'View rejected submissions with admin notes explaining why they were declined.',
+                        target: 'a[href*="status=rejected"]',
+                        title: 'Rejected Requests Filter',
+                        content: 'View declined submissions with your admin notes explaining why. Chairpersons can review your feedback and submit revised requests addressing your concerns.',
                         position: 'bottom'
                     },
                     {
-                        target: 'table thead',
+                        target: 'table.table-hover thead, .table thead',
                         title: 'Request Details Table',
-                        content: 'Each request shows: Template Name, Submitter (chairperson), Structure Type (Lecture Only, Lecture+Lab, Custom), Status, and Submission Date.',
+                        content: 'The table displays comprehensive request information: Template Name (what the chairperson named it), Submitted By (chairperson details), Structure Type (Lecture Only, Lecture+Lab, or Custom), Current Status, Submission Date, and Available Actions.',
                         position: 'bottom'
                     },
                     {
-                        target: '.badge.bg-info, .badge:contains("Lecture")',
-                        title: 'Structure Type',
-                        content: 'The structure type indicates: Lecture Only (theory courses), Lecture + Lab (with practical component), or Custom (special configuration).',
+                        target: 'table tbody tr:first-child td:first-child, .fw-bold:first-of-type',
+                        title: 'Template Name Column',
+                        content: 'Shows the template\'s label and optional description. The name should clearly indicate the template\'s purpose (e.g., "Nursing Clinical Rotation Formula" or "Laboratory-Heavy Science Course").',
                         position: 'bottom',
                         optional: true
                     },
                     {
-                        target: '.btn-info, button:contains("View")',
+                        target: 'table tbody tr:first-child td:nth-child(2), td:has(.text-muted)',
+                        title: 'Submitter Information',
+                        content: 'Shows which chairperson submitted the request, including their name and email. This helps you contact them if you need clarification before making a decision.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.badge.bg-info',
+                        title: 'Structure Type Badge',
+                        content: 'Indicates the template\'s structure type: LECTURE ONLY (theory-based courses with activities like quizzes, exams, assignments), LECTURE + LAB (courses with both theoretical and practical components), or CUSTOM (unique configurations for specialized courses).',
+                        position: 'bottom'
+                    },
+                    {
+                        target: '.badge.bg-warning',
+                        title: 'Status Badge',
+                        content: 'Color-coded status indicators: Yellow/Clock = Pending (needs review), Green/Checkmark = Approved (in system), Red/X = Rejected (declined with feedback). Status changes are immediate upon your action.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.btn-info',
                         title: 'View Request Details',
-                        content: 'Click View to see the complete formula structure including all weights, parameters, and the chairperson\'s notes.',
-                        position: 'left',
-                        optional: true
+                        content: 'Click View to open a detailed modal showing the complete formula configuration: all activity types, weight distributions, any composite components (like Lecture/Lab sections), and the chairperson\'s notes explaining their requirements.',
+                        position: 'left'
                     },
                     {
-                        target: '.btn-success.btn-sm, button:contains("Approve")',
+                        target: '.btn-success.btn-sm',
                         title: 'Approve Request',
-                        content: 'Approve the formula to make it available system-wide. The formula becomes part of the global template catalog.',
+                        content: 'Approve the template to add it to the global structure catalog. Once approved: 1) The chairperson is notified, 2) The template becomes available system-wide, 3) Any instructor can use it when configuring their subjects. Add optional notes to provide feedback.',
                         position: 'left',
                         optional: true
                     },
                     {
-                        target: '.btn-danger.btn-sm, button:contains("Reject")',
+                        target: '.btn-danger.btn-sm',
                         title: 'Reject Request',
-                        content: 'Reject with notes explaining why. The chairperson will see your feedback and can submit a revised request.',
+                        content: 'Decline the request with a REQUIRED explanation. Your feedback should be constructive: explain what\'s wrong (e.g., "weights don\'t sum to 100%", "missing required activity types") and suggest how to fix it. The chairperson can then submit a revised request.',
                         position: 'left',
                         optional: true
                     },
                     {
                         target: '#viewRequestModal, .modal-content',
                         title: 'Request Details Modal',
-                        content: 'The modal shows complete formula details: all activity weights, scaling parameters, passing grade, and chairperson description.',
+                        content: 'The modal displays the complete formula structure: label, description, structure type, all component weights, and any hierarchical relationships (composite components with sub-activities). Review this carefully before approving.',
                         position: 'center',
                         optional: true
                     },
                     {
-                        target: 'textarea[name="admin_notes"], input[name="admin_notes"]',
-                        title: 'Admin Notes',
-                        content: 'When approving or rejecting, add notes to communicate with the chairperson about your decision.',
+                        target: 'textarea[name="admin_notes"], #approveAdminNotes, #rejectAdminNotes',
+                        title: 'Admin Notes Field',
+                        content: 'Add notes when approving or rejecting. For approvals: acknowledge good work or note any limitations. For rejections: REQUIRED - clearly explain issues and provide actionable guidance for resubmission.',
+                        position: 'bottom',
+                        optional: true
+                    },
+                    {
+                        target: '.alert.alert-success, .alert.alert-danger',
+                        title: 'Action Confirmation',
+                        content: 'When approving/rejecting, you\'ll see confirmation messages explaining the consequences. Approvals create new system-wide templates immediately. Rejections notify the chairperson with your feedback.',
                         position: 'bottom',
                         optional: true
                     }
@@ -1099,8 +1266,16 @@
                 return 'admin-grades-formula-select';
             }
             
-            // Grades Formula - Main wildcards page
+            // Grades Formula - Formulas section (check for view=formulas or active formulas tab)
             if (path.includes('/admin/grades-formula')) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const viewParam = urlParams.get('view');
+                const formulasSection = document.querySelector('[data-section="formulas"]:not(.d-none)');
+                const formulasTabActive = document.querySelector('.wildcard-section-btn[data-section-target="formulas"].active');
+                
+                if (viewParam === 'formulas' || formulasSection || formulasTabActive) {
+                    return 'admin-grades-formula-formulas';
+                }
                 return 'admin-grades-formula';
             }
             
