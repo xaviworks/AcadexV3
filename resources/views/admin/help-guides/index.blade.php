@@ -5,8 +5,8 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-question-circle-fill text-success me-2"></i>Help Guides</h1>
-            <p class="text-muted mb-0">Manage help guides for different user roles</p>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-question-circle-fill text-success me-2"></i>Manage Guides</h1>
+            <p class="text-muted mb-0">Create and manage help guides for different user roles</p>
         </div>
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createGuideModal">
             <i class="bi bi-plus-lg me-1"></i> Create Guide
@@ -28,6 +28,16 @@
             });
         </script>
     @endif
+
+    {{-- Search Box --}}
+    <div class="mb-3">
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" id="guidesSearch" class="form-control border-start-0 ps-0" placeholder="Search guides...">
+        </div>
+    </div>
 
     {{-- Guides Table --}}
     <div class="card shadow-sm">
@@ -137,14 +147,14 @@
     </div>
 
     {{-- Info Card --}}
-    <div class="card mt-4 border-info">
-        <div class="card-body">
-            <h6 class="card-title text-info"><i class="bi bi-info-circle me-2"></i>About Help Guides</h6>
-            <ul class="mb-0 small text-muted">
-                <li>Help guides are displayed to users based on their assigned roles.</li>
-                <li>You can attach documents (PDF, Word, Excel, images) to provide additional resources.</li>
-                <li>Inactive guides will not be visible to users but remain in the system.</li>
-                <li>Sort order determines the display sequence for users.</li>
+    <div class="card mt-4 shadow-sm border-0" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
+        <div class="card-body py-3">
+            <h6 class="fw-bold text-success mb-2"><i class="bi bi-lightbulb me-2"></i>Quick Tips</h6>
+            <ul class="mb-0 small text-muted ps-3">
+                <li>Guides are displayed to users based on their assigned roles.</li>
+                <li>Attach documents (PDF, Word, Excel, images) for additional resources.</li>
+                <li>Use priority to control the display order for users.</li>
+                <li>Hidden guides remain in the system but are not visible to users.</li>
             </ul>
         </div>
     </div>
@@ -662,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize DataTable
     if ($.fn.DataTable && $('#guidesTable').length) {
-        $('#guidesTable').DataTable({
+        const guidesTable = $('#guidesTable').DataTable({
             paging: true,
             pageLength: 10,
             lengthChange: false,
@@ -672,11 +682,14 @@ document.addEventListener('DOMContentLoaded', function() {
             autoWidth: false,
             scrollX: true,
             language: {
-                emptyTable: "No help guides found",
-                search: "_INPUT_",
-                searchPlaceholder: "Search guides..."
+                emptyTable: "No help guides found"
             },
-            dom: '<"d-flex justify-content-between align-items-center mb-3 px-3 pt-3"<"search-box"f>>rt<"d-flex justify-content-between align-items-center mt-3 px-3 pb-3"ip>'
+            dom: 'rt<"d-flex justify-content-between align-items-center mt-3 px-3 pb-3"ip>'
+        });
+
+        // Connect custom search box to DataTable
+        $('#guidesSearch').on('keyup', function() {
+            guidesTable.search(this.value).draw();
         });
     }
 
