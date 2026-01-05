@@ -167,23 +167,6 @@
         </div>
     @endif
 
-    {{-- Need More Help Card --}}
-    <div class="card mt-4 border-0 bg-gradient" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);">
-        <div class="card-body py-4">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    <div class="rounded-circle bg-success bg-opacity-25 p-3">
-                        <i class="bi bi-headset text-success fs-3"></i>
-                    </div>
-                </div>
-                <div class="col">
-                    <h5 class="fw-bold mb-1 text-success">Need More Help?</h5>
-                    <p class="mb-0 text-muted">If you can't find what you're looking for, contact your system administrator for assistance.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- Full PDF Viewer Modal --}}
     <div class="modal fade" id="pdfViewerModal" tabindex="-1" aria-hidden="true" x-ref="pdfModal">
         <div class="modal-dialog modal-fullscreen">
