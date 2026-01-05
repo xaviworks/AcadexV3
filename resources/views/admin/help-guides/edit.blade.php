@@ -56,17 +56,10 @@
                             <label for="content" class="form-label fw-semibold">Content <span class="text-danger">*</span></label>
                             <textarea class="form-control @error('content') is-invalid @enderror" 
                                       id="content" 
-                                      name="content" 
-                                      rows="12" 
-                                      placeholder="Write the help guide content here..."
-                                      required>{{ old('content', $helpGuide->content) }}</textarea>
+                                      name="content">{{ old('content', $helpGuide->content) }}</textarea>
                             @error('content')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>
-                                Tip: Use clear, step-by-step instructions to help users understand the feature.
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -84,21 +77,21 @@
                                 <div class="row g-3" id="existingAttachments">
                                     {{-- Legacy single attachment --}}
                                     @if($helpGuide->attachment_path)
-                                        <div class="col-12">
+                                        <div class="col-12" id="legacy-attachment">
                                             <div class="alert alert-secondary d-flex align-items-center justify-content-between mb-0">
-                                                <div>
-                                                    <i class="bi bi-file-pdf text-danger me-2"></i>
-                                                    <a href="{{ route('admin.help-guides.download', $helpGuide) }}" class="text-decoration-none">
+                                                <div class="d-flex align-items-center overflow-hidden me-3" style="min-width: 0;">
+                                                    <i class="bi bi-file-pdf text-danger me-2 flex-shrink-0"></i>
+                                                    <a href="{{ route('admin.help-guides.download', $helpGuide) }}" class="text-decoration-none text-truncate" style="max-width: 400px;" title="{{ $helpGuide->attachment_name }}">
                                                         {{ $helpGuide->attachment_name }}
                                                     </a>
-                                                    <small class="text-muted ms-2">(Legacy)</small>
+                                                    <small class="text-muted ms-2 flex-shrink-0">(Legacy)</small>
                                                 </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="remove_attachment" value="1" id="removeAttachment">
-                                                    <label class="form-check-label text-danger" for="removeAttachment">
-                                                        Remove
-                                                    </label>
-                                                </div>
+                                                <input type="hidden" name="remove_attachment" id="removeAttachmentInput" value="0">
+                                                <button type="button" 
+                                                        class="btn btn-link text-danger p-0 flex-shrink-0" 
+                                                        onclick="removeLegacyAttachment()">
+                                                    Remove
+                                                </button>
                                             </div>
                                         </div>
                                     @endif
@@ -275,6 +268,7 @@
 @endsection
 
 @push('styles')
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
 <style>
     .form-check-input:checked {
         background-color: #198754;
@@ -283,17 +277,36 @@
     .form-switch .form-check-input:checked {
         background-color: #198754;
     }
-    #content {
-        font-family: inherit;
-        resize: vertical;
-        min-height: 300px;
+    .note-editor.note-frame {
+        border-radius: 0.375rem;
+    }
+    .note-editor .note-toolbar {
+        background-color: #f8f9fa;
     }
 </style>
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Summernote
+    $('#content').summernote({
+        height: 300,
+        placeholder: 'Write the help guide content here...',
+        toolbar: [
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['para', ['ul', 'ol']],
+            ['insert', ['link']],
+            ['view', ['codeview']]
+        ],
+        callbacks: {
+            onChange: function(contents) {
+                $('#content').val(contents);
+            }
+        }
+    });
+
     // Multiple files preview
     const filesInput = document.getElementById('attachments');
     const filesPreview = document.getElementById('filesPreview');
@@ -387,6 +400,27 @@ function deleteAttachment(attachmentId) {
                 console.error('Error:', error);
                 window.notify.error('Failed to delete attachment.');
             });
+        }
+    });
+}
+
+function removeLegacyAttachment() {
+    window.confirm.ask({
+        title: 'Remove Legacy Attachment?',
+        message: 'This attachment will be removed when you save the form.',
+        type: 'warning',
+        confirmText: 'Yes, remove it',
+        cancelText: 'Cancel'
+    }).then((confirmed) => {
+        if (confirmed) {
+            document.getElementById('removeAttachmentInput').value = '1';
+            const el = document.getElementById('legacy-attachment');
+            if (el) {
+                el.style.opacity = '0.5';
+                el.querySelector('button').disabled = true;
+                el.querySelector('button').textContent = 'Will be removed on save';
+            }
+            window.notify.info('Legacy attachment will be removed when you save.');
         }
     });
 }

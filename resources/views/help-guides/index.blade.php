@@ -78,7 +78,7 @@
                     <div class="card-body border-top guide-body" x-show="openGuide === {{ $guide->id }}" x-transition>
                         {{-- Content --}}
                         <div class="guide-content mb-3">
-                            {!! nl2br(e($guide->content)) !!}
+                            {!! $guide->content !!}
                         </div>
                         
                         {{-- Attachments Grid (Multiple PDFs) --}}
@@ -231,7 +231,28 @@
         font-size: 0.95rem;
         line-height: 1.7;
         color: #444;
-        white-space: pre-wrap;
+    }
+    
+    .guide-content p {
+        margin-bottom: 0.75rem;
+    }
+    
+    .guide-content p:last-child {
+        margin-bottom: 0;
+    }
+    
+    .guide-content ul, .guide-content ol {
+        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+    }
+    
+    .guide-content a {
+        color: #198754;
+        text-decoration: underline;
+    }
+    
+    .guide-content a:hover {
+        color: #146c43;
     }
     
     .transition-transform {

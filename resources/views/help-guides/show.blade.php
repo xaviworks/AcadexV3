@@ -30,7 +30,7 @@
                 </div>
                 <div class="card-body">
                     <div class="guide-content">
-                        {!! nl2br(e($helpGuide->content)) !!}
+                        {!! $helpGuide->content !!}
                     </div>
                 </div>
                 <div class="card-footer bg-light">
@@ -161,7 +161,28 @@
         font-size: 1rem;
         line-height: 1.8;
         color: #333;
-        white-space: pre-wrap;
+    }
+    
+    .guide-content p {
+        margin-bottom: 1rem;
+    }
+    
+    .guide-content p:last-child {
+        margin-bottom: 0;
+    }
+    
+    .guide-content ul, .guide-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+    }
+    
+    .guide-content a {
+        color: #198754;
+        text-decoration: underline;
+    }
+    
+    .guide-content a:hover {
+        color: #146c43;
     }
     
     .breadcrumb-item a {
