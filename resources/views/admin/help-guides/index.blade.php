@@ -200,7 +200,7 @@
                     {{-- Title --}}
                     <div class="mb-3">
                         <label for="create_title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="create_title" name="title" placeholder="Enter a descriptive title..." required>
+                        <input type="text" class="form-control" id="create_title" name="title" placeholder="Enter a descriptive title...">
                     </div>
                     
                     {{-- Content --}}
@@ -213,7 +213,7 @@
                         {{-- Visibility --}}
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Visible To <span class="text-danger">*</span></label>
-                            <div class="border rounded p-3 bg-light" style="max-height: 180px; overflow-y: auto;">
+                            <div id="create_roles_container" class="border rounded p-3 bg-light" style="max-height: 180px; overflow-y: auto;">
                                 @foreach($availableRoles as $roleId => $roleName)
                                     <div class="form-check mb-2">
                                         <input class="form-check-input" type="checkbox" name="visible_roles[]" value="{{ $roleId }}" id="create_role_{{ $roleId }}">
@@ -294,7 +294,7 @@
                     {{-- Title --}}
                     <div class="mb-3">
                         <label for="edit_title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="edit_title" name="title" placeholder="Enter a descriptive title..." required>
+                        <input type="text" class="form-control" id="edit_title" name="title" placeholder="Enter a descriptive title...">
                     </div>
                     
                     {{-- Content --}}
@@ -307,7 +307,7 @@
                         {{-- Visibility --}}
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Visible To <span class="text-danger">*</span></label>
-                            <div class="border rounded p-3 bg-light" style="max-height: 180px; overflow-y: auto;">
+                            <div id="edit_roles_container" class="border rounded p-3 bg-light" style="max-height: 180px; overflow-y: auto;">
                                 @foreach($availableRoles as $roleId => $roleName)
                                     <div class="form-check mb-2">
                                         <input class="form-check-input" type="checkbox" name="visible_roles[]" value="{{ $roleId }}" id="edit_role_{{ $roleId }}">
@@ -386,6 +386,11 @@
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
 <style>
+    /* Validation styles for non-input elements */
+    .is-invalid:not(input):not(textarea):not(select) {
+        border-color: #dc3545 !important;
+    }
+    
     /* Help Guides Table Styles - Matching Sessions Table Design */
     
     /* Table wrapper with max height and scroll */
@@ -713,6 +718,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('createGuideForm').reset();
         $('#create_content').summernote('code', '');
         clearFiles('create');
+        clearValidationErrors('create');
     });
 
     // Initialize Summernote for Edit modal when shown
@@ -735,6 +741,85 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('editGuideForm').reset();
         $('#edit_content').summernote('code', '');
         clearFiles('edit');
+        clearValidationErrors('edit');
+    });
+
+    // Form validation function
+    function validateGuideForm(prefix) {
+        let isValid = true;
+        const errors = [];
+        
+        // Clear previous validation errors
+        clearValidationErrors(prefix);
+        
+        // Validate title
+        const titleInput = document.getElementById(`${prefix}_title`);
+        const title = titleInput.value.trim();
+        if (!title) {
+            isValid = false;
+            errors.push('Title is required');
+            titleInput.classList.add('is-invalid');
+        }
+        
+        // Validate content
+        const contentTextarea = document.getElementById(`${prefix}_content`);
+        const content = $(`#${prefix}_content`).summernote('code').replace(/<[^>]*>/g, '').trim();
+        if (!content || content === '') {
+            isValid = false;
+            errors.push('Content is required');
+            const noteEditor = contentTextarea.closest('.mb-3').querySelector('.note-editor');
+            if (noteEditor) {
+                noteEditor.classList.add('is-invalid');
+            }
+        }
+        
+        // Validate visible roles (at least one selected)
+        const visibleRoles = document.querySelectorAll(`#${prefix}GuideModal input[name="visible_roles[]"]:checked`);
+        if (visibleRoles.length === 0) {
+            isValid = false;
+            errors.push('At least one role must be selected');
+            const rolesContainer = document.getElementById(`${prefix}_roles_container`);
+            if (rolesContainer) {
+                rolesContainer.classList.add('is-invalid');
+            }
+        }
+        
+        // Show notification if validation failed
+        if (!isValid) {
+            window.notify.warning('Please fill in all required fields');
+        }
+        
+        return isValid;
+    }
+    
+    // Clear validation errors
+    function clearValidationErrors(prefix) {
+        const modal = document.getElementById(`${prefix}GuideModal`);
+        if (!modal) return;
+        
+        // Remove error messages
+        modal.querySelectorAll('.validation-error').forEach(el => el.remove());
+        
+        // Remove invalid classes
+        modal.querySelectorAll('.is-invalid').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
+    }
+    
+    // Create form submission
+    document.getElementById('createGuideForm').addEventListener('submit', function(e) {
+        if (!validateGuideForm('create')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // Edit form submission
+    document.getElementById('editGuideForm').addEventListener('submit', function(e) {
+        if (!validateGuideForm('edit')) {
+            e.preventDefault();
+            return false;
+        }
     });
 
     // Delete handler
