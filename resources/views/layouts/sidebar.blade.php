@@ -357,6 +357,19 @@
                     </li>
                 </ul>
             </div>
+
+            <div class="sidebar-section">
+                <h6 class="px-3 mb-2 sidebar-heading">Content Management</h6>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a href="{{ route('admin.help-guides.index') }}" 
+                           class="nav-link {{ request()->routeIs('admin.help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-question-circle me-3"></i>
+                            <span>Help Guides</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         @endif
 
         {{-- GE Coordinator --}}
@@ -493,6 +506,22 @@
                            class="nav-link {{ request()->routeIs('vpaa.reports.co-student') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-person-lines-fill me-3"></i>
                             <span>By Student</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        @endif
+
+        {{-- Help Guides (All Users) --}}
+        @if($role !== 3) {{-- Admins have their own management link --}}
+            <div class="sidebar-section">
+                <h6 class="px-3 mb-2 sidebar-heading">Support</h6>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a href="{{ route('help-guides.index') }}" 
+                           class="nav-link {{ request()->routeIs('help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-question-circle me-3"></i>
+                            <span>Help Guides</span>
                         </a>
                     </li>
                 </ul>
