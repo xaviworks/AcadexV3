@@ -39,6 +39,13 @@
 
     {{-- Styles: resources/css/layout/app.css --}}
 
+    <!-- Admin Tutorial System (Admin users only) -->
+    @auth
+        @if(Auth::user()->role === 3)
+            <link rel="stylesheet" href="{{ asset('css/admin-tutorial.css') }}">
+        @endif
+    @endauth
+
     <!-- Additional Page Styles -->
     @stack('styles')
 
@@ -445,6 +452,13 @@
 
     {{-- Confirmation Dialog (Alpine.js) --}}
     @include('components.confirmation-dialog')
+
+    {{-- Admin Tutorial System (Admin users only) --}}
+    @auth
+        @if(Auth::user()->role === 3)
+            <script src="{{ asset('js/admin-tutorial.js') }}" defer></script>
+        @endif
+    @endauth
 
     @stack('scripts')
 </body>
