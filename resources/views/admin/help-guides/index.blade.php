@@ -44,66 +44,77 @@
                     </div>
                 </div>
             @else
-                <div class="table-responsive">
-                    <table id="guidesTable" class="table table-hover mb-0">
+                <div class="table-responsive guides-table-wrapper">
+                    <table id="guidesTable" class="table table-bordered table-hover mb-0">
                         <thead class="table-success">
                             <tr>
-                                <th style="width: 50px;">Order</th>
-                                <th>Title</th>
-                                <th>Visible To</th>
-                                <th class="text-center">Attachment</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Created By</th>
-                                <th class="text-center">Updated</th>
-                                <th class="text-center" style="width: 150px;">Actions</th>
+                                <th class="text-center" style="min-width: 100px;">Priority</th>
+                                <th style="min-width: 250px;">Title</th>
+                                <th class="text-center" style="min-width: 180px;">Visible To</th>
+                                <th class="text-center" style="min-width: 120px;">Status</th>
+                                <th class="text-center" style="min-width: 150px;">Created By</th>
+                                <th class="text-center" style="min-width: 140px;">Updated</th>
+                                <th class="text-center" style="min-width: 120px;">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="sortable-guides">
+                        <tbody>
                             @foreach($guides as $guide)
-                                <tr data-id="{{ $guide->id }}">
+                                <tr>
                                     <td class="text-center">
-                                        <span class="badge bg-secondary">{{ $guide->sort_order }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold">{{ $guide->title }}</div>
-                                        <small class="text-muted">{{ Str::limit(strip_tags($guide->content), 60) }}</small>
-                                    </td>
-                                    <td>
-                                        @foreach($guide->visible_role_labels as $role)
-                                            <span class="badge bg-info bg-opacity-10 text-info me-1">{{ $role }}</span>
-                                        @endforeach
-                                    </td>
-                                    <td class="text-center">
-                                        @if($guide->hasAttachment())
-                                            <a href="{{ route('admin.help-guides.download', $guide) }}" class="btn btn-sm btn-outline-primary" title="Download {{ $guide->attachment_name }}">
-                                                <i class="bi bi-paperclip"></i>
-                                            </a>
+                                        @if($guide->sort_order <= 25)
+                                            <span class="priority-badge priority-high">
+                                                <i class="bi bi-arrow-up-circle-fill me-1"></i>High
+                                            </span>
+                                        @elseif($guide->sort_order <= 75)
+                                            <span class="priority-badge priority-normal">
+                                                <i class="bi bi-dash-circle-fill me-1"></i>Normal
+                                            </span>
                                         @else
-                                            <span class="text-muted">—</span>
+                                            <span class="priority-badge priority-low">
+                                                <i class="bi bi-arrow-down-circle-fill me-1"></i>Low
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="guide-info">
+                                            <span class="guide-title">{{ $guide->title }}</span>
+                                            <small class="guide-excerpt">{{ Str::limit(strip_tags($guide->content), 60) }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="role-badges">
+                                            @foreach($guide->visible_role_labels as $role)
+                                                <span class="role-badge bg-info text-white">{{ $role }}</span>
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        @if($guide->is_active)
+                                            <span class="status-badge status-visible">
+                                                <i class="bi bi-eye-fill me-1"></i>Visible
+                                            </span>
+                                        @else
+                                            <span class="status-badge status-hidden">
+                                                <i class="bi bi-eye-slash-fill me-1"></i>Hidden
+                                            </span>
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" 
-                                                class="btn btn-sm {{ $guide->is_active ? 'btn-success' : 'btn-secondary' }} toggle-status"
-                                                data-id="{{ $guide->id }}"
-                                                title="{{ $guide->is_active ? 'Active - Click to deactivate' : 'Inactive - Click to activate' }}">
-                                            <i class="bi {{ $guide->is_active ? 'bi-check-circle' : 'bi-x-circle' }}"></i>
-                                            {{ $guide->is_active ? 'Active' : 'Inactive' }}
-                                        </button>
+                                        <span class="creator-name">{{ $guide->creator->full_name ?? 'Unknown' }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <small>{{ $guide->creator->full_name ?? 'Unknown' }}</small>
+                                        <div class="updated-info">
+                                            <span class="updated-time">{{ $guide->updated_at->diffForHumans() }}</span>
+                                            <small class="updated-date">{{ $guide->updated_at->format('M d, Y') }}</small>
+                                        </div>
                                     </td>
                                     <td class="text-center">
-                                        <small class="text-muted">{{ $guide->updated_at->diffForHumans() }}</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('admin.help-guides.edit', $guide) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                                                <i class="bi bi-pencil"></i>
+                                        <div class="action-btn-group">
+                                            <a href="{{ route('admin.help-guides.edit', $guide) }}" class="action-btn btn-edit" title="Edit">
+                                                <i class="bi bi-pencil-fill"></i>
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-outline-danger delete-guide" data-id="{{ $guide->id }}" data-title="{{ $guide->title }}" title="Delete">
-                                                <i class="bi bi-trash"></i>
+                                            <button type="button" class="action-btn btn-delete delete-guide" data-id="{{ $guide->id }}" data-title="{{ $guide->title }}" title="Delete">
+                                                <i class="bi bi-trash-fill"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -159,17 +170,221 @@
 
 @push('styles')
 <style>
-    #guidesTable tbody tr {
-        transition: background-color 0.2s ease;
+    /* Help Guides Table Styles - Matching Sessions Table Design */
+    
+    /* Table wrapper with max height and scroll */
+    .guides-table-wrapper {
+        max-height: 580px; /* Approximately 10 rows */
+        overflow-y: auto;
+        overflow-x: auto;
     }
-    #guidesTable tbody tr:hover {
-        background-color: #f8f9fa;
+
+    /* Sticky header when scrolling */
+    #guidesTable thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #d1e7dd;
     }
-    .toggle-status {
-        min-width: 90px;
+
+    #guidesTable th,
+    #guidesTable td {
+        vertical-align: middle;
+        padding: 0.75rem 1rem;
+        white-space: nowrap;
     }
-    .badge {
+
+    /* Guide info styling */
+    .guide-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    .guide-title {
+        font-weight: 600;
+        color: #212529;
+        font-size: 0.875rem;
+        white-space: normal;
+        min-width: 200px;
+    }
+
+    .guide-excerpt {
+        color: #6c757d;
+        font-size: 0.75rem;
+        white-space: normal;
+        max-width: 250px;
+    }
+
+    /* Priority badges */
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .priority-high {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .priority-normal {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
+
+    .priority-low {
+        background-color: #d3d3d4;
+        color: #1a1a1a;
+    }
+
+    /* Status badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        gap: 0.25rem;
+        white-space: nowrap;
+    }
+
+    .status-visible {
+        background-color: #d1f4e0;
+        color: #0f4b36;
+    }
+
+    .status-hidden {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
+
+    /* Role badges container */
+    .role-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        justify-content: center;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Creator name */
+    .creator-name {
+        font-size: 0.875rem;
+        color: #495057;
         font-weight: 500;
+    }
+
+    /* Updated info styling */
+    .updated-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    .updated-time {
+        font-weight: 600;
+        color: #212529;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .updated-date {
+        color: #6c757d;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    /* Action buttons */
+    .action-btn-group {
+        display: inline-flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        cursor: pointer;
+    }
+
+    .action-btn i {
+        font-size: 0.875rem;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .btn-edit {
+        background-color: #0d6efd;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-edit:hover {
+        background-color: #0b5ed7;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background-color: #bb2d3b;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+    }
+
+    /* DataTable search box styling */
+    .dataTables_filter input {
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .dataTables_filter input:focus {
+        border-color: #0f4b36;
+        box-shadow: 0 0 0 0.2rem rgba(15, 75, 54, 0.15);
+        outline: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .guide-title,
+        .guide-excerpt {
+            font-size: 0.8125rem;
+        }
+
+        .action-btn {
+            padding: 0.375rem 0.5rem;
+            min-width: 32px;
+            height: 32px;
+        }
     }
 </style>
 @endpush
@@ -177,65 +392,25 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize DataTable only if table exists and has data
+    // Initialize DataTable
     if ($.fn.DataTable && $('#guidesTable').length) {
         $('#guidesTable').DataTable({
             paging: true,
-            pageLength: 15,
+            pageLength: 10,
             lengthChange: false,
             searching: true,
-            ordering: false, // Disable ordering since we use custom sort
+            ordering: false,
             info: true,
             autoWidth: false,
-            columnDefs: [
-                { targets: [0, 3, 4, 5, 6, 7], orderable: false }
-            ],
+            scrollX: true,
             language: {
                 emptyTable: "No help guides found",
                 search: "_INPUT_",
                 searchPlaceholder: "Search guides..."
             },
-            dom: '<"d-flex justify-content-between align-items-center mb-3"<"search-box"f>>rt<"d-flex justify-content-between align-items-center mt-3"ip>'
+            dom: '<"d-flex justify-content-between align-items-center mb-3 px-3 pt-3"<"search-box"f>>rt<"d-flex justify-content-between align-items-center mt-3 px-3 pb-3"ip>'
         });
     }
-
-    // Toggle status handler
-    document.querySelectorAll('.toggle-status').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const id = this.dataset.id;
-            const button = this;
-            
-            try {
-                const response = await fetch(`{{ url('admin/help-guides') }}/${id}/toggle-active`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    if (data.is_active) {
-                        button.classList.remove('btn-secondary');
-                        button.classList.add('btn-success');
-                        button.innerHTML = '<i class="bi bi-check-circle"></i> Active';
-                        button.title = 'Active - Click to deactivate';
-                    } else {
-                        button.classList.remove('btn-success');
-                        button.classList.add('btn-secondary');
-                        button.innerHTML = '<i class="bi bi-x-circle"></i> Inactive';
-                        button.title = 'Inactive - Click to activate';
-                    }
-                }
-            } catch (error) {
-                console.error('Error toggling status:', error);
-                window.notify.error('Failed to update status. Please try again.');
-            }
-        });
-    });
 
     // Delete handler
     document.querySelectorAll('.delete-guide').forEach(btn => {
