@@ -21,6 +21,7 @@
  * - tutorial-academic-structure.js - Departments, Programs, Subjects, Academic Periods tutorials
  * - tutorial-grades-formula.js - All Grades Formula related tutorials
  * - tutorial-structure-template-requests.js - Structure Template Requests tutorial
+ * - tutorial-help-guides.js    - Help Guides management tutorials
  */
 
 (function() {
@@ -81,7 +82,8 @@
                     loadScript(tutorialsPath + 'tutorial-disaster-recovery.js'),
                     loadScript(tutorialsPath + 'tutorial-academic-structure.js'),
                     loadScript(tutorialsPath + 'tutorial-grades-formula.js'),
-                    loadScript(tutorialsPath + 'tutorial-structure-template-requests.js')
+                    loadScript(tutorialsPath + 'tutorial-structure-template-requests.js'),
+                    loadScript(tutorialsPath + 'tutorial-help-guides.js')
                 ]);
             })
             .then(function() {

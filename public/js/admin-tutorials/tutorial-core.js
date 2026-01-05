@@ -5,8 +5,7 @@
  * Features:
  * - Step-based guided tours with spotlight highlighting
  * - Auto-advance on correct actions
- * - First-visit detection
- * - Accessible via header button
+ * - Accessible via header button (FAB)
  */
 
 (function() {
@@ -43,23 +42,6 @@
             this.createOverlayElements();
             this.bindEvents();
             this.createTutorialButton();
-            
-            // Check for first-time visit to current page
-            const pageId = this.getCurrentPageId();
-            if (pageId && this.tutorials[pageId] && !this.hasCompletedTutorial(pageId)) {
-                // Add pulse animation to FAB to draw attention
-                const fab = document.getElementById('tutorial-fab');
-                if (fab) {
-                    fab.classList.add('pulse');
-                    // Remove pulse after animation completes
-                    setTimeout(() => fab.classList.remove('pulse'), 6000);
-                }
-                
-                // Small delay to let page render
-                setTimeout(() => {
-                    this.promptTutorial(pageId);
-                }, 1000);
-            }
         },
         
         /**
@@ -153,6 +135,21 @@
             
             if (path.includes('/admin/academic-periods')) {
                 return 'admin-academic-periods';
+            }
+            
+            // Help Guides - Edit (more specific, check first)
+            if (path.includes('/admin/help-guides/') && path.includes('/edit')) {
+                return 'admin-help-guides-edit';
+            }
+            
+            // Help Guides - Create
+            if (path.includes('/admin/help-guides/create')) {
+                return 'admin-help-guides-create';
+            }
+            
+            // Help Guides - Index
+            if (path.includes('/admin/help-guides')) {
+                return 'admin-help-guides';
             }
             
             return null;
@@ -264,48 +261,6 @@
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => this.updatePosition(), 100);
             });
-        },
-        
-        /**
-         * Prompt user to start tutorial (first visit)
-         */
-        promptTutorial: function(pageId) {
-            const tutorial = this.tutorials[pageId];
-            if (!tutorial) return;
-            
-            // Use SweetAlert2 if available
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: '👋 Welcome!',
-                    html: `
-                        <div class="text-start">
-                            <h5 class="mb-2">${tutorial.title}</h5>
-                            <p class="text-muted">${tutorial.description}</p>
-                            <p class="mb-0"><small>Would you like a quick tour of this page?</small></p>
-                        </div>
-                    `,
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonColor: '#198754',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Start Tutorial',
-                    cancelButtonText: 'Maybe Later'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        this.start(pageId);
-                    } else {
-                        // Mark as seen but not completed
-                        this.markTutorialSeen(pageId);
-                    }
-                });
-            } else {
-                // Fallback to confirm dialog
-                if (confirm(`Welcome! Would you like a quick tour of ${tutorial.title}?`)) {
-                    this.start(pageId);
-                } else {
-                    this.markTutorialSeen(pageId);
-                }
-            }
         },
         
         /**
@@ -748,14 +703,6 @@
          */
         markTutorialCompleted: function(tutorialId) {
             localStorage.setItem(this.STORAGE_PREFIX + tutorialId + '_completed', 'true');
-            localStorage.setItem(this.STORAGE_PREFIX + tutorialId + '_seen', 'true');
-        },
-        
-        /**
-         * Mark tutorial as seen (but not completed)
-         */
-        markTutorialSeen: function(tutorialId) {
-            localStorage.setItem(this.STORAGE_PREFIX + tutorialId + '_seen', 'true');
         },
         
         /**
@@ -775,7 +722,6 @@
          */
         resetProgress: function(tutorialId) {
             localStorage.removeItem(this.STORAGE_PREFIX + tutorialId + '_completed');
-            localStorage.removeItem(this.STORAGE_PREFIX + tutorialId + '_seen');
             console.log('Tutorial progress reset for:', tutorialId);
         }
     };
