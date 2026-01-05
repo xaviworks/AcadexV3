@@ -24,17 +24,15 @@
         </div>
     @else
         {{-- Search Box --}}
-        <div class="card shadow-sm mb-4">
-            <div class="card-body py-3">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0">
-                        <i class="bi bi-search text-muted"></i>
-                    </span>
-                    <input type="text" 
-                           class="form-control border-start-0 ps-0" 
-                           x-model="search"
-                           placeholder="Search help guides...">
-                </div>
+        <div class="mb-3">
+            <div class="input-group" style="max-width: 300px;">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+                <input type="text" 
+                       class="form-control border-start-0 ps-0" 
+                       x-model="search"
+                       placeholder="Search guides...">
             </div>
         </div>
 
