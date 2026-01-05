@@ -168,4 +168,3 @@
 @endsection
 
 {{-- Styles: resources/css/dashboard/common.css --}}
-@endsection
