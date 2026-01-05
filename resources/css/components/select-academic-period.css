@@ -5,134 +5,246 @@
  * for instructors and deans.
  */
 
+/* Ensure page background is light green for this page */
+body {
+  background-color: #eaf8e7 !important;
+  min-height: 100vh;
+}
+
 .select-period-container {
   width: 100%;
-  max-width: 420px;
+  max-width: 360px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  padding: 2rem;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
   margin: 1rem auto;
 }
 
 .select-period-container .logo-icon {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  font-size: 1.75rem;
+  font-size: 1.4rem;
   color: white;
 }
 
 /* Year Filter Dropdown */
-.select-period-container .year-filter .form-select {
-  border-radius: 10px;
-  border: 1.5px solid #e5e7eb;
-  height: 44px;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  background-color: white;
+.select-period-container .year-filter {
+  position: relative;
 }
 
-.select-period-container .year-filter .form-select:focus {
+.select-period-container .year-filter-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Custom Dropdown */
+.select-period-container .custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.select-period-container .dropdown-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: white;
+  border: 1.5px solid #d1fae5;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* Remove default select arrow background */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none;
+}
+
+/* Remove Bootstrap's default dropdown arrow */
+.select-period-container .dropdown-toggle::after {
+  display: none !important;
+}
+
+.select-period-container .dropdown-toggle:hover {
   border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.select-period-container .dropdown-toggle:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
   outline: none;
 }
 
-.select-period-container .year-filter .form-select:hover {
-  border-color: #10b981;
+.select-period-container .dropdown-arrow {
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+  color: #6b7280;
 }
 
-/* Period List Container */
-.select-period-container .period-list-container {
-  max-height: 320px;
-  overflow-y: auto;
+.select-period-container .custom-dropdown.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.select-period-container .dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
   border: 1.5px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 200px; /* ~5 items × 40px */
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
   scrollbar-width: thin;
   scrollbar-color: #d1d5db transparent;
 }
 
-.select-period-container .period-list-container::-webkit-scrollbar {
+.select-period-container .dropdown-menu::-webkit-scrollbar {
   width: 6px;
 }
 
-.select-period-container .period-list-container::-webkit-scrollbar-track {
+.select-period-container .dropdown-menu::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.select-period-container .period-list-container::-webkit-scrollbar-thumb {
+.select-period-container .dropdown-menu::-webkit-scrollbar-thumb {
   background-color: #d1d5db;
   border-radius: 3px;
 }
 
-/* Year Groups */
-.select-period-container .year-group {
-  border-bottom: 1px solid #f3f4f6;
+.select-period-container .custom-dropdown.open .dropdown-menu {
+  display: block;
+  animation: dropdownFade 0.15s ease;
 }
 
-.select-period-container .year-group:last-child {
-  border-bottom: none;
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.select-period-container .year-header {
-  padding: 10px 16px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
-  background: #f9fafb;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-/* Period Items */
-.select-period-container .period-item {
+.select-period-container .dropdown-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: #374151;
   cursor: pointer;
-  transition: all 0.15s ease;
-  border-left: 3px solid transparent;
-  margin: 0;
+  transition: background 0.15s ease;
 }
 
-.select-period-container .period-item:hover {
+.select-period-container .dropdown-item:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.select-period-container .dropdown-item:last-child {
+  border-radius: 0 0 6px 6px;
+}
+
+.select-period-container .dropdown-item:hover {
   background: #f0fdf4;
 }
 
-.select-period-container .period-item input[type='radio'] {
-  display: none;
+.select-period-container .dropdown-item.selected {
+  background: #ecfdf5;
+  color: #059669;
+  font-weight: 600;
 }
 
-.select-period-container .period-content {
+.select-period-container .dropdown-item .bi-check2 {
+  display: none;
+  color: #10b981;
+}
+
+.select-period-container .dropdown-item.selected .bi-check2 {
+  display: inline;
+}
+
+/* Semester Cards */
+.select-period-container .semester-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.select-period-container .semester-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex: 1;
+  padding: 12px 14px;
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+}
+
+.select-period-container .semester-card:hover {
+  border-color: #10b981;
+  background: #f0fdf4;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+}
+
+.select-period-container .semester-card input[type='radio'] {
+  display: none;
+}
+
+.select-period-container .semester-card:has(input:checked) {
+  border-color: #10b981;
+  background: #ecfdf5;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.select-period-container .semester-card-content {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-/* Semester Badges */
-.select-period-container .semester-badge {
-  width: 28px;
-  height: 28px;
+.select-period-container .semester-icon {
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
+.select-period-container .semester-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+/* Semester Icon Colors */
 .select-period-container .semester-1st {
   background: #dbeafe;
   color: #2563eb;
@@ -148,40 +260,18 @@
   color: #d97706;
 }
 
-.select-period-container .semester-name {
-  font-weight: 500;
-  color: #374151;
-  font-size: 0.9rem;
-}
-
-.select-period-container .current-badge {
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  background: #10b981;
-  color: white;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 /* Check Indicator */
 .select-period-container .check-indicator {
   opacity: 0;
   transform: scale(0.5);
   transition: all 0.15s ease;
   color: #10b981;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
 }
 
-.select-period-container .period-item:has(input:checked) .check-indicator {
+.select-period-container .semester-card:has(input:checked) .check-indicator {
   opacity: 1;
   transform: scale(1);
-}
-
-.select-period-container .period-item:has(input:checked) {
-  background: #ecfdf5;
-  border-left-color: #10b981;
 }
 
 /* Empty State & No Results */
@@ -206,13 +296,13 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 24px;
+  padding: 12px 20px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -235,11 +325,7 @@
   transform: translateX(4px);
 }
 
-/* Hidden States for Search */
-.select-period-container .year-group.hidden {
-  display: none;
-}
-
-.select-period-container .period-item.hidden {
+/* Hidden States */
+.select-period-container .semester-card.hidden {
   display: none;
 }

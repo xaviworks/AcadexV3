@@ -11,12 +11,12 @@
 @section('content')
 <div class="select-period-container">
     {{-- Header Section --}}
-    <div class="text-center mb-4">
-        <div class="logo-icon mb-3">
+    <div class="text-center mb-3">
+        <div class="logo-icon mb-2">
             <i class="bi bi-calendar-check"></i>
         </div>
-        <h2 class="fw-bold text-gray-800 mb-2">Select Academic Period</h2>
-        <p class="text-muted small">Choose the semester you want to work with</p>
+        <h2 class="fw-bold text-gray-800 mb-1" style="font-size: 1.25rem;">Select Academic Period</h2>
+        <p class="text-muted" style="font-size: 0.8rem;">Choose the semester you want to work with</p>
     </div>
 
     <form method="POST" action="{{ route('set.academicPeriod') }}" id="periodForm">
@@ -24,10 +24,8 @@
 
         @php
             // Group periods: merge summer semesters into their corresponding academic year
-            // e.g., Summer 2026 (academic_year="2026") goes into "2026-2027" group
             $groupedPeriods = $periods->groupBy(function($period) {
                 $year = $period->academic_year;
-                // If it's a standalone year (summer), map it to the corresponding academic year range
                 if (preg_match('/^\d{4}$/', $year)) {
                     $summerYear = (int)$year;
                     return $summerYear . '-' . ($summerYear + 1);
@@ -35,83 +33,99 @@
                 return $year;
             })->sortKeysDesc();
             
-            // Get only academic year ranges for dropdown (they're now all XXXX-XXXX format)
+            // Get academic year ranges for dropdown
             $academicYearRanges = $groupedPeriods->keys()->toArray();
+            
+            // Determine current academic year (default selection)
+            $currentMonth = (int) date('n');
+            $currentYear = (int) date('Y');
+            // Academic year starts in August, so Jan-Jul belongs to previous academic year
+            $academicStartYear = $currentMonth >= 8 ? $currentYear : $currentYear - 1;
+            $defaultAcademicYear = $academicStartYear . '-' . ($academicStartYear + 1);
+            
+            // Fallback to first available if default doesn't exist
+            if (!in_array($defaultAcademicYear, $academicYearRanges) && count($academicYearRanges) > 0) {
+                $defaultAcademicYear = $academicYearRanges[0];
+            }
         @endphp
 
-        {{-- Year Filter Dropdown --}}
+        {{-- Year Dropdown with Label (Custom Dropdown) --}}
         <div class="year-filter mb-3">
-            <select id="yearFilter" class="form-select">
-                <option value="">All Academic Years</option>
-                @foreach($academicYearRanges as $year)
-                    <option value="{{ $year }}">{{ $year }}</option>
-                @endforeach
-            </select>
+            <label class="year-filter-label">
+                <i class="bi bi-calendar3 me-1"></i> Academic Year
+            </label>
+            <div class="custom-dropdown" id="yearDropdown" data-default-year="{{ $defaultAcademicYear }}">
+                <button type="button" class="dropdown-toggle" id="yearDropdownBtn">
+                    <span class="dropdown-value">{{ $defaultAcademicYear }}</span>
+                    <i class="bi bi-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-menu" id="yearDropdownMenu">
+                    @foreach($academicYearRanges as $year)
+                        <div class="dropdown-item {{ $year === $defaultAcademicYear ? 'selected' : '' }}" data-value="{{ $year }}">
+                            <span>{{ $year }}</span>
+                            <i class="bi bi-check2"></i>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
 
-        {{-- Period List --}}
-        <div class="period-list-container">
-            <div class="period-list" id="periodList">
-                @forelse($groupedPeriods as $year => $yearPeriods)
-                    <div class="year-group" data-year="{{ $year }}" data-filter-year="{{ $year }}">
-                        <div class="year-header">
-                            <i class="bi bi-folder2 me-2"></i>{{ $year }}
+        {{-- Semester Cards --}}
+        <div class="semester-cards" id="semesterCards">
+            @forelse($groupedPeriods as $year => $yearPeriods)
+                @foreach($yearPeriods->sortBy(fn($p) => $p->semester === '1st' ? 1 : ($p->semester === '2nd' ? 2 : 3)) as $period)
+                    <label class="semester-card" 
+                           data-year="{{ $year }}" 
+                           data-semester="{{ $period->semester }}"
+                           style="{{ $year !== $defaultAcademicYear ? 'display: none;' : '' }}">
+                        <input type="radio" 
+                               name="academic_period_id" 
+                               value="{{ $period->id }}"
+                               {{ $year === $defaultAcademicYear && $period->semester === '1st' ? 'checked' : '' }}
+                               required>
+                        <div class="semester-card-content">
+                            <span class="semester-icon semester-{{ strtolower(str_replace(' ', '', $period->semester)) }}">
+                                @if($period->semester === '1st')
+                                    <i class="bi bi-1-circle-fill"></i>
+                                @elseif($period->semester === '2nd')
+                                    <i class="bi bi-2-circle-fill"></i>
+                                @else
+                                    <i class="bi bi-sun-fill"></i>
+                                @endif
+                            </span>
+                            <span class="semester-label">
+                                @if($period->semester === 'Summer')
+                                    Summer
+                                @else
+                                    {{ $period->semester }} Semester
+                                @endif
+                            </span>
                         </div>
-                        @foreach($yearPeriods->sortBy(fn($p) => $p->semester === '1st' ? 1 : ($p->semester === '2nd' ? 2 : 3)) as $period)
-                            <label class="period-item" data-year="{{ $year }}">
-                                <input type="radio" 
-                                       name="academic_period_id" 
-                                       value="{{ $period->id }}"
-                                       {{ $loop->parent->first && $loop->first ? 'checked' : '' }}
-                                       required>
-                                <div class="period-content">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="semester-badge semester-{{ strtolower(str_replace(' ', '', $period->semester)) }}">
-                                            @if($period->semester === '1st')
-                                                <i class="bi bi-1-circle-fill"></i>
-                                            @elseif($period->semester === '2nd')
-                                                <i class="bi bi-2-circle-fill"></i>
-                                            @else
-                                                <i class="bi bi-sun-fill"></i>
-                                            @endif
-                                        </span>
-                                        <span class="semester-name">{{ $period->semester }} Semester</span>
-                                    </div>
-                                </div>
-                                <div class="check-indicator">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                </div>
-                            </label>
-                        @endforeach
-                    </div>
-                @empty
-                    <div class="empty-state">
-                        <i class="bi bi-calendar-x"></i>
-                        <p>No academic periods available</p>
-                    </div>
-                @endforelse
-            </div>
+                        <div class="check-indicator">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    </label>
+                @endforeach
+            @empty
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x"></i>
+                    <p>No academic periods available</p>
+                </div>
+            @endforelse
         </div>
 
         {{-- No Results Message --}}
         <div class="no-results" id="noResults" style="display: none;">
             <i class="bi bi-funnel"></i>
-            <p>No periods for selected year</p>
+            <p>No semesters available for this year</p>
         </div>
 
         {{-- Submit Button --}}
-        <div class="mt-4">
+        <div class="mt-3">
             <button type="submit" class="btn-proceed" id="submitBtn" {{ $periods->isEmpty() ? 'disabled' : '' }}>
                 <span>Continue to Dashboard</span>
                 <i class="bi bi-arrow-right"></i>
             </button>
-        </div>
-
-        {{-- Period Count --}}
-        <div class="text-center mt-3">
-            <small class="text-muted">
-                <span id="visibleCount">{{ $periods->count() }}</span> of {{ $periods->count() }} periods
-            </small>
         </div>
     </form>
 </div>
