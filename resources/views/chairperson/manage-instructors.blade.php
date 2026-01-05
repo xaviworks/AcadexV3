@@ -20,6 +20,22 @@
         </div>
     @endif
 
+    {{-- Toast Notifications --}}
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify?.success(@json(session('success')));
+            });
+        </script>
+    @endif
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify?.error(@json(session('error')));
+            });
+        </script>
+    @endif
+
     {{-- Bootstrap Tabs --}}
     <ul class="nav nav-tabs" id="instructorTabs" role="tablist">
         <li class="nav-item" role="presentation">
