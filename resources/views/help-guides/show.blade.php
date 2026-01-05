@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" x-data="pdfViewerComponent()">
     {{-- Breadcrumb --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
@@ -43,33 +43,70 @@
         </div>
 
         <div class="col-lg-4">
-            {{-- Attachment Card --}}
+            {{-- Attachments Card --}}
             @if($helpGuide->hasAttachment())
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
                         <h6 class="mb-0 fw-semibold">
-                            <i class="bi bi-paperclip me-2 text-primary"></i>Attachment
+                            <i class="bi bi-paperclip me-2 text-primary"></i>Attachments
+                            @php
+                                $attachmentCount = $helpGuide->attachments->count() + ($helpGuide->attachment_path ? 1 : 0);
+                            @endphp
+                            @if($attachmentCount > 1)
+                                <span class="badge bg-info bg-opacity-10 text-info ms-2">{{ $attachmentCount }}</span>
+                            @endif
                         </h6>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="file-icon me-3">
-                                @if($helpGuide->attachmentIsPdf())
-                                    <i class="bi bi-file-pdf text-danger fs-2"></i>
-                                @elseif($helpGuide->attachmentIsImage())
-                                    <i class="bi bi-file-image text-info fs-2"></i>
-                                @else
-                                    <i class="bi bi-file-earmark text-secondary fs-2"></i>
-                                @endif
-                            </div>
-                            <div class="flex-grow-1 text-truncate">
-                                <div class="fw-semibold text-truncate">{{ $helpGuide->attachment_name }}</div>
-                                <small class="text-muted text-uppercase">{{ $helpGuide->attachment_extension }} file</small>
-                            </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            {{-- Legacy single attachment --}}
+                            @if($helpGuide->attachment_path)
+                                <div class="pdf-thumbnail-card border rounded overflow-hidden"
+                                     @click="openPdfViewer('{{ route('help-guides.preview', $helpGuide) }}', '{{ addslashes($helpGuide->attachment_name) }}')"
+                                     style="cursor: pointer;">
+                                    <div class="pdf-thumbnail-preview bg-light position-relative">
+                                        <iframe src="{{ route('help-guides.preview', $helpGuide) }}#toolbar=0&navpanes=0&scrollbar=0" 
+                                                class="pdf-thumb-iframe"
+                                                title="Preview: {{ $helpGuide->attachment_name }}"></iframe>
+                                        <div class="pdf-overlay d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-zoom-in fs-5 text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="pdf-thumbnail-info bg-white">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-pdf text-danger me-1" style="font-size: 0.65rem;"></i>
+                                            <span class="small text-truncate" title="{{ $helpGuide->attachment_name }}">
+                                                {{ Str::limit($helpGuide->attachment_name, 10) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            {{-- Multiple attachments --}}
+                            @foreach($helpGuide->attachments as $attachment)
+                                <div class="pdf-thumbnail-card border rounded overflow-hidden"
+                                     @click="openPdfViewer('{{ route('help-guides.attachment.preview', $attachment) }}', '{{ addslashes($attachment->file_name) }}')"
+                                     style="cursor: pointer;">
+                                    <div class="pdf-thumbnail-preview bg-light position-relative">
+                                        <iframe src="{{ route('help-guides.attachment.preview', $attachment) }}#toolbar=0&navpanes=0&scrollbar=0" 
+                                                class="pdf-thumb-iframe"
+                                                title="Preview: {{ $attachment->file_name }}"></iframe>
+                                        <div class="pdf-overlay d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-zoom-in fs-5 text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div class="pdf-thumbnail-info bg-white">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-file-pdf text-danger me-1" style="font-size: 0.65rem;"></i>
+                                            <span class="small text-truncate" title="{{ $attachment->file_name }}">
+                                                {{ Str::limit($attachment->file_name, 10) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                        <a href="{{ route('admin.help-guides.download', $helpGuide) }}" class="btn btn-primary w-100 mt-3">
-                            <i class="bi bi-download me-2"></i>Download File
-                        </a>
                     </div>
                 </div>
             @endif
@@ -80,6 +117,23 @@
                     <a href="{{ route('help-guides.index') }}" class="btn btn-outline-secondary w-100">
                         <i class="bi bi-arrow-left me-2"></i>Back to All Guides
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Full PDF Viewer Modal --}}
+    <div class="modal fade" id="pdfViewerModal" tabindex="-1" aria-hidden="true" x-ref="pdfModal">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header py-1 px-3 bg-dark border-0" style="min-height: auto;">
+                    <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 bg-secondary">
+                    <iframe :src="currentPdfUrl" 
+                            class="w-100 h-100 border-0"
+                            style="min-height: calc(100vh - 40px);"
+                            x-show="currentPdfUrl"></iframe>
                 </div>
             </div>
         </div>
@@ -110,16 +164,6 @@
         white-space: pre-wrap;
     }
     
-    .file-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 8px;
-        background-color: #f8f9fa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
     .breadcrumb-item a {
         color: #198754;
     }
@@ -127,5 +171,78 @@
     .breadcrumb-item a:hover {
         color: #146c43;
     }
+    
+    /* PDF Thumbnail Styles */
+    .pdf-thumbnail-card {
+        transition: all 0.2s ease;
+        background: #fff;
+        width: 100px;
+    }
+    
+    .pdf-thumbnail-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .pdf-thumbnail-preview {
+        height: 70px;
+        overflow: hidden;
+    }
+    
+    .pdf-thumb-iframe {
+        width: 200%;
+        height: 300%;
+        transform: scale(0.5);
+        transform-origin: top left;
+        pointer-events: none;
+        border: none;
+    }
+    
+    .pdf-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    
+    .pdf-thumbnail-card:hover .pdf-overlay {
+        opacity: 1;
+    }
+    
+    .pdf-thumbnail-info {
+        border-top: 1px solid #e9ecef;
+        padding: 4px 6px !important;
+    }
+    
+    .pdf-thumbnail-info .small {
+        font-size: 0.6rem !important;
+    }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    function pdfViewerComponent() {
+        return {
+            currentPdfUrl: '',
+            currentPdfName: '',
+            pdfModal: null,
+            
+            init() {
+                this.pdfModal = new bootstrap.Modal(this.$refs.pdfModal);
+            },
+            
+            openPdfViewer(url, name) {
+                this.currentPdfUrl = url;
+                this.currentPdfName = name;
+                this.pdfModal.show();
+            }
+        }
+    }
+</script>
+@endpush
 @endpush

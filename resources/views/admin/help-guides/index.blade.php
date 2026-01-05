@@ -13,12 +13,20 @@
         </a>
     </div>
 
-    {{-- Success Message --}}
+    {{-- Success/Error Messages via Bootbox --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify.success('{{ session('success') }}');
+            });
+        </script>
+    @endif
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify.error('{{ session('error') }}');
+            });
+        </script>
     @endif
 
     {{-- Guides Table --}}
@@ -224,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Error toggling status:', error);
-                Swal.fire('Error', 'Failed to update status. Please try again.', 'error');
+                window.notify.error('Failed to update status. Please try again.');
             }
         });
     });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\HelpGuide;
+use App\Models\HelpGuideAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -21,7 +22,8 @@ class HelpGuideController extends Controller
     {
         $user = Auth::user();
         
-        $guides = HelpGuide::active()
+        $guides = HelpGuide::with('attachments')
+            ->active()
             ->visibleToRole($user->role)
             ->ordered()
             ->get();
@@ -40,6 +42,8 @@ class HelpGuideController extends Controller
         if (!$helpGuide->is_active || !$helpGuide->isVisibleToRole($user->role)) {
             abort(404);
         }
+
+        $helpGuide->load('attachments');
 
         return view('help-guides.show', compact('helpGuide'));
     }
@@ -96,5 +100,53 @@ class HelpGuideController extends Controller
         return response($file, 200)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="' . $helpGuide->attachment_name . '"');
+    }
+
+    /**
+     * Preview an individual attachment inline.
+     */
+    public function previewAttachment(HelpGuideAttachment $attachment)
+    {
+        $user = Auth::user();
+        $helpGuide = $attachment->helpGuide;
+        
+        // Check if guide is active and visible to user's role
+        if (!$helpGuide->is_active || !$helpGuide->isVisibleToRole($user->role)) {
+            abort(404);
+        }
+
+        if (!$attachment->fileExists()) {
+            abort(404, 'Attachment file not found.');
+        }
+
+        // Return the PDF inline for preview
+        $file = $attachment->getContents();
+        
+        return response($file, 200)
+            ->header('Content-Type', $attachment->mime_type)
+            ->header('Content-Disposition', 'inline; filename="' . $attachment->file_name . '"');
+    }
+
+    /**
+     * Download an individual attachment.
+     */
+    public function downloadAttachment(HelpGuideAttachment $attachment)
+    {
+        $user = Auth::user();
+        $helpGuide = $attachment->helpGuide;
+        
+        // Check if guide is active and visible to user's role
+        if (!$helpGuide->is_active || !$helpGuide->isVisibleToRole($user->role)) {
+            abort(404);
+        }
+
+        if (!$attachment->fileExists()) {
+            abort(404, 'Attachment file not found.');
+        }
+
+        return Storage::disk('public')->download(
+            $attachment->file_path,
+            $attachment->file_name
+        );
     }
 }

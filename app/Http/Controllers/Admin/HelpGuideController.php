@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HelpGuide;
+use App\Models\HelpGuideAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -24,7 +25,7 @@ class HelpGuideController extends Controller
     {
         Gate::authorize('admin');
 
-        $guides = HelpGuide::with(['creator', 'updater'])
+        $guides = HelpGuide::with(['creator', 'updater', 'attachments'])
             ->ordered()
             ->get();
 
@@ -60,11 +61,16 @@ class HelpGuideController extends Controller
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'attachment' => 'nullable|file|max:10240|mimes:pdf',
+            'attachments' => 'nullable|array|max:10',
+            'attachments.*' => 'file|max:10240|mimes:pdf',
         ], [
             'visible_roles.required' => 'Please select at least one role that can view this guide.',
             'visible_roles.min' => 'Please select at least one role that can view this guide.',
             'attachment.max' => 'The attachment must not exceed 10MB.',
             'attachment.mimes' => 'Only PDF files are allowed.',
+            'attachments.*.max' => 'Each attachment must not exceed 10MB.',
+            'attachments.*.mimes' => 'Only PDF files are allowed.',
+            'attachments.max' => 'Maximum 10 attachments allowed.',
         ]);
 
         $attachmentPath = null;
@@ -79,7 +85,7 @@ class HelpGuideController extends Controller
         // Cast visible_roles to integers
         $visibleRoles = array_map('intval', $validated['visible_roles']);
 
-        HelpGuide::create([
+        $helpGuide = HelpGuide::create([
             'title' => $validated['title'],
             'content' => $validated['content'],
             'visible_roles' => $visibleRoles,
@@ -89,6 +95,22 @@ class HelpGuideController extends Controller
             'attachment_name' => $attachmentName,
             'created_by' => Auth::id(),
         ]);
+
+        // Handle multiple attachments
+        if ($request->hasFile('attachments')) {
+            $sortOrder = 0;
+            foreach ($request->file('attachments') as $file) {
+                $filePath = $file->store('help-guides', 'public');
+                
+                $helpGuide->attachments()->create([
+                    'file_path' => $filePath,
+                    'file_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType() ?? 'application/pdf',
+                    'file_size' => $file->getSize(),
+                    'sort_order' => $sortOrder++,
+                ]);
+            }
+        }
 
         return redirect()
             ->route('admin.help-guides.index')
@@ -102,6 +124,7 @@ class HelpGuideController extends Controller
     {
         Gate::authorize('admin');
 
+        $helpGuide->load('attachments');
         $availableRoles = HelpGuide::availableRoles();
 
         return view('admin.help-guides.edit', compact('helpGuide', 'availableRoles'));
@@ -122,12 +145,16 @@ class HelpGuideController extends Controller
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'attachment' => 'nullable|file|max:10240|mimes:pdf',
+            'attachments' => 'nullable|array|max:10',
+            'attachments.*' => 'file|max:10240|mimes:pdf',
             'remove_attachment' => 'boolean',
         ], [
             'visible_roles.required' => 'Please select at least one role that can view this guide.',
             'visible_roles.min' => 'Please select at least one role that can view this guide.',
             'attachment.max' => 'The attachment must not exceed 10MB.',
             'attachment.mimes' => 'Only PDF files are allowed.',
+            'attachments.*.max' => 'Each attachment must not exceed 10MB.',
+            'attachments.*.mimes' => 'Only PDF files are allowed.',
         ]);
 
         // Handle attachment removal
@@ -162,6 +189,24 @@ class HelpGuideController extends Controller
             'updated_by' => Auth::id(),
         ]);
 
+        // Handle new multiple attachments
+        if ($request->hasFile('attachments')) {
+            $maxSortOrder = $helpGuide->attachments()->max('sort_order') ?? -1;
+            $sortOrder = $maxSortOrder + 1;
+            
+            foreach ($request->file('attachments') as $file) {
+                $filePath = $file->store('help-guides', 'public');
+                
+                $helpGuide->attachments()->create([
+                    'file_path' => $filePath,
+                    'file_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType() ?? 'application/pdf',
+                    'file_size' => $file->getSize(),
+                    'sort_order' => $sortOrder++,
+                ]);
+            }
+        }
+
         return redirect()
             ->route('admin.help-guides.index')
             ->with('success', 'Help guide updated successfully.');
@@ -174,14 +219,39 @@ class HelpGuideController extends Controller
     {
         Gate::authorize('admin');
 
-        // Delete attachment if exists
+        // Delete legacy single attachment if exists
         $helpGuide->deleteAttachment();
         
+        // Delete all attachments files from storage
+        foreach ($helpGuide->attachments as $attachment) {
+            $attachment->deleteFile();
+        }
+        
+        // The cascade delete will handle removing attachment records
         $helpGuide->delete();
 
         return redirect()
             ->route('admin.help-guides.index')
             ->with('success', 'Help guide deleted successfully.');
+    }
+
+    /**
+     * Delete a specific attachment (AJAX).
+     */
+    public function deleteAttachment(HelpGuideAttachment $attachment)
+    {
+        Gate::authorize('admin');
+
+        // Delete file from storage
+        $attachment->deleteFile();
+        
+        // Delete database record
+        $attachment->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Attachment deleted successfully.',
+        ]);
     }
 
     /**

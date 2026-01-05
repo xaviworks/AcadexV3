@@ -103,6 +103,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/help-guides/{helpGuide}', [\App\Http\Controllers\HelpGuideController::class, 'show'])->name('help-guides.show');
     Route::get('/help-guides/{helpGuide}/download', [\App\Http\Controllers\HelpGuideController::class, 'download'])->name('help-guides.download');
     Route::get('/help-guides/{helpGuide}/preview', [\App\Http\Controllers\HelpGuideController::class, 'preview'])->name('help-guides.preview');
+    Route::get('/help-guides/attachment/{attachment}/preview', [\App\Http\Controllers\HelpGuideController::class, 'previewAttachment'])->name('help-guides.attachment.preview');
+    Route::get('/help-guides/attachment/{attachment}/download', [\App\Http\Controllers\HelpGuideController::class, 'downloadAttachment'])->name('help-guides.attachment.download');
 });
 
 // Chairperson Routes
@@ -379,6 +381,7 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::post('/update-order', [\App\Http\Controllers\Admin\HelpGuideController::class, 'updateOrder'])->name('update-order');
         Route::post('/{helpGuide}/toggle-active', [\App\Http\Controllers\Admin\HelpGuideController::class, 'toggleActive'])->name('toggle-active');
         Route::get('/{helpGuide}/download', [\App\Http\Controllers\Admin\HelpGuideController::class, 'downloadAttachment'])->name('download');
+        Route::delete('/attachment/{attachment}', [\App\Http\Controllers\Admin\HelpGuideController::class, 'deleteAttachment'])->name('attachment.delete');
     });
 });
 

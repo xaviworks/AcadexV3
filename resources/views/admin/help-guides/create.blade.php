@@ -73,33 +73,39 @@
                 {{-- Attachment Section --}}
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0 fw-semibold"><i class="bi bi-paperclip me-2 text-primary"></i>Attachment (Optional)</h5>
+                        <h5 class="mb-0 fw-semibold"><i class="bi bi-paperclip me-2 text-primary"></i>Attachments (Optional)</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label for="attachment" class="form-label fw-semibold">Upload PDF</label>
+                            <label for="attachments" class="form-label fw-semibold">Upload PDF Files</label>
                             <input type="file" 
-                                   class="form-control @error('attachment') is-invalid @enderror" 
-                                   id="attachment" 
-                                   name="attachment"
-                                   accept=".pdf,application/pdf">
-                            @error('attachment')
+                                   class="form-control @error('attachments') is-invalid @enderror @error('attachments.*') is-invalid @enderror" 
+                                   id="attachments" 
+                                   name="attachments[]"
+                                   accept=".pdf,application/pdf"
+                                   multiple>
+                            @error('attachments')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @error('attachments.*')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">
                                 <i class="bi bi-file-earmark-pdf me-1 text-danger"></i>
-                                Only PDF files are accepted. Max size: 10MB.
+                                Only PDF files are accepted. Max size: 10MB per file. Maximum 10 files.
                             </div>
                         </div>
                         
-                        {{-- File Preview --}}
-                        <div id="filePreview" class="d-none">
-                            <div class="alert alert-info d-flex align-items-center">
-                                <i class="bi bi-file-earmark me-2"></i>
-                                <span id="fileName"></span>
-                                <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="clearFile()">
-                                    <i class="bi bi-x"></i> Remove
-                                </button>
+                        {{-- Files Preview --}}
+                        <div id="filesPreview" class="d-none">
+                            <div class="border rounded p-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold small">Selected Files:</span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFiles()">
+                                        <i class="bi bi-x"></i> Clear All
+                                    </button>
+                                </div>
+                                <div id="filesList"></div>
                             </div>
                         </div>
                     </div>
@@ -217,41 +223,64 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // File preview
-    const fileInput = document.getElementById('attachment');
-    const filePreview = document.getElementById('filePreview');
-    const fileName = document.getElementById('fileName');
+    // Multiple files preview
+    const filesInput = document.getElementById('attachments');
+    const filesPreview = document.getElementById('filesPreview');
+    const filesList = document.getElementById('filesList');
     
-    fileInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-            const file = this.files[0];
+    filesInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
             const maxSize = 10 * 1024 * 1024; // 10MB
+            let hasError = false;
             
-            if (file.size > maxSize) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'File Too Large',
-                    text: 'The file must not exceed 10MB.'
-                });
+            // Check file sizes
+            for (const file of this.files) {
+                if (file.size > maxSize) {
+                    window.notify.error(`File Too Large: "${file.name}" exceeds 10MB limit.`);
+                    hasError = true;
+                    break;
+                }
+            }
+            
+            if (hasError) {
                 this.value = '';
-                filePreview.classList.add('d-none');
+                filesPreview.classList.add('d-none');
                 return;
             }
             
-            fileName.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
-            filePreview.classList.remove('d-none');
+            if (this.files.length > 10) {
+                window.notify.error('Too Many Files: Maximum 10 files allowed.');
+                this.value = '';
+                filesPreview.classList.add('d-none');
+                return;
+            }
+            
+            // Build files list
+            filesList.innerHTML = '';
+            for (const file of this.files) {
+                const div = document.createElement('div');
+                div.className = 'd-flex align-items-center py-1 border-bottom';
+                div.innerHTML = `
+                    <i class="bi bi-file-pdf text-danger me-2"></i>
+                    <span class="small flex-grow-1 text-truncate">${file.name}</span>
+                    <span class="badge bg-secondary ms-2">${formatFileSize(file.size)}</span>
+                `;
+                filesList.appendChild(div);
+            }
+            
+            filesPreview.classList.remove('d-none');
         } else {
-            filePreview.classList.add('d-none');
+            filesPreview.classList.add('d-none');
         }
     });
 });
 
-function clearFile() {
-    const fileInput = document.getElementById('attachment');
-    const filePreview = document.getElementById('filePreview');
+function clearFiles() {
+    const filesInput = document.getElementById('attachments');
+    const filesPreview = document.getElementById('filesPreview');
     
-    fileInput.value = '';
-    filePreview.classList.add('d-none');
+    filesInput.value = '';
+    filesPreview.classList.add('d-none');
 }
 
 function selectAllRoles() {

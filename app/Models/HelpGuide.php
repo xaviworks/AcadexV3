@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -87,6 +88,14 @@ class HelpGuide extends Model
     }
 
     /**
+     * Get all attachments for this guide
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(HelpGuideAttachment::class)->ordered();
+    }
+
+    /**
      * Scope to get only active guides
      */
     public function scopeActive($query)
@@ -136,11 +145,27 @@ class HelpGuide extends Model
     }
 
     /**
-     * Check if the guide has an attachment
+     * Check if the guide has an attachment (legacy single or new multiple)
      */
     public function hasAttachment(): bool
     {
-        return !empty($this->attachment_path);
+        return !empty($this->attachment_path) || $this->attachments()->exists();
+    }
+
+    /**
+     * Check if the guide has any attachments (new multiple attachments)
+     */
+    public function hasAttachments(): bool
+    {
+        return $this->attachments()->exists();
+    }
+
+    /**
+     * Get all PDF attachments
+     */
+    public function getPdfAttachments()
+    {
+        return $this->attachments()->get()->filter(fn ($a) => $a->isPdf());
     }
 
     /**
