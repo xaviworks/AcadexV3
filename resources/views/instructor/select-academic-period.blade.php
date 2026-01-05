@@ -49,16 +49,25 @@
             }
         @endphp
 
-        {{-- Year Dropdown with Label --}}
+        {{-- Year Dropdown with Label (Custom Dropdown) --}}
         <div class="year-filter mb-3">
-            <label for="yearFilter" class="year-filter-label">
+            <label class="year-filter-label">
                 <i class="bi bi-calendar3 me-1"></i> Academic Year
             </label>
-            <select id="yearFilter" class="form-select" data-default-year="{{ $defaultAcademicYear }}">
-                @foreach($academicYearRanges as $year)
-                    <option value="{{ $year }}" {{ $year === $defaultAcademicYear ? 'selected' : '' }}>{{ $year }}</option>
-                @endforeach
-            </select>
+            <div class="custom-dropdown" id="yearDropdown" data-default-year="{{ $defaultAcademicYear }}">
+                <button type="button" class="dropdown-toggle" id="yearDropdownBtn">
+                    <span class="dropdown-value">{{ $defaultAcademicYear }}</span>
+                    <i class="bi bi-chevron-down dropdown-arrow"></i>
+                </button>
+                <div class="dropdown-menu" id="yearDropdownMenu">
+                    @foreach($academicYearRanges as $year)
+                        <div class="dropdown-item {{ $year === $defaultAcademicYear ? 'selected' : '' }}" data-value="{{ $year }}">
+                            <span>{{ $year }}</span>
+                            <i class="bi bi-check2"></i>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
 
         {{-- Semester Cards --}}
