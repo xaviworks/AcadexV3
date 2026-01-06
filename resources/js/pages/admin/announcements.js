@@ -6,7 +6,28 @@
 
 // Initialize Quill Editor
 let quill;
-const Delta = Quill.import('delta');
+
+// Dynamically load a script and return a promise that resolves when loaded
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      // Script already included in the page
+      // Wait until global Quill is available
+      const check = () => {
+        if (window.Quill) return resolve();
+        setTimeout(check, 50);
+      };
+      return check();
+    }
+
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Failed to load ' + src));
+    document.head.appendChild(s);
+  });
+}
 
 /**
  * Initialize the Quill editor and set up event handlers
@@ -15,7 +36,17 @@ const Delta = Quill.import('delta');
  * @param {string} config.previewUrl - URL for recipient preview
  * @param {string} config.oldMessage - Previously entered message (for validation errors)
  */
-function initAnnouncementEditor(config) {
+async function initAnnouncementEditor(config) {
+    // Ensure Quill library is available; load it dynamically if necessary
+    if (typeof window.Quill === 'undefined') {
+        try {
+            await loadScript('https://cdn.quilljs.com/1.3.7/quill.min.js');
+        } catch (e) {
+            console.error('Failed to load Quill library:', e);
+            return; // Abort initialization
+        }
+    }
+
     // Initialize Quill with toolbar (no image upload)
     quill = new Quill('#message-editor', {
         theme: 'snow',
@@ -35,6 +66,7 @@ function initAnnouncementEditor(config) {
     });
 
     // Block pasted or inserted images (clipboard HTML with <img>)
+    const Delta = Quill.import('delta');
     const clipboard = quill.getModule('clipboard');
     clipboard.addMatcher('IMG', () => new Delta());
 
