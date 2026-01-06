@@ -192,10 +192,22 @@ class NotificationService
 
     /**
      * Get unread notification count for a user.
+     * (Uses read_at - notifications that haven't been clicked/interacted with)
      */
     public static function getUnreadCount(User $user): int
     {
         return $user->unreadNotifications()->count();
+    }
+
+    /**
+     * Get unviewed notification count for a user (for badge display).
+     * (Uses viewed_at - notifications that haven't been seen in dropdown)
+     */
+    public static function getUnviewedCount(User $user): int
+    {
+        return $user->notifications()
+            ->whereNull('viewed_at')
+            ->count();
     }
 
     /**
@@ -211,6 +223,17 @@ class NotificationService
         }
 
         return false;
+    }
+
+    /**
+     * Mark all notifications as viewed (seen in dropdown).
+     * This clears the badge count but doesn't mark them as "read".
+     */
+    public static function markAllAsViewed(User $user): int
+    {
+        return $user->notifications()
+            ->whereNull('viewed_at')
+            ->update(['viewed_at' => now()]);
     }
 
     /**

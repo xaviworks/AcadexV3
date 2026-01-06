@@ -92,11 +92,12 @@ class NotificationController extends Controller
     }
 
     /**
-     * Get unread notifications count (for badge updates).
+     * Get unviewed notifications count (for badge display).
+     * Uses viewed_at to track if user has seen the notification in dropdown.
      */
     public function getUnreadCount(): JsonResponse
     {
-        $count = NotificationService::getUnreadCount(Auth::user());
+        $count = NotificationService::getUnviewedCount(Auth::user());
         return response()->json(['count' => $count]);
     }
 
@@ -122,8 +123,23 @@ class NotificationController extends Controller
 
         return response()->json([
             'notifications' => $notifications,
-            'count' => NotificationService::getUnreadCount($user),
+            'count' => NotificationService::getUnviewedCount($user),
             'has_more' => $result['has_more'],
+        ]);
+    }
+
+    /**
+     * Mark all notifications as viewed (when user opens dropdown).
+     * This clears the badge but doesn't mark as "read".
+     */
+    public function markAsViewed(): JsonResponse
+    {
+        $count = NotificationService::markAllAsViewed(Auth::user());
+
+        return response()->json([
+            'success' => true,
+            'marked_count' => $count,
+            'unviewed_count' => 0,
         ]);
     }
 
@@ -137,6 +153,7 @@ class NotificationController extends Controller
         return response()->json([
             'success' => $success,
             'unread_count' => NotificationService::getUnreadCount(Auth::user()),
+            'unviewed_count' => NotificationService::getUnviewedCount(Auth::user()),
         ]);
     }
 

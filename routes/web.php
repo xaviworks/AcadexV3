@@ -96,6 +96,7 @@ Route::middleware('auth')->prefix('notifications')->name('notifications.')->grou
     Route::get('/unread', [NotificationController::class, 'getUnread'])->name('unread');
     Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
     Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+    Route::post('/viewed', [NotificationController::class, 'markAsViewed'])->name('viewed');
     Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
     Route::get('/preferences', [NotificationController::class, 'getPreferences'])->name('preferences');
     Route::put('/preferences', [NotificationController::class, 'updatePreferences'])->name('preferences.update');
