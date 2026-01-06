@@ -26,7 +26,8 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
 
   curriculumSelect.addEventListener('change', function () {
     if (loadSubjectsBtn) {
-      loadSubjectsBtn.classList.toggle('d-none', !this.value);
+      // Enable/disable button based on selection instead of hiding
+      loadSubjectsBtn.disabled = !this.value;
     }
     subjectsContainer.classList.add('d-none');
     if (yearTabs) yearTabs.innerHTML = '';
@@ -104,84 +105,75 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
             .map((s) => {
               // For GE Coordinator, disable checkboxes for non-GE subjects
               // For Chairperson, disable checkboxes for GE, PD, PE, RS, NSTP subjects
+              // Also disable if already imported
               let isDisabled = false;
-              if (isGECoordinator && !s.is_universal) {
+              let disabledReason = '';
+              
+              if (s.already_imported) {
+                isDisabled = true;
+                disabledReason = 'already-imported';
+              } else if (isGECoordinator && !s.is_universal) {
                 isDisabled = true; // GE Coordinator can only select GE subjects
+                disabledReason = 'restricted';
               } else if (isChairperson && s.is_restricted) {
                 isDisabled = true; // Chairperson cannot select restricted subjects
+                disabledReason = 'restricted';
               }
-              const disabledAttr = isDisabled ? 'disabled' : '';
-              const disabledClass = isDisabled ? 'opacity-50' : '';
-
-              // Use different table layouts for chairperson vs ge coordinator
-              if (isChairperson) {
-                return `
-                            <tr class="${disabledClass}">
-                                <td class="text-center">
-                                    <input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}" ${disabledAttr}>
-                                </td>
-                                <td><strong>${s.subject_code}</strong></td>
-                                <td>${s.subject_description}</td>
-                                <td class="text-center">${s.year_level}</td>
-                                <td class="text-center">${s.semester}</td>
-                            </tr>
-                        `;
+              
+              // Row class - only light background for already imported, no opacity for restricted
+              const rowClass = s.already_imported ? 'table-light' : '';
+              // Text class - muted for disabled items
+              const textClass = isDisabled ? 'text-muted' : '';
+              
+              // Already imported indicator
+              const importedIndicator = s.already_imported 
+                ? '<span class="badge bg-success bg-opacity-75 ms-2" style="font-size: 0.7rem; font-weight: 500;"><i class="bi bi-check2-circle me-1"></i>Already Added</span>' 
+                : '';
+              
+              // Checkbox or checkmark for the select column
+              let selectCell;
+              if (s.already_imported) {
+                selectCell = '<i class="bi bi-check-circle-fill text-success" title="Already added to subjects"></i>';
+              } else if (isDisabled) {
+                // Disabled checkbox - just show empty square icon for restricted subjects
+                selectCell = '<i class="bi bi-square text-muted" title="Managed by another coordinator"></i>';
               } else {
-                return `
-                            <tr class="${disabledClass}">
-                                <td><input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}" ${disabledAttr}></td>
-                                <td>${s.subject_code}</td>
-                                <td>${s.subject_description}</td>
-                                <td>${s.year_level}</td>
-                                <td>${s.semester}</td>
-                            </tr>
-                        `;
+                selectCell = `<input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}">`;
               }
+
+              // Same table layout for both roles
+              return `
+                <tr class="${rowClass}">
+                    <td class="text-center">${selectCell}</td>
+                    <td class="${textClass}"><strong>${s.subject_code}</strong>${importedIndicator}</td>
+                    <td class="${textClass}">${s.subject_description}</td>
+                    <td class="text-center ${textClass}">${s.year_level}</td>
+                    <td class="text-center ${textClass}">${s.semester}</td>
+                </tr>
+              `;
             })
             .join('');
 
-          let table;
-          if (isChairperson) {
-            table = `
-                        <h6 class="semester-heading">
-                            <i class="bi bi-calendar3 me-2"></i>${currentSemester} Semester
-                        </h6>
-                        <div class="table-container">
-                            <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 60px;" class="text-center">Select</th>
-                                        <th style="width: 150px;">Course Code</th>
-                                        <th>Description</th>
-                                        <th style="width: 100px;" class="text-center">Year</th>
-                                        <th style="width: 120px;" class="text-center">Semester</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${rows}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-          } else {
-            table = `
-                        <h5 class="mt-4 text-success">${currentSemester} Semester</h5>
-                        <table class="table table-bordered table-striped align-middle">
-                            <thead class="table-success">
-                                <tr>
-                                    <th></th>
-                                    <th>Course Code</th>
-                                    <th>Description</th>
-                                    <th>Year</th>
-                                    <th>Semester</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${rows}
-                            </tbody>
-                        </table>
-                    `;
-          }
+          // Same table structure for both roles
+          const table = `
+            <h5 class="mt-4 text-success fw-semibold">
+                <i class="bi bi-calendar3 me-2"></i>${currentSemester} Semester
+            </h5>
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-success">
+                    <tr>
+                        <th style="width: 60px;" class="text-center">Select</th>
+                        <th style="width: 180px;">Course Code</th>
+                        <th>Description</th>
+                        <th style="width: 80px;" class="text-center">Year</th>
+                        <th style="width: 100px;" class="text-center">Semester</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                </tbody>
+            </table>
+          `;
 
           if (subjectsTableBody) {
             subjectsTableBody.insertAdjacentHTML(
@@ -259,10 +251,25 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
     }
   });
 
+  // Get the open modal button
+  const openConfirmModalBtn = document.getElementById('openConfirmModalBtn');
+  
   function updateSelectedCount() {
     const count = document.querySelectorAll('.subject-checkbox:checked').length;
     if (selectedCountEl) {
       selectedCountEl.textContent = count;
+    }
+    
+    // Enable/disable confirm button based on selection count
+    if (openConfirmModalBtn) {
+      openConfirmModalBtn.disabled = count === 0;
+      if (count === 0) {
+        openConfirmModalBtn.classList.add('btn-secondary');
+        openConfirmModalBtn.classList.remove('btn-success');
+      } else {
+        openConfirmModalBtn.classList.remove('btn-secondary');
+        openConfirmModalBtn.classList.add('btn-success');
+      }
     }
   }
 
@@ -272,6 +279,29 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
       updateSelectedCount();
     }
   });
+  
+  // Handle confirm button click - validate before opening modal
+  if (openConfirmModalBtn) {
+    openConfirmModalBtn.addEventListener('click', function () {
+      const count = document.querySelectorAll('.subject-checkbox:checked').length;
+      if (count === 0) {
+        // Show warning notification
+        if (window.notify) {
+          window.notify.warning('Please select at least one course to import.');
+        } else {
+          alert('Please select at least one course to import.');
+        }
+        return;
+      }
+      
+      // Open the modal
+      const confirmModal = document.getElementById('confirmModal');
+      if (confirmModal && typeof bootstrap !== 'undefined') {
+        const modal = new bootstrap.Modal(confirmModal);
+        modal.show();
+      }
+    });
+  }
 
   // Confirm Modal Submission
   const submitConfirmBtn = document.getElementById('submitConfirmBtn');

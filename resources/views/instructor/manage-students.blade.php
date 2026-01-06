@@ -591,10 +591,18 @@
 
 {{-- Toast Message --}}
 @if(session('success'))
-    <script>notify.success('{{ session('success') }}');</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.notify?.success(@json(session('success')));
+        });
+    </script>
 @endif
 @if(session('dropped'))
-    <script>notify.error('{{ session('dropped') }}');</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.notify?.error(@json(session('dropped')));
+        });
+    </script>
 @endif
 @endsection
 

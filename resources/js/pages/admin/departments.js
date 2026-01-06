@@ -1,49 +1,21 @@
 /**
  * Admin - Departments Page JavaScript
  *
- * Handles:
- * - DataTable initialization for departments list
- * - Department modal handling
+ * Note: The main functionality has been moved inline to the Blade template
+ * for better integration with Laravel routes and CSRF tokens.
+ * 
+ * This file is kept for backwards compatibility and DataTable initialization fallback.
  */
-
-/**
- * Show the department modal
- */
-function showDepartmentModal() {
-  const modalEl = document.getElementById('departmentModal');
-  if (modalEl) {
-    const bsModal = new bootstrap.Modal(modalEl);
-    bsModal.show();
-  }
-}
 
 /**
  * Initialize the admin departments page
+ * @deprecated Use inline script in departments.blade.php instead
  */
 function initAdminDepartmentsPage() {
-  // Initialize DataTable
-  if ($.fn.DataTable && $('#departmentsTable').length) {
-    $('#departmentsTable').DataTable({
-      order: [[1, 'asc']], // Sort by Code by default
-      language: {
-        search: '_INPUT_',
-        searchPlaceholder: 'Search departments...',
-        lengthMenu: 'Show _MENU_ entries',
-        info: 'Showing _START_ to _END_ of _TOTAL_ departments',
-        emptyTable: 'No departments found',
-      },
-    });
-  }
+  // DataTable initialization is now handled in the Blade template
+  // This function is kept for backwards compatibility
+  console.log('[departments.js] Page initialization delegated to inline script.');
 }
 
-// Export for global access
-window.showDepartmentModal = showDepartmentModal;
-window.showModal = showDepartmentModal; // Alias for onclick handlers
+// Export for global access (backwards compatibility)
 window.initAdminDepartmentsPage = initAdminDepartmentsPage;
-
-// Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function () {
-  if (document.getElementById('departmentsTable')) {
-    initAdminDepartmentsPage();
-  }
-});

@@ -294,9 +294,13 @@ Route::prefix('dean')->middleware(['auth', 'academic.period.set'])->name('dean.'
 
 // Admin Routes
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
+    // Department CRUD
     Route::get('/departments', [AdminController::class, 'departments'])->name('departments');
     Route::get('/departments/create', [AdminController::class, 'createDepartment'])->name('createDepartment');
     Route::post('/departments/store', [AdminController::class, 'storeDepartment'])->name('storeDepartment');
+    Route::put('/departments/{department}', [AdminController::class, 'updateDepartment'])->name('updateDepartment');
+    Route::delete('/departments/{department}', [AdminController::class, 'destroyDepartment'])->name('destroyDepartment');
+    Route::post('/departments/validate-password', [AdminController::class, 'validateDepartmentPassword'])->name('departments.validatePassword');
 
     Route::get('/courses', [AdminController::class, 'courses'])->name('courses');
     Route::get('/courses/create', [AdminController::class, 'createCourse'])->name('createCourse');
