@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\Course;
 use App\Models\FinalGrade;
 use App\Models\UnverifiedUser;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -253,6 +254,12 @@ class ChairpersonController extends Controller
             'instructor_id' => $instructor->id,
             'updated_by' => Auth::id(),
         ]);
+
+        // Notify instructor about new subject assignment
+        $academicPeriod = \App\Models\AcademicPeriod::find($academicPeriodId);
+        $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
+        NotificationService::notifySubjectAssigned($instructor, $subject, $periodLabel);
+
         return redirect()->route('chairperson.assign-subjects')->with('success', 'Subject assigned successfully.');
     }
     public function toggleAssignedSubject(Request $request)
@@ -299,6 +306,12 @@ class ChairpersonController extends Controller
                 'instructor_id' => $instructor->id,
                 'updated_by' => Auth::id(),
             ]);
+
+            // Notify instructor about new subject assignment
+            $academicPeriod = \App\Models\AcademicPeriod::find($academicPeriodId);
+            $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
+            NotificationService::notifySubjectAssigned($instructor, $subject, $periodLabel);
+
             return redirect()->route('chairperson.assign-subjects')->with('success', 'Instructor assigned successfully.');
         } else {
             $subject->update([

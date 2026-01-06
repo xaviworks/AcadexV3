@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Course;
 use App\Models\UnverifiedUser;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -425,6 +426,9 @@ class GECoordinatorController extends Controller
             // Assign the instructor (if not already assigned)
             $subject->instructors()->syncWithoutDetaching([$request->instructor_id]);
             $instructor = User::find($request->instructor_id);
+            
+            // Send notification to the instructor
+            NotificationService::notifySubjectAssigned($instructor, $subject, Auth::user());
             
             return response()->json([
                 'success' => true, 

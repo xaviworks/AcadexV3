@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Chairperson;
 use App\Http\Controllers\Controller;
 use App\Models\UnverifiedUser;
 use App\Models\User;
+use App\Listeners\NotifyUserCreated;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -67,7 +68,7 @@ class AccountApprovalController extends Controller
 
         try {
             // Transfer to the main users table
-            User::create([
+            $newUser = User::create([
                 'first_name'    => $pending->first_name,
                 'middle_name'   => $pending->middle_name,
                 'last_name'     => $pending->last_name,
@@ -78,6 +79,9 @@ class AccountApprovalController extends Controller
                 'role'          => 0, // Instructor role
                 'is_active'     => true,
             ]);
+
+            // Notify admins about new user creation
+            NotifyUserCreated::handle($newUser, Auth::user());
 
             // Remove from unverified list
             $pending->delete();

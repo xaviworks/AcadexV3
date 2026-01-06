@@ -77,71 +77,101 @@
             </div>
         </div>
         
-        <!-- Notification Bell -->
-        @if($showNotifications)
-            <div class="position-relative" x-data="notificationBell" x-init="init()" x-cloak style="min-width: 50px;">
-                <button @click="toggleDropdown" type="button" class="btn btn-link text-white position-relative p-2" style="min-width: 50px; min-height: 50px;">
-                    <i class="bi bi-bell fs-4" style="display: inline-block; line-height: 1;"></i>
-                    <span x-show="unreadCount > 0" 
-                          x-text="unreadCount"
-                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          style="font-size: 0.65rem; min-width: 20px; line-height: 1.4;">
-                    </span>
-                </button>
+        <!-- Notification Bell - Now available for all authenticated users -->
+        <div class="position-relative" x-data="notificationBell" x-init="init()" x-cloak style="min-width: 50px;">
+            <button @click="toggleDropdown" type="button" class="btn btn-link text-white position-relative p-2" style="min-width: 50px; min-height: 50px;">
+                <i class="bi bi-bell fs-4" style="display: inline-block; line-height: 1;"></i>
+                <span x-show="unreadCount > 0" 
+                      x-text="unreadCount > 99 ? '99+' : unreadCount"
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style="font-size: 0.65rem; min-width: 20px; line-height: 1.4;">
+                </span>
+            </button>
+            
+            <!-- Notification Dropdown -->
+            <div x-show="showDropdown" 
+                 @click.away="showDropdown = false"
+                 x-transition:enter="transition ease-out duration-100"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-75"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 x-cloak
+                 class="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg notification-dropdown"
+                 style="width: 400px; max-height: 500px; z-index: 1050;">
                 
-                <!-- Notification Dropdown -->
-                <div x-show="showDropdown" 
-                     @click.away="showDropdown = false"
-                     x-transition:enter="transition ease-out duration-100"
-                     x-transition:enter-start="opacity-0 scale-95"
-                     x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-75"
-                     x-transition:leave-start="opacity-100 scale-100"
-                     x-transition:leave-end="opacity-0 scale-95"
-                     x-cloak
-                     class="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg"
-                     style="width: 380px; max-height: 500px; overflow-y: auto; z-index: 1050;">
-                    
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0 text-dark fw-semibold">Notifications</h6>
-                        <button @click="markAllRead" 
-                                x-show="unreadCount > 0"
-                                class="btn btn-sm btn-link text-primary p-0">
-                            Mark all read
-                        </button>
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center sticky-top bg-white rounded-top-3">
+                    <h6 class="mb-0 text-dark fw-semibold">
+                        <i class="bi bi-bell me-2"></i>Notifications
+                    </h6>
+                    <button @click="markAllRead" 
+                            x-show="unreadCount > 0"
+                            class="btn btn-sm btn-link text-primary p-0">
+                        Mark all read
+                    </button>
+                </div>
+                
+                <div class="notification-dropdown-body" style="max-height: 380px; overflow-y: auto;">
+                    <!-- Loading State -->
+                    <div x-show="loading" class="p-4 text-center text-muted">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>Loading...</span>
                     </div>
                     
-                    <div x-show="notifications.length === 0" class="p-4 text-center text-muted">
+                    <!-- Empty State -->
+                    <div x-show="!loading && notifications.length === 0" class="p-4 text-center text-muted">
                         <i class="bi bi-bell-slash fs-1 d-block mb-2"></i>
                         <small>No new notifications</small>
                     </div>
                     
+                    <!-- Notification Items -->
                     <template x-for="notification in notifications" :key="notification.id">
-                        <div class="notification-item p-3 border-bottom" 
-                             @click="markRead(notification.id)"
+                        <div class="notification-dropdown-item p-3 border-bottom" 
+                             :class="{ 'bg-light': !notification.is_read }"
+                             @click="handleNotificationClick(notification)"
                              style="cursor: pointer;">
                             <div class="d-flex align-items-start">
-                                <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                <div class="flex-grow-1">
-                                    <p class="mb-1 text-dark small" x-text="notification.message"></p>
-                                    <div class="d-flex gap-2 text-muted" style="font-size: 0.75rem;">
-                                        <span><i class="bi bi-book me-1"></i><span x-text="notification.subject_code"></span></span>
-                                        <span><i class="bi bi-calendar me-1"></i><span x-text="notification.term"></span></span>
+                                <!-- Dynamic Icon -->
+                                <div class="notification-icon-sm me-2 mt-1 rounded-circle d-flex align-items-center justify-content-center"
+                                     :class="'notification-icon-' + (notification.color || 'info')"
+                                     style="width: 32px; height: 32px; flex-shrink: 0;">
+                                    <i :class="notification.icon || 'bi-bell'" style="font-size: 0.875rem;"></i>
+                                </div>
+                                <div class="flex-grow-1 min-width-0">
+                                    <!-- Badges -->
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        <span x-show="!notification.is_read" class="badge bg-primary" style="font-size: 0.65rem;">New</span>
+                                        <span class="badge"
+                                              :class="{
+                                                  'bg-success-subtle text-success': notification.category === 'academic',
+                                                  'bg-danger-subtle text-danger': notification.category === 'security',
+                                                  'bg-primary-subtle text-primary': notification.category === 'announcement',
+                                                  'bg-secondary-subtle text-secondary': notification.category === 'system'
+                                              }"
+                                              style="font-size: 0.65rem;"
+                                              x-text="notification.category ? notification.category.charAt(0).toUpperCase() + notification.category.slice(1) : 'General'">
+                                        </span>
                                     </div>
-                                    <small class="text-muted" x-text="notification.created_at"></small>
+                                    <!-- Message -->
+                                    <p class="mb-1 small" 
+                                       :class="{ 'fw-semibold text-dark': !notification.is_read, 'text-secondary': notification.is_read }"
+                                       x-text="notification.message"></p>
+                                    <!-- Time -->
+                                    <small class="text-muted" x-text="notification.time_ago"></small>
                                 </div>
                             </div>
                         </div>
                     </template>
-                    
-                    <div class="p-2 text-center border-top">
-                        <a href="{{ route('notifications.index') }}" class="btn btn-sm btn-link text-primary">
-                            View all notifications
-                        </a>
-                    </div>
+                </div>
+                
+                <div class="p-2 text-center border-top bg-white rounded-bottom-3 sticky-bottom">
+                    <a href="{{ route('notifications.index') }}" class="btn btn-sm btn-link text-primary">
+                        View all notifications
+                    </a>
                 </div>
             </div>
-        @endif
+        </div>
         
         <!-- Profile Dropdown -->
         <div class="dropdown" style="min-width: 200px; position: relative; z-index: 2000;">
@@ -230,13 +260,59 @@ document.addEventListener('alpine:init', () => {
         notifications: [],
         unreadCount: 0,
         showDropdown: false,
+        loading: false,
         
         init() {
-            this.fetchNotifications();
-            // Automatic polling removed - notifications refresh when dropdown is opened
+            this.fetchUnreadCount();
+            // Setup real-time listener if Echo is available
+            this.setupRealtimeListener();
+        },
+        
+        setupRealtimeListener() {
+            if (typeof Echo !== 'undefined' && window.userId) {
+                Echo.private(`App.Models.User.${window.userId}`)
+                    .notification((notification) => {
+                        this.handleNewNotification(notification);
+                    });
+            }
+        },
+        
+        handleNewNotification(notification) {
+            // Increment count
+            this.unreadCount++;
+            
+            // Add to top of list if dropdown is open
+            if (this.showDropdown) {
+                this.notifications.unshift({
+                    id: notification.id,
+                    message: notification.message,
+                    category: notification.category || 'general',
+                    icon: notification.icon || 'bi-bell',
+                    color: notification.color || 'info',
+                    action_url: notification.action_url,
+                    is_read: false,
+                    time_ago: 'Just now',
+                });
+            }
+            
+            // Show toast
+            if (window.notify) {
+                window.notify.info(notification.message);
+            }
+        },
+        
+        async fetchUnreadCount() {
+            try {
+                const response = await fetch('{{ route("notifications.unread-count") }}');
+                const data = await response.json();
+                this.unreadCount = data.count;
+            } catch (error) {
+                console.error('Error fetching notification count:', error);
+            }
         },
         
         async fetchNotifications() {
+            this.loading = true;
             try {
                 const response = await fetch('{{ route("notifications.unread") }}');
                 const data = await response.json();
@@ -244,6 +320,8 @@ document.addEventListener('alpine:init', () => {
                 this.unreadCount = data.count;
             } catch (error) {
                 console.error('Error fetching notifications:', error);
+            } finally {
+                this.loading = false;
             }
         },
         
@@ -254,6 +332,13 @@ document.addEventListener('alpine:init', () => {
             }
         },
         
+        handleNotificationClick(notification) {
+            this.markRead(notification.id);
+            if (notification.action_url) {
+                window.location.href = notification.action_url;
+            }
+        },
+        
         async markRead(notificationId) {
             try {
                 const response = await fetch(`/notifications/${notificationId}/read`, {
@@ -261,11 +346,18 @@ document.addEventListener('alpine:init', () => {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                 });
                 
                 if (response.ok) {
-                    this.fetchNotifications();
+                    const data = await response.json();
+                    // Update local state
+                    const notification = this.notifications.find(n => n.id === notificationId);
+                    if (notification) {
+                        notification.is_read = true;
+                    }
+                    this.unreadCount = data.unread_count;
                 }
             } catch (error) {
                 console.error('Error marking as read:', error);
@@ -279,11 +371,145 @@ document.addEventListener('alpine:init', () => {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                 });
                 
                 if (response.ok) {
-                    this.fetchNotifications();
+                    this.notifications.forEach(n => n.is_read = true);
+                    this.unreadCount = 0;
+                    if (window.notify) {
+                        window.notify.success('All notifications marked as read');
+                    }
+                }
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+            }
+        }
+    }));
+});
+</script>
+@else
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('notificationBell', () => ({
+        notifications: [],
+        unreadCount: 0,
+        showDropdown: false,
+        loading: false,
+        
+        init() {
+            this.fetchUnreadCount();
+            this.setupRealtimeListener();
+        },
+        
+        setupRealtimeListener() {
+            if (typeof Echo !== 'undefined' && window.userId) {
+                Echo.private(`App.Models.User.${window.userId}`)
+                    .notification((notification) => {
+                        this.handleNewNotification(notification);
+                    });
+            }
+        },
+        
+        handleNewNotification(notification) {
+            this.unreadCount++;
+            if (this.showDropdown) {
+                this.notifications.unshift({
+                    id: notification.id,
+                    message: notification.message,
+                    category: notification.category || 'general',
+                    icon: notification.icon || 'bi-bell',
+                    color: notification.color || 'info',
+                    action_url: notification.action_url,
+                    is_read: false,
+                    time_ago: 'Just now',
+                });
+            }
+            if (window.notify) {
+                window.notify.info(notification.message);
+            }
+        },
+        
+        async fetchUnreadCount() {
+            try {
+                const response = await fetch('/notifications/unread-count');
+                const data = await response.json();
+                this.unreadCount = data.count;
+            } catch (error) {
+                console.error('Error fetching notification count:', error);
+            }
+        },
+        
+        async fetchNotifications() {
+            this.loading = true;
+            try {
+                const response = await fetch('/notifications/unread');
+                const data = await response.json();
+                this.notifications = data.notifications;
+                this.unreadCount = data.count;
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        toggleDropdown() {
+            this.showDropdown = !this.showDropdown;
+            if (this.showDropdown) {
+                this.fetchNotifications();
+            }
+        },
+        
+        handleNotificationClick(notification) {
+            this.markRead(notification.id);
+            if (notification.action_url) {
+                window.location.href = notification.action_url;
+            }
+        },
+        
+        async markRead(notificationId) {
+            try {
+                const response = await fetch(`/notifications/${notificationId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const notification = this.notifications.find(n => n.id === notificationId);
+                    if (notification) {
+                        notification.is_read = true;
+                    }
+                    this.unreadCount = data.unread_count;
+                }
+            } catch (error) {
+                console.error('Error marking as read:', error);
+            }
+        },
+        
+        async markAllRead() {
+            try {
+                const response = await fetch('/notifications/read-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+                
+                if (response.ok) {
+                    this.notifications.forEach(n => n.is_read = true);
+                    this.unreadCount = 0;
+                    if (window.notify) {
+                        window.notify.success('All notifications marked as read');
+                    }
                 }
             } catch (error) {
                 console.error('Error marking all as read:', error);

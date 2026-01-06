@@ -1,0 +1,197 @@
+/**
+ * Notification page styles
+ * Supports admin detailed view and user-friendly view
+ */
+
+/* Notification List Container */
+.notification-list {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+}
+
+/* Individual Notification Item */
+.notification-item {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa !important;
+}
+
+.notification-item:last-child {
+    border-bottom: none !important;
+}
+
+/* Unread notification styling */
+.notification-unread {
+    background-color: #f0f7ff !important;
+    border-left: 3px solid var(--bs-primary, #0d6efd);
+}
+
+.notification-unread:hover {
+    background-color: #e6f0ff !important;
+}
+
+/* Notification Icon Styles */
+.notification-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.notification-icon-success {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.notification-icon-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.notification-icon-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.notification-icon-info {
+    background-color: rgba(13, 202, 240, 0.1);
+    color: #0dcaf0;
+}
+
+.notification-icon-primary {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}
+
+.notification-icon-secondary {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+}
+
+/* Extra Details Section (Admin View) */
+.notification-extra {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.75rem;
+    border-left: 3px solid #dee2e6;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.notification-extra::-webkit-scrollbar {
+    width: 4px;
+}
+
+.notification-extra::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.notification-extra::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+}
+
+/* Priority Indicators */
+.notification-item[data-priority="urgent"]::before,
+.notification-item[data-priority="high"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+}
+
+/* Category Badge Colors */
+.badge.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.15) !important;
+}
+
+.badge.bg-danger-subtle {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+}
+
+.badge.bg-primary-subtle {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
+.badge.bg-secondary-subtle {
+    background-color: rgba(108, 117, 125, 0.15) !important;
+}
+
+/* Min width helper */
+.min-width-0 {
+    min-width: 0;
+}
+
+/* Loading and empty states */
+.notification-list .spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .notification-item {
+        padding: 1rem !important;
+    }
+    
+    .notification-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .notification-extra {
+        display: none; /* Hide admin details on mobile */
+    }
+    
+    .d-flex.gap-2.flex-wrap {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* Smooth scroll behavior */
+.notification-list {
+    scroll-behavior: smooth;
+}
+
+/* Animation for new notifications */
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-item.new-notification {
+    animation: slideInFromTop 0.3s ease-out;
+}
+
+/* Dropdown menu improvements */
+.notification-item .dropdown-menu {
+    min-width: 160px;
+}
+
+.notification-item .dropdown-item {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Action button styling */
+.notification-item .btn-outline-primary {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.75rem;
+}

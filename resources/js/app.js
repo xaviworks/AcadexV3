@@ -3,12 +3,16 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import Alpine from 'alpinejs';
+import intersect from '@alpinejs/intersect';
 import { getDeviceFingerprint } from './fingerprint';
 import './stores'; // Initialize Alpine stores
 import './store-helpers'; // Global helper functions
 
 // Import page-specific scripts (auto-initialize on DOMContentLoaded)
 import './pages/index.js';
+
+// Register Alpine plugins
+Alpine.plugin(intersect);
 
 window.Alpine = Alpine;
 

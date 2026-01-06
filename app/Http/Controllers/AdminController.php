@@ -3661,7 +3661,10 @@ class AdminController extends Controller
             }
         }
 
-        User::create($userData);
+        $newUser = User::create($userData);
+
+        // Send security notification to admins about new user creation
+        \App\Listeners\NotifyUserCreated::handle($newUser, Auth::user());
 
         return redirect()->route('admin.users')->with('success', 'User created successfully.');
     }

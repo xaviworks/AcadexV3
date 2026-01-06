@@ -12,7 +12,7 @@ use App\Models\FinalGrade;
 use App\Traits\GradeCalculationTrait;
 use App\Traits\ActivityManagementTrait;
 use App\Services\GradesFormulaService;
-use App\Services\GradeNotificationService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -327,7 +327,7 @@ class GradeController extends Controller
         
         // Only notify if at least one student was graded
         if ($studentsGraded > 0) {
-            GradeNotificationService::notifyGradeSaved($subject->id, $request->term, $studentsGraded);
+            NotificationService::notifyGradeSubmitted($subject, $request->term, $studentsGraded);
         }
         
         // Build success message and respond appropriately based on the request type
