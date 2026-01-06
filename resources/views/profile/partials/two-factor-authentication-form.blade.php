@@ -40,16 +40,17 @@
                         <p class="text-sm font-medium text-gray-700 mb-2">{{ __('QR Code') }}</p>
                         <div class="relative inline-block" id="qr-container">
                             <!-- Single QR Code with blur toggle -->
-                            <img 
+                            <div 
                                 id="qr-image" 
-                                src="{!! (new PragmaRX\Google2FAQRCode\Google2FA())->getQRCodeInline(
+                                class="border border-gray-300 rounded p-2 transition-all duration-300 [&>svg]:w-[200px] [&>svg]:h-[200px]" 
+                                style="filter: blur(10px);">
+                                {!! (new PragmaRX\Google2FAQRCode\Google2FA())->getQRCodeInline(
                                     config('app.name'),
                                     auth()->user()->email,
-                                    auth()->user()->two_factor_secret
-                                ) !!}" 
-                                alt="QR Code" 
-                                class="border border-gray-300 rounded p-2 transition-all duration-300" 
-                                style="filter: blur(10px);">
+                                    auth()->user()->two_factor_secret,
+                                    200
+                                ) !!}
+                            </div>
                             
                             <!-- Overlay with reveal button -->
                             <div id="qr-overlay" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded">
