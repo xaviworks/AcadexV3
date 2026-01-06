@@ -104,23 +104,38 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
             .map((s) => {
               // For GE Coordinator, disable checkboxes for non-GE subjects
               // For Chairperson, disable checkboxes for GE, PD, PE, RS, NSTP subjects
+              // Also disable if already imported
               let isDisabled = false;
-              if (isGECoordinator && !s.is_universal) {
+              let disabledReason = '';
+              
+              if (s.already_imported) {
+                isDisabled = true;
+                disabledReason = 'already-imported';
+              } else if (isGECoordinator && !s.is_universal) {
                 isDisabled = true; // GE Coordinator can only select GE subjects
+                disabledReason = 'restricted';
               } else if (isChairperson && s.is_restricted) {
                 isDisabled = true; // Chairperson cannot select restricted subjects
+                disabledReason = 'restricted';
               }
               const disabledAttr = isDisabled ? 'disabled' : '';
-              const disabledClass = isDisabled ? 'opacity-50' : '';
+              const rowClass = s.already_imported ? 'table-light text-muted' : (isDisabled ? 'opacity-50' : '');
+              
+              // Already imported indicator - more user-friendly
+              const importedIndicator = s.already_imported 
+                ? '<span class="badge bg-success bg-opacity-75 ms-2" style="font-size: 0.7rem; font-weight: 500;"><i class="bi bi-check2-circle me-1"></i>Already Added</span>' 
+                : '';
 
               // Use different table layouts for chairperson vs ge coordinator
               if (isChairperson) {
                 return `
-                            <tr class="${disabledClass}">
+                            <tr class="${rowClass}">
                                 <td class="text-center">
-                                    <input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}" ${disabledAttr}>
+                                    ${s.already_imported 
+                                      ? '<i class="bi bi-check-circle-fill text-success" title="Already added to subjects"></i>' 
+                                      : `<input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}" ${disabledAttr}>`}
                                 </td>
-                                <td><strong>${s.subject_code}</strong></td>
+                                <td><strong>${s.subject_code}</strong>${importedIndicator}</td>
                                 <td>${s.subject_description}</td>
                                 <td class="text-center">${s.year_level}</td>
                                 <td class="text-center">${s.semester}</td>
@@ -128,9 +143,13 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
                         `;
               } else {
                 return `
-                            <tr class="${disabledClass}">
-                                <td><input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}" ${disabledAttr}></td>
-                                <td>${s.subject_code}</td>
+                            <tr class="${rowClass}">
+                                <td>
+                                    ${s.already_imported 
+                                      ? '<i class="bi bi-check-circle-fill text-success" title="Already added to subjects"></i>' 
+                                      : `<input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}" ${disabledAttr}>`}
+                                </td>
+                                <td>${s.subject_code}${importedIndicator}</td>
                                 <td>${s.subject_description}</td>
                                 <td>${s.year_level}</td>
                                 <td>${s.semester}</td>

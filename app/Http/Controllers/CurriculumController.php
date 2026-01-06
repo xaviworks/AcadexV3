@@ -186,7 +186,15 @@ class CurriculumController extends Controller
             ->orderBy('semester')
             ->get();
 
-        $subjects = $curriculumSubjects->map(function($cs) {
+        // Get current academic period for checking already imported subjects
+        $academicPeriodId = session('active_academic_period_id');
+        
+        // Get all already imported subject codes for this academic period
+        $importedSubjectCodes = Subject::where('academic_period_id', $academicPeriodId)
+            ->pluck('subject_code')
+            ->toArray();
+        
+        $subjects = $curriculumSubjects->map(function($cs) use ($importedSubjectCodes) {
             // Mark as GE if subject code starts with 'GE', 'NSTP', 'PD', 'PE', 'RS' or contains 'General Education'
             $isGE = stripos($cs->subject_code, 'GE') === 0 || 
                     stripos($cs->subject_code, 'NSTP') === 0 ||
@@ -204,6 +212,9 @@ class CurriculumController extends Controller
                 $isRestricted = $isGE;
             }
             
+            // Check if subject is already imported
+            $alreadyImported = in_array($cs->subject_code, $importedSubjectCodes);
+            
             return [
                 'id' => $cs->id,
                 'subject_code' => $cs->subject_code,
@@ -212,6 +223,7 @@ class CurriculumController extends Controller
                 'semester' => $cs->semester,
                 'is_universal' => $isGE,
                 'is_restricted' => $isRestricted,
+                'already_imported' => $alreadyImported,
             ];
         });
 
