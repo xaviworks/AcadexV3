@@ -261,12 +261,24 @@ document.addEventListener('alpine:init', () => {
         unreadCount: 0,
         showDropdown: false,
         loading: false,
+        lastPollTimestamp: null,
+        pollInterval: null,
+        seenNotificationIds: new Set(),
         
         init() {
             // Fetch unviewed count from server (persisted in database)
             this.fetchUnreadCount();
-            // Setup real-time listener if Echo is available
+            // Setup real-time listener if Echo is available, otherwise use polling
             this.setupRealtimeListener();
+            // Start polling for live updates (every 10 seconds)
+            this.startPolling();
+        },
+        
+        destroy() {
+            // Clean up polling interval when component is destroyed
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+            }
         },
         
         setupRealtimeListener() {
@@ -278,27 +290,85 @@ document.addEventListener('alpine:init', () => {
             }
         },
         
-        handleNewNotification(notification) {
-            // Increment count (new notifications always show badge)
-            this.unreadCount++;
+        startPolling() {
+            // Initialize with current timestamp to only get new notifications
+            this.lastPollTimestamp = new Date().toISOString();
             
+            // Poll every 10 seconds for new notifications
+            this.pollInterval = setInterval(() => {
+                this.pollForNewNotifications();
+            }, 10000);
+        },
+        
+        async pollForNewNotifications() {
+            try {
+                const url = new URL('{{ route("notifications.poll") }}', window.location.origin);
+                if (this.lastPollTimestamp) {
+                    url.searchParams.set('since', this.lastPollTimestamp);
+                }
+                
+                const response = await fetch(url.toString());
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                // Update badge count
+                this.unreadCount = data.count;
+                
+                // Process new notifications
+                if (data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach(notification => {
+                        // Only show toast for truly new notifications we haven't seen
+                        if (!this.seenNotificationIds.has(notification.id)) {
+                            this.seenNotificationIds.add(notification.id);
+                            this.handleNewNotification(notification);
+                        }
+                    });
+                    
+                    // Update timestamp for next poll
+                    if (data.latest_timestamp) {
+                        this.lastPollTimestamp = data.latest_timestamp;
+                    }
+                }
+            } catch (error) {
+                console.error('Error polling for notifications:', error);
+            }
+        },
+        
+        handleNewNotification(notification) {
             // Add to top of list if dropdown is open
             if (this.showDropdown) {
-                this.notifications.unshift({
-                    id: notification.id,
-                    message: notification.message,
-                    category: notification.category || 'general',
-                    icon: notification.icon || 'bi-bell',
-                    color: notification.color || 'info',
-                    action_url: notification.action_url,
-                    is_read: false,
-                    time_ago: 'Just now',
-                });
+                // Check if notification already exists in the list
+                const exists = this.notifications.some(n => n.id === notification.id);
+                if (!exists) {
+                    this.notifications.unshift({
+                        id: notification.id,
+                        message: notification.message,
+                        category: notification.category || 'general',
+                        icon: notification.icon || 'bi-bell',
+                        color: notification.color || 'info',
+                        action_url: notification.action_url,
+                        is_read: false,
+                        time_ago: 'Just now',
+                    });
+                }
             }
             
-            // Show toast
+            // Show toast notification with category-specific styling
             if (window.notify) {
-                window.notify.info(notification.message);
+                const category = notification.category || 'general';
+                const priority = notification.priority || 'normal';
+                
+                // Use different toast types based on category/priority
+                if (priority === 'urgent' || priority === 'high') {
+                    window.notify.warning(notification.message, 8000);
+                } else if (category === 'security') {
+                    window.notify.error(notification.message, 7000);
+                } else if (category === 'academic') {
+                    window.notify.success(notification.message, 6000);
+                } else {
+                    window.notify.info(notification.message, 5000);
+                }
             }
         },
         
@@ -318,6 +388,8 @@ document.addEventListener('alpine:init', () => {
                 const response = await fetch('{{ route("notifications.unread") }}');
                 const data = await response.json();
                 this.notifications = data.notifications;
+                // Mark all fetched notifications as seen
+                this.notifications.forEach(n => this.seenNotificationIds.add(n.id));
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             } finally {
@@ -416,11 +488,23 @@ document.addEventListener('alpine:init', () => {
         unreadCount: 0,
         showDropdown: false,
         loading: false,
+        lastPollTimestamp: null,
+        pollInterval: null,
+        seenNotificationIds: new Set(),
         
         init() {
             // Fetch unviewed count from server (persisted in database)
             this.fetchUnreadCount();
+            // Setup real-time listener if Echo is available
             this.setupRealtimeListener();
+            // Start polling for live updates (every 10 seconds)
+            this.startPolling();
+        },
+        
+        destroy() {
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+            }
         },
         
         setupRealtimeListener() {
@@ -432,23 +516,75 @@ document.addEventListener('alpine:init', () => {
             }
         },
         
-        handleNewNotification(notification) {
-            // Increment count (new notifications always show badge)
-            this.unreadCount++;
-            if (this.showDropdown) {
-                this.notifications.unshift({
-                    id: notification.id,
-                    message: notification.message,
-                    category: notification.category || 'general',
-                    icon: notification.icon || 'bi-bell',
-                    color: notification.color || 'info',
-                    action_url: notification.action_url,
-                    is_read: false,
-                    time_ago: 'Just now',
-                });
+        startPolling() {
+            this.lastPollTimestamp = new Date().toISOString();
+            
+            this.pollInterval = setInterval(() => {
+                this.pollForNewNotifications();
+            }, 10000);
+        },
+        
+        async pollForNewNotifications() {
+            try {
+                const url = new URL('/notifications/poll', window.location.origin);
+                if (this.lastPollTimestamp) {
+                    url.searchParams.set('since', this.lastPollTimestamp);
+                }
+                
+                const response = await fetch(url.toString());
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                this.unreadCount = data.count;
+                
+                if (data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach(notification => {
+                        if (!this.seenNotificationIds.has(notification.id)) {
+                            this.seenNotificationIds.add(notification.id);
+                            this.handleNewNotification(notification);
+                        }
+                    });
+                    
+                    if (data.latest_timestamp) {
+                        this.lastPollTimestamp = data.latest_timestamp;
+                    }
+                }
+            } catch (error) {
+                console.error('Error polling for notifications:', error);
             }
+        },
+        
+        handleNewNotification(notification) {
+            if (this.showDropdown) {
+                const exists = this.notifications.some(n => n.id === notification.id);
+                if (!exists) {
+                    this.notifications.unshift({
+                        id: notification.id,
+                        message: notification.message,
+                        category: notification.category || 'general',
+                        icon: notification.icon || 'bi-bell',
+                        color: notification.color || 'info',
+                        action_url: notification.action_url,
+                        is_read: false,
+                        time_ago: 'Just now',
+                    });
+                }
+            }
+            
             if (window.notify) {
-                window.notify.info(notification.message);
+                const category = notification.category || 'general';
+                const priority = notification.priority || 'normal';
+                
+                if (priority === 'urgent' || priority === 'high') {
+                    window.notify.warning(notification.message, 8000);
+                } else if (category === 'security') {
+                    window.notify.error(notification.message, 7000);
+                } else if (category === 'academic') {
+                    window.notify.success(notification.message, 6000);
+                } else {
+                    window.notify.info(notification.message, 5000);
+                }
             }
         },
         
@@ -468,6 +604,7 @@ document.addEventListener('alpine:init', () => {
                 const response = await fetch('/notifications/unread');
                 const data = await response.json();
                 this.notifications = data.notifications;
+                this.notifications.forEach(n => this.seenNotificationIds.add(n.id));
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             } finally {
@@ -478,7 +615,6 @@ document.addEventListener('alpine:init', () => {
         async toggleDropdown() {
             this.showDropdown = !this.showDropdown;
             if (this.showDropdown) {
-                // Mark all as viewed in database (clears badge count)
                 await this.markAllViewed();
                 this.fetchNotifications();
             }

@@ -94,6 +94,7 @@ Route::middleware('auth')->prefix('notifications')->name('notifications.')->grou
     Route::get('/paginate', [NotificationController::class, 'paginate'])->name('paginate');
     Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
     Route::get('/unread', [NotificationController::class, 'getUnread'])->name('unread');
+    Route::get('/poll', [NotificationController::class, 'poll'])->name('poll');
     Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
     Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
     Route::post('/viewed', [NotificationController::class, 'markAsViewed'])->name('viewed');

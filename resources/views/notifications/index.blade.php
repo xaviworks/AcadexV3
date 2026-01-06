@@ -326,7 +326,7 @@
 <script>
 /**
  * Notification page Alpine.js component
- * Handles infinite scroll, mark as read, and real-time updates
+ * Handles infinite scroll, mark as read, and real-time updates with polling
  */
 function notificationPageComponent(config) {
     return {
@@ -337,10 +337,25 @@ function notificationPageComponent(config) {
         currentCategory: config.currentCategory || 'all',
         loading: false,
         loadingMore: false,
+        lastPollTimestamp: null,
+        pollInterval: null,
+        seenNotificationIds: new Set(),
 
         init() {
+            // Mark initial items as seen
+            this.items.forEach(item => this.seenNotificationIds.add(item.id));
+            
             // Listen for real-time notification events
             this.setupRealtimeListener();
+            
+            // Start polling for live updates
+            this.startPolling();
+        },
+        
+        destroy() {
+            if (this.pollInterval) {
+                clearInterval(this.pollInterval);
+            }
         },
 
         setupRealtimeListener() {
@@ -351,8 +366,52 @@ function notificationPageComponent(config) {
                     });
             }
         },
+        
+        startPolling() {
+            this.lastPollTimestamp = new Date().toISOString();
+            
+            // Poll every 10 seconds
+            this.pollInterval = setInterval(() => {
+                this.pollForNewNotifications();
+            }, 10000);
+        },
+        
+        async pollForNewNotifications() {
+            try {
+                const url = new URL('/notifications/poll', window.location.origin);
+                if (this.lastPollTimestamp) {
+                    url.searchParams.set('since', this.lastPollTimestamp);
+                }
+                
+                const response = await fetch(url.toString());
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                this.unreadCount = data.count;
+                
+                if (data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach(notification => {
+                        if (!this.seenNotificationIds.has(notification.id)) {
+                            this.seenNotificationIds.add(notification.id);
+                            this.handleNewNotification(notification);
+                        }
+                    });
+                    
+                    if (data.latest_timestamp) {
+                        this.lastPollTimestamp = data.latest_timestamp;
+                    }
+                }
+            } catch (error) {
+                console.error('Error polling for notifications:', error);
+            }
+        },
 
         handleNewNotification(notification) {
+            // Check if already in list
+            const exists = this.items.some(item => item.id === notification.id);
+            if (exists) return;
+            
             const newItem = {
                 id: notification.id,
                 type: notification.type,
@@ -376,9 +435,21 @@ function notificationPageComponent(config) {
             }
             
             this.items.unshift(newItem);
-            this.unreadCount++;
+            
+            // Show toast with category-specific styling
             if (window.notify) {
-                window.notify.info(notification.message);
+                const category = notification.category || 'general';
+                const priority = notification.priority || 'normal';
+                
+                if (priority === 'urgent' || priority === 'high') {
+                    window.notify.warning(notification.message, 8000);
+                } else if (category === 'security') {
+                    window.notify.error(notification.message, 7000);
+                } else if (category === 'academic') {
+                    window.notify.success(notification.message, 6000);
+                } else {
+                    window.notify.info(notification.message, 5000);
+                }
             }
         },
 

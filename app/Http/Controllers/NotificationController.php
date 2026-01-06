@@ -129,6 +129,36 @@ class NotificationController extends Controller
     }
 
     /**
+     * Poll for new notifications since a given timestamp.
+     * Used for live updates without WebSockets.
+     */
+    public function poll(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $since = $request->get('since');
+        
+        $query = $user->notifications()
+            ->orderBy('created_at', 'desc')
+            ->limit(10);
+        
+        if ($since) {
+            $query->where('created_at', '>', $since);
+        }
+        
+        $notifications = $query->get();
+        
+        $formatted = $notifications->map(function ($notification) use ($user) {
+            return NotificationService::formatForResponse($notification, $user);
+        });
+        
+        return response()->json([
+            'notifications' => $formatted,
+            'count' => NotificationService::getUnviewedCount($user),
+            'latest_timestamp' => $notifications->first()?->created_at?->toIso8601String(),
+        ]);
+    }
+
+    /**
      * Mark all notifications as viewed (when user opens dropdown).
      * This clears the badge but doesn't mark as "read".
      */
