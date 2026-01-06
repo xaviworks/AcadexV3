@@ -94,9 +94,6 @@
                     @endif
                 </p>
                 <div class="d-flex justify-content-center gap-3">
-                    <a href="{{ route('vpaa.dashboard') }}" class="btn btn-success">
-                        <i class="bi bi-house me-2"></i>Go to Dashboard
-                    </a>
                     <a href="{{ route('vpaa.course-outcome-attainment') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-clockwise me-2"></i>Refresh
                     </a>

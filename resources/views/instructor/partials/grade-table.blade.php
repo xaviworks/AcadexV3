@@ -247,6 +247,7 @@
                 <span class="small fw-semibold">Unsaved changes</span>
             </div>
         </div>
+        <!-- Container for validation error messages only -->
         <div id="unsavedNotificationContainer" class="me-3"></div>
         <button type="submit" id="saveGradesBtn" class="btn btn-success px-4 py-2 d-flex align-items-center gap-2 position-relative" disabled x-data>
             <i class="bi bi-save"></i>

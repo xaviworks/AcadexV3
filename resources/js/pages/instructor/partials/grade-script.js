@@ -131,26 +131,20 @@ export function bindGradeInputEvents() {
       // Update notification
       const container = document.getElementById('unsavedNotificationContainer');
 
-      if (hasChanges) {
-        let message = 'You have unsaved changes';
-        if (hasInvalidInputs) {
-          message = 'Please correct invalid grades before saving';
-        }
-
-        // Compact notification for beside save button
-        const compactNotificationHTML = `
+      // Only show notification for validation errors (Alpine handles unsaved changes indicator)
+      if (hasInvalidInputs) {
+        const errorNotificationHTML = `
                     <div class="unsaved-notification-compact">
-                        <i class="bi ${hasInvalidInputs ? 'bi-exclamation-triangle-fill text-danger' : 'bi-info-circle-fill text-warning'}"></i>
-                        <span class="small">${message}</span>
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                        <span class="small">Please correct invalid grades before saving</span>
                     </div>
                 `;
 
-        // Show beside save button only
         if (container) {
-          container.innerHTML = compactNotificationHTML;
+          container.innerHTML = errorNotificationHTML;
         }
       } else {
-        // Clear notification
+        // Clear validation error notification
         if (container) {
           container.innerHTML = '';
         }
