@@ -10,77 +10,26 @@ let quill;
 /**
  * Initialize the Quill editor and set up event handlers
  * @param {Object} config - Configuration object from Blade template
- * @param {string} config.csrfToken - CSRF token for uploads
- * @param {string} config.uploadUrl - URL for image uploads
+ * @param {string} config.csrfToken - CSRF token
  * @param {string} config.previewUrl - URL for recipient preview
  * @param {string} config.oldMessage - Previously entered message (for validation errors)
  */
 function initAnnouncementEditor(config) {
-    // Custom image handler
-    function imageHandler() {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = async () => {
-            const file = input.files[0];
-            if (file) {
-                // Show upload progress
-                document.getElementById('image-upload-progress').classList.add('active');
-                
-                try {
-                    // Create FormData for upload
-                    const formData = new FormData();
-                    formData.append('image', file);
-                    formData.append('_token', config.csrfToken);
-
-                    // Upload to server
-                    const response = await fetch(config.uploadUrl, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Upload failed');
-                    }
-
-                    const data = await response.json();
-                    
-                    // Insert image into editor
-                    const range = quill.getSelection(true);
-                    quill.insertEmbed(range.index, 'image', data.url);
-                    quill.setSelection(range.index + 1);
-                } catch (error) {
-                    console.error('Image upload failed:', error);
-                    alert('Failed to upload image. Please try again.');
-                } finally {
-                    document.getElementById('image-upload-progress').classList.remove('active');
-                }
-            }
-        };
-    }
-
-    // Initialize Quill with custom toolbar
+    // Initialize Quill with toolbar (no image upload)
     quill = new Quill('#message-editor', {
         theme: 'snow',
         placeholder: 'Enter your announcement message...',
         modules: {
-            toolbar: {
-                container: [
-                    [{ 'font': [] }],
-                    [{ 'size': ['small', false, 'large', 'huge'] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'color': [] }, { 'background': [] }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'align': [] }],
-                    ['link', 'image'],
-                    ['clean']
-                ],
-                handlers: {
-                    image: imageHandler
-                }
-            }
+            toolbar: [
+                [{ 'font': [] }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link'],
+                ['clean']
+            ]
         }
     });
 
@@ -123,7 +72,6 @@ function initAnnouncementEditor(config) {
  * @param {string} config.oldTitle - Previously entered title
  * @param {string} config.oldTargetType - Previously selected target type
  * @param {string} config.oldTargetId - Previously selected target ID
- * @param {boolean} config.hasOldActionUrl - Whether there was a previous action URL
  * @param {Array} config.users - Array of user objects
  */
 function announcementForm(config) {
@@ -138,7 +86,6 @@ function announcementForm(config) {
         filteredUsers: config.users || [],
         recipientCount: 0,
         recipientPreview: [],
-        showActionFields: config.hasOldActionUrl || false,
         isSubmitting: false,
 
         get canSubmit() {

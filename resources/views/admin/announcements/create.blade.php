@@ -11,13 +11,11 @@
 <script>
     window.announcementConfig = {
         csrfToken: '{{ csrf_token() }}',
-        uploadUrl: '{{ route("admin.announcements.upload-image") }}',
         previewUrl: '{{ route("admin.announcements.preview") }}',
         oldTitle: @json(old('title', '')),
         oldMessage: @json(old('message', '')),
         oldTargetType: @json(old('target_type', '')),
         oldTargetId: @json(old('target_id', '')),
-        hasOldActionUrl: {{ old('action_url') ? 'true' : 'false' }},
         users: @json($users)
     };
 </script>
@@ -82,10 +80,6 @@
                             <div id="message-editor" role="textbox" aria-labelledby="message-label" aria-multiline="true"></div>
                         </div>
                         <input type="hidden" name="message" id="message-input">
-                        <div class="image-upload-progress" id="image-upload-progress">
-                            <span class="spinner-border spinner-border-sm" role="status"></span>
-                            <span>Uploading image...</span>
-                        </div>
                         <div class="character-count" :class="{ 'warning': messageLength > 1500, 'danger': messageLength > 1800 }">
                             <span x-text="messageLength"></span>/2000 characters
                         </div>
@@ -262,43 +256,6 @@
                         </div>
                         <div class="recipient-more" x-show="recipientCount > 5">
                             ... and <span x-text="recipientCount - 5"></span> more
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Optional Action Button --}}
-                <div class="form-section">
-                    <div class="action-fields">
-                        <label class="action-fields-toggle" @click="showActionFields = !showActionFields">
-                            <i class="bi" :class="showActionFields ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
-                            <span>Add Action Button (Optional)</span>
-                        </label>
-                        <div class="action-fields-content" :class="{ 'active': showActionFields }">
-                            <div class="row">
-                                <div class="col-md-8 mb-3">
-                                    <label for="action_url" class="form-label">Action URL</label>
-                                    <input 
-                                        type="url" 
-                                        class="form-control" 
-                                        id="action_url" 
-                                        name="action_url" 
-                                        placeholder="https://..."
-                                        value="{{ old('action_url') }}"
-                                    >
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="action_text" class="form-label">Button Text</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        id="action_text" 
-                                        name="action_text" 
-                                        placeholder="e.g., View Details"
-                                        maxlength="100"
-                                        value="{{ old('action_text') }}"
-                                    >
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

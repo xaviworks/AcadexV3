@@ -373,7 +373,6 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/create', [\App\Http\Controllers\Admin\AnnouncementController::class, 'create'])->name('create');
         Route::post('/store', [\App\Http\Controllers\Admin\AnnouncementController::class, 'store'])->name('store');
         Route::post('/preview', [\App\Http\Controllers\Admin\AnnouncementController::class, 'getTargetUsers'])->name('preview');
-        Route::post('/upload-image', [\App\Http\Controllers\Admin\AnnouncementController::class, 'uploadImage'])->name('upload-image');
     });
 });
 

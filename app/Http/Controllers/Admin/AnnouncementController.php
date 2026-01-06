@@ -80,8 +80,6 @@ class AnnouncementController extends Controller
             'priority' => 'required|in:low,normal,high,urgent',
             'target_type' => 'required|in:specific_user,department,program,role',
             'target_id' => 'required',
-            'action_url' => 'nullable|url|max:500',
-            'action_text' => 'nullable|string|max:100',
         ]);
 
         // Validate plain text length (strip HTML tags)
@@ -174,8 +172,8 @@ class AnnouncementController extends Controller
                     $validated['target_type'],
                     $targetName,
                     $validated['priority'],
-                    $validated['action_url'] ?? null,
-                    $validated['action_text'] ?? null,
+                    null, // action_url removed
+                    null, // action_text removed
                     $metadata
                 )
             );
@@ -266,50 +264,5 @@ class AnnouncementController extends Controller
             'count' => $count,
             'preview' => $preview,
         ]);
-    }
-
-    /**
-     * Upload an image for the announcement editor.
-     */
-    public function uploadImage(Request $request)
-    {
-        Gate::authorize('admin');
-
-        $validated = $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,gif,webp|max:2048', // 2MB max
-        ]);
-
-        try {
-            $file = $request->file('image');
-            $filename = 'announcement_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            
-            // Store in public storage for accessibility
-            $path = $file->storeAs('announcements', $filename, 'public');
-            
-            // Generate public URL
-            $url = asset('storage/' . $path);
-
-            Log::info('Announcement image uploaded', [
-                'admin_id' => Auth::id(),
-                'filename' => $filename,
-                'size' => $file->getSize(),
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'url' => $url,
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Failed to upload announcement image', [
-                'error' => $e->getMessage(),
-                'admin_id' => Auth::id(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to upload image.',
-            ], 500);
-        }
     }
 }
