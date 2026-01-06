@@ -209,6 +209,7 @@ BaseNotification (abstract)
 ├── GradeSubmitted
 ├── SubjectAssigned
 ├── InstructorAnnouncement
+├── AdminAnnouncement
 ├── SecurityAlert
 └── SystemNotification
 ```
@@ -299,6 +300,46 @@ new InstructorAnnouncement(
     ?string $actionUrl,
     ?string $actionText
 );
+```
+
+### AdminAnnouncement
+
+Location: `app/Notifications/AdminAnnouncement.php`
+
+For sending targeted announcements from administrators. Supports flexible targeting options.
+
+**Target Types:**
+- `AdminAnnouncement::TARGET_SPECIFIC_USER` — Send to a single user
+- `AdminAnnouncement::TARGET_DEPARTMENT` — Send to all users in a department
+- `AdminAnnouncement::TARGET_PROGRAM` — Send to all users in a program/course
+- `AdminAnnouncement::TARGET_ROLE` — Send to all users with a specific role
+
+```php
+new AdminAnnouncement(
+    User $sender,           // Admin sending the announcement
+    string $title,          // Announcement title
+    string $message,        // Full message content
+    string $targetType,     // One of the TARGET_* constants
+    ?string $targetName,    // Name of target (dept name, role name, etc.)
+    string $priority,       // low, normal, high, urgent
+    ?string $actionUrl,     // Optional action link
+    ?string $actionText,    // Optional button text
+    array $metadata         // Additional data (recipient_count, sent_at)
+);
+```
+
+**Example Messages:**
+
+*Admin View:*
+```
+[Admin Announcement - high] From John Admin (Admin, ID: 1) to Department 
+(College of Computer Studies) (15 recipients): System Update - Please update 
+your profile information by end of week.
+```
+
+*User View:*
+```
+📢 Admin Announcement: System Update
 ```
 
 ### SystemNotification
@@ -450,6 +491,53 @@ Features:
 4. **Expandable Details:** Admin users can expand notifications for technical details
 5. **Bulk Actions:** Mark all as read, clear all read notifications
 6. **Individual Actions:** Mark as read, delete, follow action link
+
+### Admin Announcement Page
+
+Located at `/admin/announcements/create` (route: `admin.announcements.create`)
+
+Accessible via: **Admin Sidebar → System Monitoring → Announcements**
+
+This dedicated interface allows administrators to send targeted announcements to specific audiences.
+
+#### Features
+
+1. **Message Composition**
+   - Title field (max 255 characters) with live character count
+   - Message body (max 2000 characters) with live character count
+   - Visual warnings when approaching limits
+
+2. **Priority Selection**
+   - **Low** (🔵) — General information, no urgency
+   - **Normal** (🟢) — Standard announcements
+   - **High** (🟡) — Important, requires attention
+   - **Urgent** (🔴) — Critical, immediate action needed
+
+3. **Target Audience Options**
+   - **Specific User** — Search and select a single user by name or email
+   - **Department** — All active users in a department
+   - **Program** — All active users in a program/course
+   - **Role** — All active users with a specific role (Instructor, Chairperson, etc.)
+
+4. **Recipient Preview**
+   - Shows count of recipients before sending
+   - Preview of first 5 recipients with names and emails
+   - Excludes the sender from recipient list
+
+5. **Optional Action Button**
+   - Add a URL link to the notification
+   - Custom button text (e.g., "View Details", "Take Action")
+
+#### Usage Example
+
+1. Navigate to **Admin → Announcements**
+2. Enter announcement title and message
+3. Select priority level
+4. Choose target type (e.g., "Department")
+5. Select specific target (e.g., "College of Computer Studies")
+6. Review recipient preview
+7. Optionally add action URL/button
+8. Click **Send Announcement**
 
 ### CSS & JavaScript
 
@@ -631,6 +719,8 @@ php artisan migrate:status
 
 ### Routes
 
+#### User Notification Routes
+
 | Method | URI | Name | Description |
 |--------|-----|------|-------------|
 | GET | `/notifications` | `notifications.index` | Notifications page |
@@ -641,6 +731,14 @@ php artisan migrate:status
 | DELETE | `/notifications/{id}` | `notifications.destroy` | Delete notification |
 | GET | `/notifications/preferences` | `notifications.preferences` | Get user preferences |
 | POST | `/notifications/preferences` | `notifications.preferences.update` | Update preferences |
+
+#### Admin Announcement Routes
+
+| Method | URI | Name | Description |
+|--------|-----|------|-------------|
+| GET | `/admin/announcements/create` | `admin.announcements.create` | Announcement form |
+| POST | `/admin/announcements/store` | `admin.announcements.store` | Send announcement |
+| POST | `/admin/announcements/preview` | `admin.announcements.preview` | AJAX recipient preview |
 
 ### AJAX Response Formats
 
@@ -680,6 +778,26 @@ php artisan migrate:status
 ---
 
 ## Changelog
+
+### Version 1.1.0 (January 6, 2026)
+
+- **New Feature:** Admin Announcement System
+  - Administrators can now send targeted announcements
+  - Target options: Specific User, Department, Program, Role
+  - Live recipient preview before sending
+  - Priority levels with visual indicators
+  - Optional action buttons with custom URLs
+  - New sidebar link under System Monitoring
+
+- **New Files:**
+  - `app/Notifications/AdminAnnouncement.php`
+  - `app/Http/Controllers/Admin/AnnouncementController.php`
+  - `resources/views/admin/announcements/create.blade.php`
+
+- **New Routes:**
+  - `GET /admin/announcements/create`
+  - `POST /admin/announcements/store`
+  - `POST /admin/announcements/preview`
 
 ### Version 1.0.0 (January 6, 2026)
 

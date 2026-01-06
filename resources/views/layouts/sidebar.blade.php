@@ -285,6 +285,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('admin.announcements.create') }}" 
+                           class="nav-link {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-megaphone me-3"></i>
+                            <span>Announcements</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('admin.disaster-recovery.index') }}" 
                            class="nav-link {{ request()->routeIs('admin.disaster-recovery.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-shield-check me-3"></i>
