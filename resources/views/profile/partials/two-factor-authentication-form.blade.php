@@ -42,9 +42,9 @@
                             <!-- Single QR Code with blur toggle -->
                             <div 
                                 id="qr-image" 
-                                class="border border-gray-300 rounded p-2 transition-all duration-300 [&>svg]:w-[200px] [&>svg]:h-[200px]" 
+                                class="border border-gray-300 rounded p-2 transition-all duration-300" 
                                 style="filter: blur(10px);">
-                                {!! (new PragmaRX\Google2FAQRCode\Google2FA())->getQRCodeInline(
+                                {!! \App\Support\QRCodeHelper::generate(
                                     config('app.name'),
                                     auth()->user()->email,
                                     auth()->user()->two_factor_secret,

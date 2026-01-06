@@ -12,14 +12,12 @@
     @if(!$user->two_factor_confirmed_at)
         <div class="mb-6 flex flex-col items-center">
             <div class="bg-white p-4 rounded-lg mb-3 flex items-center justify-center">
-                <div class="w-48 h-48 [&>svg]:w-full [&>svg]:h-full">
-                    {!! (new PragmaRX\Google2FAQRCode\Google2FA())->getQRCodeInline(
-                        config('app.name'),
-                        $user->email,
-                        $user->two_factor_secret,
-                        200
-                    ) !!}
-                </div>
+                {!! \App\Support\QRCodeHelper::generate(
+                    config('app.name'),
+                    $user->email,
+                    $user->two_factor_secret,
+                    200
+                ) !!}
             </div>
             <p class="text-xs text-gray-300 text-center max-w-sm">
                 {{ __('Scan this QR code with your authenticator app, then enter the code below.') }}
