@@ -330,6 +330,11 @@
             document.querySelectorAll('.tutorial-highlight').forEach(el => {
                 el.classList.remove('tutorial-highlight');
             });
+            
+            // Remove modal elevation classes
+            document.querySelectorAll('.tutorial-active-modal').forEach(m => {
+                m.classList.remove('tutorial-active-modal');
+            });
         },
         
         /**
@@ -537,8 +542,19 @@
                 e.classList.remove('tutorial-highlight');
             });
             
+            // Remove previous modal elevation classes
+            document.querySelectorAll('.tutorial-active-modal').forEach(m => {
+                m.classList.remove('tutorial-active-modal');
+            });
+            
             // Add highlight to current element
             el.classList.add('tutorial-highlight');
+            
+            // Check if element is inside a modal and elevate the modal
+            const modal = el.closest('.modal');
+            if (modal && modal.classList.contains('show')) {
+                modal.classList.add('tutorial-active-modal');
+            }
             
             // Position spotlight
             const rect = el.getBoundingClientRect();
@@ -561,7 +577,9 @@
             const spacing = 16;
             
             let top, left;
+            let actualPosition = position;
             
+            // Calculate initial position based on preferred position
             switch (position) {
                 case 'top':
                     top = rect.top + window.scrollY - tooltipRect.height - spacing;
@@ -584,23 +602,47 @@
             // Ensure tooltip stays within viewport
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
+            const scrollY = window.scrollY;
             
+            // Horizontal bounds
             if (left < 10) left = 10;
             if (left + tooltipRect.width > viewportWidth - 10) {
                 left = viewportWidth - tooltipRect.width - 10;
             }
-            if (top < window.scrollY + 10) {
-                top = rect.bottom + window.scrollY + spacing;
+            
+            // Vertical bounds - check if tooltip goes above viewport
+            if (top < scrollY + 10) {
+                // Try positioning below the element instead
+                const bottomPosition = rect.bottom + window.scrollY + spacing;
+                if (bottomPosition + tooltipRect.height <= scrollY + viewportHeight - 10) {
+                    top = bottomPosition;
+                    actualPosition = 'bottom';
+                } else {
+                    // Force it to stay at top of viewport with some padding
+                    top = scrollY + 10;
+                    actualPosition = 'bottom';
+                }
             }
-            if (top + tooltipRect.height > window.scrollY + viewportHeight - 10) {
-                top = rect.top + window.scrollY - tooltipRect.height - spacing;
+            
+            // Check if tooltip goes below viewport
+            if (top + tooltipRect.height > scrollY + viewportHeight - 10) {
+                // Try positioning above the element instead
+                const topPosition = rect.top + window.scrollY - tooltipRect.height - spacing;
+                if (topPosition >= scrollY + 10) {
+                    top = topPosition;
+                    actualPosition = 'top';
+                } else {
+                    // Force it to fit within viewport
+                    top = scrollY + viewportHeight - tooltipRect.height - 10;
+                    actualPosition = 'top';
+                }
             }
             
             this.tooltip.style.top = top + 'px';
             this.tooltip.style.left = left + 'px';
             
-            // Set position class for arrow
-            this.tooltip.className = 'tutorial-tooltip active tutorial-tooltip-' + position;
+            // Set position class for arrow based on actual position
+            this.tooltip.className = 'tutorial-tooltip active tutorial-tooltip-' + actualPosition;
         },
         
         /**
@@ -609,8 +651,32 @@
         scrollIntoView: function(el) {
             const rect = el.getBoundingClientRect();
             const viewportHeight = window.innerHeight;
+            const tooltipHeight = this.tooltip ? this.tooltip.getBoundingClientRect().height : 150;
             
-            if (rect.top < 100 || rect.bottom > viewportHeight - 100) {
+            // Check if element is inside a modal
+            const modal = el.closest('.modal');
+            if (modal) {
+                const modalBody = modal.querySelector('.modal-body');
+                if (modalBody) {
+                    // Scroll within the modal to make element visible
+                    const modalRect = modalBody.getBoundingClientRect();
+                    const elRelativeTop = rect.top - modalRect.top;
+                    
+                    // If element is above or below visible area in modal, scroll modal
+                    if (rect.top < modalRect.top + 50 || rect.bottom > modalRect.bottom - 50) {
+                        // Scroll the modal body to show the element with some padding for tooltip
+                        const scrollTarget = modalBody.scrollTop + elRelativeTop - (modalRect.height / 3);
+                        modalBody.scrollTo({
+                            top: Math.max(0, scrollTarget),
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            }
+            
+            // Also handle page-level scrolling if needed
+            // Account for tooltip space (either above or below)
+            if (rect.top < 100 + tooltipHeight || rect.bottom > viewportHeight - 100) {
                 el.scrollIntoView({
                     behavior: 'smooth',
                     block: 'center'
@@ -674,7 +740,7 @@
             
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                    title: '🎉 Tutorial Complete!',
+                    title: 'Tutorial Complete!',
                     text: 'You\'ve completed the tutorial. You can restart it anytime using the help button in the header.',
                     icon: 'success',
                     confirmButtonColor: '#198754',

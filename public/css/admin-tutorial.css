@@ -429,6 +429,32 @@
     }
 }
 
+/* Modal elevation when tutorial is targeting modal content */
+/* When a modal contains a highlighted element, elevate the entire modal above the tutorial overlay */
+.modal.show:has(.tutorial-highlight),
+.modal.show.tutorial-active-modal {
+    z-index: 9993 !important;
+}
+
+.modal.show:has(.tutorial-highlight) .modal-backdrop,
+.modal.show.tutorial-active-modal + .modal-backdrop {
+    z-index: 9989 !important;
+    opacity: 0 !important;
+}
+
+.modal.show:has(.tutorial-highlight) .modal-dialog,
+.modal.show.tutorial-active-modal .modal-dialog {
+    z-index: 9994 !important;
+}
+
+/* Ensure modal content is not affected by backdrop blur */
+.modal.show:has(.tutorial-highlight) .modal-content,
+.modal.show.tutorial-active-modal .modal-content {
+    position: relative;
+    z-index: 9994 !important;
+    isolation: isolate;
+}
+
 /* Focus styles for accessibility */
 .tutorial-btn:focus {
     outline: none;
