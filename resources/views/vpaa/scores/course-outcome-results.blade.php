@@ -2,16 +2,15 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-    {{-- Breadcrumbs --}}
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/vpaa/dashboard">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('vpaa.course-outcome-attainment') }}">Course Outcome Attainment Results</a></li>
-            <li class="breadcrumb-item active" aria-current="page">
-                {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
-            </li>
-        </ol>
-    </nav>
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-bar-chart-line me-2"></i>{{ $selectedSubject->subject_code }} - Course Outcome Results
+            </h2>
+            <p class="text-muted mb-0">{{ $selectedSubject->subject_description }}</p>
+        </div>
+    </div>
 
     {{-- View-only banner --}}
     <div class="alert alert-success bg-success-subtle border-0 text-dark d-flex align-items-center" role="alert">

@@ -3,28 +3,23 @@
 @section('content')
 <div class="container-fluid px-4 py-4">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 fw-semibold text-gray-800 mb-0">
-                <i class="bi bi-people-fill me-2"></i>
-                Instructor Management
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-people-fill me-2"></i>Instructor Management
                 @if($selectedDepartment)
                     <span class="text-muted">• {{ $selectedDepartment->department_description }}</span>
                 @endif
-            </h1>
-            <nav aria-label="breadcrumb" class="mt-2">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('vpaa.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('vpaa.departments') }}">Departments</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Instructors</li>
-                </ol>
-            </nav>
+            </h2>
+            <p class="text-muted mb-0">Manage instructors and their department assignments</p>
         </div>
+        @if(request('department_id'))
         <div>
-            <a href="{{ route('vpaa.departments') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Back to Departments
+            <a href="{{ route('vpaa.departments') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i>Back
             </a>
         </div>
+        @endif
     </div>
 
     <!-- Filter Card -->

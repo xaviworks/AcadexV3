@@ -73,3 +73,23 @@
 .modal-content {
   z-index: 1061 !important;
 }
+
+/* QR Code styling - cross-platform compatibility */
+.qr-code-svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-code-svg svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.qr-code-img {
+  display: block;
+  max-width: 200px;
+  max-height: 200px;
+}

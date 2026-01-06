@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-5">
+<div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-1">
@@ -11,20 +11,19 @@
         </div>
         <div>
             @if($academicYear && $semester)
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">
+                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
                     <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
                 </span>
             @endif
-            <a href="{{ route('vpaa.dashboard') }}" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
-            </a>
         </div>
     </div>
 
     <div class="row g-4 px-4 py-2">
         @forelse($courses as $c)
             <div class="col-md-4">
-                <div class="course-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden" style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <div class="course-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden" 
+                     style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;"
+                     onclick="window.location.href='{{ route('vpaa.reports.co-course') }}?course_id={{ $c->id }}'">
                     <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
                         <div class="course-circle position-absolute start-50 translate-middle"
                             style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
