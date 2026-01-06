@@ -325,9 +325,19 @@ class GradeController extends Controller
             }
         }
         
-        // Only notify if at least one student was graded
+        // Only notify when ALL students have completed term grades for this subject/term
+        // This means the instructor has completed grading the subject for this term
         if ($studentsGraded > 0) {
-            NotificationService::notifyGradeSubmitted($subject, $request->term, $studentsGraded);
+            $totalStudents = $subject->students()->count();
+            $gradedStudents = TermGrade::where('subject_id', $subject->id)
+                ->where('term_id', $termId)
+                ->distinct('student_id')
+                ->count('student_id');
+            
+            // Only send notification if all students now have term grades (grading complete)
+            if ($totalStudents > 0 && $gradedStudents >= $totalStudents) {
+                NotificationService::notifyGradeSubmitted($subject, $request->term, $totalStudents);
+            }
         }
         
         // Build success message and respond appropriately based on the request type
