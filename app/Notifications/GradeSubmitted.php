@@ -54,12 +54,13 @@ class GradeSubmitted extends BaseNotification
 
     public function getActionUrl(): ?string
     {
-        return route('chairperson.viewGrades');
+        // No action button for grade submissions - notification is informational only
+        return null;
     }
 
     public function getActionText(): ?string
     {
-        return 'View Grades';
+        return null;
     }
 
     public function getExtraData(): array

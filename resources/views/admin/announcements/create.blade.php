@@ -77,9 +77,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="message" class="form-label">Message <span class="text-danger">*</span></label>
+                        <label id="message-label" class="form-label">Message <span class="text-danger">*</span></label>
                         <div class="editor-container">
-                            <div id="message-editor"></div>
+                            <div id="message-editor" role="textbox" aria-labelledby="message-label" aria-multiline="true"></div>
                         </div>
                         <input type="hidden" name="message" id="message-input">
                         <div class="image-upload-progress" id="image-upload-progress">

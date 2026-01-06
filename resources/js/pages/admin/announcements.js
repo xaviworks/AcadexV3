@@ -87,6 +87,8 @@ function initAnnouncementEditor(config) {
     // Set initial content if exists
     if (config.oldMessage) {
         quill.root.innerHTML = config.oldMessage;
+        // Sync initial content to hidden input
+        document.getElementById('message-input').value = config.oldMessage;
     }
 
     // Sync content to hidden input on text change
@@ -100,6 +102,17 @@ function initAnnouncementEditor(config) {
             window.announcementFormInstance.messageHtml = html;
         }
     });
+
+    // Trigger initial sync for Alpine instance after a short delay to ensure Alpine is ready
+    setTimeout(() => {
+        if (window.announcementFormInstance) {
+            const html = quill.root.innerHTML;
+            const textLength = quill.getText().trim().length;
+            window.announcementFormInstance.messageLength = textLength;
+            window.announcementFormInstance.messageHtml = html;
+            document.getElementById('message-input').value = html;
+        }
+    }, 100);
 }
 
 /**
@@ -137,6 +150,14 @@ function announcementForm(config) {
 
         init() {
             window.announcementFormInstance = this;
+            // Sync initial message content if exists (for validation errors)
+            if (config.oldMessage) {
+                this.messageHtml = config.oldMessage;
+                // Calculate text length from HTML by creating a temp element
+                const temp = document.createElement('div');
+                temp.innerHTML = config.oldMessage;
+                this.messageLength = (temp.textContent || temp.innerText || '').trim().length;
+            }
         },
 
         selectTargetType(type) {

@@ -267,11 +267,13 @@ class NotificationService
     ): array {
         $data = $notification->data;
         $isAdmin = $user->isAdmin();
+        $category = $data['category'] ?? 'general';
 
-        return [
+        // Base response
+        $response = [
             'id' => $notification->id,
             'type' => $data['type'] ?? 'unknown',
-            'category' => $data['category'] ?? 'general',
+            'category' => $category,
             'priority' => $data['priority'] ?? 'normal',
             'icon' => $data['icon'] ?? 'bi-bell',
             'color' => $data['color'] ?? 'info',
@@ -290,5 +292,14 @@ class NotificationService
                 'admin_message', 'user_message', 'action_url', 'action_text'
             ])) : null,
         ];
+
+        // For announcements, include full_message and title for all users (so they can read it)
+        if ($category === 'announcement') {
+            $response['announcement_title'] = $data['title'] ?? null;
+            $response['announcement_content'] = $data['full_message'] ?? null;
+            $response['announcement_sender'] = $data['actor_name'] ?? null;
+        }
+
+        return $response;
     }
 }

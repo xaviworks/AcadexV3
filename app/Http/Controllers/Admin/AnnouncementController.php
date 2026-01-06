@@ -76,13 +76,19 @@ class AnnouncementController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'message' => 'required|string|max:2000',
+            'message' => 'required|string|max:65535', // HTML content from rich text editor
             'priority' => 'required|in:low,normal,high,urgent',
             'target_type' => 'required|in:specific_user,department,program,role',
             'target_id' => 'required',
             'action_url' => 'nullable|url|max:500',
             'action_text' => 'nullable|string|max:100',
         ]);
+
+        // Validate plain text length (strip HTML tags)
+        $plainTextLength = strlen(strip_tags($validated['message']));
+        if ($plainTextLength > 2000) {
+            return back()->withErrors(['message' => 'The message field must not be greater than 2000 characters.'])->withInput();
+        }
 
         $sender = Auth::user();
         $recipients = collect();

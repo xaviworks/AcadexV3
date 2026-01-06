@@ -139,6 +139,19 @@
                                    :class="{ 'fw-semibold': !notification.is_read }"
                                    x-text="notification.message"></p>
                                 
+                                {{-- Announcement Content (for announcement notifications) --}}
+                                <div x-show="notification.category === 'announcement' && notification.announcement_content"
+                                     class="announcement-content bg-light rounded p-3 mb-2">
+                                    <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
+                                        <i class="bi bi-megaphone-fill text-primary"></i>
+                                        <strong x-text="notification.announcement_title || 'Announcement'"></strong>
+                                        <span x-show="notification.announcement_sender" class="text-muted small ms-auto">
+                                            From: <span x-text="notification.announcement_sender"></span>
+                                        </span>
+                                    </div>
+                                    <div class="announcement-body" x-html="notification.announcement_content"></div>
+                                </div>
+                                
                                 {{-- Admin Extra Details --}}
                                 @if($isAdmin)
                                 <div x-show="notification.extra && Object.keys(notification.extra).length > 0" 
@@ -265,6 +278,32 @@
     overflow-y: auto;
 }
 
+/* Announcement Content Styles */
+.announcement-content {
+    border-left: 3px solid #0d6efd;
+    font-size: 0.9375rem;
+}
+
+.announcement-content .announcement-body {
+    line-height: 1.6;
+    color: #374151;
+}
+
+.announcement-content .announcement-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 0.5rem 0;
+}
+
+.announcement-content .announcement-body p {
+    margin-bottom: 0.5rem;
+}
+
+.announcement-content .announcement-body p:last-child {
+    margin-bottom: 0;
+}
+
 .badge.bg-success-subtle { background-color: rgba(25, 135, 84, 0.15) !important; }
 .badge.bg-danger-subtle { background-color: rgba(220, 53, 69, 0.15) !important; }
 .badge.bg-primary-subtle { background-color: rgba(13, 110, 253, 0.15) !important; }
@@ -314,7 +353,7 @@ function notificationPageComponent(config) {
         },
 
         handleNewNotification(notification) {
-            this.items.unshift({
+            const newItem = {
                 id: notification.id,
                 type: notification.type,
                 category: notification.category || 'general',
@@ -327,7 +366,16 @@ function notificationPageComponent(config) {
                 is_read: false,
                 time_ago: 'Just now',
                 created_at: notification.created_at,
-            });
+            };
+            
+            // Include announcement fields if present
+            if (notification.category === 'announcement') {
+                newItem.announcement_title = notification.announcement_title || null;
+                newItem.announcement_content = notification.announcement_content || null;
+                newItem.announcement_sender = notification.announcement_sender || null;
+            }
+            
+            this.items.unshift(newItem);
             this.unreadCount++;
             if (window.notify) {
                 window.notify.info(notification.message);
