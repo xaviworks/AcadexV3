@@ -261,9 +261,16 @@ document.addEventListener('alpine:init', () => {
         unreadCount: 0,
         showDropdown: false,
         loading: false,
+        hasBeenViewed: false, // Track if user has opened dropdown this session
         
         init() {
-            this.fetchUnreadCount();
+            // Check if notifications were viewed in this session
+            this.hasBeenViewed = sessionStorage.getItem('notificationsViewed') === 'true';
+            if (this.hasBeenViewed) {
+                this.unreadCount = 0; // Keep badge cleared if already viewed
+            } else {
+                this.fetchUnreadCount();
+            }
             // Setup real-time listener if Echo is available
             this.setupRealtimeListener();
         },
@@ -278,8 +285,10 @@ document.addEventListener('alpine:init', () => {
         },
         
         handleNewNotification(notification) {
-            // Increment count
+            // Increment count (new notifications always show badge)
             this.unreadCount++;
+            this.hasBeenViewed = false; // Reset so new notifications show badge
+            sessionStorage.removeItem('notificationsViewed'); // Clear viewed state so badge shows
             
             // Add to top of list if dropdown is open
             if (this.showDropdown) {
@@ -305,7 +314,10 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch('{{ route("notifications.unread-count") }}');
                 const data = await response.json();
-                this.unreadCount = data.count;
+                // Only update count if user hasn't viewed yet
+                if (!this.hasBeenViewed) {
+                    this.unreadCount = data.count;
+                }
             } catch (error) {
                 console.error('Error fetching notification count:', error);
             }
@@ -317,7 +329,7 @@ document.addEventListener('alpine:init', () => {
                 const response = await fetch('{{ route("notifications.unread") }}');
                 const data = await response.json();
                 this.notifications = data.notifications;
-                this.unreadCount = data.count;
+                // Don't update unreadCount from server - keep it cleared after viewing
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             } finally {
@@ -328,6 +340,10 @@ document.addEventListener('alpine:init', () => {
         toggleDropdown() {
             this.showDropdown = !this.showDropdown;
             if (this.showDropdown) {
+                // Clear badge when user views notifications (but don't mark as read in DB)
+                this.unreadCount = 0;
+                this.hasBeenViewed = true;
+                sessionStorage.setItem('notificationsViewed', 'true'); // Persist across page refreshes
                 this.fetchNotifications();
             }
         },
@@ -397,9 +413,16 @@ document.addEventListener('alpine:init', () => {
         unreadCount: 0,
         showDropdown: false,
         loading: false,
+        hasBeenViewed: false, // Track if user has opened dropdown this session
         
         init() {
-            this.fetchUnreadCount();
+            // Check if notifications were viewed in this session
+            this.hasBeenViewed = sessionStorage.getItem('notificationsViewed') === 'true';
+            if (this.hasBeenViewed) {
+                this.unreadCount = 0; // Keep badge cleared if already viewed
+            } else {
+                this.fetchUnreadCount();
+            }
             this.setupRealtimeListener();
         },
         
@@ -413,7 +436,10 @@ document.addEventListener('alpine:init', () => {
         },
         
         handleNewNotification(notification) {
+            // Increment count (new notifications always show badge)
             this.unreadCount++;
+            this.hasBeenViewed = false; // Reset so new notifications show badge
+            sessionStorage.removeItem('notificationsViewed'); // Clear viewed state so badge shows
             if (this.showDropdown) {
                 this.notifications.unshift({
                     id: notification.id,
@@ -435,7 +461,10 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch('/notifications/unread-count');
                 const data = await response.json();
-                this.unreadCount = data.count;
+                // Only update count if user hasn't viewed yet
+                if (!this.hasBeenViewed) {
+                    this.unreadCount = data.count;
+                }
             } catch (error) {
                 console.error('Error fetching notification count:', error);
             }
@@ -447,7 +476,7 @@ document.addEventListener('alpine:init', () => {
                 const response = await fetch('/notifications/unread');
                 const data = await response.json();
                 this.notifications = data.notifications;
-                this.unreadCount = data.count;
+                // Don't update unreadCount from server - keep it cleared after viewing
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             } finally {
@@ -458,6 +487,10 @@ document.addEventListener('alpine:init', () => {
         toggleDropdown() {
             this.showDropdown = !this.showDropdown;
             if (this.showDropdown) {
+                // Clear badge when user views notifications (but don't mark as read in DB)
+                this.unreadCount = 0;
+                this.hasBeenViewed = true;
+                sessionStorage.setItem('notificationsViewed', 'true'); // Persist across page refreshes
                 this.fetchNotifications();
             }
         },
