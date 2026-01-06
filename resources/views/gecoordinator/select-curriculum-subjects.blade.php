@@ -30,25 +30,25 @@
         </div>
     @endif
 
-    {{-- Curriculum Dropdown --}}
+    {{-- Curriculum Dropdown with Load Button --}}
     <div class="mb-4">
         <label for="curriculumSelect" class="form-label fw-semibold">Select Curriculum</label>
-        <select id="curriculumSelect" class="form-select shadow-sm">
-            <option value="">-- Choose Curriculum --</option>
-            @foreach($curriculums as $curriculum)
-                <option value="{{ $curriculum->id }}">
-                    {{ $curriculum->name }} ({{ $curriculum->course->course_code }})
-                </option>
-            @endforeach
-        </select>
-    </div>
-
-    {{-- Load Button --}}
-    <div class="mb-3 d-flex justify-content-between align-items-center">
-        <button id="loadSubjectsBtn" class="btn btn-success d-none">
-            <span id="loadBtnText"><i class="bi bi-arrow-repeat me-1"></i> Load Subjects</span>
-            <span id="loadBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-        </button>
+        <div class="d-flex gap-3 align-items-center">
+            <div class="flex-grow-1">
+                <select id="curriculumSelect" class="form-select shadow-sm">
+                    <option value="">-- Choose Curriculum --</option>
+                    @foreach($curriculums as $curriculum)
+                        <option value="{{ $curriculum->id }}">
+                            {{ $curriculum->name }} ({{ $curriculum->course->course_code }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <button id="loadSubjectsBtn" class="btn btn-success" disabled>
+                <span id="loadBtnText"><i class="bi bi-arrow-repeat me-1"></i> Load Subjects</span>
+                <span id="loadBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
+        </div>
     </div>
 
     {{-- Subject Selection Form --}}
@@ -67,8 +67,12 @@
 
             <div class="tab-content mt-3" id="subjectsTableBody"></div>
 
-            <div class="text-end mt-3">
-                <button type="button" class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#confirmModal">
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <span id="selectedCount">0</span> subject(s) selected
+                </div>
+                <button type="button" id="openConfirmModalBtn" class="btn btn-success shadow-sm" disabled>
                     <i class="bi bi-check-circle me-1"></i> Confirm Selected Subjects
                 </button>
             </div>
