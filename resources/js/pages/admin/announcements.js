@@ -6,6 +6,7 @@
 
 // Initialize Quill Editor
 let quill;
+const Delta = Quill.import('delta');
 
 /**
  * Initialize the Quill editor and set up event handlers
@@ -30,6 +31,26 @@ function initAnnouncementEditor(config) {
                 ['link'],
                 ['clean']
             ]
+        }
+    });
+
+    // Block pasted or inserted images (clipboard HTML with <img>)
+    const clipboard = quill.getModule('clipboard');
+    clipboard.addMatcher('IMG', () => new Delta());
+
+    // Prevent drag/drop files (including images) from being inserted
+    quill.root.addEventListener('drop', (event) => {
+        if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+            event.preventDefault();
+        }
+    });
+
+    // Prevent pasting images (files or inline image MIME types)
+    quill.root.addEventListener('paste', (event) => {
+        const items = event.clipboardData ? Array.from(event.clipboardData.items) : [];
+        const hasImage = items.some((item) => item.kind === 'file' || (item.type && item.type.startsWith('image/')));
+        if (hasImage) {
+            event.preventDefault();
         }
     });
 
