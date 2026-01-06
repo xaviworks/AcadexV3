@@ -3,18 +3,12 @@
 @section('content')
 <div class="container-fluid px-4 py-4">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 fw-semibold text-gray-800 mb-0">
-                <i class="bi bi-building me-2"></i>
-                Departments Overview
-            </h1>
-            <nav aria-label="breadcrumb" class="mt-2">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('vpaa.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Departments</li>
-                </ol>
-            </nav>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-building me-2"></i>Departments Overview
+            </h2>
+            <p class="text-muted mb-0">View and manage all departments in the institution</p>
         </div>
     </div>
 

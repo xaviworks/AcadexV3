@@ -1,21 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <div class="d-flex justify-content-between align-items-center mb-6">
-        <h1 class="text-2xl font-bold">
-            <i class="bi bi-journal-text me-2"></i>
-            Final Grades
-            @if($departmentId)
-                <span class="text-muted">- {{ $departments->firstWhere('id', $departmentId)->department_description ?? '' }}</span>
-            @endif
-            @if($courseId)
-                <span class="text-muted">- {{ $courses->firstWhere('id', $courseId)->course_code ?? '' }}</span>
-            @endif
-        </h1>
-        <a href="{{ route('vpaa.departments') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Back to Departments
-        </a>
+<div class="container-fluid px-4 py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-journal-text me-2"></i>Final Grades
+                @if($departmentId)
+                    <span class="text-muted fs-5">• {{ $departments->firstWhere('id', $departmentId)->department_description ?? '' }}</span>
+                @endif
+                @if($courseId)
+                    <span class="text-muted fs-5">• {{ $courses->firstWhere('id', $courseId)->course_code ?? '' }}</span>
+                @endif
+            </h2>
+            <p class="text-muted mb-0">View final grades across departments and courses</p>
+        </div>
     </div>
 
     <div class="card border-0 shadow-sm mb-4">
