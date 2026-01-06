@@ -15,7 +15,7 @@
         </div>
         @if(isset($department))
         <div>
-            <a href="{{ route('vpaa.students-departments') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
+            <a href="{{ route('vpaa.students') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
                 <i class="bi bi-arrow-left me-2"></i>Back
             </a>
         </div>

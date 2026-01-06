@@ -431,7 +431,7 @@ class VPAAController extends Controller
         if ($departmentId) {
             $students = Student::where('department_id', $departmentId)
                 ->where('is_deleted', false)
-                ->select('id', 'student_id', 'first_name', 'middle_name', 'last_name', 'email', 'department_id', 'course_id', 'year_level')
+                ->select('id', 'first_name', 'middle_name', 'last_name', 'department_id', 'course_id', 'year_level')
                 ->orderBy('last_name')
                 ->get();
             $department = Department::select('id', 'department_code', 'department_description')
