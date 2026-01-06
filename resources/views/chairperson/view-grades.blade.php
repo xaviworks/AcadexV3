@@ -30,40 +30,47 @@
 
     {{-- Step 1: Instructor Selection --}}
     @if (empty($selectedInstructorId) && empty($selectedSubjectId))
-        <div class="row g-4 px-4 py-4">
-            @foreach($instructors as $instructor)
-                <div class="col-md-4">
-                    <div
-                        class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow"
-                        data-url="{{ route('chairperson.viewGrades', ['instructor_id' => $instructor->id]) }}"
-                        onclick="window.location.href='{{ route('chairperson.viewGrades', ['instructor_id' => $instructor->id]) }}'"
-                        style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;"
-                    >
-                        {{-- Top header --}}
-                        <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
-                            <div class="subject-circle wildcard-circle-positioned">
-                                {{-- Person Icon for Instructor (Square Design) --}}
-                                <i class="bi bi-person-circle text-white" style="font-size: 40px;"></i>
+        @if (count($instructors) > 0)
+            <div class="row g-4 px-4 py-4">
+                @foreach($instructors as $instructor)
+                    <div class="col-md-4">
+                        <div
+                            class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow"
+                            data-url="{{ route('chairperson.viewGrades', ['instructor_id' => $instructor->id]) }}"
+                            onclick="window.location.href='{{ route('chairperson.viewGrades', ['instructor_id' => $instructor->id]) }}'"
+                            style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;"
+                        >
+                            {{-- Top header --}}
+                            <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
+                                <div class="subject-circle wildcard-circle-positioned">
+                                    {{-- Person Icon for Instructor (Square Design) --}}
+                                    <i class="bi bi-person-circle text-white" style="font-size: 40px;"></i>
+                                </div>
                             </div>
-                        </div>
 
-                        {{-- Card body --}}
-                        <div class="card-body pt-5 text-center">
-                            <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $instructor->last_name }}, {{ $instructor->first_name }}">
-                                {{ $instructor->last_name }}, {{ $instructor->first_name }}
-                            </h6>
-                            {{-- Badge for role --}}
-                            <div class="mt-2">
-                                <span class="badge bg-primary text-white">Instructor</span>
+                            {{-- Card body --}}
+                            <div class="card-body pt-5 text-center">
+                                <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $instructor->last_name }}, {{ $instructor->first_name }}">
+                                    {{ $instructor->last_name }}, {{ $instructor->first_name }}
+                                </h6>
+                                {{-- Badge for role --}}
+                                <div class="mt-2">
+                                    <span class="badge bg-primary text-white">Instructor</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
+        @else
+            <div class="text-center text-muted mt-8 bg-info bg-opacity-25 border border-info px-6 py-4 rounded-4">
+                <i class="bi bi-info-circle me-2"></i>
+                No instructors available in your department/program.
+            </div>
+        @endif
     @elseif (empty($selectedSubjectId))
         {{-- Step 2: Subject Selection --}}
-        @if (!empty($subjects))
+        @if (count($subjects) > 0)
             <div class="row g-4 px-4 py-4" id="subject-selection">
                 @foreach($subjects as $subjectItem)
                     <div class="col-md-4">
@@ -98,7 +105,7 @@
     @else
         {{-- Step 3: Display Students' Final Grades --}}
         {{-- Students Table --}}
-        @if (!empty($students) && count($students))
+        @if (count($students) > 0)
             <div class="bg-white shadow-lg rounded-4 overflow-x-auto">
                 <table class="table table-bordered align-middle mb-0">
                     <thead class="table-success">
