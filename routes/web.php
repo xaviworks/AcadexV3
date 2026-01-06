@@ -367,13 +367,6 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/activity/{auditLog}', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'showActivity'])->name('activity.show');
         Route::post('/activity/{auditLog}/rollback', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'rollback'])->name('activity.rollback');
     });
-
-    // Announcement Routes
-    Route::prefix('announcements')->name('announcements.')->group(function () {
-        Route::get('/create', [\App\Http\Controllers\Admin\AnnouncementController::class, 'create'])->name('create');
-        Route::post('/store', [\App\Http\Controllers\Admin\AnnouncementController::class, 'store'])->name('store');
-        Route::post('/preview', [\App\Http\Controllers\Admin\AnnouncementController::class, 'getTargetUsers'])->name('preview');
-    });
 });
 
 // VPAA Routes

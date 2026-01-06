@@ -24,7 +24,6 @@ import './admin/grades-formula-select-period.js';
 import './admin/grades-formula-subject.js';
 import './admin/grades-formula-form.js';
 import './admin/grades-formula-wildcards.js';
-import './admin/announcements.js';
 
 // Dashboard pages
 import './dashboard/instructor.js';

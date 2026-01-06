@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\Subject;
 use App\Notifications\GradeSubmitted;
 use App\Notifications\SubjectAssigned;
-use App\Notifications\InstructorAnnouncement;
 use App\Notifications\SecurityAlert;
 use App\Notifications\SystemNotification;
 use Illuminate\Support\Facades\Auth;
@@ -85,30 +84,6 @@ class NotificationService
         }
 
         $instructor->notify(new SubjectAssigned($assignedBy, $subject, $academicPeriod));
-    }
-
-    /**
-     * Send an announcement to instructors.
-     */
-    public static function sendInstructorAnnouncement(
-        Collection|array $instructors,
-        string $title,
-        string $message,
-        string $priority = 'normal',
-        ?string $actionUrl = null,
-        ?string $actionText = null
-    ): void {
-        $sender = Auth::user();
-        if (!$sender) {
-            return;
-        }
-
-        $instructors = $instructors instanceof Collection ? $instructors : collect($instructors);
-
-        Notification::send(
-            $instructors,
-            new InstructorAnnouncement($sender, $title, $message, $priority, $actionUrl, $actionText)
-        );
     }
 
     /**
