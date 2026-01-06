@@ -14,6 +14,22 @@
             <p class="page-subtitle">Select a curriculum and choose courses to import into the system</p>
         </div>
 
+        {{-- Success/Error Messages via Notify --}}
+        @if(session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    window.notify?.success(@json(session('success')));
+                });
+            </script>
+        @endif
+        @if(session('error'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    window.notify?.error(@json(session('error')));
+                });
+            </script>
+        @endif
+
         @if(Auth::user()->role === 1)
             <div class="alert alert-custom" role="alert">
                 <i class="bi bi-info-circle me-2"></i>

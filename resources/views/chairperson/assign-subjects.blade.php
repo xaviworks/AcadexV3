@@ -35,11 +35,19 @@
         </div>
 
     @if (session('success'))
-        <script>notify.success('{{ session('success') }}');</script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify?.success(@json(session('success')));
+            });
+        </script>
     @endif
 
     @if (session('error'))
-        <script>notify.error('{{ session('error') }}');</script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify?.error(@json(session('error')));
+            });
+        </script>
     @endif
 
     <!-- YEAR VIEW (Tabbed) -->

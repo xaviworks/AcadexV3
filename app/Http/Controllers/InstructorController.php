@@ -24,7 +24,9 @@ class InstructorController extends Controller
         Gate::authorize('instructor');
         $instructor = Auth::user();
 
-        return view('instructor.dashboard', compact('instructor'));
+        // Redirect to the main dashboard route which will render the instructor dashboard
+        // (DashboardController::index handles role detection and instructor dashboard rendering)
+        return redirect()->route('dashboard');
     }
 
     // Manage Students Page (with subject grade status labels)

@@ -7,6 +7,22 @@
         Confirm Curriculum Subjects
     </h1>
 
+    {{-- Success/Error Messages via Notify --}}
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify?.success(@json(session('success')));
+            });
+        </script>
+    @endif
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify?.error(@json(session('error')));
+            });
+        </script>
+    @endif
+
     @if(Auth::user()->role === 4)
         <div class="alert alert-info mb-4" role="alert">
             <i class="bi bi-info-circle me-2"></i>
@@ -58,11 +74,6 @@
             </div>
         </div>
     </form>
-
-    {{-- Toast Notification --}}
-    @if(session('success'))
-        <script>notify.success('{{ session('success') }}');</script>
-    @endif
 </div>
 
 {{-- Confirmation Modal --}}

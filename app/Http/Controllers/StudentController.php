@@ -136,7 +136,7 @@ class StudentController extends Controller
             $this->getOrCreateDefaultActivities($subject->id, $term);
         }
     
-        return redirect()->route('instructor.students.index')->with('success', 'Student enrolled successfully with default activities.');
+        return redirect()->route('instructor.students.index', ['subject_id' => $subject->id])->with('success', 'Student enrolled successfully with default activities.');
     }    
     
 
