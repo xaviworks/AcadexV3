@@ -9,7 +9,12 @@
             </h2>
             <p class="text-muted mb-0">Course Outcome compliance across all courses in {{ $department->department_description ?? 'your department' }}</p>
         </div>
-        <div>
+        <div class="d-flex align-items-center gap-2">
+            @if(request('department_id'))
+                <a href="{{ route('vpaa.reports.co-program') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-2"></i>Back
+                </a>
+            @endif
             @if($academicYear && $semester)
                 <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
                     <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}

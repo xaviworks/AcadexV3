@@ -13,6 +13,13 @@
             </h2>
             <p class="text-muted mb-0">View and manage students across departments and courses</p>
         </div>
+        @if(isset($department))
+        <div>
+            <a href="{{ route('vpaa.students-departments') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i>Back
+            </a>
+        </div>
+        @endif
     </div>
 
     <div class="card border-0 shadow-sm mb-4">

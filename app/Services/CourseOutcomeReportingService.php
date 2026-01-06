@@ -253,19 +253,76 @@ class CourseOutcomeReportingService
 
     /**
      * Aggregate CO attainment across multiple subjects by merging totals per CO number.
+     * Optimized to reduce database queries.
      */
     public function aggregateSubjects(array $subjectIds): array
     {
+        if (empty($subjectIds)) {
+            return [];
+        }
+
         $merged = [];
 
-        foreach ($subjectIds as $sid) {
-            $agg = $this->aggregateSubject((int)$sid);
-            foreach ($agg as $coNum => $vals) {
-                if (!isset($merged[$coNum])) {
-                    $merged[$coNum] = ['raw' => 0, 'max' => 0];
-                }
-                $merged[$coNum]['raw'] += (int)$vals['raw'];
-                $merged[$coNum]['max'] += (int)$vals['max'];
+        // Optimized: Batch fetch all data needed for all subjects at once
+        // Get all activities with their course outcomes
+        $activities = Activity::whereIn('subject_id', $subjectIds)
+            ->where('is_deleted', false)
+            ->whereNotNull('course_outcome_id')
+            ->with(['courseOutcome' => function ($query) {
+                $query->select('id', 'co_code', 'is_deleted');
+            }])
+            ->select('id', 'subject_id', 'course_outcome_id', 'number_of_items')
+            ->get();
+
+        if ($activities->isEmpty()) {
+            return [];
+        }
+
+        // Get all enrolled students for these subjects
+        $students = Student::whereHas('subjects', function ($q) use ($subjectIds) {
+            $q->whereIn('subject_id', $subjectIds)
+              ->where('student_subjects.is_deleted', false);
+        })
+        ->where('students.is_deleted', false)
+        ->select('id')
+        ->get();
+
+        if ($students->isEmpty()) {
+            return [];
+        }
+
+        // Prefetch all scores for these activities and students
+        $activityIds = $activities->pluck('id')->all();
+        $studentIds = $students->pluck('id')->all();
+        
+        $scores = Score::whereIn('activity_id', $activityIds)
+            ->whereIn('student_id', $studentIds)
+            ->select('activity_id', 'student_id', 'score')
+            ->get()
+            ->groupBy(function ($s) { return $s->activity_id.'::'.$s->student_id; });
+
+        // Process each activity
+        foreach ($activities as $activity) {
+            $co = $activity->courseOutcome;
+            if (!$co || $co->is_deleted) {
+                continue;
+            }
+            
+            $coNum = (int)preg_replace('/[^0-9]/', '', (string)$co->co_code);
+            if ($coNum <= 0) {
+                $coNum = 0;
+            }
+
+            if (!isset($merged[$coNum])) {
+                $merged[$coNum] = ['raw' => 0, 'max' => 0];
+            }
+
+            // For each student, add score and max
+            foreach ($students as $student) {
+                $key = $activity->id.'::'.$student->id;
+                $score = $scores->get($key)?->first();
+                $merged[$coNum]['raw'] += $score ? (int)$score->score : 0;
+                $merged[$coNum]['max'] += (int)$activity->number_of_items;
             }
         }
 
@@ -289,15 +346,26 @@ class CourseOutcomeReportingService
      */
     public function aggregateDepartmentByCourse(int $departmentId, ?int $academicPeriodId = null): array
     {
+        // Optimized: Eager load courses with their subjects to avoid N+1 queries
         $courses = Course::where('department_id', $departmentId)
             ->where('is_deleted', false)
+            ->select('id', 'course_code', 'course_description', 'department_id')
+            ->with(['subjects' => function ($query) use ($academicPeriodId) {
+                $query->where('is_deleted', false)
+                    ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                        $q->where('academic_period_id', $academicPeriodId);
+                    })
+                    ->select('id', 'course_id', 'subject_code', 'academic_period_id');
+            }])
             ->get();
 
         $out = [];
         foreach ($courses as $course) {
+            // Use the eager-loaded subjects instead of making separate queries
+            $subjectIds = $course->subjects->pluck('id')->all();
             $out[$course->id] = [
                 'course' => $course,
-                'co' => $this->aggregateCourse($course->id, $academicPeriodId),
+                'co' => $this->aggregateSubjects($subjectIds),
             ];
         }
         return $out;

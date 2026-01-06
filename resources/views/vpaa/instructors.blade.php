@@ -13,6 +13,13 @@
             </h2>
             <p class="text-muted mb-0">Manage instructors and their department assignments</p>
         </div>
+        @if(request('department_id'))
+        <div>
+            <a href="{{ route('vpaa.departments') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i>Back
+            </a>
+        </div>
+        @endif
     </div>
 
     <!-- Filter Card -->

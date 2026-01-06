@@ -27,8 +27,9 @@ class ProgramReportsController extends Controller
         // If no department selected, show departments list to choose from
         if (!$departmentId) {
             $departments = \App\Models\Department::where('is_deleted', false)
+                ->select('id', 'department_code', 'department_description')
                 ->orderBy('department_description')
-                ->get(['id', 'department_code', 'department_description']);
+                ->get();
 
             return view('vpaa.reports.co-program-departments', [
                 'departments' => $departments,
@@ -37,7 +38,8 @@ class ProgramReportsController extends Controller
             ]);
         }
 
-        $department = Department::findOrFail($departmentId);
+        $department = Department::select('id', 'department_code', 'department_description')
+            ->findOrFail($departmentId);
         $byCourse = $service->aggregateDepartmentByCourse($departmentId, $periodId);
 
         return view('vpaa.reports.co-program', [
