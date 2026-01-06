@@ -3,7 +3,7 @@
  *
  * Note: The main functionality has been moved inline to the Blade template
  * for better integration with Laravel routes and CSRF tokens.
- * 
+ *
  * This file is kept for backwards compatibility and DataTable initialization fallback.
  */
 
