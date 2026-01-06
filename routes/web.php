@@ -22,6 +22,7 @@ use App\Http\Controllers\CourseOutcomeAttainmentController;
 use App\Http\Controllers\CourseOutcomeReportsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\AnnouncementController;
 
 // Welcome Page
 use Illuminate\Support\Facades\Auth;
@@ -45,6 +46,12 @@ Route::get('/session/check', function () {
     }
     return response()->json(['authenticated' => true]);
 })->middleware('auth')->name('session.check');
+
+// Announcement Routes (for all authenticated users)
+Route::middleware('auth')->group(function () {
+    Route::get('/announcements/active', [AnnouncementController::class, 'getActive'])->name('announcements.active');
+    Route::post('/announcements/{announcement}/view', [AnnouncementController::class, 'markAsViewed'])->name('announcements.view');
+});
 
 use App\Http\Controllers\Profile\TwoFactorAuthenticationController;
 
@@ -362,6 +369,17 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/activity', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'activity'])->name('activity');
         Route::get('/activity/{auditLog}', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'showActivity'])->name('activity.show');
         Route::post('/activity/{auditLog}/rollback', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'rollback'])->name('activity.rollback');
+    });
+
+    // Announcements Management (Admin Only)
+    Route::prefix('announcements')->name('announcements.')->group(function () {
+        Route::get('/', [AnnouncementController::class, 'index'])->name('index');
+        Route::get('/create', [AnnouncementController::class, 'create'])->name('create');
+        Route::post('/', [AnnouncementController::class, 'store'])->name('store');
+        Route::get('/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit');
+        Route::put('/{announcement}', [AnnouncementController::class, 'update'])->name('update');
+        Route::delete('/{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy');
+        Route::post('/{announcement}/toggle', [AnnouncementController::class, 'toggleActive'])->name('toggle');
     });
 });
 

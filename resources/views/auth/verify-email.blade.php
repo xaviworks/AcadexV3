@@ -22,7 +22,7 @@
             </div>
         </form>
 
-        <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ route('logout') }}" onsubmit="if(typeof clearAnnouncementSession === 'function') clearAnnouncementSession()">
             @csrf
 
             <button 

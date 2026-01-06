@@ -77,6 +77,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Alpine.js is loaded via Vite with stores configured in resources/js/app.js -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Bootbox.js (requires jQuery and Bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootbox@6.0.0/dist/bootbox.all.min.js"></script>
+    
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -425,7 +429,7 @@
                     <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal" style="font-weight: 600;">
                         <i class="bi bi-x-circle me-2"></i>Cancel
                     </button>
-                    <form method="POST" action="{{ route('logout') }}" id="logoutForm" class="d-inline">
+                    <form method="POST" action="{{ route('logout') }}" id="logoutForm" class="d-inline" onsubmit="clearAnnouncementSession()">
                         @csrf
                         <button type="submit" class="btn btn-danger px-4 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);">
                             <i class="bi bi-box-arrow-right me-2"></i>Yes, Sign Out
@@ -445,6 +449,16 @@
 
     {{-- Confirmation Dialog (Alpine.js) --}}
     @include('components.confirmation-dialog')
+
+    {{-- System Announcements Popup --}}
+    @include('components.announcement-popup')
+
+    {{-- Clear announcement session on logout --}}
+    <script>
+        function clearAnnouncementSession() {
+            sessionStorage.removeItem('dismissedAnnouncements');
+        }
+    </script>
 
     @stack('scripts')
 </body>

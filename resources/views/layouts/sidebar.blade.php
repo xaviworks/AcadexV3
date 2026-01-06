@@ -291,6 +291,13 @@
                             <span>Disaster Recovery</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.announcements.index') }}" 
+                           class="nav-link {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-megaphone me-3"></i>
+                            <span>Announcements</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
 
