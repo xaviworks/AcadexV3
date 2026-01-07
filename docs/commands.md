@@ -25,7 +25,7 @@ acadex setup
 **What it does:**
 1. Checks system requirements (PHP, Composer, Node.js, npm)
 2. Creates `.env` file from `.env.example`
-3. Installs Composer dependencies (Laravel, Excel, 2FA, Socialite, etc.)
+3. Installs Composer dependencies (Laravel, Excel, 2FA, Socialite, notifications, etc.)
 4. Installs npm dependencies
 5. Installs notification features (`@alpinejs/intersect`)
 6. Generates application key
