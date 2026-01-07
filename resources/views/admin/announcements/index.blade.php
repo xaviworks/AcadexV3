@@ -143,6 +143,7 @@
             <form id="createAnnouncementForm" action="{{ route('admin.announcements.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="_modal" value="create">
+                <input type="hidden" name="is_dismissible" value="0">
                 <input type="hidden" name="show_once" value="0">
                 <input type="hidden" name="is_active" value="0">
                 <div class="modal-body">
@@ -169,6 +170,7 @@
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="_modal" value="edit">
+                <input type="hidden" name="is_dismissible" value="0">
                 <input type="hidden" name="show_once" value="0">
                 <input type="hidden" name="is_active" value="0">
                 <div class="modal-body">
@@ -293,6 +295,7 @@ function loadAnnouncementForEdit(id, announcement) {
         ? formatDateTimeLocal(announcement.end_date) 
         : '';
     
+    document.getElementById('edit_is_dismissible').checked = announcement.is_dismissible;
     document.getElementById('edit_show_once').checked = announcement.show_once;
     document.getElementById('edit_is_active').checked = announcement.is_active;
     

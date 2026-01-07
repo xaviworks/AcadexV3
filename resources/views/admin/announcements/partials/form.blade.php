@@ -212,9 +212,21 @@
                            {{ old('is_active', $announcement?->is_active ?? true) ? 'checked' : '' }}>
                     <label class="form-check-label" for="{{ $prefix }}is_active">
                         <span class="fw-semibold d-block">Active</span>
-                        <small class="text-muted">
-                            When active, users will see this announcement. Turn off to pause or prepare drafts.
-                        </small>
+                        <small class="text-muted">Visible to users when enabled.</small>
+                    </label>
+                </div>
+                
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" 
+                           type="checkbox" 
+                           role="switch"
+                           id="{{ $prefix }}is_dismissible" 
+                           name="is_dismissible" 
+                           value="1"
+                           {{ old('is_dismissible', $announcement?->is_dismissible ?? true) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="{{ $prefix }}is_dismissible">
+                        <span class="fw-semibold d-block">Allow dismissal</span>
+                        <small class="text-muted">When off, logout required to dismiss.</small>
                     </label>
                 </div>
             </div>
@@ -230,9 +242,7 @@
                            {{ old('show_once', $announcement?->show_once ?? false) ? 'checked' : '' }}>
                     <label class="form-check-label" for="{{ $prefix }}show_once">
                         <span class="fw-semibold d-block">Show once only</span>
-                        <small class="text-muted">
-                            Users see it once, then it's hidden from them permanently.
-                        </small>
+                        <small class="text-muted">Displays once per user, then hidden.</small>
                     </label>
                 </div>
             </div>

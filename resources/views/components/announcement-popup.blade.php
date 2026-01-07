@@ -76,7 +76,7 @@
                             <i class="bi bi-chevron-right"></i>
                         </button>
                         <button 
-                            @click="dismissCurrentAnnouncement()"
+                            @click="currentAnnouncement.is_dismissible ? dismissCurrentAnnouncement() : logout()"
                             type="button"
                             class="btn btn-sm"
                             :class="{
@@ -84,8 +84,8 @@
                                 'btn-success': currentAnnouncement.type === 'success',
                                 'btn-warning': currentAnnouncement.type === 'warning',
                                 'btn-danger': currentAnnouncement.type === 'danger'
-                            }">
-                            Got it
+                            }"
+                            x-text="currentAnnouncement.is_dismissible ? 'Got it' : 'Logout'">
                         </button>
                     </div>
                 </div>
@@ -215,10 +215,15 @@ function announcementPopup() {
         },
         
         handleEscape() {
-            // Allow ESC key to close announcement
-            if (this.currentAnnouncement) {
+            // Allow ESC key to close announcement only if dismissible
+            if (this.currentAnnouncement && this.currentAnnouncement.is_dismissible) {
                 this.dismissCurrentAnnouncement();
             }
+        },
+        
+        logout() {
+            // Trigger logout
+            window.location.href = '/logout';
         }
     }
 }
