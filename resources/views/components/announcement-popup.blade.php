@@ -54,7 +54,7 @@
                 <div class="mb-2" x-html="currentAnnouncement.message" style="line-height: 1.6;"></div>
                 
                 <!-- Compact Footer -->
-                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                <div class="d-flex justify-content-between align-items-center mt-2">
                     <small class="text-muted" x-show="announcements.length > 1" x-text="`${currentIndex + 1} of ${announcements.length}`"></small>
                     <div class="d-flex gap-1 ms-auto">
                         <button 
