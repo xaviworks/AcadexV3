@@ -57,7 +57,7 @@ trait SendsGERequestNotifications
     }
 
     /**
-     * Notify the requesting chairperson when a GE request is approved.
+     * Notify the chairperson of the instructor's program when a GE request is approved.
      * Email and system notification.
      */
     public static function notifyGERequestApproved(GESubjectRequest $request, ?User $approvedBy = null): void
@@ -66,19 +66,33 @@ trait SendsGERequestNotifications
             $instructor = User::find($request->instructor_id);
             $requestedBy = User::find($request->requested_by);
             
-            if (!$instructor || !$requestedBy) {
-                Log::warning('GE request approved notification skipped - missing user data', [
+            if (!$instructor) {
+                Log::warning('GE request approved notification skipped - instructor not found', [
                     'request_id' => $request->id,
                 ]);
                 return;
             }
             
-            $requestedBy->notify(new GERequestApproved($request, $instructor, $requestedBy, $approvedBy));
+            // Get the chairperson of the instructor's program
+            $chairperson = User::where('role', 1) // Chairperson
+                ->where('course_id', $instructor->course_id)
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$chairperson) {
+                Log::warning('GE request approved notification skipped - no chairperson found for program', [
+                    'request_id' => $request->id,
+                    'instructor_course_id' => $instructor->course_id,
+                ]);
+                return;
+            }
+            
+            $chairperson->notify(new GERequestApproved($request, $instructor, $requestedBy, $approvedBy));
             
             Log::info('GE request approved notification sent', [
                 'request_id' => $request->id,
                 'instructor_id' => $instructor->id,
-                'requested_by_id' => $requestedBy->id,
+                'chairperson_id' => $chairperson->id,
                 'approved_by_id' => $approvedBy?->id,
             ]);
         } catch (\Exception $e) {
@@ -90,7 +104,7 @@ trait SendsGERequestNotifications
     }
 
     /**
-     * Notify the requesting chairperson when a GE request is rejected.
+     * Notify the chairperson of the instructor's program when a GE request is rejected.
      * Email and system notification.
      */
     public static function notifyGERequestRejected(GESubjectRequest $request, ?User $rejectedBy = null): void
@@ -99,19 +113,33 @@ trait SendsGERequestNotifications
             $instructor = User::find($request->instructor_id);
             $requestedBy = User::find($request->requested_by);
             
-            if (!$instructor || !$requestedBy) {
-                Log::warning('GE request rejected notification skipped - missing user data', [
+            if (!$instructor) {
+                Log::warning('GE request rejected notification skipped - instructor not found', [
                     'request_id' => $request->id,
                 ]);
                 return;
             }
             
-            $requestedBy->notify(new GERequestRejected($request, $instructor, $requestedBy, $rejectedBy));
+            // Get the chairperson of the instructor's program
+            $chairperson = User::where('role', 1) // Chairperson
+                ->where('course_id', $instructor->course_id)
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$chairperson) {
+                Log::warning('GE request rejected notification skipped - no chairperson found for program', [
+                    'request_id' => $request->id,
+                    'instructor_course_id' => $instructor->course_id,
+                ]);
+                return;
+            }
+            
+            $chairperson->notify(new GERequestRejected($request, $instructor, $requestedBy, $rejectedBy));
             
             Log::info('GE request rejected notification sent', [
                 'request_id' => $request->id,
                 'instructor_id' => $instructor->id,
-                'requested_by_id' => $requestedBy->id,
+                'chairperson_id' => $chairperson->id,
                 'rejected_by_id' => $rejectedBy?->id,
             ]);
         } catch (\Exception $e) {
