@@ -49,6 +49,18 @@ acadex install:2fa
 
 ---
 
+### `acadex install:notif`
+Install notification feature packages.
+
+```bash
+acadex install:notif
+```
+
+**Packages installed:**
+- `@alpinejs/intersect` - Alpine.js Intersection Observer plugin for scroll-based notifications
+
+---
+
 ### `acadex check`
 Verify system requirements and project status.
 
@@ -123,6 +135,27 @@ acadex build
 ```
 
 Runs `npm run build` to compile and minify CSS/JS assets.
+
+---
+
+### `acadex ui`
+Rebuild UI assets and clear all caches.
+
+```bash
+acadex ui
+```
+
+**What it does:**
+1. Runs `npm run build` - Rebuilds all frontend assets (CSS/JS)
+2. Runs `php artisan optimize:clear` - Clears all caches:
+   - Configuration cache
+   - Route cache
+   - View cache (compiled Blade templates)
+   - Application cache
+
+**Use when:** You've made UI changes (CSS, JS, Blade templates) and need to see them immediately.
+
+**Tip:** After running this, hard refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`).
 
 ---
 
