@@ -412,11 +412,25 @@ class GECoordinatorController extends Controller
         if (!($subject->course_id == 1 || ($subject->is_universal ?? false))) {
             return response()->json(['error' => 'Only General Education subjects can be managed by GE Coordinator.'], 403);
         }
+        
+        // Get academic period label for notifications
+        $academicPeriodId = session('active_academic_period_id');
+        $academicPeriod = \App\Models\AcademicPeriod::find($academicPeriodId);
+        $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
 
         // Check if we're assigning or unassigning
         if ($request->isMethod('delete')) {
+            // Get instructor for notification before detaching
+            $instructor = User::find($request->instructor_id);
+            
             // Unassign the instructor
             $subject->instructors()->detach($request->instructor_id);
+            
+            // Notify instructor about course removal (Email + System)
+            if ($instructor) {
+                NotificationService::notifyCourseRemoved($instructor, $subject, $periodLabel);
+            }
+            
             return response()->json([
                 'success' => true, 
                 'message' => 'Instructor unassigned successfully.',
@@ -427,14 +441,16 @@ class GECoordinatorController extends Controller
             $subject->instructors()->syncWithoutDetaching([$request->instructor_id]);
             $instructor = User::find($request->instructor_id);
             
-            // Send notification to the instructor
-            NotificationService::notifySubjectAssigned($instructor, $subject, Auth::user());
+            // Send notification to the instructor (Email + System)
+            if ($instructor) {
+                NotificationService::notifyCourseAssigned($instructor, $subject, $periodLabel);
+            }
             
             return response()->json([
                 'success' => true, 
                 'message' => 'Instructor assigned successfully.',
                 'action' => 'assigned',
-                'instructor_name' => $instructor->name
+                'instructor_name' => $instructor?->name
             ]);
         }
     }
@@ -597,6 +613,9 @@ class GECoordinatorController extends Controller
             $instructor->can_teach_ge = true;
             $instructor->save();
         }
+        
+        // Notify the requesting chairperson (Email + System)
+        NotificationService::notifyGERequestApproved($request, Auth::user());
 
         return redirect()->back()->with('status', 'GE assignment request approved successfully. The instructor can now teach GE subjects.');
     }
@@ -617,6 +636,9 @@ class GECoordinatorController extends Controller
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);
+        
+        // Notify the requesting chairperson (Email + System)
+        NotificationService::notifyGERequestRejected($request, Auth::user());
 
         return redirect()->back()->with('status', 'GE assignment request rejected successfully.');
     }

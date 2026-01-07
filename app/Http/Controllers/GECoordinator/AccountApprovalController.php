@@ -7,6 +7,7 @@ use App\Models\UnverifiedUser;
 use App\Models\User;
 use App\Models\Department;
 use App\Listeners\NotifyUserCreated;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -85,6 +86,9 @@ class AccountApprovalController extends Controller
             
             // Notify admins about new user creation
             NotifyUserCreated::handle($newUser, Auth::user());
+            
+            // Notify the instructor that their account was approved (Email + System)
+            NotificationService::notifyInstructorApproved($newUser, Auth::user());
 
             return back()->with('success', 'GE Instructor account has been approved successfully.');
         } catch (\Exception $e) {
@@ -118,6 +122,13 @@ class AccountApprovalController extends Controller
         if (!$pending) {
             return back()->withErrors(['error' => 'Pending account not found or already processed.']);
         }
+        
+        // Store info before deletion for notification
+        $email = $pending->email;
+        $name = trim($pending->first_name . ' ' . $pending->last_name);
+        
+        // Send rejection email notification to the instructor
+        NotificationService::notifyInstructorRejected($email, $name, Auth::user());
             
         $pending->delete();
 

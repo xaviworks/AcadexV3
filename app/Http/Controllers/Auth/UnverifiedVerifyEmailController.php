@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\UnverifiedUser;
+use App\Services\NotificationService;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,6 +45,10 @@ class UnverifiedVerifyEmailController extends Controller
         // Mark email as verified
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
+            
+            // Notify the appropriate approver (Chairperson or GE Coordinator) about the pending instructor
+            // System notification only - no email
+            NotificationService::notifyInstructorPending($user);
         }
 
         // Check if the selected department is GE

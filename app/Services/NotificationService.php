@@ -4,13 +4,24 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Subject;
+use App\Models\UnverifiedUser;
+use App\Models\GESubjectRequest;
 use App\Notifications\GradeSubmitted;
 use App\Notifications\SubjectAssigned;
 use App\Notifications\SecurityAlert;
 use App\Notifications\SystemNotification;
+use App\Notifications\InstructorPendingApproval;
+use App\Notifications\InstructorApproved;
+use App\Notifications\InstructorRejected;
+use App\Notifications\GERequestSubmitted;
+use App\Notifications\GERequestApproved;
+use App\Notifications\GERequestRejected;
+use App\Notifications\CourseAssigned;
+use App\Notifications\CourseRemoved;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Central service for managing notifications throughout the application.
@@ -299,5 +310,309 @@ class NotificationService
         }
 
         return $response;
+    }
+
+    // ============================
+    // Instructor Account Notifications
+    // ============================
+
+    /**
+     * Notify appropriate approver when a new instructor registers and is pending approval.
+     * - GE Department instructors → notify GE Coordinators
+     * - Other departments → notify Chairpersons of that department/course
+     * System notification only (no email).
+     */
+    public static function notifyInstructorPending(UnverifiedUser $pendingUser): void
+    {
+        try {
+            // Check if this is a GE department instructor
+            $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
+            $isGEDepartment = $geDepartment && $pendingUser->department_id === $geDepartment->id;
+            
+            if ($isGEDepartment) {
+                // Notify GE Coordinators
+                $recipients = User::where('role', 4) // GE Coordinator
+                    ->where('is_active', true)
+                    ->get();
+                $recipientType = 'GE Coordinator';
+            } else {
+                // Notify Chairpersons of the same department and course
+                $recipients = User::where('role', 1) // Chairperson
+                    ->where('department_id', $pendingUser->department_id)
+                    ->where('course_id', $pendingUser->course_id)
+                    ->where('is_active', true)
+                    ->get();
+                $recipientType = 'Chairperson';
+            }
+
+            if ($recipients->isNotEmpty()) {
+                Notification::send(
+                    $recipients,
+                    new InstructorPendingApproval($pendingUser)
+                );
+                
+                Log::info('Pending instructor notification sent', [
+                    'pending_user_id' => $pendingUser->id,
+                    'pending_user_email' => $pendingUser->email,
+                    'recipient_type' => $recipientType,
+                    'recipient_count' => $recipients->count(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send pending instructor notification', [
+                'error' => $e->getMessage(),
+                'pending_user_id' => $pendingUser->id,
+            ]);
+        }
+    }
+
+    /**
+     * Notify instructor when their account is approved.
+     * Email and system notification.
+     */
+    public static function notifyInstructorApproved(User $instructor, ?User $approvedBy = null): void
+    {
+        try {
+            $instructor->notify(new InstructorApproved($instructor, $approvedBy));
+            
+            Log::info('Instructor approved notification sent', [
+                'instructor_id' => $instructor->id,
+                'instructor_email' => $instructor->email,
+                'approved_by_id' => $approvedBy?->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send instructor approved notification', [
+                'error' => $e->getMessage(),
+                'instructor_id' => $instructor->id,
+            ]);
+        }
+    }
+
+    /**
+     * Notify instructor when their account is rejected.
+     * Email notification only (account is being deleted).
+     */
+    public static function notifyInstructorRejected(
+        string $email,
+        string $name,
+        ?User $rejectedBy = null
+    ): void {
+        try {
+            // Create a temporary notifiable for sending email
+            $notifiable = new class($email) {
+                public string $email;
+                
+                public function __construct(string $email) {
+                    $this->email = $email;
+                }
+                
+                public function routeNotificationForMail(): string {
+                    return $this->email;
+                }
+            };
+            
+            $notifiable->notify(new InstructorRejected($email, $name, $rejectedBy));
+            
+            Log::info('Instructor rejected notification sent', [
+                'instructor_email' => $email,
+                'rejected_by_id' => $rejectedBy?->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send instructor rejected notification', [
+                'error' => $e->getMessage(),
+                'instructor_email' => $email,
+            ]);
+        }
+    }
+
+    // ============================
+    // GE Request Notifications
+    // ============================
+
+    /**
+     * Notify GE Coordinator(s) when a new GE assignment request is submitted.
+     * System notification only (no email).
+     */
+    public static function notifyGERequestSubmitted(GESubjectRequest $request): void
+    {
+        try {
+            $instructor = User::find($request->instructor_id);
+            $requestedBy = User::find($request->requested_by);
+            
+            if (!$instructor || !$requestedBy) {
+                Log::warning('GE request notification skipped - missing user data', [
+                    'request_id' => $request->id,
+                ]);
+                return;
+            }
+            
+            // Get all active GE Coordinators
+            $geCoordinators = User::where('role', 4) // GE Coordinator
+                ->where('is_active', true)
+                ->get();
+
+            if ($geCoordinators->isNotEmpty()) {
+                Notification::send(
+                    $geCoordinators,
+                    new GERequestSubmitted($request, $instructor, $requestedBy)
+                );
+                
+                Log::info('GE request submitted notification sent', [
+                    'request_id' => $request->id,
+                    'instructor_id' => $instructor->id,
+                    'requested_by_id' => $requestedBy->id,
+                    'coordinator_count' => $geCoordinators->count(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send GE request submitted notification', [
+                'error' => $e->getMessage(),
+                'request_id' => $request->id,
+            ]);
+        }
+    }
+
+    /**
+     * Notify the requesting chairperson when a GE request is approved.
+     * Email and system notification.
+     */
+    public static function notifyGERequestApproved(GESubjectRequest $request, ?User $approvedBy = null): void
+    {
+        try {
+            $instructor = User::find($request->instructor_id);
+            $requestedBy = User::find($request->requested_by);
+            
+            if (!$instructor || !$requestedBy) {
+                Log::warning('GE request approved notification skipped - missing user data', [
+                    'request_id' => $request->id,
+                ]);
+                return;
+            }
+            
+            // Notify the chairperson who made the request
+            $requestedBy->notify(new GERequestApproved($request, $instructor, $requestedBy, $approvedBy));
+            
+            Log::info('GE request approved notification sent', [
+                'request_id' => $request->id,
+                'instructor_id' => $instructor->id,
+                'requested_by_id' => $requestedBy->id,
+                'approved_by_id' => $approvedBy?->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send GE request approved notification', [
+                'error' => $e->getMessage(),
+                'request_id' => $request->id,
+            ]);
+        }
+    }
+
+    /**
+     * Notify the requesting chairperson when a GE request is rejected.
+     * Email and system notification.
+     */
+    public static function notifyGERequestRejected(GESubjectRequest $request, ?User $rejectedBy = null): void
+    {
+        try {
+            $instructor = User::find($request->instructor_id);
+            $requestedBy = User::find($request->requested_by);
+            
+            if (!$instructor || !$requestedBy) {
+                Log::warning('GE request rejected notification skipped - missing user data', [
+                    'request_id' => $request->id,
+                ]);
+                return;
+            }
+            
+            // Notify the chairperson who made the request
+            $requestedBy->notify(new GERequestRejected($request, $instructor, $requestedBy, $rejectedBy));
+            
+            Log::info('GE request rejected notification sent', [
+                'request_id' => $request->id,
+                'instructor_id' => $instructor->id,
+                'requested_by_id' => $requestedBy->id,
+                'rejected_by_id' => $rejectedBy?->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send GE request rejected notification', [
+                'error' => $e->getMessage(),
+                'request_id' => $request->id,
+            ]);
+        }
+    }
+
+    // ============================
+    // Course Assignment Notifications
+    // ============================
+
+    /**
+     * Notify an instructor when they're assigned to a course/subject.
+     * Email and system notification.
+     */
+    public static function notifyCourseAssigned(
+        User $instructor,
+        Subject $subject,
+        ?string $academicPeriod = null
+    ): void {
+        $assignedBy = Auth::user();
+        if (!$assignedBy) {
+            return;
+        }
+
+        // Don't notify if assigning to self
+        if ($assignedBy->id === $instructor->id) {
+            return;
+        }
+
+        try {
+            $instructor->notify(new CourseAssigned($assignedBy, $subject, $academicPeriod));
+            
+            Log::info('Course assigned notification sent', [
+                'instructor_id' => $instructor->id,
+                'subject_id' => $subject->id,
+                'assigned_by_id' => $assignedBy->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send course assigned notification', [
+                'error' => $e->getMessage(),
+                'instructor_id' => $instructor->id,
+                'subject_id' => $subject->id,
+            ]);
+        }
+    }
+
+    /**
+     * Notify an instructor when they're removed from a course/subject.
+     * Email and system notification.
+     */
+    public static function notifyCourseRemoved(
+        User $instructor,
+        Subject $subject,
+        ?string $academicPeriod = null
+    ): void {
+        $removedBy = Auth::user();
+        if (!$removedBy) {
+            return;
+        }
+
+        // Don't notify if removing self
+        if ($removedBy->id === $instructor->id) {
+            return;
+        }
+
+        try {
+            $instructor->notify(new CourseRemoved($removedBy, $subject, $academicPeriod));
+            
+            Log::info('Course removed notification sent', [
+                'instructor_id' => $instructor->id,
+                'subject_id' => $subject->id,
+                'removed_by_id' => $removedBy->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send course removed notification', [
+                'error' => $e->getMessage(),
+                'instructor_id' => $instructor->id,
+                'subject_id' => $subject->id,
+            ]);
+        }
     }
 }
