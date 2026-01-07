@@ -12,17 +12,17 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover" style="min-width: 1400px;">
                     <thead>
                         <tr>
-                            <th>Status</th>
-                            <th>Title</th>
-                            <th style="min-width: 80px;">Type</th>
-                            <th style="min-width: 80px;">Priority</th>
-                            <th>Target</th>
-                            <th>Date Range</th>
-                            <th>Views</th>
-                            <th>Actions</th>
+                            <th style="min-width: 100px;">Status</th>
+                            <th style="min-width: 300px;">Title</th>
+                            <th style="min-width: 100px;">Type</th>
+                            <th style="min-width: 100px;">Priority</th>
+                            <th style="min-width: 200px;">Target</th>
+                            <th style="min-width: 180px;">Date Range</th>
+                            <th style="min-width: 100px;">Views</th>
+                            <th style="min-width: 120px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
