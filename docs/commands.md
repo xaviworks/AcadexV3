@@ -27,12 +27,13 @@ acadex setup
 2. Creates `.env` file from `.env.example`
 3. Installs Composer dependencies (Laravel, Excel, 2FA, Socialite, etc.)
 4. Installs npm dependencies
-5. Generates application key
-6. Prompts for database configuration
-7. Runs database migrations
-8. Optionally seeds the database
-9. Builds frontend assets
-10. Optimizes the application
+5. Installs notification features (`@alpinejs/intersect`)
+6. Generates application key
+7. Prompts for database configuration
+8. Runs database migrations
+9. Optionally seeds the database
+10. Builds frontend assets
+11. Optimizes the application
 
 ---
 
@@ -296,11 +297,16 @@ acadex format app/Http/Controllers
 ## Dependencies
 
 ### `acadex install`
-Install all dependencies (Composer + npm).
+Install all dependencies (Composer + npm + notification features).
 
 ```bash
 acadex install
 ```
+
+**Installs:**
+- Composer dependencies
+- npm dependencies
+- Notification features (`@alpinejs/intersect`)
 
 ---
 

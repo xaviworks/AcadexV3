@@ -138,7 +138,7 @@ case "$1" in
         
         # Step 3: Install Composer dependencies
         echo -e "${YELLOW}[3/9]${NC} Installing Composer dependencies..."
-        echo -e "  ${BLUE}→${NC} This includes: Laravel, Excel, 2FA, Socialite, etc."
+        echo -e "  ${BLUE}→${NC} This includes: Laravel, Excel, 2FA, Socialite, notifications, etc."
         composer install --no-interaction
         if [ $? -eq 0 ]; then
             echo -e "  ${GREEN}✓${NC} Composer dependencies installed"
@@ -156,6 +156,11 @@ case "$1" in
         else
             echo -e "  ${RED}✗${NC} npm install failed!"
             exit 1
+        fi
+        echo -e "  ${BLUE}→${NC} Installing notification features..."
+        npm install @alpinejs/intersect --save
+        if [ $? -eq 0 ]; then
+            echo -e "  ${GREEN}✓${NC} Notification packages installed"
         fi
         echo ""
         
@@ -426,6 +431,8 @@ case "$1" in
         echo -e "${GREEN}Installing dependencies...${NC}"
         composer install
         npm install
+        echo -e "${BLUE}→${NC} Installing notification features..."
+        npm install @alpinejs/intersect --save
         echo -e "${GREEN}Dependencies installed!${NC}"
         ;;
     update)
