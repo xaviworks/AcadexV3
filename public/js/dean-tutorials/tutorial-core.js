@@ -246,6 +246,31 @@
             
             this.currentTutorial = { id: tutorialId, ...tutorial };
             this.currentStep = 0;
+            
+            // Check if tutorial requires data and if data exists
+            if (tutorial.tableDataCheck && !this.hasTableData()) {
+                const check = tutorial.tableDataCheck;
+                const entityName = check.entityName || 'records';
+                
+                // Show alert that tutorial cannot proceed
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: `No ${entityName.charAt(0).toUpperCase() + entityName.slice(1)} Available`,
+                        html: check.noAddButton 
+                            ? `This page currently has no ${entityName} to display.<br><br>The tutorial cannot proceed without data. ${entityName.charAt(0).toUpperCase() + entityName.slice(1)} will appear here when available.`
+                            : `This page currently has no ${entityName} to display.<br><br>Please add some ${entityName} first, then try the tutorial again.`,
+                        icon: 'info',
+                        confirmButtonColor: '#198754',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    alert(`Cannot start tutorial: No ${entityName} available on this page.`);
+                }
+                
+                this.currentTutorial = null;
+                return;
+            }
+            
             this.isActive = true;
             
             // Hide FAB

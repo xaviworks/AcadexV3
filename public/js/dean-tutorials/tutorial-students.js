@@ -27,26 +27,33 @@
                 target: 'form select#courseFilter, form .form-select',
                 title: 'Course Filter',
                 content: 'Use this dropdown to filter students by course/program. Select a specific course to see only students enrolled in that program, or choose "All Courses" to view everyone.',
-                position: 'bottom'
+                position: 'bottom',
+                requiresData: true
             },
             {
                 target: '.table thead',
                 title: 'Students Table',
                 content: 'The table displays student information: Name, Course enrollment, and Year Level.',
-                position: 'bottom'
+                position: 'bottom',
+                requiresData: true
             },
             {
                 target: '.table tbody tr:first-child',
                 title: 'Student Record',
                 content: 'Each row shows a student\'s name (Last Name, First Name), their course code, and current year level.',
                 position: 'bottom',
-                optional: true
+                optional: true,
+                requiresData: true
             }
         ],
         tableDataCheck: {
             selector: '.table tbody tr',
             entityName: 'students',
-            noAddButton: true
+            noAddButton: true,
+            emptySelectors: [
+                '.table tbody tr td[colspan]',
+                '.dataTables_empty'
+            ]
         }
     });
 })();

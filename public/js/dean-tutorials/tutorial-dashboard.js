@@ -24,12 +24,6 @@
                 position: 'bottom'
             },
             {
-                target: 'a[href*="dean/grades"]',
-                title: 'Quick Access: View Grades',
-                content: 'Click this button to quickly navigate to the grades section where you can view student final grades across courses.',
-                position: 'left'
-            },
-            {
                 target: '.row.g-4 > .col-md-3:first-child .card',
                 title: 'Total Students',
                 content: 'This card shows the total number of students across all departments. It gives you a quick overview of your student population.',
