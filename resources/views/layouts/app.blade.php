@@ -39,9 +39,9 @@
 
     {{-- Styles: resources/css/layout/app.css --}}
 
-    <!-- Admin Tutorial System (Admin users only) -->
+    <!-- Tutorial System Styles (Admin, VPAA, and Dean users) -->
     @auth
-        @if(Auth::user()->role === 3)
+        @if(Auth::user()->role === 3 || Auth::user()->role === 5 || Auth::user()->role === 2)
             <link rel="stylesheet" href="{{ asset('css/admin-tutorial.css') }}">
         @endif
     @endauth
@@ -457,6 +457,20 @@
     @auth
         @if(Auth::user()->role === 3)
             <script src="{{ asset('js/admin-tutorial.js') }}" defer></script>
+        @endif
+    @endauth
+
+    {{-- VPAA Tutorial System (VPAA users only) --}}
+    @auth
+        @if(Auth::user()->role === 5)
+            <script src="{{ asset('js/vpaa-tutorial.js') }}" defer></script>
+        @endif
+    @endauth
+
+    {{-- Dean Tutorial System (Dean users only) --}}
+    @auth
+        @if(Auth::user()->role === 2)
+            <script src="{{ asset('js/dean-tutorial.js') }}" defer></script>
         @endif
     @endauth
 
