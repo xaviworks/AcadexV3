@@ -202,7 +202,7 @@
         
         <div class="row">
             <div class="col-md-6">
-                <div class="form-check form-switch mb-2">
+                <div class="form-check form-switch mb-3">
                     <input class="form-check-input" 
                            type="checkbox" 
                            role="switch"
@@ -211,26 +211,16 @@
                            value="1"
                            {{ old('is_active', $announcement?->is_active ?? true) ? 'checked' : '' }}>
                     <label class="form-check-label" for="{{ $prefix }}is_active">
-                        Active
-                    </label>
-                </div>
-                
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" 
-                           type="checkbox" 
-                           role="switch"
-                           id="{{ $prefix }}is_dismissible" 
-                           name="is_dismissible" 
-                           value="1"
-                           {{ old('is_dismissible', $announcement?->is_dismissible ?? true) ? 'checked' : '' }}>
-                    <label class="form-check-label" for="{{ $prefix }}is_dismissible">
-                        Allow dismissal
+                        <span class="fw-semibold d-block">Active</span>
+                        <small class="text-muted">
+                            When active, users will see this announcement. Turn off to pause or prepare drafts.
+                        </small>
                     </label>
                 </div>
             </div>
             
             <div class="col-md-6">
-                <div class="form-check form-switch mb-2">
+                <div class="form-check form-switch mb-3">
                     <input class="form-check-input" 
                            type="checkbox" 
                            role="switch"
@@ -239,7 +229,10 @@
                            value="1"
                            {{ old('show_once', $announcement?->show_once ?? false) ? 'checked' : '' }}>
                     <label class="form-check-label" for="{{ $prefix }}show_once">
-                        Show once only
+                        <span class="fw-semibold d-block">Show once only</span>
+                        <small class="text-muted">
+                            Users see it once, then it's hidden from them permanently.
+                        </small>
                     </label>
                 </div>
             </div>
