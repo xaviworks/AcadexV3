@@ -74,6 +74,7 @@ This installs all required packages including:
 - Google 2FA (two-factor authentication)
 - Laravel Socialite (OAuth)
 - Jenssegers Agent (device detection)
+- Alpine.js Intersect (notification system)
 
 #### Step 3: Install Node Dependencies
 
@@ -132,7 +133,7 @@ Visit [http://localhost:8000](http://localhost:8000)
 
 ## Installing the ACADEX Command
 
-### Easy Installation (Recommended) 🚀
+### Easy Installation (Recommended) 
 
 **For Mac/Linux Users:**
 
@@ -156,7 +157,7 @@ Visit [http://localhost:8000](http://localhost:8000)
    acadex check
    ```
 
-✅ Done! The installer automatically detects your system and sets everything up.
+ Done! The installer automatically detects your system and sets everything up.
 
 ---
 
@@ -179,7 +180,7 @@ Visit [http://localhost:8000](http://localhost:8000)
    acadex check
    ```
 
-✅ Done! The installer sets up everything automatically.
+ Done! The installer sets up everything automatically.
 
 ---
 

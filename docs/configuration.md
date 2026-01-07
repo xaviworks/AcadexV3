@@ -109,6 +109,25 @@ QUEUE_CONNECTION=database
 
 ---
 
+### Notification Configuration
+
+Notifications use Alpine.js Intersect plugin for scroll-based animations:
+
+```bash
+# Install notification packages
+npm install @alpinejs/intersect
+
+# Or use ACADEX CLI
+acadex install:notif
+```
+
+**Features:**
+- Scroll-based notification triggers
+- Intersection observer support
+- Smooth animations
+
+---
+
 ### Cache Configuration
 
 ```env

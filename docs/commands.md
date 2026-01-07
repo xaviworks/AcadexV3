@@ -25,14 +25,15 @@ acadex setup
 **What it does:**
 1. Checks system requirements (PHP, Composer, Node.js, npm)
 2. Creates `.env` file from `.env.example`
-3. Installs Composer dependencies (Laravel, Excel, 2FA, Socialite, etc.)
+3. Installs Composer dependencies (Laravel, Excel, 2FA, Socialite, notifications, etc.)
 4. Installs npm dependencies
-5. Generates application key
-6. Prompts for database configuration
-7. Runs database migrations
-8. Optionally seeds the database
-9. Builds frontend assets
-10. Optimizes the application
+5. Installs notification features (`@alpinejs/intersect`)
+6. Generates application key
+7. Prompts for database configuration
+8. Runs database migrations
+9. Optionally seeds the database
+10. Builds frontend assets
+11. Optimizes the application
 
 ---
 
@@ -46,6 +47,18 @@ acadex install:2fa
 **Packages installed:**
 - `pragmarx/google2fa-laravel` - Google Two-Factor Authentication
 - `bacon/bacon-qr-code` - QR Code generation
+
+---
+
+### `acadex install:notif`
+Install notification feature packages.
+
+```bash
+acadex install:notif
+```
+
+**Packages installed:**
+- `@alpinejs/intersect` - Alpine.js Intersection Observer plugin for scroll-based notifications
 
 ---
 
@@ -123,6 +136,27 @@ acadex build
 ```
 
 Runs `npm run build` to compile and minify CSS/JS assets.
+
+---
+
+### `acadex ui`
+Rebuild UI assets and clear all caches.
+
+```bash
+acadex ui
+```
+
+**What it does:**
+1. Runs `npm run build` - Rebuilds all frontend assets (CSS/JS)
+2. Runs `php artisan optimize:clear` - Clears all caches:
+   - Configuration cache
+   - Route cache
+   - View cache (compiled Blade templates)
+   - Application cache
+
+**Use when:** You've made UI changes (CSS, JS, Blade templates) and need to see them immediately.
+
+**Tip:** After running this, hard refresh your browser (`Ctrl+Shift+R` or `Cmd+Shift+R`).
 
 ---
 
@@ -263,11 +297,16 @@ acadex format app/Http/Controllers
 ## Dependencies
 
 ### `acadex install`
-Install all dependencies (Composer + npm).
+Install all dependencies (Composer + npm + notification features).
 
 ```bash
 acadex install
 ```
+
+**Installs:**
+- Composer dependencies
+- npm dependencies
+- Notification features (`@alpinejs/intersect`)
 
 ---
 

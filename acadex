@@ -27,12 +27,14 @@ show_help() {
     echo -e "  ${BLUE}Setup & Installation:${NC}"
     echo -e "  ${GREEN}setup${NC}           First-time full installation"
     echo -e "  ${GREEN}install:2fa${NC}     Install 2FA packages (existing install)"
+    echo -e "  ${GREEN}install:notif${NC}   Install notification feature packages"
     echo -e "  ${GREEN}check${NC}           Check system requirements"
     echo ""
     echo -e "  ${BLUE}Development:${NC}"
     echo -e "  ${GREEN}serve${NC}           Start production servers (Laravel + Queue + Scheduler)"
     echo -e "  ${GREEN}dev${NC}             Start dev servers (Laravel + Queue + Logs + Vite)"
     echo -e "  ${GREEN}build${NC}           Build assets for production (npm run build)"
+    echo -e "  ${GREEN}ui${NC}              Rebuild UI assets and clear caches"
     echo -e "  ${GREEN}start${NC}           Start Laravel server only"
     echo ""
     echo -e "  ${BLUE}Testing:${NC}"
@@ -136,7 +138,7 @@ case "$1" in
         
         # Step 3: Install Composer dependencies
         echo -e "${YELLOW}[3/9]${NC} Installing Composer dependencies..."
-        echo -e "  ${BLUE}→${NC} This includes: Laravel, Excel, 2FA, Socialite, etc."
+        echo -e "  ${BLUE}→${NC} This includes: Laravel, Excel, 2FA, Socialite, notifications, etc."
         composer install --no-interaction
         if [ $? -eq 0 ]; then
             echo -e "  ${GREEN}✓${NC} Composer dependencies installed"
@@ -154,6 +156,11 @@ case "$1" in
         else
             echo -e "  ${RED}✗${NC} npm install failed!"
             exit 1
+        fi
+        echo -e "  ${BLUE}→${NC} Installing notification features..."
+        npm install @alpinejs/intersect --save
+        if [ $? -eq 0 ]; then
+            echo -e "  ${GREEN}✓${NC} Notification packages installed"
         fi
         echo ""
         
@@ -236,6 +243,20 @@ case "$1" in
             echo -e "${GREEN}✓ 2FA packages installed successfully!${NC}"
             echo -e "  - pragmarx/google2fa-laravel"
             echo -e "  - bacon/bacon-qr-code"
+        else
+            echo -e "${RED}✗ Installation failed!${NC}"
+            exit 1
+        fi
+        ;;
+    
+    install:notif)
+        echo -e "${GREEN}Installing notification feature packages...${NC}"
+        echo ""
+        npm install @alpinejs/intersect --save
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo -e "${GREEN}✓ Notification packages installed successfully!${NC}"
+            echo -e "  - @alpinejs/intersect"
         else
             echo -e "${RED}✗ Installation failed!${NC}"
             exit 1
@@ -346,6 +367,14 @@ case "$1" in
         echo -e "${GREEN}Building assets for production...${NC}"
         npm run build
         ;;
+    ui)
+        echo -e "${GREEN}Rebuilding UI and clearing caches...${NC}"
+        echo -e "  ${BLUE}→${NC} Building frontend assets..."
+        npm run build
+        echo -e "  ${BLUE}→${NC} Clearing all caches..."
+        php artisan optimize:clear
+        echo -e "${GREEN}✓ UI refreshed! Hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)${NC}"
+        ;;
     start)
         echo -e "${GREEN}Starting Laravel server only...${NC}"
         php artisan serve
@@ -402,6 +431,8 @@ case "$1" in
         echo -e "${GREEN}Installing dependencies...${NC}"
         composer install
         npm install
+        echo -e "${BLUE}→${NC} Installing notification features..."
+        npm install @alpinejs/intersect --save
         echo -e "${GREEN}Dependencies installed!${NC}"
         ;;
     update)
