@@ -63,13 +63,14 @@
                                     @else
                                         @foreach($announcement->target_roles as $role)
                                             <span class="badge bg-secondary">
-                                                {{ match($role) {
+                                                {{ match((int)$role) {
                                                     0 => 'Instructor',
                                                     1 => 'Chairperson',
                                                     2 => 'Dean',
                                                     3 => 'Admin',
                                                     4 => 'GE Coordinator',
                                                     5 => 'VPAA',
+                                                    default => 'Unknown',
                                                 } }}
                                             </span>
                                         @endforeach
@@ -285,8 +286,15 @@ function loadAnnouncementForEdit(id, announcement) {
     document.getElementById('edit_message').value = announcement.message;
     document.getElementById('edit_type').value = announcement.type;
     document.getElementById('edit_priority').value = announcement.priority;
-    document.getElementById('edit_start_date').value = announcement.start_date || '';
-    document.getElementById('edit_end_date').value = announcement.end_date || '';
+    
+    // Format dates for datetime-local inputs (YYYY-MM-DDTHH:mm)
+    document.getElementById('edit_start_date').value = announcement.start_date 
+        ? formatDateTimeLocal(announcement.start_date) 
+        : '';
+    document.getElementById('edit_end_date').value = announcement.end_date 
+        ? formatDateTimeLocal(announcement.end_date) 
+        : '';
+    
     document.getElementById('edit_is_dismissible').checked = announcement.is_dismissible;
     document.getElementById('edit_show_once').checked = announcement.show_once;
     document.getElementById('edit_is_active').checked = announcement.is_active;
@@ -322,6 +330,22 @@ function getRoleName(roleId) {
         5: 'vpaa'
     };
     return roles[roleId] || '';
+}
+
+function formatDateTimeLocal(dateString) {
+    if (!dateString) return '';
+    
+    // Parse the date string and convert to local datetime-local format (YYYY-MM-DDTHH:mm)
+    const date = new Date(dateString);
+    
+    // Get local date components
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 function toggleRoleSelection(prefix = '') {
