@@ -32,6 +32,8 @@ function Show-Help {
     Write-Host "First-time full installation"
     Write-Host "  install:2fa     " -ForegroundColor Green -NoNewline
     Write-Host "Install 2FA packages (existing install)"
+    Write-Host "  install:notif   " -ForegroundColor Green -NoNewline
+    Write-Host "Install notification feature packages"
     Write-Host "  check           " -ForegroundColor Green -NoNewline
     Write-Host "Check system requirements"
     Write-Host ""
@@ -42,6 +44,8 @@ function Show-Help {
     Write-Host "Start dev servers (Laravel + Queue + Logs + Vite)"
     Write-Host "  build           " -ForegroundColor Green -NoNewline
     Write-Host "Build assets for production (npm run build)"
+    Write-Host "  ui              " -ForegroundColor Green -NoNewline
+    Write-Host "Rebuild UI assets and clear caches"
     Write-Host "  start           " -ForegroundColor Green -NoNewline
     Write-Host "Start Laravel server only"
     Write-Host ""
@@ -169,7 +173,7 @@ switch ($Command) {
         
         # Step 3: Install Composer dependencies
         Write-Host "[3/9] Installing Composer dependencies..." -ForegroundColor Yellow
-        Write-Host "  -> This includes: Laravel, Excel, 2FA, Socialite, etc." -ForegroundColor Cyan
+        Write-Host "  -> This includes: Laravel, Excel, 2FA, Socialite, notifications, etc." -ForegroundColor Cyan
         composer install --no-interaction
         if ($LASTEXITCODE -eq 0) {
             Write-Host "  [OK] Composer dependencies installed" -ForegroundColor Green
@@ -187,6 +191,11 @@ switch ($Command) {
         } else {
             Write-Host "  [X] npm install failed!" -ForegroundColor Red
             exit 1
+        }
+        Write-Host "  -> Installing notification features..." -ForegroundColor Cyan
+        npm install @alpinejs/intersect --save
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  [OK] Notification packages installed" -ForegroundColor Green
         }
         Write-Host ""
         
@@ -270,6 +279,20 @@ switch ($Command) {
             Write-Host "[OK] 2FA packages installed successfully!" -ForegroundColor Green
             Write-Host "  - pragmarx/google2fa-laravel"
             Write-Host "  - bacon/bacon-qr-code"
+        } else {
+            Write-Host "[X] Installation failed!" -ForegroundColor Red
+            exit 1
+        }
+    }
+    
+    "install:notif" {
+        Write-Host "Installing notification feature packages..." -ForegroundColor Green
+        Write-Host ""
+        npm install @alpinejs/intersect --save
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host ""
+            Write-Host "[OK] Notification packages installed successfully!" -ForegroundColor Green
+            Write-Host "  - @alpinejs/intersect"
         } else {
             Write-Host "[X] Installation failed!" -ForegroundColor Red
             exit 1
@@ -374,6 +397,15 @@ switch ($Command) {
         npm run build
     }
     
+    "ui" {
+        Write-Host "Rebuilding UI and clearing caches..." -ForegroundColor Green
+        Write-Host "  -> Building frontend assets..." -ForegroundColor Cyan
+        npm run build
+        Write-Host "  -> Clearing all caches..." -ForegroundColor Cyan
+        php artisan optimize:clear
+        Write-Host "[OK] UI refreshed! Hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)" -ForegroundColor Green
+    }
+    
     "start" {
         Write-Host "Starting Laravel server only..." -ForegroundColor Green
         php artisan serve
@@ -470,6 +502,8 @@ switch ($Command) {
         Write-Host "Installing dependencies..." -ForegroundColor Green
         composer install
         npm install
+        Write-Host "  -> Installing notification features..." -ForegroundColor Cyan
+        npm install @alpinejs/intersect --save
         Write-Host "Dependencies installed!" -ForegroundColor Green
     }
     
