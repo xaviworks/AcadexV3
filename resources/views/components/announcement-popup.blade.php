@@ -39,23 +39,15 @@
                 aria-labelledby="announcement-title">
                 
                 <!-- Compact Header -->
-                <div class="d-flex align-items-start justify-content-between mb-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi fs-5" 
-                           :class="{
-                               'bi-info-circle-fill': currentAnnouncement.type === 'info',
-                               'bi-check-circle-fill': currentAnnouncement.type === 'success',
-                               'bi-exclamation-triangle-fill': currentAnnouncement.type === 'warning',
-                               'bi-x-circle-fill': currentAnnouncement.type === 'danger'
-                           }"></i>
-                        <h5 class="alert-heading fw-bold mb-0" id="announcement-title" x-text="currentAnnouncement.title"></h5>
-                    </div>
-                    <button 
-                        @click="dismissCurrentAnnouncement()"
-                        type="button"
-                        class="btn-close"
-                        aria-label="Close">
-                    </button>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi fs-5" 
+                       :class="{
+                           'bi-info-circle-fill': currentAnnouncement.type === 'info',
+                           'bi-check-circle-fill': currentAnnouncement.type === 'success',
+                           'bi-exclamation-triangle-fill': currentAnnouncement.type === 'warning',
+                           'bi-x-circle-fill': currentAnnouncement.type === 'danger'
+                       }"></i>
+                    <h5 class="alert-heading fw-bold mb-0" id="announcement-title" x-text="currentAnnouncement.title"></h5>
                 </div>
                 
                 <!-- Message -->
@@ -64,7 +56,7 @@
                 <!-- Compact Footer -->
                 <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                     <small class="text-muted" x-show="announcements.length > 1" x-text="`${currentIndex + 1} of ${announcements.length}`"></small>
-                    <div class="d-flex gap-1">
+                    <div class="d-flex gap-1 ms-auto">
                         <button 
                             x-show="announcements.length > 1"
                             @click="previousAnnouncement()"
