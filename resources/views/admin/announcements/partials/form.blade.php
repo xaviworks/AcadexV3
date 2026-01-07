@@ -130,14 +130,6 @@
                 </div>
                 <div class="col-6 col-md-4">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="target_roles[]" value="3" 
-                               id="{{ $prefix }}role_admin"
-                               {{ in_array(3, $announcement?->target_roles ?? []) ? 'checked' : '' }}>
-                        <label class="form-check-label" for="{{ $prefix }}role_admin">Admins</label>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4">
-                    <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="target_roles[]" value="4" 
                                id="{{ $prefix }}role_ge"
                                {{ in_array(4, $announcement?->target_roles ?? []) ? 'checked' : '' }}>

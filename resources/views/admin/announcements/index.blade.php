@@ -67,7 +67,6 @@
                                                     0 => 'Instructor',
                                                     1 => 'Chairperson',
                                                     2 => 'Dean',
-                                                    3 => 'Admin',
                                                     4 => 'GE Coordinator',
                                                     5 => 'VPAA',
                                                     default => 'Unknown',
@@ -325,7 +324,6 @@ function getRoleName(roleId) {
         0: 'instructor',
         1: 'chairperson', 
         2: 'dean',
-        3: 'admin',
         4: 'ge',
         5: 'vpaa'
     };

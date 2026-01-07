@@ -222,8 +222,21 @@ function announcementPopup() {
         },
         
         logout() {
-            // Trigger logout
-            window.location.href = '/logout';
+            // Create a form and submit POST request to logout
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/logout';
+            
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+            
+            document.body.appendChild(form);
+            form.submit();
         }
     }
 }
