@@ -61,6 +61,17 @@
     <!-- Additional Page Styles -->
     @stack('styles')
 
+    <!-- Tutorial System Scripts (Admin, VPAA, and Dean users) -->
+    @auth
+        @if(Auth::user()->role === 3)
+            <script src="{{ asset('js/admin-tutorial.js') }}" defer></script>
+        @elseif(Auth::user()->role === 5)
+            <script src="{{ asset('js/vpaa-tutorial.js') }}" defer></script>
+        @elseif(Auth::user()->role === 2)
+            <script src="{{ asset('js/dean-tutorial.js') }}" defer></script>
+        @endif
+    @endauth
+
     <!-- Preload critical resources -->
     <link rel="preload" as="image" href="{{ asset('logo.jpg') }}">
     <link rel="preload" as="script" href="{{ asset('js/page-transition.js') }}">
