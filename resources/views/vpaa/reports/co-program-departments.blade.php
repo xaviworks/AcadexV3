@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-5">
+<div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-1">
@@ -11,13 +11,10 @@
         </div>
         <div>
             @if($academicYear && $semester)
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">
+                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
                     <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
                 </span>
             @endif
-            <a href="{{ route('vpaa.dashboard') }}" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
-            </a>
         </div>
     </div>
 

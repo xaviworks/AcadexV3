@@ -108,7 +108,7 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
               // Also disable if already imported
               let isDisabled = false;
               let disabledReason = '';
-              
+
               if (s.already_imported) {
                 isDisabled = true;
                 disabledReason = 'already-imported';
@@ -119,17 +119,17 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
                 isDisabled = true; // Chairperson cannot select restricted subjects
                 disabledReason = 'restricted';
               }
-              
+
               // Row class - only light background for already imported, no opacity for restricted
               const rowClass = s.already_imported ? 'table-light' : '';
               // Text class - muted for disabled items
               const textClass = isDisabled ? 'text-muted' : '';
-              
+
               // Already imported indicator
-              const importedIndicator = s.already_imported 
-                ? '<span class="badge bg-success bg-opacity-75 ms-2" style="font-size: 0.7rem; font-weight: 500;"><i class="bi bi-check2-circle me-1"></i>Already Added</span>' 
+              const importedIndicator = s.already_imported
+                ? '<span class="badge bg-success bg-opacity-75 ms-2" style="font-size: 0.7rem; font-weight: 500;"><i class="bi bi-check2-circle me-1"></i>Already Added</span>'
                 : '';
-              
+
               // Checkbox or checkmark for the select column
               let selectCell;
               if (s.already_imported) {
@@ -253,13 +253,13 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
 
   // Get the open modal button
   const openConfirmModalBtn = document.getElementById('openConfirmModalBtn');
-  
+
   function updateSelectedCount() {
     const count = document.querySelectorAll('.subject-checkbox:checked').length;
     if (selectedCountEl) {
       selectedCountEl.textContent = count;
     }
-    
+
     // Enable/disable confirm button based on selection count
     if (openConfirmModalBtn) {
       openConfirmModalBtn.disabled = count === 0;
@@ -279,7 +279,7 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
       updateSelectedCount();
     }
   });
-  
+
   // Handle confirm button click - validate before opening modal
   if (openConfirmModalBtn) {
     openConfirmModalBtn.addEventListener('click', function () {
@@ -293,7 +293,7 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
         }
         return;
       }
-      
+
       // Open the modal
       const confirmModal = document.getElementById('confirmModal');
       if (confirmModal && typeof bootstrap !== 'undefined') {

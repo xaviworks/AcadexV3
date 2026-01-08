@@ -2,26 +2,23 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('vpaa.dashboard') }}">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Course Outcome Attainment</li>
-        </ol>
-    </nav>
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-graph-up me-2"></i>Course Outcome Attainment
+            </h2>
+            <p class="text-muted mb-0">
+                Select a department to view its subjects
+                @if($academicYear && $semester)
+                    <span class="ms-2 small">({{ $academicYear }} - {{ $semester }})</span>
+                @endif
+            </p>
+        </div>
+    </div>
 
     @if(isset($departments) && count($departments))
-        <div class="card border-0 shadow-sm rounded-4 mb-3">
-            <div class="card-body d-flex flex-wrap gap-3 align-items-center">
-                <div class="text-muted" aria-live="polite">
-                    Select a department to view its subjects
-                    @if($academicYear && $semester)
-                        <span class="ms-2 small">(Academic Year: {{ $academicYear }}, Semester: {{ $semester }})</span>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4 px-4 py-2" id="department-selection">
+        <div class="row">
             @foreach($departments as $dept)
                 <div class="col-md-4">
                     <div

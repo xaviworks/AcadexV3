@@ -37,26 +37,28 @@
 
 @if ($hasData)
     @if (!empty($formulaMeta))
-        <div class="alert alert-secondary shadow-sm d-flex align-items-center gap-3 rounded-4 py-2 px-3 mb-3" style="transition: all 0.3s ease;">
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(25, 135, 84, 0.12); color: #198754;">
-                <i class="bi bi-gear-fill"></i>
-            </div>
-            <div class="flex-grow-1">
-                <div class="fw-semibold text-dark mb-1" style="font-size: 0.95rem;">
-                    Using <span class="text-success">{{ $formulaMeta['label'] ?? 'ASBME Default' }}</span>
-                </div>
-                <div class="text-muted small">
-                    Scope: {{ strtoupper($formulaMeta['scope'] ?? 'GLOBAL') }}
-                    @if(!empty($formulaMeta['department']))
-                        · Department: {{ $formulaMeta['department'] }}
-                    @endif
-                    @if(!empty($formulaMeta['course']))
-                        · Course: {{ $formulaMeta['course'] }}
-                    @endif
-                    @if(!empty($formulaMeta['subject']))
-                        · Subject Formula Active
-                    @endif
-                </div>
+        <div class="alert alert-light border shadow-sm py-2 px-3 mb-3">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <i class="bi bi-calculator text-success"></i>
+                <span class="fw-semibold">{{ $formulaMeta['label'] ?? 'ASBME Default' }}</span>
+                @php
+                    $scopeLabel = strtolower($formulaMeta['scope'] ?? 'global');
+                    $scopeClass = match($scopeLabel) {
+                        'subject' => 'bg-primary-subtle text-primary border-primary',
+                        'course' => 'bg-info-subtle text-info border-info',
+                        'department' => 'bg-warning-subtle text-warning border-warning',
+                        default => 'bg-success-subtle text-success border-success'
+                    };
+                    $scopeIcon = match($scopeLabel) {
+                        'subject' => 'bi-journal-text',
+                        'course' => 'bi-mortarboard',
+                        'department' => 'bi-building',
+                        default => 'bi-globe'
+                    };
+                @endphp
+                <span class="badge {{ $scopeClass }}" style="font-size: 0.75rem;">
+                    <i class="{{ $scopeIcon }}"></i> {{ ucfirst($scopeLabel) }}
+                </span>
             </div>
         </div>
     @endif
@@ -247,6 +249,7 @@
                 <span class="small fw-semibold">Unsaved changes</span>
             </div>
         </div>
+        <!-- Container for validation error messages only -->
         <div id="unsavedNotificationContainer" class="me-3"></div>
         <button type="submit" id="saveGradesBtn" class="btn btn-success px-4 py-2 d-flex align-items-center gap-2 position-relative" disabled x-data>
             <i class="bi bi-save"></i>

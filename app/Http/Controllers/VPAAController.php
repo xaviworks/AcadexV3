@@ -47,17 +47,24 @@ class VPAAController extends Controller
         $period = $academicPeriodId ? \App\Models\AcademicPeriod::find($academicPeriodId) : null;
 
         if (!$departmentId) {
-            // Show department wildcards with chairperson and GE coordinator
+            // Show department wildcards with chairperson and GE coordinator (optimized with eager loading)
             $departments = Department::where('is_deleted', false)
                 ->select('id', 'department_code', 'department_description')
+                ->with([
+                    'users' => function ($query) {
+                        $query->whereIn('role', [1, 4])
+                            ->select('id', 'department_id', 'role', 'first_name', 'last_name', 'email');
+                    }
+                ])
                 ->orderBy('department_description')
                 ->get();
 
-            // Attach chairperson and GE coordinator to each department
-            foreach ($departments as $dept) {
-                $dept->chairperson = $dept->users()->where('role', 1)->first();
-                $dept->gecoordinator = $dept->users()->where('role', 4)->first();
-            }
+            // Map chairperson and GE coordinator from loaded users
+            $departments->each(function ($dept) {
+                $dept->chairperson = $dept->users->firstWhere('role', 1);
+                $dept->gecoordinator = $dept->users->firstWhere('role', 4);
+                unset($dept->users);
+            });
 
             return view('vpaa.scores.course-outcome-departments', [
                 'departments' => $departments,
@@ -209,30 +216,33 @@ class VPAAController extends Controller
 
     public function viewDepartments()
     {
-        // Get all non-deleted departments except GE (General Education)
+        // Get all non-deleted departments except GE (General Education) with optimized eager loading
         $departments = Department::where('is_deleted', false)
             ->where('department_code', '!=', 'GE') // Exclude GE department
             ->select('id', 'department_code', 'department_description')
+            ->withCount([
+                'users as instructor_count' => function ($query) {
+                    $query->where('role', 0)->where('is_active', true);
+                },
+                'students as student_count' => function ($query) {
+                    $query->where('is_deleted', false);
+                }
+            ])
+            ->with([
+                'users' => function ($query) {
+                    $query->whereIn('role', [1, 4]) // Chairperson and GE Coordinator
+                        ->select('id', 'department_id', 'role', 'first_name', 'last_name', 'email');
+                }
+            ])
             ->orderBy('department_description')
             ->get();
 
-        // Manually count instructors and students for each department, and attach chairperson and GE coordinator
+        // Map chairperson and GE coordinator from the loaded users
         $departments->each(function ($department) {
-            $department->instructor_count = User::where('department_id', $department->id)
-                ->where('role', 0) // Instructor role
-                ->where('is_active', true)
-                ->count();
-
-            $department->student_count = $department->students()
-                ->where('is_deleted', false)
-                ->count();
-
-            $department->chairperson = User::where('department_id', $department->id)
-                ->where('role', 1)
-                ->first();
-            $department->gecoordinator = User::where('department_id', $department->id)
-                ->where('role', 4)
-                ->first();
+            $department->chairperson = $department->users->firstWhere('role', 1);
+            $department->gecoordinator = $department->users->firstWhere('role', 4);
+            // Remove the users collection to avoid passing unnecessary data to the view
+            unset($department->users);
         });
 
         return view('vpaa.departments', compact('departments'));
@@ -412,14 +422,20 @@ class VPAAController extends Controller
 
     public function viewStudents(Request $request)
     {
-        $departments = Department::orderBy('department_description')->get();
+        $departments = Department::select('id', 'department_code', 'department_description')
+            ->where('is_deleted', false)
+            ->orderBy('department_description')
+            ->get();
         $departmentId = $request->input('department_id');
 
         if ($departmentId) {
             $students = Student::where('department_id', $departmentId)
+                ->where('is_deleted', false)
+                ->select('id', 'first_name', 'middle_name', 'last_name', 'department_id', 'course_id', 'year_level')
                 ->orderBy('last_name')
                 ->get();
-            $department = Department::find($departmentId);
+            $department = Department::select('id', 'department_code', 'department_description')
+                ->find($departmentId);
             return view('vpaa.students', compact('students', 'department', 'departments'));
         }
 
