@@ -157,6 +157,10 @@ class ChairpersonController extends Controller
         $query->where('department_id', '!=', $geDepartment->id);
         $instructor = $query->firstOrFail();
         $instructor->update(['is_active' => true]);
+        
+        // Notify the instructor that their account has been activated (Email + System)
+        NotificationService::notifyInstructorApproved($instructor, Auth::user());
+        
         return redirect()->back()->with('success', 'Instructor activated successfully.');
     }
 
