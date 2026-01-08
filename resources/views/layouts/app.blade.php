@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<!--
+    
+     █████╗  ██████╗ █████╗ ██████╗ ███████╗██╗  ██╗
+    ██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝╚██╗██╔╝
+    ███████║██║     ███████║██║  ██║█████╗   ╚███╔╝ 
+    ██╔══██║██║     ██╔══██║██║  ██║██╔══╝   ██╔██╗ 
+    ██║  ██║╚██████╗██║  ██║██████╔╝███████╗██╔╝ ██╗
+    ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝
+                                                      
+    An Outcomes-Based Automated Grading System
+    
+-->
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
 <head>
     <meta charset="utf-8">
@@ -450,14 +462,30 @@
     {{-- Confirmation Dialog (Alpine.js) --}}
     @include('components.confirmation-dialog')
 
-    {{-- System Announcements Popup --}}
-    @include('components.announcement-popup')
-
-    {{-- Clear announcement session on logout --}}
     <script>
-        function clearAnnouncementSession() {
-            sessionStorage.removeItem('dismissedAnnouncements');
-        }
+        (function () {
+            // Display branded message to anyone inspecting the console
+            if (!window.console) {
+                return;
+            }
+
+            const titleStyle = [
+                'font-weight: 700',
+                'font-size: 32px',
+                'color: #023336',
+                'letter-spacing: 0.2rem',
+                'font-family: "Inter", sans-serif',
+            ].join(';');
+
+            const subtitleStyle = [
+                'font-size: 14px',
+                'color: #1bce8f',
+                'font-family: "Inter", sans-serif',
+            ].join(';');
+
+            console.log('%cACADEX', titleStyle);
+            console.log('%cOutcome-based education intelligence platform', subtitleStyle);
+        })();
     </script>
 
     @stack('scripts')
