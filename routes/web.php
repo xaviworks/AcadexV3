@@ -363,6 +363,13 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/activity/{auditLog}', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'showActivity'])->name('activity.show');
         Route::post('/activity/{auditLog}/rollback', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'rollback'])->name('activity.rollback');
     });
+
+    // System Health Routes
+    Route::prefix('system-health')->name('system-health.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\SystemHealthController::class, 'index'])->name('index');
+        Route::post('/clear-cache', [\App\Http\Controllers\Admin\SystemHealthController::class, 'clearCache'])->name('clear-cache');
+        Route::post('/optimize-database', [\App\Http\Controllers\Admin\SystemHealthController::class, 'optimizeDatabase'])->name('optimize-database');
+    });
 });
 
 // VPAA Routes

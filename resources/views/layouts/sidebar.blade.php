@@ -291,6 +291,13 @@
                             <span>Disaster Recovery</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.system-health.index') }}" 
+                           class="nav-link {{ request()->routeIs('admin.system-health.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-heart-pulse me-3"></i>
+                            <span>System Health</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
 
