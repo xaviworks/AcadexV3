@@ -292,31 +292,31 @@
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="dropdown">
                                             <button class="btn btn-outline-success btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" id="displayTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 150px;">
-                                                <span id="currentIcon">📊</span>
+                                                <span id="currentIcon"></span>
                                                 <span id="currentText">Percentage</span>
                                             </button>
                                             <ul class="dropdown-menu shadow-sm" aria-labelledby="displayTypeDropdown" style="min-width: 200px;">
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('score', '📝', 'Scores'); return false;">
-                                                        <span>📝</span>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('score', 'Scores'); return false;">
+                                                        <span></span>
                                                         <span>Raw Scores</span>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2 active" href="#" onclick="setDisplayType('percentage', '📊', 'Percentage'); return false;">
-                                                        <span>📊</span>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2 active" href="#" onclick="setDisplayType('percentage', 'Percentage'); return false;">
+                                                        <span></span>
                                                         <span>Percentage View</span>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('passfail', '✅', 'Pass/Fail'); return false;">
-                                                        <span>✅</span>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('passfail', 'Pass/Fail'); return false;">
+                                                        <span></span>
                                                         <span>Pass/Fail Analysis</span>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('copasssummary', '📈', 'Summary'); return false;">
-                                                        <span>📈</span>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('copasssummary', 'Summary'); return false;">
+                                                        <span></span>
                                                         <span>Summary Dashboard</span>
                                                     </a>
                                                 </li>
@@ -397,7 +397,7 @@
                     <table class="table co-table table-bordered align-middle mb-0 text-center">
                         <thead>
                             <tr>
-                                <th class="text-start">📋 Analysis Metrics</th>
+                                <th class="text-start"> Analysis Metrics</th>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         <th>{{ $coDetails[$coId]['co_code'] ?? '' }}</th>
@@ -407,7 +407,7 @@
                         </thead>
                         <tbody>
                             <tr style="background:#f8f9fa;">
-                                <td class="fw-bold text-dark text-start">👥 Students Attempted</td>
+                                <td class="fw-bold text-dark text-start"> Students Attempted</td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
@@ -418,7 +418,7 @@
                                 @endforeach
                             </tr>
                             <tr style="background:#fff;">
-                                <td class="fw-bold text-dark text-start">✅ Students Passed</td>
+                                <td class="fw-bold text-dark text-start"> Students Passed</td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
@@ -429,7 +429,7 @@
                                 @endforeach
                             </tr>
                             <tr style="background:#f8f9fa;">
-                                <td class="fw-bold text-dark text-start">📊 Pass Percentage</td>
+                                <td class="fw-bold text-dark text-start"> Pass Percentage</td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
@@ -442,7 +442,7 @@
                                 @endforeach
                             </tr>
                             <tr style="background:#fff;">
-                                <td class="fw-bold text-dark text-start">❌ Failed Percentage</td>
+                                <td class="fw-bold text-dark text-start"> Failed Percentage</td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
@@ -877,7 +877,7 @@
                         <table class="table co-table table-bordered align-middle mb-0 text-center">
                             <thead>
                                 <tr>
-                                    <th class="text-start">📋 Analysis Metrics</th>
+                                    <th class="text-start"> Analysis Metrics</th>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         <th>{{ $coDetails[$coId]->co_code ?? 'CO'.$coId }}</th>
                                     @endforeach
@@ -885,7 +885,7 @@
                             </thead>
                             <tbody>
                                 <tr style="background:#f8f9fa;">
-                                    <td class="fw-bold text-dark text-start">👥 Students Attempted</td>
+                                    <td class="fw-bold text-dark text-start"> Students Attempted</td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
                                             $stats = $termCoSummaryStats[$term][$coId] ?? ['attempted' => 0];
@@ -894,7 +894,7 @@
                                     @endforeach
                                 </tr>
                                 <tr style="background:#fff;">
-                                    <td class="fw-bold text-dark text-start">✅ Students Passed</td>
+                                    <td class="fw-bold text-dark text-start"> Students Passed</td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
                                             $stats = $termCoSummaryStats[$term][$coId] ?? ['passed' => 0];
@@ -903,7 +903,7 @@
                                     @endforeach
                                 </tr>
                                 <tr style="background:#f8f9fa;">
-                                    <td class="fw-bold text-dark text-start">📊 Pass Percentage</td>
+                                    <td class="fw-bold text-dark text-start"> Pass Percentage</td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
                                             $stats = $termCoSummaryStats[$term][$coId] ?? ['pass_percentage' => 0];
@@ -914,7 +914,7 @@
                                     @endforeach
                                 </tr>
                                 <tr style="background:#fff;">
-                                    <td class="fw-bold text-dark text-start">❌ Failed Percentage</td>
+                                    <td class="fw-bold text-dark text-start"> Failed Percentage</td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
                                             $stats = $termCoSummaryStats[$term][$coId] ?? ['fail_percentage' => 0];
@@ -970,10 +970,10 @@
                             What You Need to Do:
                         </h6>
                         <ul class="text-start mb-0">
-                            <li>🎯 Define course outcomes that align with learning objectives</li>
-                            <li>📝 Create assessment activities linked to course outcomes</li>
-                            <li>👥 Input student scores for each activity</li>
-                            <li>📊 Then return here to view comprehensive results</li>
+                            <li> Define course outcomes that align with learning objectives</li>
+                            <li> Create assessment activities linked to course outcomes</li>
+                            <li> Input student scores for each activity</li>
+                            <li> Then return here to view comprehensive results</li>
                         </ul>
                     </div>
                     

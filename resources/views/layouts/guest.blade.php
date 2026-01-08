@@ -14,16 +14,7 @@
         }
     </style>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Google Fonts (Poppins) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
-
-    <!-- CDNFonts: Feeling Passionate -->
-    <link href="https://fonts.cdnfonts.com/css/feeling-passionate" rel="stylesheet">
-
-    <!-- Tailwind & App Assets -->
+    <!-- Tailwind & App Assets (includes Bootstrap and Fonts locally) -->
     @vite(['resources/css/app.css', 'resources/css/guest-entry.css', 'resources/js/app.js'])
 
     {{-- Styles: resources/css/layout/guest.css (loaded via guest-entry.css) --}}
@@ -49,10 +40,7 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Alpine.js for interactivity (optional) -->
+    <!-- Alpine.js for interactivity (loaded via Vite in app.js) -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('passwordToggle', () => ({

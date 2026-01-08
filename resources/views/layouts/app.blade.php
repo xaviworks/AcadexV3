@@ -20,34 +20,19 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
     
-    <!-- DNS Prefetch & Preconnect for CDN resources -->
-    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
+    {{-- All assets loaded locally for offline use --}}
     {{-- Styles: resources/css/layout/app.css --}}
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons via CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <!-- DataTables CSS with Bootstrap 5 Integration -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <!-- Custom DataTables CSS -->
     <link rel="stylesheet" href="{{ asset('css/datatables-custom.css') }}">
     
-    <!-- Google Fonts - Inter (with display=swap to prevent FOIT) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- SweetAlert2 -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css" rel="stylesheet">
-    
-    <!-- App CSS & JS (with cache busting) -->
+    <!-- App CSS & JS (includes Bootstrap, Icons, Fonts, SweetAlert2, DataTables, Chart.js) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+
+    <!-- Debug Alpine (temporary) -->
+    @if(config('app.debug'))
+        <script src="{{ asset('js/debug-alpine.js') }}" defer></script>
+    @endif
 
     {{-- Styles: resources/css/layout/app.css --}}
 
@@ -103,17 +88,8 @@
         </main>
     </div>
 
-    <!-- Scripts Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Alpine.js is loaded via Vite with stores configured in resources/js/app.js -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
-    <!-- Bootbox.js (requires jQuery and Bootstrap) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootbox@6.0.0/dist/bootbox.all.min.js"></script>
-    
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootbox loaded after Alpine.js initializes (requires jQuery & Bootstrap from Vite bundle) -->
+    <script src="{{ asset('js/vendor/bootbox.min.js') }}" defer></script>
 
     <!-- Remove loading class when page is ready -->
     <script>

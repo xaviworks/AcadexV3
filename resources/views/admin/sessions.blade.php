@@ -2,8 +2,8 @@
 
 @section('content')
 {{-- Styles: resources/css/admin/sessions.css --}}
+{{-- Font Awesome is loaded via app.js --}}
 @push('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 @endpush
 
 <div class="container py-4">

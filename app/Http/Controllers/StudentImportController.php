@@ -35,7 +35,7 @@ public function upload(Request $request)
 
     $listName = $request->list_name ?? pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME);
 
-    // ✅ Check if list_name already exists
+    //  Check if list_name already exists
     $exists = ReviewStudent::where('list_name', $listName)
         ->where('instructor_id', Auth::id())
         ->exists();
@@ -43,7 +43,7 @@ public function upload(Request $request)
     if ($exists) {
         return redirect()
             ->route('instructor.students.index', ['tab' => 'import'])
-            ->withErrors(['file' => "❌ A file with the name '{$listName}' already exists."]);
+            ->withErrors(['file' => " A file with the name '{$listName}' already exists."]);
     }
 
     Excel::import(
@@ -53,7 +53,7 @@ public function upload(Request $request)
 
     return redirect()
         ->route('instructor.students.index', ['tab' => 'import'])
-        ->with('status', '📥 Student list uploaded for review.');
+        ->with('status', ' Student list uploaded for review.');
 }
 
     /**
@@ -95,7 +95,7 @@ public function upload(Request $request)
                 ->first();
     
             if ($existingStudent) {
-                // ✅ Check if already linked to this subject
+                //  Check if already linked to this subject
                 $alreadyEnrolled = StudentSubject::where('student_id', $existingStudent->id)
                     ->where('subject_id', $subject->id)
                     ->exists();
@@ -129,7 +129,7 @@ public function upload(Request $request)
             ]);
         }
     
-        // ✅ Check and create activities for all terms if missing
+        //  Check and create activities for all terms if missing
         $terms = ['prelim', 'midterm', 'prefinal', 'final'];
         foreach ($terms as $term) {
             $this->getOrCreateDefaultActivities($subject->id, $term);
@@ -140,7 +140,7 @@ public function upload(Request $request)
             ->whereIn('id', $selectedIds)
             ->update(['is_confirmed' => true]);
 
-        return redirect()->route('instructor.students.index', ['tab' => 'import'])->with('status', '✅ Selected students successfully imported to the selected subject.');
+        return redirect()->route('instructor.students.index', ['tab' => 'import'])->with('status', ' Selected students successfully imported to the selected subject.');
     }
     
 

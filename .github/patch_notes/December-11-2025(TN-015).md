@@ -40,7 +40,7 @@ const confirmed = window.confirm('Are you sure?');
 
 // After (correct - using the custom helper's ask method)
 const confirmed = await window.confirm.ask({
-    title: '⚠️ Final Warning',
+    title: ' Final Warning',
     message: 'This will PERMANENTLY DELETE all existing course outcomes...',
     confirmText: 'Yes, Override All',
     cancelText: 'Cancel',
@@ -387,21 +387,21 @@ if ($instructor->department_id === $geDepartment?->id) {
 
 | # | Bug | Status |
 |---|-----|--------|
-| 1 | Admin Users - Disable modal showing on page load | ✅ Fixed |
-| 2 | Chairperson/GE - Password validation "window.confirm is not a function" | ✅ Fixed |
-| 3 | Override COs - Confirmation dialog not appearing after password validation | ✅ Fixed |
-| 4 | Instructor - Course Outcome Results CSS displayed as raw text | ✅ Fixed |
-| 5 | Instructor - Course Outcome Results null reference error | ✅ Fixed |
-| 6 | GE Coordinator - View/Edit buttons not working on Assign Subjects | ✅ Fixed |
-| 7 | GE Coordinator - Incorrect deactivation for non-GE instructors | ✅ Fixed |
-| 8 | Instructor sidebar - Content cut off / not scrolling | ✅ Fixed |
-| 9 | Instructor sidebar - Content clipped after CSS load | ✅ Fixed |
-| 10 | Chairperson/GE Coordinator - Route conflicts | ✅ Fixed |
-| 11 | Admin Users - DataTables reinitialization error | ✅ Fixed |
-| 12 | Sidebar - Text cutoff with ellipsis | ✅ Fixed |
-| 13 | Admin - Add Department/Program buttons not working | ✅ Fixed |
-| 14 | Override COs - Password prompt not showing | ✅ Fixed |
-| 15 | Generate COs - Modal not opening ("Cannot read properties of null") | ✅ Fixed |
+| 1 | Admin Users - Disable modal showing on page load |  Fixed |
+| 2 | Chairperson/GE - Password validation "window.confirm is not a function" |  Fixed |
+| 3 | Override COs - Confirmation dialog not appearing after password validation |  Fixed |
+| 4 | Instructor - Course Outcome Results CSS displayed as raw text |  Fixed |
+| 5 | Instructor - Course Outcome Results null reference error |  Fixed |
+| 6 | GE Coordinator - View/Edit buttons not working on Assign Subjects |  Fixed |
+| 7 | GE Coordinator - Incorrect deactivation for non-GE instructors |  Fixed |
+| 8 | Instructor sidebar - Content cut off / not scrolling |  Fixed |
+| 9 | Instructor sidebar - Content clipped after CSS load |  Fixed |
+| 10 | Chairperson/GE Coordinator - Route conflicts |  Fixed |
+| 11 | Admin Users - DataTables reinitialization error |  Fixed |
+| 12 | Sidebar - Text cutoff with ellipsis |  Fixed |
+| 13 | Admin - Add Department/Program buttons not working |  Fixed |
+| 14 | Override COs - Password prompt not showing |  Fixed |
+| 15 | Generate COs - Modal not opening ("Cannot read properties of null") |  Fixed |
 
 **Enhancements:**
 - Added "Remove GE Access" modal with appropriate messaging for non-GE instructors

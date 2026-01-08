@@ -15,7 +15,7 @@ ACADEX_PATH="$SCRIPT_DIR/acadex"
 # Make sure acadex script is executable
 chmod +x "$ACADEX_PATH"
 
-echo "📍 Project location: $SCRIPT_DIR"
+echo "Project location: $SCRIPT_DIR"
 echo ""
 
 # Detect shell
@@ -31,18 +31,18 @@ else
     CONFIG_FILE="$HOME/.bashrc"
 fi
 
-echo "🔍 Detected shell: $SHELL_NAME"
-echo "📝 Config file: $CONFIG_FILE"
+echo "Detected shell: $SHELL_NAME"
+echo "Config file: $CONFIG_FILE"
 echo ""
 
 # Check if alias already exists
 if grep -q "alias acadex=" "$CONFIG_FILE" 2>/dev/null; then
-    echo "⚠️  acadex alias already exists in $CONFIG_FILE"
+    echo "acadex alias already exists in $CONFIG_FILE"
     echo ""
     read -p "Do you want to update it? (y/n) " -n 1 -r
     echo ""
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "❌ Installation cancelled"
+        echo "Installation cancelled"
         exit 0
     fi
     
@@ -54,7 +54,7 @@ if grep -q "alias acadex=" "$CONFIG_FILE" 2>/dev/null; then
         # Linux
         sed -i '/alias acadex=/d' "$CONFIG_FILE"
     fi
-    echo "🗑️  Removed old alias"
+    echo "Removed old alias"
 fi
 
 # Add new alias
@@ -62,7 +62,7 @@ echo "" >> "$CONFIG_FILE"
 echo "# ACADEX CLI" >> "$CONFIG_FILE"
 echo "alias acadex=\"$ACADEX_PATH\"" >> "$CONFIG_FILE"
 
-echo "✅ Added acadex alias to $CONFIG_FILE"
+echo "Added acadex alias to $CONFIG_FILE"
 echo ""
 
 # Instructions to activate

@@ -8,7 +8,7 @@ The **System Announcements** feature allows administrators to create and manage 
 
 ## Features
 
-### ✨ **Key Capabilities**
+###  **Key Capabilities**
 
 1. **Admin Management Interface**
    - Create, edit, delete announcements
@@ -47,11 +47,11 @@ The **System Announcements** feature allows administrators to create and manage 
 
 Already installed! The feature includes:
 
-✅ **Database Tables**
+ **Database Tables**
 - `announcements` - Stores announcement data
 - `announcement_views` - Tracks user views
 
-✅ **Routes**
+ **Routes**
 ```php
 // Admin routes
 GET  /admin/announcements
@@ -67,7 +67,7 @@ GET  /announcements/active
 POST /announcements/{id}/view
 ```
 
-✅ **Components**
+ **Components**
 - Admin management views (index, create, edit)
 - Popup component (included in app layout)
 - Alpine.js integration
@@ -117,7 +117,7 @@ When users log in:
 ### **Example 1: System Maintenance**
 
 ```
-Title: ⚠️ Scheduled Maintenance
+Title:  Scheduled Maintenance
 Message: System will be down Jan 10, 2-6 AM for maintenance.
 Type: Warning
 Priority: Urgent
@@ -129,7 +129,7 @@ Show Once: No
 ### **Example 2: Grade Deadline**
 
 ```
-Title: 📝 Final Grade Submission Deadline
+Title:  Final Grade Submission Deadline
 Message: All grades must be submitted by January 15, 2026.
 Type: Info
 Priority: High
@@ -143,7 +143,7 @@ Show Once: Yes
 ### **Example 3: Feature Announcement**
 
 ```
-Title: 🎉 New Feature: Course Analytics
+Title:  New Feature: Course Analytics
 Message: Check out the new analytics dashboard for course insights!
 Type: Success
 Priority: Normal
@@ -254,14 +254,14 @@ Edit gradient colors in `announcement-popup.blade.php`:
 
 ## Best Practices
 
-### ✅ **DO:**
+###  **DO:**
 - Use clear, concise titles
 - Set appropriate priority levels
 - Use "Show once" for one-time announcements
 - Set end dates for time-sensitive announcements
 - Test announcements before activating
 
-### ❌ **DON'T:**
+###  **DON'T:**
 - Create too many active announcements (max 3-4)
 - Use "Urgent" priority for non-critical messages
 - Forget to set end dates for temporary announcements
@@ -295,13 +295,13 @@ Edit gradient colors in `announcement-popup.blade.php`:
 ## Future Enhancements
 
 Potential improvements:
-- 📧 Email notifications for urgent announcements
-- 📊 Advanced analytics (click-through rates)
-- 🎨 Rich text editor for messages
-- 📱 Push notifications (mobile)
-- 🔔 In-app notification center
-- 📅 Recurring announcements
-- 👥 User-specific announcements
+-  Email notifications for urgent announcements
+-  Advanced analytics (click-through rates)
+-  Rich text editor for messages
+-  Push notifications (mobile)
+-  In-app notification center
+-  Recurring announcements
+-  User-specific announcements
 
 ---
 
@@ -317,4 +317,4 @@ For issues or questions:
 
 **Created**: January 6, 2026  
 **Version**: 1.0  
-**Status**: ✅ Production Ready
+**Status**:  Production Ready

@@ -251,7 +251,7 @@ Route::prefix('instructor')
         Route::put('/students/{student}/update', [StudentController::class, 'update'])->name('students.update');
         Route::delete('/students/{student}/drop', [StudentController::class, 'drop'])->name('students.drop');
 
-        // ✅ Student Import Routes
+        //  Student Import Routes
         Route::get('/students/import', [StudentImportController::class, 'showUploadForm'])->name('students.import');
         Route::post('/students/import', [StudentImportController::class, 'upload'])->name('students.import.upload');
         Route::post('/students/import/confirm', [StudentImportController::class, 'confirmImport'])->name('students.import.confirm');

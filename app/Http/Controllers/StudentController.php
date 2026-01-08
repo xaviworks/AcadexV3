@@ -131,7 +131,7 @@ class StudentController extends Controller
             'subject_id' => $subject->id,
         ]);
     
-        // ✅ Automatically insert default activities for all terms
+        //  Automatically insert default activities for all terms
         foreach (['prelim', 'midterm', 'prefinal', 'final'] as $term) {
             $this->getOrCreateDefaultActivities($subject->id, $term);
         }
@@ -140,7 +140,7 @@ class StudentController extends Controller
     }    
     
 
-    // 🗑 Drop Student from a Subject
+    //  Drop Student from a Subject
     public function drop(Request $request, $studentId)
     {
         Gate::authorize('instructor');
@@ -156,7 +156,7 @@ class StudentController extends Controller
         return redirect()->back()->with('success', 'Student dropped from subject.');
     }
 
-    // 📝 Update Student Details and Status
+    //  Update Student Details and Status
     public function update(Request $request, $studentId)
     {
         Gate::authorize('instructor');

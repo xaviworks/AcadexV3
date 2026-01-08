@@ -1,12 +1,12 @@
-# 🚀 System Announcements - Quick Start Guide
+#  System Announcements - Quick Start Guide
 
-## ✅ **Feature is Ready!**
+##  **Feature is Ready!**
 
 The System Announcements popup feature has been successfully implemented and is ready to use.
 
 ---
 
-## 🎯 **What Was Implemented**
+##  **What Was Implemented**
 
 ### **1. Database (✓ Migrated)**
 - `announcements` table - stores announcement data
@@ -28,7 +28,7 @@ The System Announcements popup feature has been successfully implemented and is 
 
 ---
 
-## 🏃 **Quick Test**
+##  **Quick Test**
 
 ### **1. Login as Admin**
 ```
@@ -49,13 +49,13 @@ Navigate to: http://localhost/admin/announcements
 
 ---
 
-## 📝 **Create Your First Announcement**
+##  **Create Your First Announcement**
 
 1. **Go to:** Admin → Announcements → Create Announcement
 
 2. **Fill in:**
    ```
-   Title: System Update Complete! 🎉
+   Title: System Update Complete! 
    Message: ACADEX now has a new announcement system. 
             Stay informed about important updates!
    Type: Success
@@ -71,13 +71,13 @@ Navigate to: http://localhost/admin/announcements
 
 ---
 
-## 🎨 **Popup Appearance**
+##  **Popup Appearance**
 
 ### **What Users Will See:**
 
 ```
 ┌─────────────────────────────────┐
-│ 🔔 NORMAL        [X] ←dismiss   │
+│  NORMAL        [X] ←dismiss   │
 │                                 │
 │ Your Title Here                 │
 │ Your message will appear here   │
@@ -86,15 +86,15 @@ Navigate to: http://localhost/admin/announcements
 ```
 
 **Features:**
-- ✨ Gradient background (color matches type)
-- 🎯 Priority badge
-- ⏱️ Auto-dismiss after 10s (low/normal priority)
-- 📱 Mobile responsive
-- 🔄 Smooth animations
+-  Gradient background (color matches type)
+-  Priority badge
+- ⏱ Auto-dismiss after 10s (low/normal priority)
+-  Mobile responsive
+-  Smooth animations
 
 ---
 
-## 🎭 **Different Announcement Types**
+##  **Different Announcement Types**
 
 ### **1. Info (Blue)**
 ```
@@ -141,7 +141,7 @@ Select: ☑ Chairpersons
 
 ---
 
-## ⏰ **Scheduling Examples**
+##  **Scheduling Examples**
 
 ### **Immediate Announcement**
 ```
@@ -186,7 +186,7 @@ Admin → Announcements
 
 ---
 
-## 📊 **Priority Levels Explained**
+##  **Priority Levels Explained**
 
 ### **Low**
 - Auto-dismisses after 10 seconds
@@ -206,11 +206,11 @@ Admin → Announcements
 
 ---
 
-## 🎓 **Use Cases**
+##  **Use Cases**
 
 ### **1. System Maintenance**
 ```
-Title: ⚠️ Scheduled Maintenance
+Title:  Scheduled Maintenance
 Type: Warning
 Priority: Urgent
 Target: All Users
@@ -219,7 +219,7 @@ Message: System down Jan 10, 2-6 AM
 
 ### **2. Grade Deadline**
 ```
-Title: 📝 Submit Grades by Jan 15
+Title:  Submit Grades by Jan 15
 Type: Info
 Priority: High
 Target: Instructors
@@ -228,7 +228,7 @@ Show Once: ✓ Yes
 
 ### **3. New Feature Launch**
 ```
-Title: 🎉 New Analytics Dashboard!
+Title:  New Analytics Dashboard!
 Type: Success
 Priority: Normal
 Target: Chairpersons, Deans
@@ -237,7 +237,7 @@ Message: Check out the new analytics...
 
 ### **4. Enrollment Open**
 ```
-Title: 📚 Enrollment Now Open
+Title:  Enrollment Now Open
 Type: Success
 Priority: Normal
 Start: Jan 5, 2026
@@ -246,7 +246,7 @@ End: Jan 25, 2026
 
 ---
 
-## 🐛 **Testing Checklist**
+##  **Testing Checklist**
 
 - [ ] Login as admin → Create announcement
 - [ ] Login as target user → See popup
@@ -261,7 +261,7 @@ End: Jan 25, 2026
 
 ---
 
-## 💡 **Pro Tips**
+##  **Pro Tips**
 
 1. **Don't Overuse Urgent Priority**
    - Save for true emergencies
@@ -285,7 +285,7 @@ End: Jan 25, 2026
 
 ---
 
-## 📱 **Mobile Optimization**
+##  **Mobile Optimization**
 
 The popup is fully responsive:
 - Adjusts width on small screens
@@ -295,16 +295,16 @@ The popup is fully responsive:
 
 ---
 
-## 🔒 **Security**
+##  **Security**
 
-- ✅ Admin-only access to management
-- ✅ CSRF protection on all routes
-- ✅ Authorization gates enforced
-- ✅ XSS protection (message escaped)
+-  Admin-only access to management
+-  CSRF protection on all routes
+-  Authorization gates enforced
+-  XSS protection (message escaped)
 
 ---
 
-## 🎉 **You're All Set!**
+##  **You're All Set!**
 
 The feature is production-ready. Start creating announcements and keep your users informed!
 
@@ -317,8 +317,8 @@ The feature is production-ready. Start creating announcements and keep your user
 ---
 
 **Need Help?**
-- 📖 Read: `/docs/SYSTEM_ANNOUNCEMENTS.md`
-- 🔍 Check: Browser console for errors
-- 🧪 Test: Use AnnouncementSeeder for samples
+-  Read: `/docs/SYSTEM_ANNOUNCEMENTS.md`
+-  Check: Browser console for errors
+-  Test: Use AnnouncementSeeder for samples
 
-**Feature Status:** ✅ **Production Ready**
+**Feature Status:**  **Production Ready**

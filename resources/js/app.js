@@ -1,7 +1,35 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-// Bootstrap Icons loaded via CDN for better caching
-import '@fortawesome/fontawesome-free/css/all.min.css';
+/**
+ * ACADEX - Offline-Ready Application Bundle
+ * All assets loaded locally for offline use
+ */
 
+// CSS Frameworks & Libraries
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import 'summernote/dist/summernote-bs5.min.css';
+import '../css/fonts.css'; // Local fonts
+
+// JavaScript Libraries - Order matters!
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
+import 'bootstrap';
+import 'datatables.net';
+import 'datatables.net-bs5';
+import Swal from 'sweetalert2';
+import { Chart } from 'chart.js/auto';
+
+// Make libraries globally available BEFORE importing Summernote
+window.Swal = Swal;
+window.Chart = Chart;
+
+// Summernote depends on jQuery and Bootstrap being available globally
+import 'summernote/dist/summernote-bs5.min.js';
+
+// Alpine.js - Initialize AFTER all other libraries
 import Alpine from 'alpinejs';
 import intersect from '@alpinejs/intersect';
 import { getDeviceFingerprint } from './fingerprint';
@@ -11,11 +39,9 @@ import './store-helpers'; // Global helper functions
 // Import page-specific scripts (auto-initialize on DOMContentLoaded)
 import './pages/index.js';
 
-// Register Alpine plugins
+// Register Alpine plugins and start
 Alpine.plugin(intersect);
-
 window.Alpine = Alpine;
-
 Alpine.start();
 
 // Initialize device fingerprinting on login page

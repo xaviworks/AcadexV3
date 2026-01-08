@@ -47,5 +47,5 @@ function initAdminSubjectsPage() {
 // Export for global access
 window.initAdminSubjectsPage = initAdminSubjectsPage;
 
-// Auto-initialize when DOM is ready
-$(document).ready(initAdminSubjectsPage);
+// Auto-initialize when DOM is ready (use standard addEventListener to avoid jQuery timing issues)
+document.addEventListener('DOMContentLoaded', initAdminSubjectsPage);

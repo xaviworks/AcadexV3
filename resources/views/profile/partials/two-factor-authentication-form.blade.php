@@ -700,7 +700,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'New Recovery Codes Generated!',
-                        html: '<p class="text-sm text-gray-600 mt-2">Your old codes have been invalidated.</p><p class="text-sm font-semibold text-orange-600 mt-2">⚠️ Please save these new codes immediately!</p>',
+                        html: '<p class="text-sm text-gray-600 mt-2">Your old codes have been invalidated.</p><p class="text-sm font-semibold text-orange-600 mt-2"> Please save these new codes immediately!</p>',
                         confirmButtonColor: '#ea580c',
                         confirmButtonText: 'Got it!'
                     });

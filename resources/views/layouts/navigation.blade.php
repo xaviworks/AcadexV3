@@ -177,7 +177,7 @@
         <div class="dropdown" style="min-width: 200px; position: relative; z-index: 2000;">
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle hover-lift" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             <div class="position-relative" style="flex-shrink: 0;">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($displayName) }}&background=259c59&color=fff"
+                <img src="{{ avatar($displayName, '259c59', 'fff', 76) }}"
                      alt="avatar"
                      class="rounded-circle me-2 border-2 border-success"
                      width="38"
@@ -193,7 +193,7 @@
         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg" style="min-width: 280px; z-index: 2010 !important; position: absolute !important;" aria-labelledby="profileDropdown">
             <li class="px-3 py-3 border-bottom">
                 <div class="d-flex align-items-center">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($displayName) }}&background=259c59&color=fff"
+                    <img src="{{ avatar($displayName, '259c59', 'fff', 90) }}"
                          alt="avatar"
                          class="rounded-circle me-3"
                          width="45"

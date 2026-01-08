@@ -91,19 +91,6 @@ The Acadex Notification System provides real-time, role-aware notifications to k
 
 ## User Roles & Notification Types
 
-### Notification Matrix
-
-| Event | Instructor | Chairperson | GE Coordinator | Dean | Admin |
-|-------|:----------:|:-----------:|:--------------:|:----:|:-----:|
-| Subject Assigned | ✅ | — | — | — | — |
-| Grade Submitted | — | ✅ | ✅* | — | — |
-| New User Created | — | — | — | — | ✅ |
-| Password Changed | — | — | — | — | ✅ |
-| Account Activated | — | — | — | — | ✅ |
-| Account Deactivated | — | — | — | — | ✅ |
-| Announcements | ✅ | — | — | — | — |
-| System Alerts | ✅ | ✅ | ✅ | ✅ | ✅ |
-
 *GE Coordinator receives grade notifications for GE subjects only.
 
 ### Message Format Examples

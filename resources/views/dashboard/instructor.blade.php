@@ -177,7 +177,7 @@
 
 @push('scripts')
 {{-- JavaScript moved to: resources/js/pages/dashboard/instructor.js --}}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{-- Chart.js bundled in app.js - no CDN needed --}}
 <script>
     // Pass PHP data to external JS
     window.pageData = {

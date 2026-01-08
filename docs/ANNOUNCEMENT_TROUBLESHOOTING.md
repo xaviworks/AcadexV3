@@ -8,11 +8,11 @@ The announcement popup had critical JavaScript syntax errors that prevented it f
 2. `previousAnnouncement()` function was incomplete with syntax errors
 
 ### Fix Applied (Jan 6, 2026)
-- ✅ Fixed JavaScript syntax errors in `announcement-popup.blade.php`
-- ✅ Properly closed CSS media query block
-- ✅ Completed the `previousAnnouncement()` function
-- ✅ Rebuilt Vite assets
-- ✅ Cleared Laravel caches
+-  Fixed JavaScript syntax errors in `announcement-popup.blade.php`
+-  Properly closed CSS media query block
+-  Completed the `previousAnnouncement()` function
+-  Rebuilt Vite assets
+-  Cleared Laravel caches
 
 ### Verification Steps
 
@@ -33,11 +33,11 @@ The announcement popup had critical JavaScript syntax errors that prevented it f
    - Should log array of active announcements
 
 ### Current Status
-- ✅ 3 active announcements in database
-- ✅ All routes registered correctly
-- ✅ JavaScript syntax errors fixed
-- ✅ Alpine.js properly loaded
-- ✅ Component included in layout
+-  3 active announcements in database
+-  All routes registered correctly
+-  JavaScript syntax errors fixed
+-  Alpine.js properly loaded
+-  Component included in layout
 
 ### Testing Instructions
 

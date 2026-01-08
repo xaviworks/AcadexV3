@@ -33,7 +33,7 @@ function generateNextCOCode() {
   // Check if we've reached the 6 CO limit
   if (existingCOs.length >= 6) {
     alert(
-      '⚠️ Maximum Limit Reached\n\nThis subject already has 6 course outcomes, which is the maximum allowed.\n\nPlease delete an existing CO before adding a new one.'
+      ' Maximum Limit Reached\n\nThis subject already has 6 course outcomes, which is the maximum allowed.\n\nPlease delete an existing CO before adding a new one.'
     );
 
     // Close the modal
@@ -58,7 +58,7 @@ function generateNextCOCode() {
 
   // If no missing number found
   if (nextCONumber === null) {
-    alert('⚠️ No Available CO Numbers\n\nAll CO positions (1-6) are occupied.');
+    alert(' No Available CO Numbers\n\nAll CO positions (1-6) are occupied.');
     const modalEl = document.getElementById('addCourseOutcomeModal');
     if (modalEl && typeof bootstrap !== 'undefined') {
       const modal = bootstrap.Modal.getInstance(modalEl);

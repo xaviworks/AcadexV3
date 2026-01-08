@@ -210,7 +210,7 @@
                                             <div>
                                                 <strong class="text-danger">Override all existing COs</strong>
                                                 <br><small class="text-muted">Replace all existing course outcomes with fresh set of 6 COs (CO1-CO6)</small>
-                                                <br><small class="text-danger"><i class="bi bi-shield-exclamation me-1"></i>⚠️ This will permanently delete existing COs!</small>
+                                                <br><small class="text-danger"><i class="bi bi-shield-exclamation me-1"></i> This will permanently delete existing COs!</small>
                                             </div>
                                         </div>
                                     </label>

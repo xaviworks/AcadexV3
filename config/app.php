@@ -76,8 +76,8 @@ return [
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,  // ✅ Your custom Gates/Policies loader
-        App\Providers\RouteServiceProvider::class, // ✅ Breeze, Routing control
+        App\Providers\AuthServiceProvider::class,  //  Your custom Gates/Policies loader
+        App\Providers\RouteServiceProvider::class, //  Breeze, Routing control
 
     ],
 

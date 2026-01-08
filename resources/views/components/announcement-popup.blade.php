@@ -137,8 +137,11 @@ function announcementPopup() {
     return {
         announcements: [],
         currentIndex: 0,
+        isLoading: true,
         
         get currentAnnouncement() {
+            // Only return announcement if we're done loading and have data
+            if (this.isLoading) return null;
             return this.announcements[this.currentIndex] || null;
         },
         
@@ -151,7 +154,10 @@ function announcementPopup() {
                     }
                 });
                 
-                if (!response.ok) return;
+                if (!response.ok) {
+                    this.isLoading = false;
+                    return;
+                }
                 
                 const data = await response.json();
                 
@@ -162,8 +168,12 @@ function announcementPopup() {
                 // Filter out any announcements already dismissed in this session
                 this.announcements = data.filter(ann => !dismissedInSession.includes(parseInt(ann.id, 10)));
                 
+                // Mark loading as complete
+                this.isLoading = false;
+                
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
+                this.isLoading = false;
             }
         },
         

@@ -92,7 +92,7 @@ class FinalGradeController extends Controller
         return view('instructor.scores.final-grades', compact('subjects', 'finalData'));
     }
 
-    // ⚙️ Generate Final Grades for Students with Complete Term Grades
+    //  Generate Final Grades for Students with Complete Term Grades
     public function generate(Request $request)
     {
         Gate::authorize('instructor');
@@ -247,7 +247,7 @@ class FinalGradeController extends Controller
         ]);
     }
 
-    // 🔍 Internal Helper
+    //  Internal Helper
     private function getTermId($term)
     {
         return [

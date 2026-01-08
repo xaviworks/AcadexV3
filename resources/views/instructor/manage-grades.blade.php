@@ -44,11 +44,11 @@
                                             @else bg-secondary
                                             @endif">
                                             @if($subjectItem->grade_status === 'completed')
-                                                ✔ Completed
+                                                 Completed
                                             @elseif($subjectItem->grade_status === 'pending')
-                                                ⏳ Pending
+                                                 Pending
                                             @else
-                                                ⭕ Not Started
+                                                 Not Started
                                             @endif
                                         </span>
                                     </div>

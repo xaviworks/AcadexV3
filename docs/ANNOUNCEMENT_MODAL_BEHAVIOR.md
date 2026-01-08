@@ -13,7 +13,7 @@ Announcements now display as **blocking modal dialogs** that require user acknow
 
 ## Key Features
 
-### 🔒 **Blocking Behavior**
+###  **Blocking Behavior**
 
 1. **Dark Backdrop Overlay**
    - Semi-transparent black overlay (50% opacity)
@@ -108,17 +108,17 @@ After last dismissal → Page becomes interactive
 
 ## Accessibility
 
-✅ **ARIA Attributes:**
+ **ARIA Attributes:**
 - `role="alertdialog"` - Announces as modal dialog
 - `aria-modal="true"` - Indicates modal behavior
 - `aria-labelledby="announcement-title"` - Links to title
 
-✅ **Keyboard Navigation:**
+ **Keyboard Navigation:**
 - ESC key support (if dismissible)
 - Focus trap within modal
 - Clear focus indicators
 
-✅ **Screen Readers:**
+ **Screen Readers:**
 - Semantic HTML structure
 - Proper heading hierarchy
 - Descriptive button labels
@@ -180,15 +180,15 @@ body:has(.announcement-backdrop) {
 
 ## Use Cases
 
-### ✅ **Perfect For:**
-- 🚨 System maintenance notices
-- 📢 Critical policy changes
-- ⚠️ Security alerts
-- 🎉 Important feature launches
-- 📅 Deadline reminders
-- 🔒 Terms of service updates
+###  **Perfect For:**
+-  System maintenance notices
+-  Critical policy changes
+-  Security alerts
+-  Important feature launches
+-  Deadline reminders
+-  Terms of service updates
 
-### ⚠️ **Not Ideal For:**
+###  **Not Ideal For:**
 - Minor informational messages
 - Optional tips or tutorials
 - Frequent updates
@@ -275,11 +275,11 @@ Consider adding:
 
 The announcement system now enforces **user acknowledgment** before allowing page interaction. This ensures:
 
-✅ Important messages are seen  
-✅ Users are aware of critical updates  
-✅ Better compliance with system changes  
-✅ Clear user intent (they clicked "Got it")  
-✅ Professional, modal-based UI pattern
+ Important messages are seen  
+ Users are aware of critical updates  
+ Better compliance with system changes  
+ Clear user intent (they clicked "Got it")  
+ Professional, modal-based UI pattern
 
 ---
 

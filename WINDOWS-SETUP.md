@@ -11,7 +11,7 @@ Before using the ACADEX CLI on Windows, you need **Git for Windows** installed (
 
 ## Installation Methods
 
-### Method 1: Automated Installer (Easiest) ⭐
+### Method 1: Automated Installer (Easiest) 
 
 1. **Open PowerShell** in the project folder:
    ```powershell
@@ -30,7 +30,7 @@ Before using the ACADEX CLI on Windows, you need **Git for Windows** installed (
    acadex check
    ```
 
-✅ Done!
+ Done!
 
 ---
 

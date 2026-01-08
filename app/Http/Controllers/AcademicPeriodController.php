@@ -14,7 +14,7 @@ class AcademicPeriodController extends Controller
         $this->middleware('auth');
     }
 
-    // 📘 View all academic periods
+    //  View all academic periods
     public function index()
     {
         Gate::authorize('admin');
@@ -23,7 +23,7 @@ class AcademicPeriodController extends Controller
         return view('admin.academic-periods.index', compact('periods'));
     }
 
-    // 🔄 Auto-generate next academic year
+    //  Auto-generate next academic year
     public function generate()
     {
         Gate::authorize('admin');
