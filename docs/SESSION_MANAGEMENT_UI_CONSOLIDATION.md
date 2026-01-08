@@ -8,7 +8,7 @@ Merged the Active Sessions and User Logs into a single tabbed interface to reduc
 
 ### 1. View Update: `resources/views/admin/sessions.blade.php`
 
-- **Changed page title**: From "🔐 Active Sessions" to "🔐 Session Management"
+- **Changed page title**: From " Active Sessions" to " Session Management"
 - **Added tab navigation**: Bootstrap 5 tabs with two tabs:
   - **Active Sessions Tab**: Shows all session data with statistics cards
   - **User Logs Tab**: Shows all user activity logs with date filtering

@@ -106,7 +106,7 @@ DELETE FROM user_devices WHERE user_id = (SELECT id FROM users WHERE email = 'ad
 6. **Regenerate recovery codes** periodically (every 6 months)
 7. **Keep backup authenticator apps** (e.g., Authy synced across devices)
 
-### ❌ DON'T:
+### DON'T:
 1. Store recovery codes in plain text files on your computer
 2. Share recovery codes with others
 3. Screenshot recovery codes and store in cloud services
