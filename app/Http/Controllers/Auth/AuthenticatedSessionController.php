@@ -136,7 +136,14 @@ class AuthenticatedSessionController extends Controller
             return;
         }
 
+        // Remove intended URL if it points to admin area without permission
         if ($this->pointsToAdminArea($intended) && !Gate::forUser($user)->allows('admin')) {
+            $request->session()->forget('url.intended');
+            return;
+        }
+
+        // Remove intended URL if it points to API or background endpoints
+        if ($this->pointsToApiOrBackgroundEndpoint($intended)) {
             $request->session()->forget('url.intended');
         }
     }
@@ -150,6 +157,31 @@ class AuthenticatedSessionController extends Controller
         }
 
         return Str::startsWith($path, 'admin');
+    }
+
+    private function pointsToApiOrBackgroundEndpoint(string $url): bool
+    {
+        $path = ltrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
+
+        if ($path === '') {
+            return false;
+        }
+
+        // Block redirects to API endpoints and background polling URLs
+        $blockedPatterns = [
+            'api/',
+            'notifications/poll',
+            'notifications/unread-count',
+            'notifications/paginate',
+        ];
+
+        foreach ($blockedPatterns as $pattern) {
+            if (Str::startsWith($path, $pattern) || Str::contains($path, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

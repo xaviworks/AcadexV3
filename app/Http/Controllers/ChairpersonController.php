@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\Course;
 use App\Models\FinalGrade;
 use App\Models\UnverifiedUser;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -156,6 +157,10 @@ class ChairpersonController extends Controller
         $query->where('department_id', '!=', $geDepartment->id);
         $instructor = $query->firstOrFail();
         $instructor->update(['is_active' => true]);
+        
+        // Notify the instructor that their account has been activated (Email + System)
+        NotificationService::notifyInstructorApproved($instructor, Auth::user());
+        
         return redirect()->back()->with('success', 'Instructor activated successfully.');
     }
 
@@ -182,11 +187,14 @@ class ChairpersonController extends Controller
         }
         
         // Create the GE assignment request
-        \App\Models\GESubjectRequest::create([
+        $geRequest = \App\Models\GESubjectRequest::create([
             'instructor_id' => $id,
             'requested_by' => Auth::id(),
             'status' => 'pending',
         ]);
+        
+        // Notify GE Coordinator(s) about the new request (System only)
+        NotificationService::notifyGERequestSubmitted($geRequest);
         
         return redirect()->back()->with('success', 'GE assignment request submitted successfully. The GE Coordinator will review your request.');
     }
@@ -253,6 +261,12 @@ class ChairpersonController extends Controller
             'instructor_id' => $instructor->id,
             'updated_by' => Auth::id(),
         ]);
+
+        // Notify instructor about new subject assignment (Email + System)
+        $academicPeriod = \App\Models\AcademicPeriod::find($academicPeriodId);
+        $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
+        NotificationService::notifyCourseAssigned($instructor, $subject, $periodLabel);
+
         return redirect()->route('chairperson.assign-subjects')->with('success', 'Subject assigned successfully.');
     }
     public function toggleAssignedSubject(Request $request)
@@ -281,6 +295,14 @@ class ChairpersonController extends Controller
         if ($enrolledStudents > 0 && !$request->instructor_id) {
             return redirect()->route('chairperson.assign-subjects')->with('error', 'Cannot unassign subject as it has enrolled students.');
         }
+        
+        // Get academic period label for notifications
+        $academicPeriod = \App\Models\AcademicPeriod::find($academicPeriodId);
+        $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
+        
+        // Get current instructor before any changes (for removal notification)
+        $previousInstructorId = $subject->instructor_id;
+        
         if ($request->instructor_id) {
             if (Auth::user()->role === 1) {
                 $instructor = User::where('id', $request->instructor_id)
@@ -295,12 +317,33 @@ class ChairpersonController extends Controller
                     ->where('is_active', true)
                     ->firstOrFail();
             }
+            
+            // If changing instructor, notify the previous one about removal
+            if ($previousInstructorId && $previousInstructorId != $instructor->id) {
+                $previousInstructor = User::find($previousInstructorId);
+                if ($previousInstructor) {
+                    NotificationService::notifyCourseRemoved($previousInstructor, $subject, $periodLabel);
+                }
+            }
+            
             $subject->update([
                 'instructor_id' => $instructor->id,
                 'updated_by' => Auth::id(),
             ]);
+
+            // Notify instructor about new subject assignment (Email + System)
+            NotificationService::notifyCourseAssigned($instructor, $subject, $periodLabel);
+
             return redirect()->route('chairperson.assign-subjects')->with('success', 'Instructor assigned successfully.');
         } else {
+            // Notify previous instructor about removal (Email + System)
+            if ($previousInstructorId) {
+                $previousInstructor = User::find($previousInstructorId);
+                if ($previousInstructor) {
+                    NotificationService::notifyCourseRemoved($previousInstructor, $subject, $periodLabel);
+                }
+            }
+            
             $subject->update([
                 'instructor_id' => null,
                 'updated_by' => Auth::id(),

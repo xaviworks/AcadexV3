@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\NotificationService;
+use App\Notifications\SecurityAlert;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -20,9 +22,22 @@ class PasswordController extends Controller
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 
-        $request->user()->update([
+        $user = $request->user();
+        
+        $user->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        // Notify admins about password change
+        NotificationService::notifySecurityAlert(
+            SecurityAlert::TYPE_PASSWORD_CHANGED,
+            $user,
+            null,
+            [
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]
+        );
 
         return back()->with('status', 'password-updated');
     }

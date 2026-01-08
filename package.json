@@ -26,6 +26,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
+    "@alpinejs/intersect": "^3.15.3",
     "@fingerprintjs/fingerprintjs": "^5.0.1",
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@popperjs/core": "^2.11.8",

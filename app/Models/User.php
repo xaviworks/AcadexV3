@@ -21,6 +21,7 @@ use Illuminate\Notifications\Notifiable;
  * @property bool $is_universal
  * @property-read Department|null $department
  * @property-read Course|null $course
+ * @property-read NotificationPreference|null $notificationPreferences
  * @property-read string $full_name
  * @property-read string $name
  */
@@ -140,6 +141,27 @@ class User extends Authenticatable
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function notificationPreferences()
+    {
+        return $this->hasOne(NotificationPreference::class);
+    }
+
+    /**
+     * Check if the user is an instructor
+     */
+    public function isInstructor(): bool
+    {
+        return $this->role === 0;
+    }
+
+    /**
+     * Check if the user is a Dean
+     */
+    public function isDean(): bool
+    {
+        return $this->role === 2;
     }
 
     public function geSubjectRequests()

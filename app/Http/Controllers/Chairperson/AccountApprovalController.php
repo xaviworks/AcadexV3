@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Chairperson;
 use App\Http\Controllers\Controller;
 use App\Models\UnverifiedUser;
 use App\Models\User;
+use App\Listeners\NotifyUserCreated;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -67,7 +69,7 @@ class AccountApprovalController extends Controller
 
         try {
             // Transfer to the main users table
-            User::create([
+            $newUser = User::create([
                 'first_name'    => $pending->first_name,
                 'middle_name'   => $pending->middle_name,
                 'last_name'     => $pending->last_name,
@@ -78,6 +80,12 @@ class AccountApprovalController extends Controller
                 'role'          => 0, // Instructor role
                 'is_active'     => true,
             ]);
+
+            // Notify admins about new user creation
+            NotifyUserCreated::handle($newUser, Auth::user());
+            
+            // Notify the instructor that their account was approved (Email + System)
+            NotificationService::notifyInstructorApproved($newUser, Auth::user());
 
             // Remove from unverified list
             $pending->delete();
@@ -114,6 +122,13 @@ class AccountApprovalController extends Controller
         if (!$pending) {
             return back()->withErrors(['error' => 'Pending account not found or already processed.']);
         }
+        
+        // Store info before deletion for notification
+        $email = $pending->email;
+        $name = trim($pending->first_name . ' ' . $pending->last_name);
+        
+        // Send rejection email notification to the instructor
+        NotificationService::notifyInstructorRejected($email, $name, Auth::user());
             
         $pending->delete();
 

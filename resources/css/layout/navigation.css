@@ -24,3 +24,92 @@
 [x-transition] {
   will-change: opacity, transform;
 }
+
+/* Notification Dropdown Styles */
+.notification-dropdown {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.notification-dropdown-item:hover {
+  background-color: #f8f9fa !important;
+}
+
+.notification-dropdown-item:last-child {
+  border-bottom: none !important;
+}
+
+/* Notification Icon Styles (Small) */
+.notification-icon-sm {
+  font-size: 0.75rem;
+}
+
+.notification-icon-success {
+  background-color: rgba(25, 135, 84, 0.15);
+  color: #198754;
+}
+
+.notification-icon-danger {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+.notification-icon-warning {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.notification-icon-info {
+  background-color: rgba(13, 202, 240, 0.15);
+  color: #0dcaf0;
+}
+
+.notification-icon-primary {
+  background-color: rgba(13, 110, 253, 0.15);
+  color: #0d6efd;
+}
+
+.notification-icon-secondary {
+  background-color: rgba(108, 117, 125, 0.15);
+  color: #6c757d;
+}
+
+/* Badge subtle colors */
+.bg-success-subtle {
+  background-color: rgba(25, 135, 84, 0.15) !important;
+}
+
+.bg-danger-subtle {
+  background-color: rgba(220, 53, 69, 0.15) !important;
+}
+
+.bg-primary-subtle {
+  background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
+.bg-secondary-subtle {
+  background-color: rgba(108, 117, 125, 0.15) !important;
+}
+
+/* Min width helper */
+.min-width-0 {
+  min-width: 0;
+}
+
+/* Custom scrollbar for notification dropdown */
+.notification-dropdown-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-dropdown-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.notification-dropdown-body::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.notification-dropdown-body::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

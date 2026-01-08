@@ -95,13 +95,19 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// Notifications (for chairperson and GE coordinator)
-Route::middleware('auth')->group(function () {
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
-    Route::get('/notifications/unread', [NotificationController::class, 'getUnread'])->name('notifications.unread');
-    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+// Notifications (for all authenticated users)
+Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::get('/paginate', [NotificationController::class, 'paginate'])->name('paginate');
+    Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
+    Route::get('/unread', [NotificationController::class, 'getUnread'])->name('unread');
+    Route::get('/poll', [NotificationController::class, 'poll'])->name('poll');
+    Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+    Route::post('/viewed', [NotificationController::class, 'markAsViewed'])->name('viewed');
+    Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+    Route::get('/preferences', [NotificationController::class, 'getPreferences'])->name('preferences');
+    Route::put('/preferences', [NotificationController::class, 'updatePreferences'])->name('preferences.update');
 });
 
 // Help Guides (for all authenticated users to view)
