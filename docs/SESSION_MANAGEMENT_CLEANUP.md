@@ -131,7 +131,7 @@ Admin Sidebar → Session & Activity Monitor → User Logs Tab
 
 ### Deleted
 
-- ✅ `resources/views/admin/user-logs.blade.php`
+- `resources/views/admin/user-logs.blade.php`
 
 ### Modified
 
