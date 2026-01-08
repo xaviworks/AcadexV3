@@ -80,7 +80,7 @@
         <!-- Notification Bell - Now available for all authenticated users -->
         <div class="position-relative" x-data="notificationBell" x-init="init()" x-cloak style="min-width: 50px;">
             <button @click="toggleDropdown" type="button" class="btn btn-link text-white position-relative p-2" style="min-width: 50px; min-height: 50px;">
-                <i class="bi bi-bell fs-4" style="display: inline-block; line-height: 1;"></i>
+                <i :class="unreadCount > 0 ? 'bi bi-bell-fill fs-4' : 'bi bi-bell fs-4'" style="display: inline-block; line-height: 1;"></i>
                 <span x-show="unreadCount > 0" 
                       x-text="unreadCount > 99 ? '99+' : unreadCount"
                       class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
@@ -354,22 +354,8 @@ document.addEventListener('alpine:init', () => {
                 }
             }
             
-            // Show toast notification with category-specific styling
-            if (window.notify) {
-                const category = notification.category || 'general';
-                const priority = notification.priority || 'normal';
-                
-                // Use different toast types based on category/priority
-                if (priority === 'urgent' || priority === 'high') {
-                    window.notify.warning(notification.message, 8000);
-                } else if (category === 'security') {
-                    window.notify.error(notification.message, 7000);
-                } else if (category === 'academic') {
-                    window.notify.success(notification.message, 6000);
-                } else {
-                    window.notify.info(notification.message, 5000);
-                }
-            }
+            // Update unread count badge
+            this.fetchUnreadCount();
         },
         
         async fetchUnreadCount() {
@@ -572,20 +558,8 @@ document.addEventListener('alpine:init', () => {
                 }
             }
             
-            if (window.notify) {
-                const category = notification.category || 'general';
-                const priority = notification.priority || 'normal';
-                
-                if (priority === 'urgent' || priority === 'high') {
-                    window.notify.warning(notification.message, 8000);
-                } else if (category === 'security') {
-                    window.notify.error(notification.message, 7000);
-                } else if (category === 'academic') {
-                    window.notify.success(notification.message, 6000);
-                } else {
-                    window.notify.info(notification.message, 5000);
-                }
-            }
+            // Update unread count badge
+            this.fetchUnreadCount();
         },
         
         async fetchUnreadCount() {
