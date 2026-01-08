@@ -338,20 +338,22 @@ class VPAAController extends Controller
         // Check if department_id is passed as a URL parameter or as a request parameter
         $departmentId = $departmentId ?: $request->input('department_id');
         
-        // Only show users if a department is selected
-        $instructors = collect(); // Empty collection by default
+        // Build query for instructors
+        $query = User::where('is_active', true)
+            ->where('role', '!=', 3) // Exclude admin users (role 3)
+            ->where('role', '!=', 5) // Exclude VPAA users (role 5)
+            ->with(['department' => function($query) {
+                $query->select('id', 'department_code', 'department_description');
+            }])
+            ->orderBy('last_name');
         
+        // Apply department filter if selected
         if ($departmentId) {
-            $instructors = User::where('is_active', true)
-                ->where('department_id', $departmentId) // Filter by department
-                ->where('role', '!=', 3) // Exclude admin users (role 3)
-                ->where('role', '!=', 5) // Exclude VPAA users (role 5)
-                ->with(['department' => function($query) {
-                    $query->select('id', 'department_code', 'department_description');
-                }])
-                ->orderBy('last_name')
-                ->paginate(15);
+            $query->where('department_id', $departmentId);
         }
+        
+        // Always paginate (returns empty paginator when no results)
+        $instructors = $query->paginate(15);
 
         $departments = Department::where('is_deleted', false)
             ->select('id', 'department_code', 'department_description')

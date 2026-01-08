@@ -482,6 +482,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('vpaa.instructors') }}" 
+                           class="nav-link {{ request()->routeIs('vpaa.instructors*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-person-badge me-3"></i>
+                            <span>Instructors</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('vpaa.students') }}" 
                            class="nav-link {{ request()->routeIs('vpaa.students') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-people-fill me-3"></i>
