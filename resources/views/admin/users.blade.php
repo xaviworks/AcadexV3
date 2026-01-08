@@ -390,9 +390,6 @@
                         </div>
                     </div>
                     <div class="modal-footer disable-modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                            <i class="bi bi-x-lg me-1"></i>Cancel
-                        </button>
                         <input type="hidden" name="duration" id="chooseDisableDuration" value="1_week">
                         <button type="submit" class="btn btn-danger px-4" x-data>
                             <span x-show="!$store.loading.isLoading('disableUser')">

@@ -125,7 +125,7 @@
         </div>
         
         <!-- Pagination -->
-        @if($instructors->hasPages())
+        @if(method_exists($instructors, 'hasPages') && $instructors->hasPages())
             <div class="card-footer bg-light bg-opacity-25 border-0 py-3 px-4">
                 {{ $instructors->withQueryString()->links() }}
             </div>
