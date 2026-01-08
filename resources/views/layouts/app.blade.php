@@ -462,6 +462,9 @@
     {{-- Confirmation Dialog (Alpine.js) --}}
     @include('components.confirmation-dialog')
 
+    {{-- System Announcements Popup --}}
+    @include('components.announcement-popup')
+
     <script>
         (function () {
             // Display branded message to anyone inspecting the console
