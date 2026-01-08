@@ -452,7 +452,12 @@ export function bindGradeInputEvents() {
             })
             .catch((error) => {
               console.error('Error:', error);
-              alert('Failed to update number of items: ' + error.message);
+              const errorMsg = 'Failed to update number of items: ' + error.message;
+              if (typeof window.notify !== 'undefined' && window.notify.error) {
+                window.notify.error(errorMsg);
+              } else {
+                alert(errorMsg);
+              }
               this.value = oldValue;
 
               // Re-enable save button on error
@@ -610,7 +615,11 @@ export function bindGradeInputEvents() {
         const { hasInvalidInputs } = checkForChanges();
 
         if (hasInvalidInputs) {
-          alert('Please correct all invalid grades before submitting.');
+          if (typeof window.notify !== 'undefined' && window.notify.warning) {
+            window.notify.warning('Please correct all invalid grades before submitting.');
+          } else {
+            alert('Please correct all invalid grades before submitting.');
+          }
           return;
         }
 
@@ -688,31 +697,25 @@ export function bindGradeInputEvents() {
           .then((data) => {
             const message = data?.message || 'Grades have been saved successfully.';
 
-            const container = document.querySelector('.container-fluid');
-
-            if (container) {
-              const successMessage = document.createElement('div');
-              successMessage.className = 'alert alert-success alert-dismissible fade show';
-              successMessage.innerHTML = `
-                            <strong>Success!</strong> ${message}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        `;
-              container.insertBefore(successMessage, container.firstChild);
-
-              // Scroll to top to show the notification
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-
-              // Remove success message after 5 seconds
-              setTimeout(() => {
-                successMessage.remove();
-              }, 5000);
+            // Use the global notify helper for consistency
+            if (typeof window.notify !== 'undefined' && window.notify.success) {
+              window.notify.success(message);
             } else {
-              console.error('Container .container-fluid not found!');
+              // Fallback to alert if notify is not available
+              alert(message);
             }
           })
           .catch((error) => {
             console.error('Error:', error);
-            alert(error?.message || 'Failed to save grades. Please try again.');
+            const errorMessage = error?.message || 'Failed to save grades. Please try again.';
+            
+            // Use the global notify helper for consistency
+            if (typeof window.notify !== 'undefined' && window.notify.error) {
+              window.notify.error(errorMessage);
+            } else {
+              // Fallback to alert if notify is not available
+              alert(errorMessage);
+            }
 
             // Reset button state
             if (saveButton) {
@@ -925,7 +928,12 @@ export function refreshGradeSection() {
       })
       .catch((error) => {
         console.error('Unable to refresh grade section:', error);
-        alert('Grades were saved, but we could not reload the table automatically. Please refresh the page.');
+        const warningMsg = 'Grades were saved, but we could not reload the table automatically. Please refresh the page.';
+        if (typeof window.notify !== 'undefined' && window.notify.warning) {
+          window.notify.warning(warningMsg);
+        } else {
+          alert(warningMsg);
+        }
         resolve();
       })
       .finally(() => {

@@ -277,7 +277,7 @@
     </div>
 </div>
     {{-- Disable Choose Modal (one instance) --}}
-    <div x-data x-show="$store.modals.active === 'chooseDisableModal'" x-cloak x-transition.opacity class="modal fade show" :class="{ 'd-block-important': $store.modals.active === 'chooseDisableModal' }" tabindex="-1" @click.self="modal.close()">
+    <div x-data x-show="$store.modals.active === 'chooseDisableModal'" x-cloak x-transition.opacity class="modal fade" :class="{ 'show d-block': $store.modals.active === 'chooseDisableModal' }" tabindex="-1" style="z-index: 1050;" @click.self="modal.close()">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header disable-modal-header text-white">

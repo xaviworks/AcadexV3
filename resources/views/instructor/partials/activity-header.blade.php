@@ -32,12 +32,13 @@
 </div>
 
 @if ($componentComponents->isNotEmpty())
-    <div class="alert alert-light border shadow-sm py-3 px-4 mb-3" id="componentUsageSummary">
-        <div class="d-flex align-items-center mb-2">
-            <i class="bi bi-sliders me-2 text-success"></i>
-            <span class="fw-semibold text-success">Component availability — {{ $componentStatus['label'] ?? ucfirst($term) }}</span>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
+    <div class="alert alert-light border shadow-sm py-2 px-3 mb-3" id="componentUsageSummary">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-sliders text-success"></i>
+                <span class="fw-semibold">Activity Slots</span>
+            </div>
+            <span class="text-muted">·</span>
             @foreach ($componentComponents as $component)
                 @php
                     $isFull = $component['max_allowed'] !== null && $component['available_slots'] === 0;
@@ -50,14 +51,17 @@
                         ? max(0, $component['max_allowed'] - $component['count'])
                         : null;
                 @endphp
-                <div class="px-3 py-2 rounded-pill border {{ $badgeClass }}" style="font-size: 0.85rem;">
-                    {{ $component['label'] }} · {{ $component['count'] }}/{{ $maxLabel }}
+                <div class="px-3 py-1 rounded-pill border {{ $badgeClass }}" style="font-size: 0.85rem;">
+                    <strong>{{ $component['count'] }}</strong> {{ $component['label'] }}
+                    @if ($maxLabel !== '∞')
+                        <span class="text-muted">/ {{ $maxLabel }} max</span>
+                    @endif
                     @if ($isFull)
-                        <span class="fw-semibold ms-1">Full</span>
+                        <span class="badge bg-danger ms-1" style="font-size: 0.7rem;">Full</span>
                     @elseif ($isMissing)
-                        <span class="fw-semibold ms-1">Need more</span>
-                    @elseif ($remaining !== null)
-                        <span class="ms-1 text-muted">{{ $remaining }} left</span>
+                        <span class="badge bg-warning ms-1" style="font-size: 0.7rem;">Required</span>
+                    @elseif ($remaining !== null && $remaining > 0)
+                        <span class="text-muted ms-1">({{ $remaining }} more)</span>
                     @endif
                 </div>
             @endforeach

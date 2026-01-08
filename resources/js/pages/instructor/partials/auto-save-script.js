@@ -48,10 +48,22 @@ export function initAutoSaveScript(options = {}) {
         .then((response) => response.json())
         .then((data) => {
           if (data.status !== 'success') {
-            alert('Failed to save score.');
+            const errorMsg = data?.message || 'Failed to save score.';
+            if (typeof window.notify !== 'undefined' && window.notify.error) {
+              window.notify.error(errorMsg);
+            } else {
+              alert(errorMsg);
+            }
           }
         })
-        .catch(() => alert('Error saving score.'));
+        .catch((error) => {
+          const errorMsg = error?.message || 'Error saving score.';
+          if (typeof window.notify !== 'undefined' && window.notify.error) {
+            window.notify.error(errorMsg);
+          } else {
+            alert(errorMsg);
+          }
+        });
     });
   });
 
