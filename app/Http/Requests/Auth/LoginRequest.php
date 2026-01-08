@@ -59,11 +59,20 @@ class LoginRequest extends FormRequest
         $user = \App\Models\User::where('email', $this->input('email'))->first();
         
         if ($user && !$user->is_active) {
-            RateLimiter::hit($this->throttleKey());
-            
-            throw ValidationException::withMessages([
-                'email' => 'Your account is on hold, please contact your coordinator or the admin.',
-            ]);
+            // Check if the disable duration has expired
+            if ($user->disabled_until && now()->greaterThanOrEqualTo($user->disabled_until)) {
+                // Auto re-enable the user since the disable period has passed
+                $user->is_active = true;
+                $user->disabled_until = null;
+                $user->save();
+            } else {
+                // Still disabled
+                RateLimiter::hit($this->throttleKey());
+                
+                throw ValidationException::withMessages([
+                    'email' => 'Your account is on hold, please contact your coordinator or the admin.',
+                ]);
+            }
         }
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {

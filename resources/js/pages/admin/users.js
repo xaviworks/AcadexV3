@@ -267,10 +267,10 @@ function initAdminUsersPage() {
       const customInput = document.getElementById('customDisableDatetime');
 
       if (e.target.value === 'custom') {
-        if (customWrapper) customWrapper.style.display = '';
+        if (customWrapper) customWrapper.classList.add('show');
         if (customInput) customInput.required = true;
       } else {
-        if (customWrapper) customWrapper.style.display = 'none';
+        if (customWrapper) customWrapper.classList.remove('show');
         if (customInput) customInput.required = false;
       }
     }
