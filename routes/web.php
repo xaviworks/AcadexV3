@@ -104,6 +104,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 });
 
+// Help Guides (for all authenticated users to view)
+Route::middleware('auth')->group(function () {
+    Route::get('/help-guides', [\App\Http\Controllers\HelpGuideController::class, 'index'])->name('help-guides.index');
+    Route::get('/help-guides/{helpGuide}', [\App\Http\Controllers\HelpGuideController::class, 'show'])->name('help-guides.show');
+    Route::get('/help-guides/{helpGuide}/download', [\App\Http\Controllers\HelpGuideController::class, 'download'])->name('help-guides.download');
+    Route::get('/help-guides/{helpGuide}/preview', [\App\Http\Controllers\HelpGuideController::class, 'preview'])->name('help-guides.preview');
+    Route::get('/help-guides/attachment/{attachment}/preview', [\App\Http\Controllers\HelpGuideController::class, 'previewAttachment'])->name('help-guides.attachment.preview');
+    Route::get('/help-guides/attachment/{attachment}/download', [\App\Http\Controllers\HelpGuideController::class, 'downloadAttachment'])->name('help-guides.attachment.download');
+});
+
 // Chairperson Routes
 Route::prefix('chairperson')
     ->middleware(['auth', 'academic.period.set'])
@@ -369,6 +379,20 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::get('/activity', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'activity'])->name('activity');
         Route::get('/activity/{auditLog}', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'showActivity'])->name('activity.show');
         Route::post('/activity/{auditLog}/rollback', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'rollback'])->name('activity.rollback');
+    });
+
+    // Help Guides Management Routes (Admin CRUD)
+    Route::prefix('help-guides')->name('help-guides.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\HelpGuideController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\HelpGuideController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\HelpGuideController::class, 'store'])->name('store');
+        Route::get('/{helpGuide}/edit', [\App\Http\Controllers\Admin\HelpGuideController::class, 'edit'])->name('edit');
+        Route::put('/{helpGuide}', [\App\Http\Controllers\Admin\HelpGuideController::class, 'update'])->name('update');
+        Route::delete('/{helpGuide}', [\App\Http\Controllers\Admin\HelpGuideController::class, 'destroy'])->name('destroy');
+        Route::post('/update-order', [\App\Http\Controllers\Admin\HelpGuideController::class, 'updateOrder'])->name('update-order');
+        Route::post('/{helpGuide}/toggle-active', [\App\Http\Controllers\Admin\HelpGuideController::class, 'toggleActive'])->name('toggle-active');
+        Route::get('/{helpGuide}/download', [\App\Http\Controllers\Admin\HelpGuideController::class, 'downloadAttachment'])->name('download');
+        Route::delete('/attachment/{attachment}', [\App\Http\Controllers\Admin\HelpGuideController::class, 'deleteAttachment'])->name('attachment.delete');
     });
 
     // Announcements Management (Admin Only)

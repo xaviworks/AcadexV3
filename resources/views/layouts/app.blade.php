@@ -51,6 +51,13 @@
 
     {{-- Styles: resources/css/layout/app.css --}}
 
+    <!-- Tutorial System Styles (Admin, VPAA, and Dean users) -->
+    @auth
+        @if(Auth::user()->role === 3 || Auth::user()->role === 5 || Auth::user()->role === 2)
+            <link rel="stylesheet" href="{{ asset('css/admin-tutorial.css') }}">
+        @endif
+    @endauth
+
     <!-- Additional Page Styles -->
     @stack('styles')
 

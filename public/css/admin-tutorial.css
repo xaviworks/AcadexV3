@@ -1,0 +1,477 @@
+/**
+ * Admin Tutorial System Styles
+ * Provides styling for the step-based guided tours
+ */
+
+/* Overlay - darkens the background */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9990;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+}
+
+.tutorial-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Spotlight - highlights the target element */
+.tutorial-spotlight {
+    position: absolute;
+    z-index: 9991;
+    border-radius: 8px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.tutorial-spotlight.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Highlighted element */
+.tutorial-highlight {
+    position: relative;
+    z-index: 9992 !important;
+    box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.5), 0 0 20px rgba(25, 135, 84, 0.3) !important;
+    border-radius: 8px;
+    animation: tutorial-pulse 2s infinite;
+}
+
+@keyframes tutorial-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.5), 0 0 20px rgba(25, 135, 84, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(25, 135, 84, 0.4), 0 0 30px rgba(25, 135, 84, 0.4);
+    }
+}
+
+/* Tooltip */
+.tutorial-tooltip {
+    position: absolute;
+    z-index: 9995;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.tutorial-tooltip.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Tooltip arrow */
+.tutorial-tooltip::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: white;
+    transform: rotate(45deg);
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tutorial-tooltip-bottom::before {
+    top: -8px;
+    left: 50%;
+    margin-left: -8px;
+}
+
+.tutorial-tooltip-top::before {
+    bottom: -8px;
+    left: 50%;
+    margin-left: -8px;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tutorial-tooltip-left::before {
+    right: -8px;
+    top: 50%;
+    margin-top: -8px;
+    box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tutorial-tooltip-right::before {
+    left: -8px;
+    top: 50%;
+    margin-top: -8px;
+    box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Tooltip header */
+.tutorial-tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px 8px;
+    border-bottom: none;
+}
+
+.tutorial-step-indicator {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #198754;
+    background: #e8f5e9;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.tutorial-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.tutorial-close-btn:hover {
+    color: #dc3545;
+    background: #fee2e2;
+}
+
+/* Tooltip content */
+.tutorial-tooltip-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 8px;
+    padding: 0 20px;
+}
+
+.tutorial-tooltip-content {
+    font-size: 0.9375rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 20px 16px;
+}
+
+/* Tooltip actions */
+.tutorial-tooltip-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    border-radius: 0 0 12px 12px;
+    gap: 12px;
+}
+
+.tutorial-nav-btns {
+    display: flex;
+    gap: 8px;
+}
+
+/* Tutorial buttons */
+.tutorial-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.tutorial-btn i {
+    font-size: 0.875rem;
+}
+
+.tutorial-btn-primary {
+    background: #198754;
+    color: white;
+}
+
+.tutorial-btn-primary:hover {
+    background: #157347;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+}
+
+.tutorial-btn-secondary {
+    background: white;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+}
+
+.tutorial-btn-secondary:hover {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.tutorial-skip-btn {
+    font-size: 0.8125rem;
+    padding: 8px 16px;
+}
+
+.tutorial-prev-btn,
+.tutorial-next-btn {
+    min-width: 100px;
+}
+
+/* Header tutorial button */
+.tutorial-header-btn {
+    transition: transform 0.2s ease;
+}
+
+.tutorial-header-btn:hover {
+    transform: scale(1.1);
+}
+
+.tutorial-header-btn:active {
+    transform: scale(0.95);
+}
+
+/* Floating Action Button (FAB) */
+.tutorial-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #198754 0%, #157347 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tutorial-fab i {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.tutorial-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.5), 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tutorial-fab:active {
+    transform: scale(0.95);
+}
+
+.tutorial-fab:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.3), 0 4px 12px rgba(25, 135, 84, 0.4);
+}
+
+/* FAB Tooltip */
+.tutorial-fab-tooltip {
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 12px;
+    background: #1a1a1a;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.tutorial-fab-tooltip::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-left-color: #1a1a1a;
+}
+
+.tutorial-fab:hover .tutorial-fab-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Hide FAB when tutorial is active */
+.tutorial-fab.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.5);
+}
+
+/* Pulse animation on first load */
+@keyframes tutorial-fab-pulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 8px rgba(25, 135, 84, 0.2);
+    }
+}
+
+.tutorial-fab.pulse {
+    animation: tutorial-fab-pulse 2s ease-in-out 3;
+}
+
+/* Progress dots (optional enhancement) */
+.tutorial-progress {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 20px 0;
+}
+
+.tutorial-progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.tutorial-progress-dot.active {
+    background: #198754;
+    transform: scale(1.2);
+}
+
+.tutorial-progress-dot.completed {
+    background: #198754;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 576px) {
+    .tutorial-tooltip {
+        width: calc(100vw - 24px);
+        left: 12px !important;
+        right: 12px !important;
+    }
+    
+    .tutorial-tooltip-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .tutorial-skip-btn {
+        order: 2;
+    }
+    
+    .tutorial-nav-btns {
+        order: 1;
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .tutorial-prev-btn,
+    .tutorial-next-btn {
+        flex: 1;
+    }
+}
+
+/* Animation for entrance */
+@keyframes tutorial-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tutorial-tooltip.active {
+    animation: tutorial-fade-in 0.3s ease forwards;
+}
+
+/* Backdrop blur effect for modern browsers */
+@supports (backdrop-filter: blur(4px)) {
+    .tutorial-overlay.active {
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+    }
+}
+
+/* Modal elevation when tutorial is targeting modal content */
+/* When a modal contains a highlighted element, elevate the entire modal above the tutorial overlay */
+.modal.show:has(.tutorial-highlight),
+.modal.show.tutorial-active-modal {
+    z-index: 9993 !important;
+}
+
+.modal.show:has(.tutorial-highlight) .modal-backdrop,
+.modal.show.tutorial-active-modal + .modal-backdrop {
+    z-index: 9989 !important;
+    opacity: 0 !important;
+}
+
+.modal.show:has(.tutorial-highlight) .modal-dialog,
+.modal.show.tutorial-active-modal .modal-dialog {
+    z-index: 9994 !important;
+}
+
+/* Ensure modal content is not affected by backdrop blur */
+.modal.show:has(.tutorial-highlight) .modal-content,
+.modal.show.tutorial-active-modal .modal-content {
+    position: relative;
+    z-index: 9994 !important;
+    isolation: isolate;
+}
+
+/* Focus styles for accessibility */
+.tutorial-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.3);
+}
+
+.tutorial-close-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.3);
+}
+
+/* Print styles - hide tutorial elements */
+@media print {
+    .tutorial-overlay,
+    .tutorial-spotlight,
+    .tutorial-tooltip,
+    .tutorial-header-btn {
+        display: none !important;
+    }
+}
