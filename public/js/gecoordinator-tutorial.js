@@ -20,6 +20,7 @@
  * - tutorial-students.js       - Students by Year tutorial
  * - tutorial-grades.js         - View Grades wizard tutorial
  * - tutorial-reports.js        - CO Reports tutorials
+ * - tutorial-curriculum.js     - Import Courses (Select Subjects) tutorial
  */
 
 (function() {
@@ -79,7 +80,8 @@
                     loadScript(tutorialsPath + 'tutorial-assign-subjects.js'),
                     loadScript(tutorialsPath + 'tutorial-students.js'),
                     loadScript(tutorialsPath + 'tutorial-grades.js'),
-                    loadScript(tutorialsPath + 'tutorial-reports.js')
+                    loadScript(tutorialsPath + 'tutorial-reports.js'),
+                    loadScript(tutorialsPath + 'tutorial-curriculum.js')
                 ]);
             })
             .then(function() {

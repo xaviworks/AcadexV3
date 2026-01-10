@@ -99,6 +99,11 @@
                 return 'gecoordinator-assign-subjects';
             }
             
+            // Import Courses / Select Subjects (Curriculum)
+            if (path.includes('/curriculum/select-subjects')) {
+                return 'gecoordinator-curriculum';
+            }
+            
             // Instructors Management (with tab detection)
             if (path.includes('/gecoordinator/instructors')) {
                 // Detect which tab is active based on hash or active nav-link
