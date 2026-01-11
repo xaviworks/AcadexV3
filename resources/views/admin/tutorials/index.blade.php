@@ -199,11 +199,11 @@
             <h6 class="fw-bold text-primary mb-1 small">
                 <i class="bi bi-lightbulb me-1"></i>Tutorial Builder Workflow
             </h6>
-            <ul class="mb-0 small text-muted ps-3" style="line-height: 1.4; margin-bottom: 0 !important;">
-                <li class="mb-0"><strong>Create:</strong> Add new tutorial with basic metadata (role, page, title) using the modal form</li>
-                <li class="mb-0"><strong>Edit:</strong> Edit tutorial metadata using the modal form</li>
-                <li class="mb-0"><strong>Manage Steps:</strong> Use the full edit page to manage all tutorial steps</li>
-                <li class="mb-0"><strong>Test:</strong> Preview tutorial on target page before activating</li>
+            <ul class="mb-0 small text-muted ps-3" style="line-height: 1.6; margin-bottom: 0 !important;">
+                <li class="mb-0"><strong>1. Create:</strong> Start a new tutorial and add steps.</li>
+                <li class="mb-0"><strong>2. Edit:</strong> Update details or steps anytime.</li>
+                <li class="mb-0"><strong>3. Test:</strong> Preview the tutorial as users will see it.</li>
+                <li class="mb-0"><strong>4. Save:</strong> Changes are live for the selected role and page.</li>
             </ul>
         </div>
     </div>
@@ -359,7 +359,7 @@
                 <div class="modal-body">
                     <p class="text-muted small mb-4">
                         <i class="bi bi-info-circle me-1"></i>
-                        Start by creating the tutorial metadata. You'll add steps after saving.
+                        Start by creating the tutorial metadata and steps.
                     </p>
 
                     {{-- Role Selection --}}
@@ -446,25 +446,13 @@
                                    min="0"
                                    max="100">
                         </div>
+                    </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Status</label>
-                            <div class="border rounded p-3 bg-light">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           id="is_active" 
-                                           name="is_active" 
-                                           value="1" 
-                                           checked>
-                                    <label class="form-check-label" for="is_active">
-                                        <span class="text-success fw-semibold">
-                                            <i class="bi bi-eye-fill me-1"></i>Active (Visible to Users)
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                    {{-- Tutorial Steps Section --}}
+                    <hr class="my-4">
+                    <h5 class="mb-3"><i class="bi bi-list-ol me-2"></i>Tutorial Steps</h5>
+                    <div id="createStepsList">
+                        <button type="button" class="btn btn-sm btn-success my-2" id="addCreateStepBtn" onclick="addStep('create')"><i class="bi bi-plus"></i> Add Step</button>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
@@ -484,8 +472,8 @@
 <div class="modal fade" id="editTutorialModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Tutorial Details</h5>
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Tutorial</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="" method="POST" id="editTutorialForm">
@@ -495,7 +483,7 @@
                 <div class="modal-body">
                     <p class="text-muted small mb-4">
                         <i class="bi bi-info-circle me-1"></i>
-                        Edit all tutorial details, including steps, in one place.
+                        Edit the tutorial and its steps in one place.
                     </p>
 
                     {{-- Role Selection --}}
@@ -696,8 +684,8 @@ function confirmDelete(tutorialId, tutorialTitle) {
     });
 }
 
-function addStep() {
-    const stepsList = document.getElementById('editStepsList');
+function addStep(context = 'edit') {
+    const stepsList = document.getElementById(context === 'create' ? 'createStepsList' : 'editStepsList');
     const newStepIndex = stepsList.querySelectorAll('.step-item').length;
 
     const newStepTemplate = `
@@ -800,14 +788,13 @@ function addStep() {
         wrapper = document.createElement('div');
         wrapper.className = 'd-flex flex-column gap-2';
         // Insert wrapper before the "Add Step" button
-        const addButton = document.getElementById('addEditStepBtn');
+        const addButton = context === 'create' ? document.getElementById('addCreateStepBtn') : document.getElementById('addEditStepBtn');
         if (addButton) {
             addButton.insertAdjacentElement('beforebegin', wrapper);
         } else {
             stepsList.appendChild(wrapper);
         }
     }
-    
     // Add new step to wrapper
     wrapper.insertAdjacentHTML('beforeend', newStepTemplate);
 
