@@ -401,6 +401,19 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::delete('/attachment/{attachment}', [\App\Http\Controllers\Admin\HelpGuideController::class, 'deleteAttachment'])->name('attachment.delete');
     });
 
+    // Tutorial Builder Routes (Dynamic Tutorial Management)
+    Route::prefix('tutorials')->name('tutorials.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'store'])->name('store');
+        Route::get('/{tutorial}', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'show'])->name('show');
+        Route::get('/{tutorial}/edit', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'edit'])->name('edit');
+        Route::put('/{tutorial}', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'update'])->name('update');
+        Route::delete('/{tutorial}', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'destroy'])->name('destroy');
+        Route::post('/{tutorial}/duplicate', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'duplicate'])->name('duplicate');
+        Route::post('/{tutorial}/toggle-active', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'toggleActive'])->name('toggle-active');
+    });
+
     // Announcements Management (Admin Only)
     Route::prefix('announcements')->name('announcements.')->group(function () {
         Route::get('/', [AnnouncementController::class, 'index'])->name('index');

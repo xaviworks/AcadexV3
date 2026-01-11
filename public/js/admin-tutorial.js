@@ -71,7 +71,7 @@
         const basePath = getScriptBasePath();
         const tutorialsPath = basePath + 'admin-tutorials/';
         
-        // Load core first, then all tutorial modules
+        // Load core first, then all tutorial modules, then dynamic loader
         loadScript(tutorialsPath + 'tutorial-core.js')
             .then(function() {
                 // Load all tutorial modules in parallel
@@ -85,6 +85,10 @@
                     loadScript(tutorialsPath + 'tutorial-structure-template-requests.js'),
                     loadScript(tutorialsPath + 'tutorial-help-guides.js')
                 ]);
+            })
+            .then(function() {
+                // Load dynamic loader (extends core with API capabilities)
+                return loadScript(tutorialsPath + 'tutorial-loader-v2.js');
             })
             .then(function() {
                 // Initialize the tutorial system

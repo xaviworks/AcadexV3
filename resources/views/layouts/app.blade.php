@@ -70,6 +70,11 @@
         @elseif(Auth::user()->role === 2)
             <script src="{{ asset('js/dean-tutorial.js') }}" defer></script>
         @endif
+        
+        {{-- Dynamic Tutorial Loader V2 (loads tutorials from database) --}}
+        @if(Auth::user()->role === 3 || Auth::user()->role === 5 || Auth::user()->role === 2)
+            <script src="{{ asset('js/admin-tutorials/tutorial-loader-v2.js') }}" defer></script>
+        @endif
     @endauth
 
     <!-- Preload critical resources -->

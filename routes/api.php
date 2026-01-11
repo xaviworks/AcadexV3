@@ -69,3 +69,16 @@ Route::get('/check-duplicate-name', function (Request $request) {
     
     return response()->json(['exists' => $exists]);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Tutorial API Routes
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\API\TutorialController;
+
+Route::prefix('tutorials')->group(function () {
+    Route::get('{role}', [TutorialController::class, 'getTutorialsByRole']);
+    Route::get('{role}/{pageId}', [TutorialController::class, 'getTutorialByPage']);
+    Route::get('statistics/all', [TutorialController::class, 'getStatistics']);
+});

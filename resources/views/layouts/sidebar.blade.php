@@ -375,6 +375,13 @@
                             <span>Help Guides</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.tutorials.index') }}" 
+                           class="nav-link {{ request()->routeIs('admin.tutorials.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-book-half me-3"></i>
+                            <span>Tutorial Builder</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         @endif
