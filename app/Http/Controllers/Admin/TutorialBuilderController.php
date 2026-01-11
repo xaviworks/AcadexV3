@@ -296,12 +296,13 @@ class TutorialBuilderController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('admin.tutorials.edit', $newTutorial)
+                ->route('admin.tutorials.index')
                 ->with('success', 'Tutorial duplicated successfully!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()
+            return redirect()
+                ->route('admin.tutorials.index')
                 ->with('error', 'Failed to duplicate tutorial: ' . $e->getMessage());
         }
     }
