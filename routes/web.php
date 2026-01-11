@@ -381,7 +381,7 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::delete('/backup/{backup}', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'delete'])->name('backup.delete');
         Route::post('/backup/{backup}/restore', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'restore'])->name('backup.restore');
         Route::post('/schedule', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'schedule'])->name('schedule');
-        Route::post('/run-now', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'runNow'])->name('run-now');
+        Route::post('/run_now', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'runNow'])->name('run-now');
         Route::get('/activity', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'activity'])->name('activity');
         Route::get('/activity/{auditLog}', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'showActivity'])->name('activity.show');
         Route::post('/activity/{auditLog}/rollback', [\App\Http\Controllers\Admin\DisasterRecoveryController::class, 'rollback'])->name('activity.rollback');
@@ -476,3 +476,8 @@ Route::get('/vpaa', function () {
 
 // Auth Routes
 require __DIR__.'/auth.php';
+
+// Route for adding a tutorial step
+Route::prefix('admin')->group(function () {
+    Route::get('/tutorials/step-form-template', [\App\Http\Controllers\Admin\TutorialBuilderController::class, 'getStepFormTemplate'])->name('tutorials.step-form-template');
+});

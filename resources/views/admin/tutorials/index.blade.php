@@ -53,6 +53,61 @@
     .btn-group .btn {
         position: relative;
     }
+    
+    /* Compact step form styling */
+    #editStepsList .step-item .card-header {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    #editStepsList .step-item .card-body {
+        padding: 0.75rem;
+    }
+    
+    #editStepsList .step-item .form-label.small {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    #editStepsList .step-item .form-control-sm,
+    #editStepsList .step-item .form-select-sm {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    #editStepsList .step-item .input-group-sm .btn {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    #editStepsList .step-item small.text-muted {
+        font-size: 0.75rem;
+    }
+    
+    /* Compact Tutorial Builder Workflow card */
+    .tutorial-info-card,
+    .card[style*="linear-gradient"] {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .card[style*="linear-gradient"] .card-body {
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .card[style*="linear-gradient"] h6 {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem !important;
+    }
+    
+    .card[style*="linear-gradient"] ul {
+        font-size: 0.8rem;
+        padding-left: 1rem !important;
+    }
+    
+    .card[style*="linear-gradient"] ul li {
+        margin-bottom: 0.1rem !important;
+        padding-bottom: 0 !important;
+    }
 </style>
 @endpush
 
@@ -85,32 +140,22 @@
     @endif
 
     {{-- Info Card --}}
-    <div class="card mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
-        <div class="card-body py-3">
-            <h6 class="fw-bold text-primary mb-2">
-                <i class="bi bi-lightbulb me-2"></i>Tutorial Builder Workflow
+    <div class="card mb-2 border-0 shadow-sm" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+        <div class="card-body py-2 px-3">
+            <h6 class="fw-bold text-primary mb-1 small">
+                <i class="bi bi-lightbulb me-1"></i>Tutorial Builder Workflow
             </h6>
-            <ul class="mb-0 small text-muted ps-3">
-                <li><strong>Create:</strong> Add new tutorial with basic metadata (role, page, title)</li>
-                <li><strong>Quick Edit:</strong> Use <i class="bi bi-pencil-square"></i> button to modify metadata instantly</li>
-                <li><strong>Full Edit:</strong> Use <i class="bi bi-list-ol"></i> button to manage tutorial steps</li>
-                <li><strong>Test:</strong> Preview tutorial on target page before activating</li>
-                <li><strong>Activate:</strong> Toggle status to make visible to users</li>
+            <ul class="mb-0 small text-muted ps-3" style="line-height: 1.4; margin-bottom: 0 !important;">
+                <li class="mb-0"><strong>Create:</strong> Add new tutorial with basic metadata (role, page, title) using the modal form</li>
+                <li class="mb-0"><strong>Edit:</strong> Edit tutorial metadata using the modal form</li>
+                <li class="mb-0"><strong>Manage Steps:</strong> Use the full edit page to manage all tutorial steps</li>
+                <li class="mb-0"><strong>Test:</strong> Preview tutorial on target page before activating</li>
+                <li class="mb-0"><strong>Activate:</strong> Toggle status to make visible to users</li>
             </ul>
         </div>
     </div>
 
-    {{-- Action Buttons Legend --}}
-    <div class="alert alert-light border mb-4 d-flex align-items-center">
-        <i class="bi bi-info-circle text-info me-3 fs-4"></i>
-        <div class="flex-grow-1">
-            <strong>Action Buttons:</strong>
-            <span class="badge bg-light text-dark border ms-2"><i class="bi bi-pencil-square"></i> Quick Edit</span> 
-            <span class="text-muted small">- Edit metadata only</span>
-            <span class="ms-3 badge bg-primary"><i class="bi bi-list-ol"></i> Full Edit</span>
-            <span class="text-muted small">- Manage all steps</span>
-        </div>
-    </div>
+    {{-- Action Buttons Legend removed as per request --}}
 
     <div class="card shadow-sm">
         <div class="card-body">
@@ -164,7 +209,7 @@
                                 <td>
                                     <div class="btn-group" role="group">
                                         <button type="button"
-                                                class="btn btn-sm btn-outline-primary edit-metadata-btn"
+                                                class="btn btn-sm btn-outline-primary edit-tutorial-btn"
                                                 data-id="{{ $tutorial->id }}"
                                                 data-role="{{ $tutorial->role }}"
                                                 data-page-identifier="{{ $tutorial->page_identifier }}"
@@ -172,9 +217,9 @@
                                                 data-description="{{ $tutorial->description }}"
                                                 data-priority="{{ $tutorial->priority }}"
                                                 data-is-active="{{ $tutorial->is_active ? '1' : '0' }}"
-                                                title="Quick Edit Metadata"
+                                                title="Edit Tutorial Details"
                                                 data-bs-toggle="modal"
-                                                data-bs-target="#editMetadataModal">
+                                                data-bs-target="#editTutorialModal">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         
@@ -381,21 +426,21 @@
     </div>
 </div>
 
-{{-- Edit Metadata Modal --}}
-<div class="modal fade" id="editMetadataModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+{{-- Edit Tutorial Details Modal --}}
+<div class="modal fade" id="editTutorialModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Tutorial Metadata</h5>
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Tutorial Details</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="" method="POST" id="editMetadataForm">
+            <form action="" method="POST" id="editTutorialForm">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
                     <p class="text-muted small mb-4">
                         <i class="bi bi-info-circle me-1"></i>
-                        Edit basic tutorial information. To modify steps, use the full "Edit Tutorial & Steps" button.
+                        Edit all tutorial details, including steps, in one place.
                     </p>
 
                     {{-- Role Selection --}}
@@ -490,13 +535,20 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Tutorial Steps Section --}}
+                    <hr class="my-4">
+                    <h5 class="mb-3"><i class="bi bi-list-ol me-2"></i>Tutorial Steps</h5>
+                    <div id="editStepsList">
+                        <button type="button" class="btn btn-sm btn-success my-2" id="addEditStepBtn" onclick="addStep()"><i class="bi bi-plus"></i> Add Step</button>
+                    </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg me-1"></i> Cancel
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg me-1"></i> Update Metadata
+                        <i class="bi bi-check-lg me-1"></i> Update Tutorial
                     </button>
                 </div>
             </form>
@@ -504,11 +556,177 @@
     </div>
 </div>
 
+{{-- Tutorial Step Templates (outside modal to prevent deletion) --}}
+@php $positions = ['top','bottom','left','right']; @endphp
+@if(isset($tutorials))
+    @foreach($tutorials as $tutorial)
+        <template id="steps-template-{{ $tutorial->id }}" style="display: none;">
+            <div class="d-flex flex-column gap-2">
+            @foreach($tutorial->steps as $index => $step)
+                <div class="card step-item" x-data="{ open: false }" data-step-index="{{ $index }}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">Step {{ $index + 1 }}: {{ $step->title ?? 'Untitled' }}</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @click="open = !open">
+                            <span x-show="!open"><i class="bi bi-chevron-down"></i></span>
+                            <span x-show="open"><i class="bi bi-chevron-up"></i></span>
+                        </button>
+                    </div>
+                    <div class="card-body" x-show="open" x-transition>
+                        @include('admin.tutorials._step-form-fields', ['index' => $index, 'step' => $step, 'positions' => $positions])
+                    </div>
+                </div>
+            @endforeach
+            </div>
+        </template>
+    @endforeach
+@endif
+
 @push('scripts')
 <script>
 function confirmDelete(tutorialId) {
     if (confirm('Are you sure you want to delete this tutorial? This action cannot be undone.')) {
         document.getElementById('delete-form-' + tutorialId).submit();
+    }
+}
+
+function addStep() {
+    const stepsList = document.getElementById('editStepsList');
+    const newStepIndex = stepsList.querySelectorAll('.step-item').length;
+
+    const newStepTemplate = `
+        <div class="card step-item" x-data="{ open: true }" data-step-index="${newStepIndex}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">Step ${newStepIndex + 1}: Untitled</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" @click="open = !open">
+                    <span x-show="!open"><i class="bi bi-chevron-down"></i></span>
+                    <span x-show="open"><i class="bi bi-chevron-up"></i></span>
+                </button>
+            </div>
+            <div class="card-body py-2" x-show="open" x-transition>
+                <div class="row g-2 mb-2">
+                    <div class="col-12">
+                        <label for="step-title-${newStepIndex}" class="form-label small fw-semibold mb-1">Step Title *</label>
+                        <input type="text" 
+                               class="form-control form-control-sm" 
+                               id="step-title-${newStepIndex}" 
+                               name="steps[${newStepIndex}][title]" 
+                               placeholder="e.g., Welcome to the Dashboard"
+                               required>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-12">
+                        <label for="step-content-${newStepIndex}" class="form-label small fw-semibold mb-1">Step Content *</label>
+                        <textarea class="form-control form-control-sm" 
+                                  id="step-content-${newStepIndex}" 
+                                  name="steps[${newStepIndex}][content]" 
+                                  rows="2" 
+                                  placeholder="Describe what the user should learn in this step..."
+                                  required></textarea>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-12">
+                        <label for="step-target-${newStepIndex}" class="form-label small fw-semibold mb-1">
+                            Target Selector * 
+                            <i class="bi bi-question-circle" 
+                               data-bs-toggle="tooltip" 
+                               title="CSS selector for the element to highlight (e.g., #myButton, .card-header)"></i>
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" 
+                                   class="form-control target-selector-input" 
+                                   id="step-target-${newStepIndex}" 
+                                   name="steps[${newStepIndex}][target_selector]" 
+                                   placeholder=".element-class, #element-id"
+                                   required>
+                            <button type="button" class="btn btn-outline-secondary btn-sm pick-element-btn" data-step-index="${newStepIndex}">
+                                <i class="bi bi-cursor"></i> Pick
+                            </button>
+                        </div>
+                        <small class="text-muted small">Use comma-separated selectors for fallbacks</small>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-4">
+                        <label for="step-position-${newStepIndex}" class="form-label small fw-semibold mb-1">Tooltip Position</label>
+                        <select name="steps[${newStepIndex}][position]" class="form-select form-select-sm" id="step-position-${newStepIndex}">
+                            <option value="top">Top</option>
+                            <option value="bottom" selected>Bottom</option>
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold mb-1">&nbsp;</label>
+                        <div class="form-check mt-2">
+                            <input type="hidden" name="steps[${newStepIndex}][is_optional]" value="0">
+                            <input type="checkbox" 
+                                   name="steps[${newStepIndex}][is_optional]" 
+                                   class="form-check-input" 
+                                   id="step-optional-${newStepIndex}"
+                                   value="1">
+                            <label class="form-check-label small" for="step-optional-${newStepIndex}">Optional</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold mb-1">&nbsp;</label>
+                        <div class="form-check mt-2">
+                            <input type="hidden" name="steps[${newStepIndex}][requires_data]" value="0">
+                            <input type="checkbox" 
+                                   name="steps[${newStepIndex}][requires_data]" 
+                                   class="form-check-input" 
+                                   id="step-requires-data-${newStepIndex}"
+                                   value="1">
+                            <label class="form-check-label small" for="step-requires-data-${newStepIndex}">Requires Data</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Find the wrapper div or create it
+    let wrapper = stepsList.querySelector('.d-flex.flex-column.gap-2');
+    if (!wrapper) {
+        // Create wrapper if it doesn't exist
+        wrapper = document.createElement('div');
+        wrapper.className = 'd-flex flex-column gap-2';
+        // Insert wrapper before the "Add Step" button
+        const addButton = document.getElementById('addEditStepBtn');
+        if (addButton) {
+            addButton.insertAdjacentElement('beforebegin', wrapper);
+        } else {
+            stepsList.appendChild(wrapper);
+        }
+    }
+    
+    // Add new step to wrapper
+    wrapper.insertAdjacentHTML('beforeend', newStepTemplate);
+
+    // Reinitialize Alpine.js for the new step
+    if (typeof Alpine !== 'undefined') {
+        // Get the last step item we just added
+        const newStepElement = wrapper.querySelector(`.step-item[data-step-index="${newStepIndex}"]`);
+        if (newStepElement) {
+            Alpine.initTree(newStepElement);
+        }
+    }
+
+    // Reinitialize tooltips for the new step
+    const tooltips = stepsList.querySelectorAll(`[data-step-index="${newStepIndex}"] [data-bs-toggle="tooltip"]`);
+    tooltips.forEach(el => new bootstrap.Tooltip(el));
+
+    // Update step title when input changes
+    const titleInput = document.getElementById(`step-title-${newStepIndex}`);
+    if (titleInput) {
+        titleInput.addEventListener('input', function() {
+            const header = this.closest('.step-item').querySelector('.card-header .fw-semibold');
+            if (header) {
+                const stepNum = newStepIndex + 1;
+                header.textContent = `Step ${stepNum}: ${this.value || 'Untitled'}`;
+            }
+        });
     }
 }
 
@@ -563,10 +781,16 @@ $(document).ready(function() {
         @endif
     @endif
 
-    // Handle Edit Metadata Modal
-    $('.edit-metadata-btn').on('click', function() {
+
+    // Store current tutorial ID for modal events
+    let currentTutorialId = null;
+
+    // Handle Edit Tutorial Details Modal
+    $('.edit-tutorial-btn').off('click').on('click', function() {
+        console.log('Edit tutorial modal opened');
         const btn = $(this);
         const tutorialId = btn.data('id');
+        currentTutorialId = tutorialId;
         const role = btn.data('role');
         const pageIdentifier = btn.data('page-identifier');
         const title = btn.data('title');
@@ -575,7 +799,7 @@ $(document).ready(function() {
         const isActive = btn.data('is-active');
 
         // Set form action
-        $('#editMetadataForm').attr('action', `/admin/tutorials/${tutorialId}`);
+        $('#editTutorialForm').attr('action', `/admin/tutorials/${tutorialId}`);
 
         // Populate form fields
         $('#edit_role').val(role);
@@ -585,9 +809,169 @@ $(document).ready(function() {
         $('#edit_priority').val(priority);
         $('#edit_is_active').prop('checked', isActive == '1');
 
-        // Reinitialize tooltips in modal
-        const tooltips = document.querySelectorAll('#editMetadataModal [data-bs-toggle="tooltip"]');
-        tooltips.forEach(el => new bootstrap.Tooltip(el));
+        // Load steps will be handled in shown.bs.modal event
+    });
+
+    // Handle modal show event to ensure content is properly initialized
+    $('#editTutorialModal').on('shown.bs.modal', function() {
+        if (!currentTutorialId) return;
+
+        const stepsTemplate = document.getElementById(`steps-template-${currentTutorialId}`);
+        const stepsListEl = document.getElementById('editStepsList');
+        
+        if (!stepsListEl) {
+            console.error('editStepsList element not found');
+            return;
+        }
+        
+        // Always clear and reload content when modal is shown
+        stepsListEl.innerHTML = '';
+        
+        if (stepsTemplate && stepsTemplate.innerHTML && stepsTemplate.innerHTML.trim()) {
+            console.log('Loading template content for tutorial:', currentTutorialId);
+            
+            // Get the template HTML
+            const templateHTML = stepsTemplate.innerHTML;
+            
+            // Find the "Add Step" button and insert content before it
+            const addButton = document.getElementById('addEditStepBtn');
+            if (addButton) {
+                // Insert template content before the button
+                addButton.insertAdjacentHTML('beforebegin', templateHTML);
+            } else {
+                // If button doesn't exist, append to container
+                stepsListEl.insertAdjacentHTML('beforeend', templateHTML);
+            }
+            
+            // Verify content was inserted
+            const insertedSteps = stepsListEl.querySelectorAll('.step-item');
+            console.log('Steps inserted into DOM:', insertedSteps.length);
+            
+            // Ensure "Add Step" button exists
+            if (!document.getElementById('addEditStepBtn')) {
+                const addButton = document.createElement('button');
+                addButton.type = 'button';
+                addButton.className = 'btn btn-sm btn-success my-2';
+                addButton.id = 'addEditStepBtn';
+                addButton.setAttribute('onclick', 'addStep()');
+                addButton.innerHTML = '<i class="bi bi-plus"></i> Add Step';
+                stepsListEl.appendChild(addButton);
+            }
+            
+            // Reinitialize Alpine.js for the modal content - use setTimeout to ensure DOM is ready
+            setTimeout(() => {
+                if (typeof Alpine !== 'undefined' && Alpine.start) {
+                    // Get fresh reference to steps after insertion
+                    const freshSteps = stepsListEl.querySelectorAll('.step-item[x-data]');
+                    console.log('Found steps with x-data:', freshSteps.length);
+                    
+                    // Also reinitialize the entire modal tree first
+                    const modalElement = document.getElementById('editTutorialModal');
+                    if (modalElement) {
+                        Alpine.initTree(modalElement);
+                    }
+                    
+                    // Manually initialize Alpine.js on each step
+                    freshSteps.forEach((step, index) => {
+                        // Use Alpine.initTree to process this element
+                        try {
+                            // Clear any existing bindings first
+                            if (step._x_dataStack) {
+                                step._x_dataStack = [];
+                            }
+                            
+                            // Initialize Alpine on this step
+                            Alpine.initTree(step);
+                            
+                            // Wait a tick for Alpine to process
+                            if (Alpine.nextTick) {
+                                Alpine.nextTick(() => {
+                                    // Verify Alpine initialized
+                                    const hasAlpine = step._x_dataStack && step._x_dataStack.length > 0;
+                                    console.log(`Step ${index + 1} Alpine initialized:`, hasAlpine);
+                                    
+                                    // Open the first step programmatically
+                                    if (index === 0 && hasAlpine) {
+                                        const alpineData = step._x_dataStack[0];
+                                        if (alpineData && typeof alpineData.open !== 'undefined') {
+                                            alpineData.open = true;
+                                            console.log('First step opened programmatically');
+                                        }
+                                    }
+                                });
+                            } else {
+                                // Fallback if nextTick is not available
+                                setTimeout(() => {
+                                    const hasAlpine = step._x_dataStack && step._x_dataStack.length > 0;
+                                    console.log(`Step ${index + 1} Alpine initialized:`, hasAlpine);
+                                    
+                                    if (index === 0 && hasAlpine) {
+                                        const alpineData = step._x_dataStack[0];
+                                        if (alpineData && typeof alpineData.open !== 'undefined') {
+                                            alpineData.open = true;
+                                            console.log('First step opened programmatically');
+                                        }
+                                    }
+                                }, 10);
+                            }
+                        } catch (error) {
+                            console.error(`Error initializing Alpine for step ${index + 1}:`, error);
+                        }
+                    });
+                } else {
+                    console.warn('Alpine.js is not available or not ready');
+                }
+
+                // Reinitialize tooltips in modal
+                const tooltips = document.querySelectorAll('#editTutorialModal [data-bs-toggle="tooltip"]');
+                tooltips.forEach(el => {
+                    // Destroy existing tooltip if any
+                    const existingTooltip = bootstrap.Tooltip.getInstance(el);
+                    if (existingTooltip) {
+                        existingTooltip.dispose();
+                    }
+                    // Create new tooltip
+                    new bootstrap.Tooltip(el);
+                });
+                
+                // Fallback: Try clicking the first step's toggle button if it's still closed
+                const firstStep = stepsListEl.querySelector('.step-item');
+                if (firstStep) {
+                    setTimeout(() => {
+                        const cardBody = firstStep.querySelector('.card-body');
+                        if (cardBody && window.getComputedStyle(cardBody).display === 'none') {
+                            const toggleBtn = firstStep.querySelector('.btn-outline-secondary');
+                            if (toggleBtn) {
+                                toggleBtn.click();
+                            }
+                        }
+                    }, 100);
+                }
+            }, 100);
+        } else {
+            console.log('No template found or template is empty for tutorial:', currentTutorialId);
+            // Ensure "Add Step" button exists
+            if (!document.getElementById('addEditStepBtn')) {
+                const addButton = document.createElement('button');
+                addButton.type = 'button';
+                addButton.className = 'btn btn-sm btn-success my-2';
+                addButton.id = 'addEditStepBtn';
+                addButton.setAttribute('onclick', 'addStep()');
+                addButton.innerHTML = '<i class="bi bi-plus"></i> Add Step';
+                stepsListEl.appendChild(addButton);
+            }
+        }
+    });
+
+    // Clear tutorial ID when modal is hidden
+    $('#editTutorialModal').on('hidden.bs.modal', function() {
+        currentTutorialId = null;
+        // Clean up Alpine.js bindings if needed
+        const stepsList = document.getElementById('editStepsList');
+        if (stepsList) {
+            // Clear content to prevent stale Alpine.js bindings
+            stepsList.innerHTML = '';
+        }
     });
 });
 </script>

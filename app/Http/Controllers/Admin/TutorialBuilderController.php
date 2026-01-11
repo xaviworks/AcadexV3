@@ -316,4 +316,13 @@ class TutorialBuilderController extends Controller
         $status = $tutorial->is_active ? 'activated' : 'deactivated';
         return back()->with('success', "Tutorial {$status} successfully!");
     }
+
+    /**
+     * Return the step form template for dynamic addition.
+     */
+    public function getStepFormTemplate(Request $request)
+    {
+        $index = $request->query('index', 0); // Default to 0 if index is not provided
+        return view('admin.tutorials._step-form-template', ['index' => $index]);
+    }
 }
