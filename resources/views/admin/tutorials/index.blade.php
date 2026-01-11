@@ -108,6 +108,74 @@
         margin-bottom: 0.1rem !important;
         padding-bottom: 0 !important;
     }
+    
+    /* Table styling - less compact, more readable */
+    #tutorialsTable {
+        width: 100% !important;
+    }
+    
+    #tutorialsTable thead th {
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    #tutorialsTable tbody td {
+        padding: 0.875rem 1rem;
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+    
+    #tutorialsTable tbody tr {
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    #tutorialsTable tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    /* Ensure table is scrollable horizontally */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* DataTables wrapper styling */
+    .dataTables_wrapper {
+        width: 100%;
+    }
+    
+    .dataTables_wrapper .dataTables_filter {
+        display: none; /* Hide default search box */
+    }
+    
+    /* Role filter styling */
+    #roleFilter {
+        max-width: 200px;
+    }
+    
+    /* Ensure action buttons don't wrap */
+    #tutorialsTable tbody td:last-child {
+        white-space: nowrap;
+    }
+    
+    #tutorialsTable .btn-group {
+        flex-wrap: nowrap;
+    }
+    
+    /* Better spacing for table content */
+    #tutorialsTable td code {
+        font-size: 0.85rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    #tutorialsTable td .badge {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.65rem;
+    }
 </style>
 @endpush
 
@@ -124,20 +192,6 @@
             <i class="bi bi-plus-lg"></i> Create Tutorial
         </button>
     </div>
-
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     {{-- Info Card --}}
     <div class="card mb-2 border-0 shadow-sm" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
@@ -159,8 +213,23 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover" id="tutorialsTable">
+            {{-- Role Filter --}}
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label for="roleFilter" class="form-label small fw-semibold">Filter by Role:</label>
+                    <select id="roleFilter" class="form-select form-select-sm">
+                        <option value="">All Roles</option>
+                        <option value="admin">Admin</option>
+                        <option value="vpaa">VPAA</option>
+                        <option value="dean">Dean</option>
+                        <option value="chairperson">Chairperson</option>
+                        <option value="instructor">Instructor</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table class="table table-hover table-striped" id="tutorialsTable" style="min-width: 1200px;">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -204,10 +273,10 @@
                                     <span class="badge bg-dark">{{ $tutorial->priority }}</span>
                                 </td>
                                 <td>
-                                    <small>{{ $tutorial->creator->first_name }} {{ $tutorial->creator->last_name }}</small>
+                                    <span class="text-nowrap">{{ $tutorial->creator->first_name }} {{ $tutorial->creator->last_name }}</span>
                                 </td>
                                 <td>
-                                    <div class="btn-group" role="group">
+                                    <div class="btn-group" role="group" style="white-space: nowrap;">
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-primary edit-tutorial-btn"
                                                 data-id="{{ $tutorial->id }}"
@@ -223,41 +292,41 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         
-                                        <a href="{{ route('admin.tutorials.edit', $tutorial) }}" 
-                                           class="btn btn-sm btn-primary" 
-                                           title="Edit Tutorial & Steps">
-                                            <i class="bi bi-list-ol"></i>
-                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-{{ $tutorial->is_active ? 'warning' : 'success' }}" 
+                                                onclick="confirmToggleActive({{ $tutorial->id }}, {{ json_encode($tutorial->title) }}, {{ $tutorial->is_active ? 'true' : 'false' }})"
+                                                title="{{ $tutorial->is_active ? 'Deactivate' : 'Activate' }}">
+                                            <i class="bi bi-{{ $tutorial->is_active ? 'pause' : 'play' }}-circle"></i>
+                                        </button>
                                         
-                                        <form action="{{ route('admin.tutorials.toggle-active', $tutorial) }}" 
-                                              method="POST" 
-                                              class="d-inline">
-                                            @csrf
-                                            <button type="submit" 
-                                                    class="btn btn-sm btn-{{ $tutorial->is_active ? 'warning' : 'success' }}" 
-                                                    title="{{ $tutorial->is_active ? 'Deactivate' : 'Activate' }}">
-                                                <i class="bi bi-{{ $tutorial->is_active ? 'pause' : 'play' }}-circle"></i>
-                                            </button>
-                                        </form>
-                                        
-                                        <form action="{{ route('admin.tutorials.duplicate', $tutorial) }}" 
-                                              method="POST" 
-                                              class="d-inline">
-                                            @csrf
-                                            <button type="submit" 
-                                                    class="btn btn-sm btn-info" 
-                                                    title="Duplicate">
-                                                <i class="bi bi-files"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-info" 
+                                                onclick="confirmDuplicate({{ $tutorial->id }}, {{ json_encode($tutorial->title) }})"
+                                                title="Duplicate">
+                                            <i class="bi bi-files"></i>
+                                        </button>
                                         
                                         <button type="button" 
                                                 class="btn btn-sm btn-danger" 
-                                                onclick="confirmDelete({{ $tutorial->id }})"
+                                                onclick="confirmDelete({{ $tutorial->id }}, {{ json_encode($tutorial->title) }})"
                                                 title="Delete">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
+                                    
+                                    <form id="toggle-form-{{ $tutorial->id }}" 
+                                          action="{{ route('admin.tutorials.toggle-active', $tutorial) }}" 
+                                          method="POST" 
+                                          class="d-none">
+                                        @csrf
+                                    </form>
+                                    
+                                    <form id="duplicate-form-{{ $tutorial->id }}" 
+                                          action="{{ route('admin.tutorials.duplicate', $tutorial) }}" 
+                                          method="POST" 
+                                          class="d-none">
+                                        @csrf
+                                    </form>
                                     
                                     <form id="delete-form-{{ $tutorial->id }}" 
                                           action="{{ route('admin.tutorials.destroy', $tutorial) }}" 
@@ -302,6 +371,7 @@
             </div>
             <form action="{{ route('admin.tutorials.store') }}" method="POST" id="createTutorialForm">
                 @csrf
+                <input type="hidden" name="_modal" value="create">
                 <div class="modal-body">
                     <p class="text-muted small mb-4">
                         <i class="bi bi-info-circle me-1"></i>
@@ -437,6 +507,7 @@
             <form action="" method="POST" id="editTutorialForm">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="_modal" value="edit">
                 <div class="modal-body">
                     <p class="text-muted small mb-4">
                         <i class="bi bi-info-circle me-1"></i>
@@ -583,10 +654,90 @@
 
 @push('scripts')
 <script>
-function confirmDelete(tutorialId) {
-    if (confirm('Are you sure you want to delete this tutorial? This action cannot be undone.')) {
-        document.getElementById('delete-form-' + tutorialId).submit();
-    }
+// Toggle Active/Inactive confirmation
+function confirmToggleActive(tutorialId, tutorialTitle, isActive) {
+    const action = isActive ? 'deactivate' : 'activate';
+    const actionText = isActive ? 'Deactivate' : 'Activate';
+    
+    bootbox.confirm({
+        message: `<div class="text-center">
+                    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">${actionText} Tutorial</h5>
+                    <p class="text-muted">Are you sure you want to <strong>${action}</strong> the tutorial "<strong>${tutorialTitle}</strong>"?</p>
+                  </div>`,
+        buttons: {
+            confirm: {
+                label: `<i class="bi bi-${isActive ? 'pause' : 'play'}-circle me-1"></i> ${actionText}`,
+                className: isActive ? 'btn-warning' : 'btn-success'
+            },
+            cancel: {
+                label: '<i class="bi bi-x-lg me-1"></i> Cancel',
+                className: 'btn-secondary'
+            }
+        },
+        centerVertical: true,
+        callback: function(result) {
+            if (result) {
+                document.getElementById('toggle-form-' + tutorialId).submit();
+            }
+        }
+    });
+}
+
+// Duplicate confirmation
+function confirmDuplicate(tutorialId, tutorialTitle) {
+    bootbox.confirm({
+        message: `<div class="text-center">
+                    <i class="bi bi-files text-info" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Duplicate Tutorial</h5>
+                    <p class="text-muted">Are you sure you want to duplicate "<strong>${tutorialTitle}</strong>"?</p>
+                    <p class="text-muted small">This will create a copy of the tutorial with all its steps.</p>
+                  </div>`,
+        buttons: {
+            confirm: {
+                label: '<i class="bi bi-files me-1"></i> Duplicate',
+                className: 'btn-info'
+            },
+            cancel: {
+                label: '<i class="bi bi-x-lg me-1"></i> Cancel',
+                className: 'btn-secondary'
+            }
+        },
+        centerVertical: true,
+        callback: function(result) {
+            if (result) {
+                document.getElementById('duplicate-form-' + tutorialId).submit();
+            }
+        }
+    });
+}
+
+// Delete confirmation
+function confirmDelete(tutorialId, tutorialTitle) {
+    bootbox.confirm({
+        message: `<div class="text-center">
+                    <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Delete Tutorial</h5>
+                    <p class="text-muted">Are you sure you want to delete "<strong>${tutorialTitle}</strong>"?</p>
+                    <p class="text-danger small"><i class="bi bi-exclamation-triangle me-1"></i>This action cannot be undone. All tutorial steps will be permanently deleted.</p>
+                  </div>`,
+        buttons: {
+            confirm: {
+                label: '<i class="bi bi-trash me-1"></i> Delete',
+                className: 'btn-danger'
+            },
+            cancel: {
+                label: '<i class="bi bi-x-lg me-1"></i> Cancel',
+                className: 'btn-secondary'
+            }
+        },
+        centerVertical: true,
+        callback: function(result) {
+            if (result) {
+                document.getElementById('delete-form-' + tutorialId).submit();
+            }
+        }
+    });
 }
 
 function addStep() {
@@ -732,6 +883,34 @@ function addStep() {
 
 // Initialize DataTables and Tooltips
 $(document).ready(function() {
+    // Show success/error messages via Alpine notifications
+    @if(session('success'))
+        if (typeof Alpine !== 'undefined' && Alpine.store('notifications')) {
+            Alpine.store('notifications').success("{{ session('success') }}");
+        } else if (typeof window.notify !== 'undefined') {
+            window.notify.success("{{ session('success') }}");
+        }
+    @endif
+
+    @if(session('error'))
+        if (typeof Alpine !== 'undefined' && Alpine.store('notifications')) {
+            Alpine.store('notifications').error("{{ session('error') }}");
+        } else if (typeof window.notify !== 'undefined') {
+            window.notify.error("{{ session('error') }}");
+        }
+    @endif
+
+    // Handle form validation errors - reopen modal if errors exist
+    @if($errors->any() && !session('success'))
+        @if(old('_modal') === 'create')
+            const createModal = new bootstrap.Modal(document.getElementById('createTutorialModal'));
+            createModal.show();
+        @elseif(old('_modal') === 'edit')
+            const editModal = new bootstrap.Modal(document.getElementById('editTutorialModal'));
+            editModal.show();
+        @endif
+    @endif
+
     // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -740,44 +919,90 @@ $(document).ready(function() {
 
     // Initialize DataTables
     if (typeof $.fn.DataTable !== 'undefined') {
-        $('#tutorialsTable').DataTable({
+        const tutorialsTable = $('#tutorialsTable').DataTable({
             order: [[0, 'desc']],
             pageLength: 25,
-            responsive: true,
+            scrollX: true,
+            autoWidth: false,
             columnDefs: [
-                { orderable: false, targets: [8] } // Disable sorting on Actions column
+                { orderable: false, targets: [8] }, // Disable sorting on Actions column
+                { width: '80px', targets: [0] }, // ID
+                { width: '200px', targets: [1] }, // Title
+                { width: '100px', targets: [2] }, // Role
+                { width: '150px', targets: [3] }, // Page Identifier
+                { width: '100px', targets: [4] }, // Steps
+                { width: '120px', targets: [5] }, // Status
+                { width: '100px', targets: [6] }, // Priority
+                { width: '150px', targets: [7] }, // Created By
+                { width: '250px', targets: [8] }  // Actions
             ],
             language: {
-                search: "Search tutorials:",
+                search: "",
+                searchPlaceholder: "",
                 lengthMenu: "Show _MENU_ tutorials per page",
-                emptyTable: "No tutorials found. Create your first tutorial!"
-            }
+                emptyTable: "No tutorials found. Create your first tutorial!",
+                info: "Showing _START_ to _END_ of _TOTAL_ tutorials",
+                infoEmpty: "No tutorials available",
+                infoFiltered: "(filtered from _MAX_ total tutorials)"
+            },
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
+        });
+
+        // Role filter functionality
+        $('#roleFilter').on('change', function() {
+            const roleValue = this.value;
+            tutorialsTable.column(2).search(roleValue).draw(); // Filter by Role column (index 2)
         });
     }
 
     // Handle form validation errors - reopen modal if errors exist
     @if($errors->any() && !session('success'))
-        const createModal = new bootstrap.Modal(document.getElementById('createTutorialModal'));
-        createModal.show();
-        
-        // Repopulate form fields with old values
-        @if(old('role'))
-            document.getElementById('role').value = '{{ old('role') }}';
-        @endif
-        @if(old('page_identifier'))
-            document.getElementById('page_identifier').value = '{{ old('page_identifier') }}';
-        @endif
-        @if(old('title'))
-            document.getElementById('title').value = '{{ old('title') }}';
-        @endif
-        @if(old('description'))
-            document.getElementById('description').value = '{{ old('description') }}';
-        @endif
-        @if(old('priority'))
-            document.getElementById('priority').value = '{{ old('priority') }}';
-        @endif
-        @if(old('is_active'))
-            document.getElementById('is_active').checked = true;
+        @if(old('_modal') === 'create')
+            const createModal = new bootstrap.Modal(document.getElementById('createTutorialModal'));
+            createModal.show();
+            
+            // Repopulate form fields with old values
+            @if(old('role'))
+                document.getElementById('role').value = '{{ old('role') }}';
+            @endif
+            @if(old('page_identifier'))
+                document.getElementById('page_identifier').value = '{{ old('page_identifier') }}';
+            @endif
+            @if(old('title'))
+                document.getElementById('title').value = '{{ old('title') }}';
+            @endif
+            @if(old('description'))
+                document.getElementById('description').value = '{{ old('description') }}';
+            @endif
+            @if(old('priority'))
+                document.getElementById('priority').value = '{{ old('priority') }}';
+            @endif
+            @if(old('is_active'))
+                document.getElementById('is_active').checked = true;
+            @endif
+        @elseif(old('_modal') === 'edit')
+            const editModal = new bootstrap.Modal(document.getElementById('editTutorialModal'));
+            editModal.show();
+            
+            // Repopulate edit form fields with old values
+            @if(old('role'))
+                document.getElementById('edit_role').value = '{{ old('role') }}';
+            @endif
+            @if(old('page_identifier'))
+                document.getElementById('edit_page_identifier').value = '{{ old('page_identifier') }}';
+            @endif
+            @if(old('title'))
+                document.getElementById('edit_title').value = '{{ old('title') }}';
+            @endif
+            @if(old('description'))
+                document.getElementById('edit_description').value = '{{ old('description') }}';
+            @endif
+            @if(old('priority'))
+                document.getElementById('edit_priority').value = '{{ old('priority') }}';
+            @endif
+            @if(old('is_active'))
+                document.getElementById('edit_is_active').checked = true;
+            @endif
         @endif
     @endif
 
