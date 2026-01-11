@@ -700,51 +700,68 @@ function addStep(context = 'edit') {
             <div class="card-body py-2" x-show="open" x-transition>
                 <div class="row g-2 mb-2">
                     <div class="col-12">
-                        <label for="step-title-${newStepIndex}" class="form-label small fw-semibold mb-1">Step Title *</label>
-                        <input type="text" 
+                           <label for="step-title-${newStepIndex}" class="form-label small fw-semibold mb-1">
+                            Step Title <span class="text-muted">(What is this step about?)</span> *
+                           </label>
+                           <input type="text" 
                                class="form-control form-control-sm" 
                                id="step-title-${newStepIndex}" 
                                name="steps[${newStepIndex}][title]" 
-                               placeholder="e.g., Welcome to the Dashboard"
+                               placeholder="e.g., Click the 'Add' button"
                                required>
+                           <small class="text-muted">Describe what the user should do or learn in this step.</small>
                     </div>
                 </div>
                 <div class="row g-2 mb-2">
                     <div class="col-12">
-                        <label for="step-content-${newStepIndex}" class="form-label small fw-semibold mb-1">Step Content *</label>
+                        <label for="step-content-${newStepIndex}" class="form-label small fw-semibold mb-1">
+                            Step Instructions <span class="text-muted">(What should the user do?)</span> *
+                        </label>
                         <textarea class="form-control form-control-sm" 
                                   id="step-content-${newStepIndex}" 
                                   name="steps[${newStepIndex}][content]" 
                                   rows="2" 
-                                  placeholder="Describe what the user should learn in this step..."
+                                  placeholder="e.g., Click the green 'Add' button to create a new item."
                                   required></textarea>
+                        <small class="text-muted">Give clear, simple instructions for this step.</small>
                     </div>
                 </div>
                 <div class="row g-2 mb-2">
                     <div class="col-12">
                         <label for="step-target-${newStepIndex}" class="form-label small fw-semibold mb-1">
-                            Target Selector * 
+                            Where on the page? <span class="text-muted">(Pick or describe the part to highlight)</span> *
                             <i class="bi bi-question-circle" 
                                data-bs-toggle="tooltip" 
-                               title="CSS selector for the element to highlight (e.g., #myButton, .card-header)"></i>
+                               title="Click 'Pick Element' then click any part of the page to select it. Or describe it, e.g., 'Add button', 'Top menu', etc."></i>
                         </label>
                         <div class="input-group input-group-sm">
                             <input type="text" 
                                    class="form-control target-selector-input" 
                                    id="step-target-${newStepIndex}" 
                                    name="steps[${newStepIndex}][target_selector]" 
-                                   placeholder=".element-class, #element-id"
+                                   placeholder="Click 'Pick Element' or type a description..."
                                    required>
-                            <button type="button" class="btn btn-outline-secondary btn-sm pick-element-btn" data-step-index="${newStepIndex}">
-                                <i class="bi bi-cursor"></i> Pick
+                            <button type="button" class="btn btn-outline-success btn-sm pick-element-btn" data-step-index="${newStepIndex}">
+                                <i class="bi bi-cursor"></i> Pick Element
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm suggest-selector-btn" data-step-index="${newStepIndex}">
+                                <i class="bi bi-lightbulb"></i> Suggest
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm mock-user-view-btn" data-step-index="${newStepIndex}">
+                                <i class="bi bi-eye"></i> Mock User View
                             </button>
                         </div>
-                        <small class="text-muted small">Use comma-separated selectors for fallbacks</small>
+                        <small class="text-muted small">Click 'Pick Element' and then click any part of the page, or describe it in your own words.<br>
+                        <span class="text-info">Or use <b>Mock User View</b> to preview the user page, click an element, and paste the selector here.</span></small>
+                    $(document).on('click', '.mock-user-view-btn', function(e) {
+                        e.preventDefault();
+                        window.open('/mock-user-view', '_blank', 'width=1200,height=800');
+                    });
                     </div>
                 </div>
                 <div class="row g-2 mb-2">
                     <div class="col-md-4">
-                        <label for="step-position-${newStepIndex}" class="form-label small fw-semibold mb-1">Tooltip Position</label>
+                        <label for="step-position-${newStepIndex}" class="form-label small fw-semibold mb-1">Tooltip Position <span class="text-muted">(Where should the tip appear?)</span></label>
                         <select name="steps[${newStepIndex}][position]" class="form-select form-select-sm" id="step-position-${newStepIndex}">
                             <option value="top">Top</option>
                             <option value="bottom" selected>Bottom</option>
@@ -753,7 +770,7 @@ function addStep(context = 'edit') {
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label small fw-semibold mb-1">&nbsp;</label>
+                        <label class="form-label small fw-semibold mb-1">Optional Step?</label>
                         <div class="form-check mt-2">
                             <input type="hidden" name="steps[${newStepIndex}][is_optional]" value="0">
                             <input type="checkbox" 
@@ -765,7 +782,7 @@ function addStep(context = 'edit') {
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label small fw-semibold mb-1">&nbsp;</label>
+                        <label class="form-label small fw-semibold mb-1">Requires Data?</label>
                         <div class="form-check mt-2">
                             <input type="hidden" name="steps[${newStepIndex}][requires_data]" value="0">
                             <input type="checkbox" 
@@ -823,6 +840,120 @@ function addStep(context = 'edit') {
         });
     }
 }
+
+// --- User-friendly Pick Element logic ---
+document.addEventListener('click', function(e) {
+    if (window._pickingElement) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.target.classList.add('tutorial-pick-highlight');
+        setTimeout(() => e.target.classList.remove('tutorial-pick-highlight'), 1200);
+        const selector = getUniqueSelector(e.target);
+        if (window._pickingElementInput) {
+            window._pickingElementInput.value = selector;
+            window._pickingElementInput.dispatchEvent(new Event('input'));
+        }
+        window._pickingElement = false;
+        window._pickingElementInput = null;
+        document.body.style.cursor = '';
+    }
+}, true);
+
+function getUniqueSelector(el) {
+    if (!el) return '';
+    if (el.id) return '#' + el.id;
+    let path = '', parent;
+    while (el && el.nodeType === 1 && el.tagName.toLowerCase() !== 'body') {
+        let selector = el.tagName.toLowerCase();
+        if (el.className) selector += '.' + Array.from(el.classList).join('.');
+        parent = el.parentNode;
+        if (parent) {
+            let siblings = Array.from(parent.children).filter(child => child.tagName === el.tagName);
+            if (siblings.length > 1) selector += `:nth-child(${Array.from(parent.children).indexOf(el) + 1})`;
+        }
+        path = selector + (path ? ' > ' + path : '');
+        el = parent;
+    }
+    return path;
+}
+
+
+
+// In-page modal picker with iframe
+let $pickerModal = null;
+function showPickerModal(role, page, inputEl) {
+    // Remove if already exists
+    if ($pickerModal) $pickerModal.remove();
+    $pickerModal = $(
+        `<div class="modal fade" id="elementPickerModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width:1200px;width:1200px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pick Element (Live UI)</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0" style="height:800px;overflow:hidden;position:relative;">
+                        <iframe id="picker-iframe" src="/mock-user-pick/${encodeURIComponent(role)}/${encodeURIComponent(page)}" style="width:1715px;height:1143px;border:0;transform:scale(0.7);transform-origin:0 0;" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    );
+    $('body').append($pickerModal);
+    $pickerModal.modal('show');
+    window._pickingElementInput = inputEl;
+    $pickerModal.on('hidden.bs.modal', function() {
+        $pickerModal.remove();
+        $pickerModal = null;
+        window._pickingElementInput = null;
+    });
+}
+
+$(document).on('click', '.pick-element-btn', function(e) {
+    e.preventDefault();
+    let role = 'admin', page = 'dashboard';
+    const $modal = $(this).closest('.modal');
+    if ($modal.length) {
+        role = $modal.find('[name="role"]').val() || 'admin';
+        page = $modal.find('[name="page_identifier"]').val() || 'dashboard';
+        if (role === 'admin') page = 'dashboard';
+    }
+    const inputEl = $(this).closest('.input-group').find('input')[0];
+    showPickerModal(role, page, inputEl);
+});
+
+// Listen for selector from mock picker
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'tutorial-element-picked' && window._pickingElementInput) {
+        window._pickingElementInput.value = event.data.selector;
+        window._pickingElementInput.dispatchEvent(new Event('input'));
+        if ($pickerModal) $pickerModal.modal('hide');
+        window._pickingElementInput = null;
+    }
+});
+
+$(document).on('click', '.suggest-selector-btn', function(e) {
+    e.preventDefault();
+    const $input = $(this).closest('.input-group').find('input');
+    const suggestions = [
+        '#main-navbar', '.btn-success', '.card', '.table', '.sidebar', '.form-control', '.nav-link', '.dropdown-menu', '.modal-content', '.alert-success'
+    ];
+    let html = '<div class="list-group">';
+    suggestions.forEach(sel => {
+        html += `<button type="button" class="list-group-item list-group-item-action">${sel}</button>`;
+    });
+    html += '</div>';
+    bootbox.dialog({
+        title: 'Suggested Elements',
+        message: html,
+        size: 'small',
+        onEscape: true
+    });
+    $(document).one('click', '.list-group-item', function() {
+        $input.val($(this).text()).trigger('input');
+        bootbox.hideAll();
+    });
+});
 
 // Initialize DataTables and Tooltips
 $(document).ready(function() {

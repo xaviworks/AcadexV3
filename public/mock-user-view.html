@@ -1,0 +1,69 @@
+<!--
+    Minimal mock user view for picking selectors. Clicking any element copies its selector to clipboard and shows a message.
+    Route: /mock-user-view (add to web.php for demo)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mock User View</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .pick-highlight { outline: 2px solid #28a745 !important; background: #e6ffe6 !important; }
+        .mock-header { font-size: 1.2em; margin-bottom: 1em; color: #28a745; }
+        .mock-section { margin-bottom: 2em; }
+        .mock-btn { background: #28a745; color: #fff; border: none; padding: 0.5em 1em; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="mock-header">Mock User View (Click any element to copy its selector)</div>
+    <div class="mock-section">
+        <button class="mock-btn">Add</button>
+        <button class="mock-btn">Edit</button>
+        <button class="mock-btn">Delete</button>
+    </div>
+    <div class="mock-section">
+        <div class="mock-card" style="border:1px solid #ccc; padding:1em; border-radius:6px; margin-bottom:1em;">
+            <h4>Dashboard Card</h4>
+            <p>This is a sample card for demonstration.</p>
+        </div>
+        <div class="mock-card" style="border:1px solid #ccc; padding:1em; border-radius:6px;">
+            <h4>Another Card</h4>
+            <p>Click any part of this card to copy its selector.</p>
+        </div>
+    </div>
+    <div class="mock-section">
+        <input type="text" class="form-control" placeholder="Sample input field">
+        <a href="#" class="mock-btn">Sample Link</a>
+    </div>
+    <script>
+    function getUniqueSelector(el) {
+        if (!el) return '';
+        if (el.id) return '#' + el.id;
+        let path = '', parent;
+        while (el && el.nodeType === 1 && el.tagName.toLowerCase() !== 'body') {
+            let selector = el.tagName.toLowerCase();
+            if (el.className) selector += '.' + Array.from(el.classList).join('.');
+            parent = el.parentNode;
+            if (parent) {
+                let siblings = Array.from(parent.children).filter(child => child.tagName === el.tagName);
+                if (siblings.length > 1) selector += `:nth-child(${Array.from(parent.children).indexOf(el) + 1})`;
+            }
+            path = selector + (path ? ' > ' + path : '');
+            el = parent;
+        }
+        return path;
+    }
+    document.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.target.classList.add('pick-highlight');
+        setTimeout(() => e.target.classList.remove('pick-highlight'), 1200);
+        const selector = getUniqueSelector(e.target);
+        navigator.clipboard.writeText(selector).then(() => {
+            alert('Selector copied to clipboard!\n' + selector + '\n\nReturn to the tutorial modal and paste it.');
+        });
+    }, true);
+    </script>
+</body>
+</html>

@@ -29,17 +29,17 @@ class DefaultTutorialsSeeder extends Seeder
         $adminUser = User::where('role', 3)->first();
         
         if (!$adminUser) {
-            $this->command->error('❌ No admin user found. Please create an admin user first.');
+            $this->command->error('No admin user found. Please create an admin user first.');
             return;
         }
 
-        $this->command->info('🌱 Seeding default tutorials...');
+        $this->command->info('Seeding default tutorials...');
 
         DB::transaction(function () use ($adminUser) {
             // Admin Tutorials
             $this->seedAdminDashboard($adminUser);
             
-            $this->command->info('✅ Default tutorials seeded successfully!');
+            $this->command->info('Default tutorials seeded successfully!');
         });
     }
 

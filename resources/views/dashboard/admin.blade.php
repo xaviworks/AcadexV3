@@ -1,4 +1,14 @@
+
 @extends('layouts.app')
+
+@if(!empty($pickerMode))
+    @push('scripts')
+        <script>
+            window.pickerMode = true;
+        </script>
+        <script src="{{ asset('js/tutorial-element-picker.js') }}"></script>
+    @endpush
+@endif
 
 @section('content')
 <div class="container-fluid px-4 py-4">

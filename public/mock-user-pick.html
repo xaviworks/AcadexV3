@@ -1,0 +1,87 @@
+<!--
+    Dynamic mock user view for picking selectors with highlight and cross-window communication.
+    Usage: Opened by the Pick Element button. On hover, elements highlight. On click, selector is sent to opener and window closes.
+    Accepts ?role=admin&page=dashboard as query params for context (can be extended).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pick Element - Mock User View</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .pick-highlight { outline: 3px solid #28a745 !important; background: #e6ffe6 !important; cursor: pointer !important; }
+        .mock-header { font-size: 1.2em; margin-bottom: 1em; color: #28a745; }
+        .mock-section { margin-bottom: 2em; }
+        .mock-btn { background: #28a745; color: #fff; border: none; padding: 0.5em 1em; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="mock-header">Pick an element for your tutorial step (Role: <span id="role">admin</span>, Page: <span id="page">dashboard</span>)</div>
+    <div class="mock-section">
+        <button class="mock-btn">Add</button>
+        <button class="mock-btn">Edit</button>
+        <button class="mock-btn">Delete</button>
+    </div>
+    <div class="mock-section">
+        <div class="mock-card" style="border:1px solid #ccc; padding:1em; border-radius:6px; margin-bottom:1em;">
+            <h4>Dashboard Card</h4>
+            <p>This is a sample card for demonstration.</p>
+        </div>
+        <div class="mock-card" style="border:1px solid #ccc; padding:1em; border-radius:6px;">
+            <h4>Another Card</h4>
+            <p>Click any part of this card to select it.</p>
+        </div>
+    </div>
+    <div class="mock-section">
+        <input type="text" class="form-control" placeholder="Sample input field">
+        <a href="#" class="mock-btn">Sample Link</a>
+    </div>
+    <script>
+    // Get role/page from query params
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('role').textContent = params.get('role') || 'admin';
+    document.getElementById('page').textContent = params.get('page') || 'dashboard';
+
+    // Highlight on hover
+    document.body.addEventListener('mouseover', function(e) {
+        if (e.target === document.body) return;
+        e.target.classList.add('pick-highlight');
+    }, true);
+    document.body.addEventListener('mouseout', function(e) {
+        if (e.target === document.body) return;
+        e.target.classList.remove('pick-highlight');
+    }, true);
+
+    // Get unique selector
+    function getUniqueSelector(el) {
+        if (!el) return '';
+        if (el.id) return '#' + el.id;
+        let path = '', parent;
+        while (el && el.nodeType === 1 && el.tagName.toLowerCase() !== 'body') {
+            let selector = el.tagName.toLowerCase();
+            if (el.className) selector += '.' + Array.from(el.classList).join('.');
+            parent = el.parentNode;
+            if (parent) {
+                let siblings = Array.from(parent.children).filter(child => child.tagName === el.tagName);
+                if (siblings.length > 1) selector += `:nth-child(${Array.from(parent.children).indexOf(el) + 1})`;
+            }
+            path = selector + (path ? ' > ' + path : '');
+            el = parent;
+        }
+        return path;
+    }
+
+    // On click, send selector to opener and close
+    document.body.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.opener && e.target !== document.body) {
+            const selector = getUniqueSelector(e.target);
+            window.opener.postMessage({ type: 'tutorial-selector', selector }, '*');
+            window.close();
+        }
+    }, true);
+    </script>
+</body>
+</html>

@@ -1,4 +1,28 @@
+
 <?php
+// Mock user pick view for tutorial element selection (shows actual UI in picker mode)
+Route::get('/mock-user-pick/{role}/{page}', function ($role, $page) {
+    // Only support admin/dashboard for now
+    if ($role === 'admin' && $page === 'dashboard') {
+        // Demo data for dashboard.admin
+        $demo = [
+            'totalUsers' => 1234,
+            'loginCount' => 56,
+            'failedLoginCount' => 3,
+            'successfulData' => array_fill(0, 24, 2),
+            'failedData' => array_fill(0, 24, 0),
+            'monthlySuccessfulData' => array_fill(0, 12, 50),
+            'monthlyFailedData' => array_fill(0, 12, 2),
+            'selectedDate' => now()->toDateString(),
+            'selectedYear' => now()->year,
+            'yearRange' => range(now()->year, now()->year - 10),
+            // Picker mode flag
+            'pickerMode' => true,
+        ];
+        return view('dashboard.admin', $demo);
+    }
+    abort(404, 'Mock actual UI for this role/page not implemented');
+});
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
