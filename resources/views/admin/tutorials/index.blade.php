@@ -204,7 +204,6 @@
                 <li class="mb-0"><strong>Edit:</strong> Edit tutorial metadata using the modal form</li>
                 <li class="mb-0"><strong>Manage Steps:</strong> Use the full edit page to manage all tutorial steps</li>
                 <li class="mb-0"><strong>Test:</strong> Preview tutorial on target page before activating</li>
-                <li class="mb-0"><strong>Activate:</strong> Toggle status to make visible to users</li>
             </ul>
         </div>
     </div>
@@ -237,7 +236,6 @@
                             <th>Role</th>
                             <th>Page Identifier</th>
                             <th>Steps</th>
-                            <th>Status</th>
                             <th>Priority</th>
                             <th>Created By</th>
                             <th>Actions</th>
@@ -262,13 +260,7 @@
                                 <td>
                                     <span class="badge bg-secondary">{{ $tutorial->steps->count() }} steps</span>
                                 </td>
-                                <td>
-                                    @if($tutorial->is_active)
-                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Active</span>
-                                    @else
-                                        <span class="badge bg-warning"><i class="bi bi-pause-circle"></i> Inactive</span>
-                                    @endif
-                                </td>
+                                <!-- Status column removed as per request -->
                                 <td>
                                     <span class="badge bg-dark">{{ $tutorial->priority }}</span>
                                 </td>
@@ -285,19 +277,14 @@
                                                 data-title="{{ $tutorial->title }}"
                                                 data-description="{{ $tutorial->description }}"
                                                 data-priority="{{ $tutorial->priority }}"
-                                                data-is-active="{{ $tutorial->is_active ? '1' : '0' }}"
+                                                
                                                 title="Edit Tutorial Details"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#editTutorialModal">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         
-                                        <button type="button" 
-                                                class="btn btn-sm btn-{{ $tutorial->is_active ? 'warning' : 'success' }}" 
-                                                onclick="confirmToggleActive({{ $tutorial->id }}, {{ json_encode($tutorial->title) }}, {{ $tutorial->is_active ? 'true' : 'false' }})"
-                                                title="{{ $tutorial->is_active ? 'Deactivate' : 'Activate' }}">
-                                            <i class="bi bi-{{ $tutorial->is_active ? 'pause' : 'play' }}-circle"></i>
-                                        </button>
+
                                         
                                         <button type="button" 
                                                 class="btn btn-sm btn-info" 
@@ -314,10 +301,7 @@
                                         </button>
                                     </div>
                                     
-                                    <form id="toggle-form-{{ $tutorial->id }}" 
-                                          action="{{ route('admin.tutorials.toggle-active', $tutorial) }}" 
-                                          method="POST" 
-                                          class="d-none">
+
                                         @csrf
                                     </form>
                                     
@@ -339,7 +323,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center py-5">
+                                <td colspan="8" class="text-center py-5">
                                     <div class="text-muted">
                                         <i class="bi bi-inbox display-4 d-block mb-3"></i>
                                         <h5 class="mb-2">No Tutorials Yet</h5>
@@ -654,35 +638,7 @@
 
 @push('scripts')
 <script>
-// Toggle Active/Inactive confirmation
-function confirmToggleActive(tutorialId, tutorialTitle, isActive) {
-    const action = isActive ? 'deactivate' : 'activate';
-    const actionText = isActive ? 'Deactivate' : 'Activate';
-    
-    bootbox.confirm({
-        message: `<div class="text-center">
-                    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
-                    <h5 class="mt-3">${actionText} Tutorial</h5>
-                    <p class="text-muted">Are you sure you want to <strong>${action}</strong> the tutorial "<strong>${tutorialTitle}</strong>"?</p>
-                  </div>`,
-        buttons: {
-            confirm: {
-                label: `<i class="bi bi-${isActive ? 'pause' : 'play'}-circle me-1"></i> ${actionText}`,
-                className: isActive ? 'btn-warning' : 'btn-success'
-            },
-            cancel: {
-                label: '<i class="bi bi-x-lg me-1"></i> Cancel',
-                className: 'btn-secondary'
-            }
-        },
-        centerVertical: true,
-        callback: function(result) {
-            if (result) {
-                document.getElementById('toggle-form-' + tutorialId).submit();
-            }
-        }
-    });
-}
+
 
 // Duplicate confirmation
 function confirmDuplicate(tutorialId, tutorialTitle) {
@@ -925,16 +881,15 @@ $(document).ready(function() {
             scrollX: true,
             autoWidth: false,
             columnDefs: [
-                { orderable: false, targets: [8] }, // Disable sorting on Actions column
+                { orderable: false, targets: [7] }, // Disable sorting on Actions column
                 { width: '80px', targets: [0] }, // ID
                 { width: '200px', targets: [1] }, // Title
                 { width: '100px', targets: [2] }, // Role
                 { width: '150px', targets: [3] }, // Page Identifier
                 { width: '100px', targets: [4] }, // Steps
-                { width: '120px', targets: [5] }, // Status
-                { width: '100px', targets: [6] }, // Priority
-                { width: '150px', targets: [7] }, // Created By
-                { width: '250px', targets: [8] }  // Actions
+                { width: '100px', targets: [5] }, // Priority
+                { width: '150px', targets: [6] }, // Created By
+                { width: '250px', targets: [7] }  // Actions
             ],
             language: {
                 search: "",
@@ -1032,7 +987,7 @@ $(document).ready(function() {
         $('#edit_title').val(title);
         $('#edit_description').val(description);
         $('#edit_priority').val(priority);
-        $('#edit_is_active').prop('checked', isActive == '1');
+        // No is_active field anymore
 
         // Load steps will be handled in shown.bs.modal event
     });

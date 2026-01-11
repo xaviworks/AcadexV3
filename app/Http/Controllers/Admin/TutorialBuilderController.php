@@ -307,16 +307,6 @@ class TutorialBuilderController extends Controller
         }
     }
 
-    /**
-     * Toggle tutorial active status
-     */
-    public function toggleActive(Tutorial $tutorial)
-    {
-        $tutorial->update(['is_active' => !$tutorial->is_active]);
-        
-        $status = $tutorial->is_active ? 'activated' : 'deactivated';
-        return back()->with('success', "Tutorial {$status} successfully!");
-    }
 
     /**
      * Return the step form template for dynamic addition.

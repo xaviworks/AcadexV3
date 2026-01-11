@@ -14,13 +14,11 @@ class Tutorial extends Model
         'page_identifier',
         'title',
         'description',
-        'is_active',
         'priority',
         'created_by',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
         'priority' => 'integer',
     ];
 
