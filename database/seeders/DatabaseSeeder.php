@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CurriculumSeeder::class,
             GradesFormulaSeeder::class,
+            CourseOutcomeTemplateSeeder::class,
         ]);
     }
     

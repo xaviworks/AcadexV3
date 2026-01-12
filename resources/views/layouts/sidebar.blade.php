@@ -114,6 +114,26 @@
             </div>
 
             <div class="sidebar-section">
+                <h6 class="px-3 mb-2 sidebar-heading">Configuration</h6>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a href="{{ route('chairperson.co-templates.index') }}" 
+                           class="nav-link {{ request()->routeIs('chairperson.co-templates.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-file-earmark-text me-3"></i>
+                            <span>CO Templates</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('chairperson.batch-drafts.index') }}" 
+                           class="nav-link {{ request()->routeIs('chairperson.batch-drafts.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-folder-symlink me-3"></i>
+                            <span>Batch Drafts</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
                 <h6 class="px-3 mb-2 sidebar-heading">Courses</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">

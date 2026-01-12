@@ -218,6 +218,18 @@ class ChairpersonController extends Controller
             ->where('academic_period_id', $academicPeriodId)
             ->orderBy('subject_code')
             ->get();
+
+        // Check which subjects have batch drafts applied
+        $subjectsWithBatchDrafts = \App\Models\BatchDraftSubject::whereIn('subject_id', $subjects->pluck('id'))
+            ->where('configuration_applied', true)
+            ->pluck('subject_id')
+            ->toArray();
+
+        // Mark subjects that have batch drafts
+        $subjects = $subjects->map(function ($subject) use ($subjectsWithBatchDrafts) {
+            $subject->has_batch_draft = in_array($subject->id, $subjectsWithBatchDrafts);
+            return $subject;
+        });
             
         $instructors = User::where('role', 0)
             ->where('department_id', Auth::user()->department_id)
@@ -249,6 +261,17 @@ class ChairpersonController extends Controller
             ->where('course_id', '!=', 1) // Exclude General Education subjects
             ->where('academic_period_id', $academicPeriodId)
             ->firstOrFail();
+
+        // **NEW VALIDATION**: Check if subject has batch draft configuration applied
+        $hasBatchDraft = \App\Models\BatchDraftSubject::where('subject_id', $subject->id)
+            ->where('configuration_applied', true)
+            ->exists();
+
+        if (!$hasBatchDraft) {
+            return redirect()
+                ->back()
+                ->with('error', 'Cannot assign subject: This subject must have a batch draft configuration applied first. Please create and apply a batch draft before assigning to an instructor.');
+        }
             
         $instructor = User::where('id', $request->instructor_id)
             ->where('role', 0)

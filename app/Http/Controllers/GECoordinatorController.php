@@ -248,6 +248,18 @@ class GECoordinatorController extends Controller
             ->where('is_deleted', false)
             ->orderBy('subject_code')
             ->get();
+
+        // Check which subjects have batch drafts applied
+        $subjectsWithBatchDrafts = \App\Models\BatchDraftSubject::whereIn('subject_id', $subjects->pluck('id'))
+            ->where('configuration_applied', true)
+            ->pluck('subject_id')
+            ->toArray();
+
+        // Mark subjects that have batch drafts
+        $subjects = $subjects->map(function ($subject) use ($subjectsWithBatchDrafts) {
+            $subject->has_batch_draft = in_array($subject->id, $subjectsWithBatchDrafts);
+            return $subject;
+        });
             
         // Group subjects by year level for the view
         $yearLevels = [];

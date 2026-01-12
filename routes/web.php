@@ -159,6 +159,31 @@ Route::prefix('chairperson')
         // AJAX endpoint for course outcomes by subject and term (use GradeController)
         Route::get('/course-outcomes', [GradeController::class, 'ajaxCourseOutcomes'])->name('course-outcomes.ajax');
 
+        // Course Outcome Templates
+        Route::prefix('co-templates')->name('co-templates.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Chairperson\CourseOutcomeTemplateController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Chairperson\CourseOutcomeTemplateController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Chairperson\CourseOutcomeTemplateController::class, 'store'])->name('store');
+            Route::get('/{coTemplate}', [\App\Http\Controllers\Chairperson\CourseOutcomeTemplateController::class, 'show'])->name('show');
+            Route::get('/{coTemplate}/edit', [\App\Http\Controllers\Chairperson\CourseOutcomeTemplateController::class, 'edit'])->name('edit');
+            Route::put('/{coTemplate}', [\App\Http\Controllers\Chairperson\CourseOutcomeTemplateController::class, 'update'])->name('update');
+            Route::delete('/{coTemplate}', [\App\Http\Controllers\Chairperson\CourseOutcomeTemplateController::class, 'destroy'])->name('destroy');
+            Route::post('/{coTemplate}/toggle-status', [\App\Http\Controllers\Chairperson\CourseOutcomeTemplateController::class, 'toggleStatus'])->name('toggle-status');
+        });
+
+        // Batch Drafts
+        Route::prefix('batch-drafts')->name('batch-drafts.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'store'])->name('store');
+            Route::get('/{batchDraft}', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'show'])->name('show');
+            Route::get('/{batchDraft}/edit', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'edit'])->name('edit');
+            Route::put('/{batchDraft}', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'update'])->name('update');
+            Route::delete('/{batchDraft}', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'destroy'])->name('destroy');
+            Route::post('/{batchDraft}/attach-subjects', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'attachSubjects'])->name('attach-subjects');
+            Route::post('/{batchDraft}/apply-configuration', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'applyConfiguration'])->name('apply-configuration');
+        });
+
         Route::get('/approvals', [AccountApprovalController::class, 'index'])->name('accounts.index');
         Route::post('/approvals/{id}/approve', [AccountApprovalController::class, 'approve'])->name('accounts.approve');
         Route::post('/approvals/{id}/reject', [AccountApprovalController::class, 'reject'])->name('accounts.reject');

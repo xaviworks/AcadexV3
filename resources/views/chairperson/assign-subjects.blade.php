@@ -50,6 +50,26 @@
         </script>
     @endif
 
+    <!-- Batch Draft Info Alert -->
+    <div class="alert alert-info d-flex align-items-start shadow-sm mb-4" role="alert">
+        <i class="bi bi-info-circle-fill me-3 fs-5 mt-1"></i>
+        <div>
+            <h6 class="alert-heading fw-bold mb-2">Batch Draft Configuration Required</h6>
+            <p class="mb-2">
+                Before assigning subjects to instructors, you must first create a <strong>Batch Draft</strong> 
+                and apply the configuration. This ensures students and course outcomes are properly imported.
+            </p>
+            <p class="mb-0">
+                <i class="bi bi-check-circle text-success me-1"></i> <strong>Configured:</strong> Subject has batch draft applied and ready for assignment<br>
+                <i class="bi bi-exclamation-triangle text-warning me-1"></i> <strong>Required:</strong> Subject needs batch draft configuration before assignment
+            </p>
+            <hr class="my-2">
+            <a href="{{ route('chairperson.batch-drafts.index') }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-folder-symlink me-1"></i>Manage Batch Drafts
+            </a>
+        </div>
+    </div>
+
     <!-- YEAR VIEW (Tabbed) -->
     <div id="yearView">
         <!-- Year Level Tabs -->
@@ -87,6 +107,7 @@
                                     <th>Course Code</th>
                                     <th>Description</th>
                                     <th>Assigned Instructor</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -97,6 +118,17 @@
                                             <td>{{ $subject->subject_description }}</td>
                                             <td>{{ $subject->instructor ? $subject->instructor->name : '—' }}</td>
                                             <td class="text-center">
+                                                @if($subject->has_batch_draft ?? false)
+                                                    <span class="badge bg-success" title="Batch draft configuration applied">
+                                                        <i class="bi bi-check-circle me-1"></i>Configured
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-warning text-dark" title="No batch draft applied">
+                                                        <i class="bi bi-exclamation-triangle me-1"></i>Required
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
                                                 @if ($subject->instructor)
                                                     <button
                                                         onclick="openConfirmUnassignModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}')"
@@ -104,11 +136,20 @@
                                                         <i class="bi bi-x-circle me-1"></i> Unassign
                                                     </button>
                                                 @else
-                                                    <button
-                                                        onclick="openConfirmAssignModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}')"
-                                                        class="btn btn-success shadow-sm btn-sm">
-                                                        <i class="bi bi-person-plus me-1"></i> Assign
-                                                    </button>
+                                                    @if($subject->has_batch_draft ?? false)
+                                                        <button
+                                                            onclick="openConfirmAssignModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}')"
+                                                            class="btn btn-success shadow-sm btn-sm">
+                                                            <i class="bi bi-person-plus me-1"></i> Assign
+                                                        </button>
+                                                    @else
+                                                        <button
+                                                            class="btn btn-secondary btn-sm"
+                                                            disabled
+                                                            title="Batch draft configuration required before assignment">
+                                                            <i class="bi bi-lock me-1"></i> Locked
+                                                        </button>
+                                                    @endif
                                                 @endif
                                             </td>
                                         </tr>
@@ -154,6 +195,7 @@
                                                 <th class="border-0 py-3">Course Code</th>
                                                 <th class="border-0 py-3">Description</th>
                                                 <th class="border-0 py-3">Assigned Instructor</th>
+                                                <th class="border-0 py-3 text-center">Status</th>
                                                 <th class="border-0 py-3 text-center">Action</th>
                                             </tr>
                                         </thead>
@@ -173,6 +215,17 @@
                                                         @endif
                                                     </td>
                                                     <td class="text-center">
+                                                        @if($subject->has_batch_draft ?? false)
+                                                            <span class="badge bg-success-subtle text-success" title="Batch draft configuration applied">
+                                                                <i class="bi bi-check-circle-fill me-1"></i>Configured
+                                                            </span>
+                                                        @else
+                                                            <span class="badge bg-warning-subtle text-warning" title="No batch draft applied">
+                                                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Required
+                                                            </span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
                                                         @if ($subject->instructor)
                                                             <button
                                                                 onclick="openConfirmUnassignModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}')"
@@ -181,12 +234,21 @@
                                                                 <i class="bi bi-x-circle me-1"></i> Unassign
                                                             </button>
                                                         @else
-                                                            <button
-                                                                onclick="openConfirmAssignModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}')"
-                                                                class="btn btn-success shadow-sm btn-sm" 
-                                                                title="Assign Instructor">
-                                                                <i class="bi bi-person-plus me-1"></i> Assign
-                                                            </button>
+                                                            @if($subject->has_batch_draft ?? false)
+                                                                <button
+                                                                    onclick="openConfirmAssignModal({{ $subject->id }}, '{{ addslashes($subject->subject_code . ' - ' . $subject->subject_description) }}')"
+                                                                    class="btn btn-success shadow-sm btn-sm" 
+                                                                    title="Assign Instructor">
+                                                                    <i class="bi bi-person-plus me-1"></i> Assign
+                                                                </button>
+                                                            @else
+                                                                <button
+                                                                    class="btn btn-outline-secondary btn-sm"
+                                                                    disabled
+                                                                    title="Batch draft configuration required before assignment">
+                                                                    <i class="bi bi-lock-fill me-1"></i> Locked
+                                                                </button>
+                                                            @endif
                                                         @endif
                                                     </td>
                                                 </tr>
