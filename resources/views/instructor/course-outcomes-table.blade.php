@@ -15,26 +15,6 @@
         </ol>
     </nav>
 
-    {{-- Current Academic Period Display --}}
-    @if(isset($currentPeriod))
-    <div class="alert alert-info mb-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <strong><i class="bi bi-calendar-check me-2"></i>Current Academic Period:</strong>
-                <span class="badge bg-primary ms-2">{{ $currentPeriod->academic_year }} - {{ $currentPeriod->semester }}</span>
-                @if(Auth::user()->role === 1 && Auth::user()->course)
-                    <span class="badge bg-success ms-2">{{ Auth::user()->course->course_code }} Program</span>
-                @endif
-            </div>
-            @if(isset($subjects) && count($subjects) > 0)
-            <div>
-                <span class="badge bg-success">{{ count($subjects) }} total subject(s) in program</span>
-            </div>
-            @endif
-        </div>
-    </div>
-    @endif
-
     {{-- Page Title --}}
     @if(isset($selectedSubject))
         <div class="mb-4">

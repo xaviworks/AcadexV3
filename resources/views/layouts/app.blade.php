@@ -505,7 +505,7 @@
             ].join(';');
 
             console.log('%cACADEX', titleStyle);
-            console.log('%cOutcome-based education intelligence platform', subtitleStyle);
+            console.log('%cAn Outcome-based automated grading system', subtitleStyle);
         })();
     </script>
 
