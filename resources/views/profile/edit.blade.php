@@ -57,6 +57,10 @@
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
+            <form id="send-verification" method="post" action="{{ route('verification.send') }}" class="hidden">
+                @csrf
+            </form>
+
             <!-- Two-step form: Step 1 Profile Info, Step 2 Password Update -->
             <div x-data="{
                 step: 1,
