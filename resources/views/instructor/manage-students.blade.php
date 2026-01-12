@@ -228,7 +228,6 @@
                                         <div class="col-md-4">
                                             <button type="button" 
                                                     class="btn btn-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2" 
-                                                    onclick="runCrossCheck()"
                                                     id="crossCheckBtn"
                                                     style="height: 31px;">
                                                 <i class="bi bi-search"></i>

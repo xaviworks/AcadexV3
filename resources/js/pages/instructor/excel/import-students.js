@@ -107,6 +107,10 @@ export function filterList(selected) {
   hideCheckboxes(); // Hide checkboxes when changing list
   const url = new URL(window.location.href);
   url.searchParams.set('list_name', selected);
+  // Preserve tab=import if we're on the manage-students page with tabs
+  if (document.getElementById('studentTabs')) {
+    url.searchParams.set('tab', 'import');
+  }
   window.location.href = url.toString();
 }
 
@@ -387,6 +391,10 @@ export function initImportStudentsPage() {
       hideCheckboxes(); // Hide checkboxes when changing subject
       const url = new URL(window.location.href);
       url.searchParams.set('compare_subject_id', this.value);
+      // Preserve tab=import if we're on the manage-students page with tabs
+      if (document.getElementById('studentTabs')) {
+        url.searchParams.set('tab', 'import');
+      }
       window.location.href = url.toString();
     });
   }
@@ -463,11 +471,27 @@ export function initImportStudentsPage() {
         return;
       }
 
-      // Set the selected student IDs and submit
+      // Set the selected student IDs
       const selectedStudentIds = document.getElementById('selectedStudentIds');
       if (selectedStudentIds) {
         selectedStudentIds.value = selected.join(',');
       }
+
+      // Hide the modal and remove backdrop before submitting
+      const modalEl = document.getElementById('confirmModal');
+      if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const bsModal = bootstrap.Modal.getInstance(modalEl);
+        if (bsModal) {
+          bsModal.hide();
+        }
+      }
+      // Remove any remaining backdrop elements
+      document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('padding-right');
+
+      // Submit the form
       this.submit();
     });
   }
@@ -538,15 +562,11 @@ export function initImportStudentsPage() {
         }
       }
 
-      // Show the modal programmatically
-      if (typeof window.modal !== 'undefined' && window.modal.open) {
-        window.modal.open('confirmModal');
-      } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modalEl = document.getElementById('confirmModal');
-        if (modalEl) {
-          const bsModal = new bootstrap.Modal(modalEl);
-          bsModal.show();
-        }
+      // Show the modal using Bootstrap
+      const modalEl = document.getElementById('confirmModal');
+      if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const bsModal = new bootstrap.Modal(modalEl);
+        bsModal.show();
       }
     });
   }
@@ -595,8 +615,15 @@ export function initImportStudentsPage() {
 }
 
 // Auto-initialize when DOM is ready
+// Only initialize on the standalone import-students page, NOT on the tabbed manage-students page
+// The manage-students.js handles initialization for the tabbed version
 document.addEventListener('DOMContentLoaded', function () {
-  if (document.getElementById('uploadForm') || document.getElementById('crossCheckBtn')) {
+  const hasUploadForm = document.getElementById('uploadForm');
+  const hasCrossCheckBtn = document.getElementById('crossCheckBtn');
+  const isTabbed = document.getElementById('studentTabs');
+  
+  // Only init if we have the import elements AND we're NOT on the tabbed manage-students page
+  if ((hasUploadForm || hasCrossCheckBtn) && !isTabbed) {
     initImportStudentsPage();
   }
 });
