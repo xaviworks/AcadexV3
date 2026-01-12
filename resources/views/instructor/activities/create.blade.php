@@ -260,28 +260,32 @@
                       $mainLabel = \App\Support\Grades\FormulaStructure::formatLabel($groupKey);
                       $mainOverall = $children->sum('weight_percent');
                       $mainLeaf = $structureDetails->firstWhere('activity_type', $groupKey);
+                      // Only show header row if there are nested children (activity types with dots)
+                      $hasNestedChildren = $children->contains(fn($c) => $c['activity_type'] !== $groupKey);
                     @endphp
-                    <tr class="border-bottom bg-white">
-                      <td class="px-3 py-3">
-                        <div class="fw-semibold" style="color: #212529;">{{ $mainLabel }}</div>
-                        <div class="text-muted small">{{ $mainLeaf ? $mainLeaf['activity_type'] : '' }}</div>
-                      </td>
-                      <td class="text-center px-3 py-3">
-                        <div class="fw-semibold" style="color: #198754;">-</div>
-                        <div class="text-muted small">Overall {{ number_format($mainOverall, 1) }}% ({{ number_format($mainOverall / 100, 2) }})</div>
-                      </td>
-                      <td class="text-center px-3 py-3">
-                        <span class="badge bg-light text-dark">
-                          {{ $mainLeaf && $mainLeaf['max_assessments'] ? $mainLeaf['max_assessments'] : '∞' }}
-                        </span>
-                      </td>
-                      @foreach ($termLabels as $termKey => $termLabel)
-                        <td class="text-center px-3 py-3">-</td>
-                      @endforeach
-                    </tr>
+                    @if ($hasNestedChildren)
+                      <tr class="border-bottom bg-white">
+                        <td class="px-3 py-3">
+                          <div class="fw-semibold" style="color: #212529;">{{ $mainLabel }}</div>
+                          <div class="text-muted small">{{ $mainLeaf ? $mainLeaf['activity_type'] : '' }}</div>
+                        </td>
+                        <td class="text-center px-3 py-3">
+                          <div class="fw-semibold" style="color: #198754;">-</div>
+                          <div class="text-muted small">Overall {{ number_format($mainOverall, 1) }}% ({{ number_format($mainOverall / 100, 2) }})</div>
+                        </td>
+                        <td class="text-center px-3 py-3">
+                          <span class="badge bg-light text-dark">
+                            {{ $mainLeaf && $mainLeaf['max_assessments'] ? $mainLeaf['max_assessments'] : '∞' }}
+                          </span>
+                        </td>
+                        @foreach ($termLabels as $termKey => $termLabel)
+                          <td class="text-center px-3 py-3">-</td>
+                        @endforeach
+                      </tr>
+                    @endif
                     @foreach ($children as $detail)
                       <tr class="border-bottom">
-                        <td class="px-3 py-3 ps-4">
+                        <td class="px-3 py-3 {{ $hasNestedChildren ? 'ps-4' : '' }}">
                           <div class="fw-semibold" style="color: #212529;">{{ $detail['label'] }}</div>
                           <div class="text-muted small">{{ $detail['activity_type'] }}</div>
                         </td>
@@ -504,6 +508,7 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <form method="POST" action="{{ route('instructor.activities.store') }}" class="modal-content border-0 shadow-lg needs-validation" novalidate>
           @csrf
+          <input type="hidden" name="create_single" value="1">
           <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #198754, #20c997);">
             <h5 class="modal-title fw-bold text-white" id="createActivityModalLabel">
               <i class="bi bi-plus-circle me-2"></i>Create New Activity

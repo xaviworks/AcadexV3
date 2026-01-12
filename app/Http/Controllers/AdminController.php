@@ -362,9 +362,23 @@ class AdminController extends Controller
 
         $request = request();
 
-        // Always show the main grades formula page, no longer require period selection
+        // Check if academic period has been selected
+        $hasAcademicPeriodSelected = $request->filled('academic_period_id');
+
+        // If no academic period selected, show the period selection page
+        if (! $hasAcademicPeriodSelected) {
+            $academicPeriods = AcademicPeriod::orderBy('academic_year', 'desc')
+                ->orderBy('semester')
+                ->get();
+
+            return view('admin.grades-formula-select-period', [
+                'academicPeriods' => $academicPeriods,
+            ]);
+        }
+
+        // Academic period selected, proceed with the main grades formula page
         $periodContext = $this->resolveFormulaPeriodContext();
-            $selectedSemester = $periodContext['semester'] ?? null;
+        $selectedSemester = $periodContext['semester'] ?? null;
         $selectedAcademicPeriodId = $periodContext['academic_period_id'];
         $selectedAcademicYear = $periodContext['academic_year'];
         $academicPeriods = $periodContext['academic_periods'];

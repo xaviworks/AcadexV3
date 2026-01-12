@@ -241,7 +241,7 @@ class CurriculumController extends Controller
             'subject_ids' => 'required|array',
         ]);
 
-        $curriculum = Curriculum::findOrFail($request->curriculum_id);
+        $curriculum = Curriculum::with('course')->findOrFail($request->curriculum_id);
 
         // If user is chairperson, verify they can confirm subjects for this curriculum
         if (Auth::user()->role === 1 && $curriculum->course_id !== Auth::user()->course_id) {
@@ -251,6 +251,9 @@ class CurriculumController extends Controller
         $subjects = CurriculumSubject::where('curriculum_id', $request->curriculum_id)
             ->whereIn('id', $request->subject_ids)
             ->get();
+
+        // Get the course's department for proper formula inheritance
+        $courseDepartmentId = $curriculum->course?->department_id;
 
         foreach ($subjects as $curriculumSubject) {
             // For GE subjects, set the department to GE
@@ -264,9 +267,11 @@ class CurriculumController extends Controller
                    stripos($curriculumSubject->subject_description, 'Philippine History') !== false ||
                    stripos($curriculumSubject->subject_description, 'Mathematics in the Modern World') !== false;
             
+            // Use GE department for universal subjects, otherwise use the course's department
+            // This ensures proper formula inheritance from the department level
             $departmentId = $isGE ? 
-                Department::where('department_code', 'GE')->first()->id : 
-                Auth::user()->department_id;
+                Department::where('department_code', 'GE')->first()?->id : 
+                $courseDepartmentId;
 
             Subject::firstOrCreate([
                 'subject_code' => $curriculumSubject->subject_code,
