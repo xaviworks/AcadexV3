@@ -37,39 +37,45 @@ class ProfileController extends Controller
 
         $user->fill($request->validated());
 
-        $passwordChanged = false;
-
-        if ($request->filled('password')) {
-            $validatedPassword = $request->validateWithBag('updatePassword', [
-                'current_password' => ['required', 'current_password'],
-                'password' => ['required', Password::defaults(), 'confirmed'],
-            ]);
-
-            $user->password = Hash::make($validatedPassword['password']);
-            $passwordChanged = true;
-        }
-
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
         $user->save();
 
-        if ($passwordChanged) {
-            NotificationService::notifySecurityAlert(
-                SecurityAlert::TYPE_PASSWORD_CHANGED,
-                $user,
-                null,
-                [
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]
-            );
-        }
+        return Redirect::route('profile.edit')->with(
+            'success',
+            'Profile updated successfully!'
+        );
+    }
+
+    /**
+     * Update the user's password.
+     */
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validateWithBag('updatePassword', [
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', Password::defaults(), 'confirmed'],
+        ]);
+
+        $user = $request->user();
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        NotificationService::notifySecurityAlert(
+            SecurityAlert::TYPE_PASSWORD_CHANGED,
+            $user,
+            null,
+            [
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]
+        );
 
         return Redirect::route('profile.edit')->with(
-            'status',
-            $passwordChanged ? 'profile-and-password-updated' : 'profile-updated'
+            'success',
+            'Password updated successfully!'
         );
     }
 
