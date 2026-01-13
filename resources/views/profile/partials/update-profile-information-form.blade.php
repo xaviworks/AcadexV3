@@ -8,14 +8,7 @@
         </p>
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
-
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
-        @csrf
-        @method('patch')
-
+    <div class="mt-6 space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
             <div>
                 <x-input-label for="first_name" :value="__('First Name')" />
@@ -78,9 +71,5 @@
                 </div>
             @endif
         </div>
-
-        <div class="flex items-center gap-4 mt-4">
-                {{-- Save button removed; confirmation only on second part (password update) --}}
-        </div>
-    </form>
+    </div>
 </section>

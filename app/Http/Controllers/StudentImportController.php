@@ -140,7 +140,7 @@ public function upload(Request $request)
             ->whereIn('id', $selectedIds)
             ->update(['is_confirmed' => true]);
 
-        return redirect()->route('instructor.students.index', ['tab' => 'import'])->with('status', '✅ Selected students successfully imported to the selected subject.');
+        return redirect()->route('instructor.students.index', ['tab' => 'import'])->with('status', 'Selected students successfully imported to the selected subject.');
     }
     
 

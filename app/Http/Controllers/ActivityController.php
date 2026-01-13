@@ -92,11 +92,7 @@ class ActivityController extends Controller
                 $selectedSubjectPeriodId,
             );
 
-            $componentSnapshot = $this->buildComponentAlignmentSnapshot($selectedSubject, $termLabels);
-            $structureDetails = $componentSnapshot['structure_details'];
-            $componentStatuses = $componentSnapshot['terms'];
-            $alignmentSummary = $componentSnapshot['alignment_summary'];
-
+            // Auto-create default activities if none exist (must be done BEFORE building snapshot)
             $existingCount = Activity::where('subject_id', $selectedSubject->id)
                 ->where('is_deleted', false)
                 ->count();
@@ -106,6 +102,12 @@ class ActivityController extends Controller
                     $this->getOrCreateDefaultActivities($selectedSubject->id, $termName);
                 }
             }
+
+            // Build component alignment snapshot AFTER auto-creating activities
+            $componentSnapshot = $this->buildComponentAlignmentSnapshot($selectedSubject, $termLabels);
+            $structureDetails = $componentSnapshot['structure_details'];
+            $componentStatuses = $componentSnapshot['terms'];
+            $alignmentSummary = $componentSnapshot['alignment_summary'];
 
             $activities = Activity::where('subject_id', $selectedSubject->id)
                 ->where('is_deleted', false)

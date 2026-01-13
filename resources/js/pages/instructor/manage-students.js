@@ -559,6 +559,9 @@ function initManageStudentsPage() {
     updateImportButtonState();
   });
 
+  // Cross-check button click handler
+  document.getElementById('crossCheckBtn')?.addEventListener('click', runCrossCheck);
+
   // Confirm form submission handling
   document.getElementById('confirmForm')?.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -580,6 +583,21 @@ function initManageStudentsPage() {
     if (selectedStudentIds) {
       selectedStudentIds.value = selected.join(',');
     }
+
+    // Hide the modal and remove backdrop before submitting
+    const modalEl = document.getElementById('confirmModal');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      const bsModal = bootstrap.Modal.getInstance(modalEl);
+      if (bsModal) {
+        bsModal.hide();
+      }
+    }
+    // Remove any remaining backdrop elements
+    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+
     this.submit();
   });
 
@@ -640,15 +658,11 @@ function initManageStudentsPage() {
       }
     }
 
-    // Show the modal
-    if (typeof window.modal !== 'undefined') {
-      window.modal.open('confirmModal');
-    } else {
-      const modalEl = document.getElementById('confirmModal');
-      if (modalEl) {
-        const bsModal = new bootstrap.Modal(modalEl);
-        bsModal.show();
-      }
+    // Show the modal using Bootstrap
+    const modalEl = document.getElementById('confirmModal');
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      const bsModal = new bootstrap.Modal(modalEl);
+      bsModal.show();
     }
   });
 
