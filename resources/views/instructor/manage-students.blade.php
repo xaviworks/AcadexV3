@@ -115,20 +115,21 @@
 
                 <div class="row">
                     <div class="col-12">
+
                         @if(session('status'))
-                            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-                                {{ session('status') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    window.notify?.success(@json(session('status')));
+                                });
+                            </script>
                         @endif
 
                         @if($errors->any())
-                            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-                                @foreach($errors->all() as $error)
-                                    <div>{{ $error }}</div>
-                                @endforeach
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    window.notify?.error(@json($errors->first()));
+                                });
+                            </script>
                         @endif
 
                         <!-- Main Card Container -->

@@ -1,3 +1,23 @@
+@if(session('status'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let msg = '';
+            switch (@json(session('status'))) {
+                case 'profile-updated':
+                    msg = 'Profile updated successfully!';
+                    break;
+                case 'profile-and-password-updated':
+                    msg = 'Profile and password updated successfully!';
+                    break;
+                default:
+                    msg = @json(session('status'));
+            }
+            if (typeof notify !== 'undefined') {
+                notify.success(msg);
+            }
+        });
+    </script>
+@endif
 @extends('layouts.app')
 
 @section('header')
