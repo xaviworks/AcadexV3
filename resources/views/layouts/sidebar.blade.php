@@ -123,12 +123,44 @@
                             <span>CO Templates</span>
                         </a>
                     </li>
+                    
+                    <!-- Batch Drafts with Submenu -->
                     <li class="nav-item">
-                        <a href="{{ route('chairperson.batch-drafts.index') }}" 
-                           class="nav-link {{ request()->routeIs('chairperson.batch-drafts.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-folder-symlink me-3"></i>
-                            <span>Batch Drafts</span>
+                        <a href="#batchDraftsSubmenu" 
+                           data-bs-toggle="collapse"
+                           class="nav-link {{ request()->routeIs('chairperson.batch-drafts.*') ? 'active' : '' }} d-flex align-items-center justify-content-between sidebar-link"
+                           aria-expanded="{{ request()->routeIs('chairperson.batch-drafts.*') ? 'true' : 'false' }}">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-folder-symlink me-3"></i>
+                                <span>Batch Drafts</span>
+                            </div>
+                            <i class="bi bi-chevron-down small"></i>
                         </a>
+                        <div class="collapse {{ request()->routeIs('chairperson.batch-drafts.*') ? 'show' : '' }}" id="batchDraftsSubmenu">
+                            <ul class="nav flex-column ps-4">
+                                <li class="nav-item">
+                                    <a href="{{ route('chairperson.batch-drafts.index') }}" 
+                                       class="nav-link {{ request()->routeIs('chairperson.batch-drafts.index') || request()->routeIs('chairperson.batch-drafts.show') ? 'active' : '' }} d-flex align-items-center sidebar-link-sub">
+                                        <i class="bi bi-list-ul me-2"></i>
+                                        <span>All Batches</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('chairperson.batch-drafts.wizard') }}" 
+                                       class="nav-link {{ request()->routeIs('chairperson.batch-drafts.wizard') || request()->routeIs('chairperson.batch-drafts.create') ? 'active' : '' }} d-flex align-items-center sidebar-link-sub">
+                                        <i class="bi bi-magic me-2"></i>
+                                        <span>Quick Setup</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('chairperson.batch-drafts.bulk-operations') }}" 
+                                       class="nav-link {{ request()->routeIs('chairperson.batch-drafts.bulk-operations') ? 'active' : '' }} d-flex align-items-center sidebar-link-sub">
+                                        <i class="bi bi-lightning-charge me-2"></i>
+                                        <span>Bulk Config</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
                 </ul>
             </div>

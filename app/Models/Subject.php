@@ -72,7 +72,10 @@ class Subject extends Model
         return $this->hasMany(\App\Models\CourseOutcomes::class, 'subject_id')->where('is_deleted', false);
     }
 
-
+    public function batchDraftSubject()
+    {
+        return $this->hasOne(BatchDraftSubject::class, 'subject_id');
+    }
 
 
 }

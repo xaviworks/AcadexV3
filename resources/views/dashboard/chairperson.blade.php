@@ -62,7 +62,73 @@
         @endforeach
     </div>
 
+    {{-- Batch Draft Quick Access --}}
     <div class="row g-4 mt-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 p-2 bg-info-subtle me-3">
+                            <i class="bi bi-people-fill text-info fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-semibold mb-1">Batch Drafts</h5>
+                            <p class="text-muted small mb-0">Quick Setup & Management</p>
+                        </div>
+                    </div>
+
+                    {{-- Statistics --}}
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="bg-light rounded-3 p-3 text-center">
+                                <div class="fs-4 fw-bold text-info">{{ $totalBatchDrafts }}</div>
+                                <div class="small text-muted">Total</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light rounded-3 p-3 text-center">
+                                <div class="fs-4 fw-bold text-warning">{{ $pendingBatchDrafts }}</div>
+                                <div class="small text-muted">Pending</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Recent Activity --}}
+                    @if($recentBatchDrafts->count() > 0)
+                    <div class="mb-3">
+                        <h6 class="small text-muted mb-2">Recent Batches</h6>
+                        <div class="list-group list-group-flush">
+                            @foreach($recentBatchDrafts as $batch)
+                            <a href="{{ route('chairperson.batch-drafts.show', $batch->id) }}" class="list-group-item list-group-item-action border-0 px-2 py-2 rounded-3 mb-1">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <div class="small fw-semibold text-truncate" style="max-width: 150px;">{{ $batch->batch_name }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">{{ $batch->year_level }} - {{ $batch->section }}</div>
+                                    </div>
+                                    <span class="badge bg-{{ $batch->status === 'completed' ? 'success' : 'warning' }}-subtle text-{{ $batch->status === 'completed' ? 'success' : 'warning' }} rounded-pill">{{ ucfirst($batch->status) }}</span>
+                                </div>
+                            </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Quick Actions --}}
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('chairperson.batch-drafts.wizard') }}" class="btn btn-primary btn-sm rounded-pill hover-lift">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Quick Setup Wizard
+                        </a>
+                        <a href="{{ route('chairperson.batch-drafts.bulk-operations') }}" class="btn btn-outline-info btn-sm rounded-pill hover-lift">
+                            <i class="bi bi-gear-wide-connected me-1"></i> Bulk Operations
+                        </a>
+                        <a href="{{ route('chairperson.batch-drafts.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill hover-lift">
+                            <i class="bi bi-list-ul me-1"></i> View All Batches
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Faculty Status Overview --}}
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 h-100">

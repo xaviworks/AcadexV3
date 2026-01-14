@@ -1,18 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4" style="background-color: var(--theme-green-light);">
+<div class="container-fluid py-4">
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-success mb-1">
-                <i class="bi bi-folder-symlink me-2"></i>Batch Drafts
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-folder-symlink me-2 text-primary"></i>Batch Drafts
             </h2>
-            <p class="text-muted mb-0">Configure student imports and CO templates for multiple subjects</p>
+            <p class="text-muted mb-0">Manage student imports and course configurations</p>
         </div>
-        <a href="{{ route('chairperson.batch-drafts.create') }}" class="btn btn-success rounded-pill">
-            <i class="bi bi-plus-circle me-2"></i>Create Batch Draft
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('chairperson.batch-drafts.wizard') }}" class="btn btn-primary rounded-pill shadow-sm">
+                <i class="bi bi-stars me-1"></i>Quick Setup
+            </a>
+            <a href="{{ route('chairperson.batch-drafts.bulk-operations') }}" class="btn btn-warning rounded-pill shadow-sm">
+                <i class="bi bi-lightning-charge-fill me-1"></i>Bulk Operations
+            </a>
+        </div>
     </div>
 
     <!-- Alerts -->
@@ -59,6 +64,11 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a class="dropdown-item" href="{{ route('chairperson.batch-drafts.duplicate', $batch) }}">
+                                            <i class="bi bi-files me-2"></i>Duplicate
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a class="dropdown-item" href="{{ route('chairperson.batch-drafts.edit', $batch) }}">
                                             <i class="bi bi-pencil me-2"></i>Edit
                                         </a>
@@ -67,7 +77,7 @@
                                     <li>
                                         <form action="{{ route('chairperson.batch-drafts.destroy', $batch) }}" 
                                               method="POST" 
-                                              onsubmit="return confirm('Delete this batch draft?\n\nThis action cannot be undone.');">
+                                              onsubmit="return confirm('Delete {{ addslashes($batch->batch_name) }}? This action cannot be undone.');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="dropdown-item text-danger">
@@ -146,8 +156,8 @@
                         <p class="text-muted mb-4">
                             Create your first batch draft to import students and configure subjects.
                         </p>
-                        <a href="{{ route('chairperson.batch-drafts.create') }}" class="btn btn-success rounded-pill">
-                            <i class="bi bi-plus-circle me-2"></i>Create Batch Draft
+                        <a href="{{ route('chairperson.batch-drafts.wizard') }}" class="btn btn-primary rounded-pill">
+                            <i class="bi bi-stars me-2"></i>Quick Setup
                         </a>
                     </div>
                 </div>
@@ -158,16 +168,55 @@
 
 <style>
 .hover-card {
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.hover-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+}
+
+.hover-card:hover::before {
+    left: 100%;
 }
 
 .hover-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
 }
 
-.bg-gradient {
-    background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+.btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
 }
 </style>
 @endsection

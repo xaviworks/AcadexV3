@@ -20,9 +20,15 @@
                 {{ $batchDraft->academicPeriod->semester ?? '' }} {{ $batchDraft->academicPeriod->academic_year ?? '' }}
             </p>
         </div>
-        <div>
-            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                <i class="bi bi-trash me-2"></i>Delete Batch
+        <div class="d-flex gap-2">
+            <a href="{{ route('chairperson.batch-drafts.duplicate', $batchDraft) }}" class="btn btn-outline-success rounded-pill shadow-sm hover-lift">
+                <i class="bi bi-files me-1"></i>Duplicate
+            </a>
+            <a href="{{ route('chairperson.batch-drafts.edit', $batchDraft) }}" class="btn btn-outline-secondary rounded-pill shadow-sm hover-lift">
+                <i class="bi bi-pencil me-1"></i>Edit
+            </a>
+            <button type="button" class="btn btn-outline-danger rounded-pill shadow-sm hover-lift" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="bi bi-trash me-1"></i>Delete
             </button>
         </div>
     </div>
@@ -197,6 +203,9 @@
                         <i class="bi bi-people me-2 text-info"></i>Students
                         <span class="badge bg-info-subtle text-info">{{ $batchDraft->students->count() }}</span>
                     </h5>
+                    <button type="button" class="btn btn-sm btn-success rounded-pill shadow-sm hover-lift" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                        <i class="bi bi-plus-circle me-1"></i>Add Student
+                    </button>
                 </div>
                 <div class="card-body p-0">
                     @if($batchDraft->students->count() > 0)
@@ -209,6 +218,7 @@
                                         <th>Last Name</th>
                                         <th>Course</th>
                                         <th>Year Level</th>
+                                        <th width="60">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -223,6 +233,17 @@
                                                 </span>
                                             </td>
                                             <td>{{ $student->year_level }}</td>
+                                            <td>
+                                                <form action="{{ route('chairperson.batch-drafts.students.destroy', [$batchDraft, $student]) }}" 
+                                                      method="POST" 
+                                                      onsubmit="return confirm('Remove {{ $student->first_name }} {{ $student->last_name }}?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-pill" title="Remove">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -281,47 +302,39 @@
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th style="width: 10%;">Subject Code</th>
-                                        <th style="width: 25%;">Subject Name</th>
-                                        <th style="width: 40%;">Status</th>
-                                        <th style="width: 10%;" class="text-center">Students</th>
-                                        <th style="width: 15%;" class="text-center">Actions</th>
+                                        <th style="width: 15%;">Subject Code</th>
+                                        <th style="width: 35%;">Subject Description</th>
+                                        <th style="width: 28%;">Status</th>
+                                        <th style="width: 22%;" class="text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($batchDraft->batchDraftSubjects as $batchSubject)
-                                        <tr class="{{ $batchSubject->configuration_applied ? 'table-success' : '' }}">
+                                        <tr>
                                             <td class="fw-semibold py-3">{{ $batchSubject->subject->subject_code ?? 'N/A' }}</td>
                                             <td class="py-3">{{ $batchSubject->subject->subject_description ?? 'N/A' }}</td>
                                             <td class="py-3">
                                                 @if($batchSubject->configuration_applied)
-                                                    <div class="mb-2">
-                                                        <span class="badge bg-success">
-                                                            <i class="bi bi-check-circle-fill me-1"></i>Configured
+                                                    <div class="mb-1">
+                                                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                                                            <i class="bi bi-check-circle-fill me-1"></i>Applied
                                                         </span>
                                                     </div>
                                                     <div>
                                                         @if($batchSubject->subject->instructor)
-                                                            <small class="text-info fw-semibold">
-                                                                <i class="bi bi-person-check me-1"></i>Instructor Assigned
+                                                            <small class="text-success">
+                                                                <i class="bi bi-person-check me-1"></i>{{ $batchDraft->students->count() }} students
                                                             </small>
                                                         @else
                                                             <small class="text-muted">
-                                                                <i class="bi bi-person-x me-1"></i>No Instructor
+                                                                <i class="bi bi-person-x me-1"></i>No instructor
                                                             </small>
                                                         @endif
                                                     </div>
                                                 @else
-                                                    <span class="badge bg-warning text-dark">
-                                                        <i class="bi bi-hourglass-split me-1"></i>Awaiting Configuration
+                                                    <span class="badge bg-info-subtle text-info rounded-pill px-3 py-2">
+                                                        <i class="bi bi-circle me-1"></i>Ready
                                                     </span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center py-3">
-                                                @if($batchSubject->configuration_applied)
-                                                    <span class="badge bg-info">{{ $batchDraft->students->count() }}</span>
-                                                @else
-                                                    <span class="text-muted">-</span>
                                                 @endif
                                             </td>
                                             <td class="text-center py-3">
@@ -329,16 +342,16 @@
                                                     <form action="{{ route('chairperson.batch-drafts.apply-configuration', $batchDraft) }}" 
                                                           method="POST" 
                                                           class="d-inline"
-                                                          onsubmit="return confirm('Apply configuration to this subject?\n\nThis will:\n• Import {{ $batchDraft->students->count() }} students\n• Create {{ $batchDraft->coTemplate->items->count() }} course outcomes\n\nContinue?');">
+                                                          onsubmit="return confirm('Apply configuration to {{ addslashes($batchSubject->subject->subject_description ?? 'this subject') }}? This will import {{ $batchDraft->students->count() }} students and create {{ $batchDraft->coTemplate->items->count() }} course outcomes.');">
                                                         @csrf
                                                         <input type="hidden" name="subject_id" value="{{ $batchSubject->subject_id }}">
-                                                        <button type="submit" class="btn btn-sm btn-success">
-                                                            <i class="bi bi-play-circle-fill me-1"></i>Apply Configuration
+                                                        <button type="submit" class="btn btn-sm btn-success rounded-pill shadow-sm hover-lift">
+                                                            <i class="bi bi-play-circle-fill me-1"></i>Apply
                                                         </button>
                                                     </form>
                                                 @else
-                                                    <span class="badge bg-success-subtle text-success">
-                                                        <i class="bi bi-check-all me-1"></i>Complete
+                                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                                        <i class="bi bi-check-circle-fill"></i>
                                                     </span>
                                                 @endif
                                             </td>
@@ -499,6 +512,47 @@
 </script>
 @endpush
 
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-person-plus me-2"></i>Add Student
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('chairperson.batch-drafts.students.add', $batchDraft) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">First Name <span class="text-danger">*</span></label>
+                        <input type="text" name="first_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Middle Name</label>
+                        <input type="text" name="middle_name" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Last Name <span class="text-danger">*</span></label>
+                        <input type="text" name="last_name" class="form-control" required>
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Course and Year Level will be set to {{ $batchDraft->course->course_code }} Year {{ $batchDraft->year_level }}
+                    </small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-1"></i>Add Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
@@ -528,4 +582,33 @@
         </div>
     </div>
 </div>
+
+<style>
+.hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.card {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.75rem 1rem;
+}
+
+.btn-rounded-pill {
+    border-radius: 50px;
+}
+
+.badge {
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+}
+</style>
 @endsection

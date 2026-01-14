@@ -176,11 +176,32 @@ Route::prefix('chairperson')
         Route::prefix('batch-drafts')->name('batch-drafts.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'create'])->name('create');
+            
+            // Smart Wizard
+            Route::get('/wizard', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'wizard'])->name('wizard');
+            Route::post('/wizard', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'storeWizard'])->name('store-wizard');
+            
+            // Bulk Operations
+            Route::get('/bulk-operations', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'bulkOperations'])->name('bulk-operations');
+            Route::post('/bulk-apply', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'bulkApplyConfiguration'])->name('bulk-apply');
+            
+            // AJAX endpoints
+            Route::get('/ajax/subjects-for-course', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'getSubjectsForCourse'])->name('ajax.subjects');
+            
+            // Student management
+            Route::delete('/{batchDraft}/students/{student}', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'destroyStudent'])->name('students.destroy');
+            Route::post('/{batchDraft}/students', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'addStudent'])->name('students.add');
+            
             Route::post('/', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'store'])->name('store');
             Route::get('/{batchDraft}', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'show'])->name('show');
             Route::get('/{batchDraft}/edit', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'edit'])->name('edit');
             Route::put('/{batchDraft}', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'update'])->name('update');
             Route::delete('/{batchDraft}', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'destroy'])->name('destroy');
+            
+            // Duplicate
+            Route::get('/{batchDraft}/duplicate', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'duplicate'])->name('duplicate');
+            Route::post('/{batchDraft}/duplicate', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'storeDuplicate'])->name('store-duplicate');
+            
             Route::post('/{batchDraft}/attach-subjects', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'attachSubjects'])->name('attach-subjects');
             Route::post('/{batchDraft}/apply-configuration', [\App\Http\Controllers\Chairperson\BatchDraftController::class, 'applyConfiguration'])->name('apply-configuration');
         });

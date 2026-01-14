@@ -191,6 +191,11 @@ class DashboardController extends Controller
         // Get the chairperson's course ID
         $chairpersonCourseId = Auth::user()->course_id;
         
+        // Get batch draft statistics
+        $batchDrafts = \App\Models\BatchDraft::where('academic_period_id', $academicPeriodId)
+            ->where('course_id', $chairpersonCourseId)
+            ->get();
+        
         $data = [
             "countInstructors" => User::where("role", 0)
                 ->where("department_id", $departmentId)
@@ -220,6 +225,11 @@ class DashboardController extends Controller
                 ->count(),
             "countUnverifiedInstructors" => UnverifiedUser::where("department_id", $departmentId)
                 ->count(),
+            // Batch Draft Statistics
+            "totalBatchDrafts" => $batchDrafts->count(),
+            "pendingBatchDrafts" => $batchDrafts->where('status', 'pending')->count(),
+            "completedBatchDrafts" => $batchDrafts->where('status', 'completed')->count(),
+            "recentBatchDrafts" => $batchDrafts->sortByDesc('created_at')->take(3),
         ];
 
         return view('dashboard.chairperson', $data);
