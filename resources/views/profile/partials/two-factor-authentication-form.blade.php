@@ -12,10 +12,12 @@
     <div class="mt-4">
         @if(! auth()->user()->two_factor_secret)
             {{-- Enable 2FA --}}
-            <x-primary-button
+            <button
+                type="button"
                 x-data=""
                 x-on:click.prevent="$dispatch('open-modal', 'confirm-2fa-enable')"
-            >{{ __('Enable') }}</x-primary-button>
+                class="btn btn-success px-4 py-2"
+            >{{ __('Enable') }}</button>
         @else
             {{-- 2FA is Enabled --}}
             <div class="flex flex-col gap-4">
