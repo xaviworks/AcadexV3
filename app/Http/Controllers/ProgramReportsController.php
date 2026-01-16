@@ -91,11 +91,11 @@ class ProgramReportsController extends Controller
 
         $course = \App\Models\Course::find($courseId);
         
-        // Get CO data for only this course
+        // Get CO data for only this course (excluding GE subjects)
         $byCourse = [
             $course->id => [
                 'course' => $course,
-                'co' => $service->aggregateCourse($course->id, $periodId),
+                'co' => $service->aggregateCourse($course->id, $periodId, true), // excludeGE = true
             ],
         ];
 
