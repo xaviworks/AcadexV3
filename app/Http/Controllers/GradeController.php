@@ -11,6 +11,7 @@ use App\Models\TermGrade;
 use App\Models\FinalGrade;
 use App\Traits\GradeCalculationTrait;
 use App\Traits\ActivityManagementTrait;
+use App\Traits\BroadcastsTableUpdates;
 use App\Services\GradesFormulaService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ use Illuminate\Support\Str;
 
 class GradeController extends Controller
 {
+    use GradeCalculationTrait, ActivityManagementTrait, BroadcastsTableUpdates;
     /**
      * AJAX: Return course outcomes for a subject and term.
      */

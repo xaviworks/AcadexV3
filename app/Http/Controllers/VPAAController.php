@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Department;
 use App\Models\CourseOutcomeAttainment;
+use App\Traits\BroadcastsTableUpdates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\DB;
 
 class VPAAController extends Controller
 {
+    use BroadcastsTableUpdates;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -262,7 +265,11 @@ class VPAAController extends Controller
         ]);
 
         try {
-            Department::create($validated);
+            $department = Department::create($validated);
+            
+            // Broadcast department creation for real-time dashboard refresh
+            $this->broadcastCreated('departments', $department);
+            
             return redirect()->route('vpaa.departments')
                 ->with('status', 'Department created successfully.');
         } catch (\Exception $e) {
@@ -289,6 +296,9 @@ class VPAAController extends Controller
         try {
             $department = Department::findOrFail($id);
             $department->update($validated);
+            
+            // Broadcast department update for real-time dashboard refresh
+            $this->broadcastUpdated('departments', $department);
             
             return redirect()->route('vpaa.departments')
                 ->with('status', 'Department updated successfully.');
@@ -318,6 +328,9 @@ class VPAAController extends Controller
                 return redirect()->back()
                     ->with('error', 'Cannot delete department with associated users or students.');
             }
+            // Broadcast department deletion for real-time dashboard refresh
+            $this->broadcastDeleted('departments', $id);
+            
             
             $department->update(['is_deleted' => true]);
             

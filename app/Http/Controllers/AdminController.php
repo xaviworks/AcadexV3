@@ -16,6 +16,7 @@ use App\Models\StructureTemplate;
 use App\Models\TermGrade;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
+use App\Traits\BroadcastsTableUpdates;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -30,6 +31,8 @@ use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
+    use BroadcastsTableUpdates;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -3676,6 +3679,9 @@ class AdminController extends Controller
         }
 
         $newUser = User::create($userData);
+
+        // Broadcast user creation for real-time dashboard refresh
+        $this->broadcastCreated('users', $newUser);
 
         // Send security notification to admins about new user creation
         \App\Listeners\NotifyUserCreated::handle($newUser, Auth::user());

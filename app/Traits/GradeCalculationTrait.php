@@ -114,7 +114,7 @@ trait GradeCalculationTrait
             $finalGrade = round($termGrades->avg('term_grade'), 2);
             $remarks = $finalGrade >= $formula['passing_grade'] ? 'Passed' : 'Failed';
             
-            FinalGrade::updateOrCreate(
+            $finalGradeModel = FinalGrade::updateOrCreate(
                 [
                     'student_id' => $studentId,
                     'subject_id' => $subject->id
@@ -128,6 +128,11 @@ trait GradeCalculationTrait
                     'updated_by' => Auth::id()
                 ]
             );
+
+            // Broadcast grade update for real-time dashboard updates
+            if (method_exists($this, 'broadcastUpdated')) {
+                $this->broadcastUpdated('grades', $finalGradeModel);
+            }
             
             Log::info("Final grade updated for student {$studentId} in subject {$subject->id}: {$finalGrade} ({$remarks})");
         }

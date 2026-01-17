@@ -390,6 +390,179 @@ class DashboardController extends Controller
         return view('dashboard.gecoordinator', $data);
     }
 
+    /**
+     * API endpoint for dashboard statistics (all roles)
+     * Used by real-time broadcasting to refresh dashboard stats
+     */
+    public function stats(Request $request)
+    {
+        $user = Auth::user();
+        
+        switch ($user->role) {
+            case 0: // Instructor
+                return response()->json($this->getInstructorStats());
+            case 1: // Chairperson
+                return response()->json($this->getChairpersonStats());
+            case 2: // Dean
+                return response()->json($this->getDeanStats());
+            case 4: // GE Coordinator
+                return response()->json($this->getGECoordinatorStats());
+            case 5: // Admin or VPAA
+                if ($user->isVPAA()) {
+                    return response()->json($this->getVPAAStats());
+                } else {
+                    return response()->json($this->getAdminStats());
+                }
+            default:
+                return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    }
+
+    private function getInstructorStats()
+    {
+        $user = Auth::user();
+        $academic_period = $user->academic_period;
+        
+        $instructorSubjects = Subject::where('instructor_id', $user->id)
+            ->where('academic_period_id', $academic_period)
+            ->get();
+        
+        $studentSubjectIds = $instructorSubjects->pluck('id')->toArray();
+        
+        $instructorStudents = Student::whereIn('subject_id', $studentSubjectIds)->count();
+        $enrolledSubjectsCount = $instructorSubjects->count();
+        
+        $passedIds = FinalGrade::whereIn('subject_id', $studentSubjectIds)
+            ->where('final_grade', '>', 0)
+            ->where('final_grade', '<', 4.0)
+            ->distinct('student_id')
+            ->pluck('student_id');
+        
+        $failedIds = FinalGrade::whereIn('subject_id', $studentSubjectIds)
+            ->where(function ($query) {
+                $query->where('final_grade', '>=', 4.0)
+                    ->orWhere('final_grade', 0);
+            })
+            ->distinct('student_id')
+            ->pluck('student_id');
+        
+        return [
+            'instructorStudents' => $instructorStudents,
+            'enrolledSubjectsCount' => $enrolledSubjectsCount,
+            'totalPassedStudents' => $passedIds->count(),
+            'totalFailedStudents' => $failedIds->count(),
+        ];
+    }
+
+    private function getChairpersonStats()
+    {
+        $user = Auth::user();
+        $courseId = $user->course_id;
+        $academicPeriodId = $user->academic_period;
+        
+        $countInstructors = Subject::where('course_id', $courseId)
+            ->where('academic_period_id', $academicPeriodId)
+            ->distinct('instructor_id')
+            ->count('instructor_id');
+        
+        $countStudents = Student::whereHas('subject', function ($query) use ($courseId, $academicPeriodId) {
+            $query->where('course_id', $courseId)
+                ->where('academic_period_id', $academicPeriodId);
+        })->count();
+        
+        $countCourses = Subject::where('course_id', $courseId)
+            ->where('academic_period_id', $academicPeriodId)
+            ->distinct('subject_code')
+            ->count();
+        
+        return [
+            'countInstructors' => $countInstructors,
+            'countStudents' => $countStudents,
+            'countCourses' => $countCourses,
+        ];
+    }
+
+    private function getAdminStats()
+    {
+        $totalUsers = User::count();
+        
+        $loginCount = UserLog::where('is_successful', 1)->count();
+        $failedLoginCount = UserLog::where('is_successful', 0)->count();
+        
+        return [
+            'totalUsers' => $totalUsers,
+            'loginCount' => $loginCount,
+            'failedLoginCount' => $failedLoginCount,
+        ];
+    }
+
+    private function getDeanStats()
+    {
+        $user = Auth::user();
+        $departmentId = $user->department_id;
+        $academicPeriodId = $user->academic_period;
+        
+        $totalStudents = Student::whereHas('subject', function ($query) use ($departmentId, $academicPeriodId) {
+            $query->whereHas('course', function ($q) use ($departmentId) {
+                $q->where('department_id', $departmentId);
+            })
+            ->where('academic_period_id', $academicPeriodId);
+        })->distinct('student_id')->count('student_id');
+        
+        $totalInstructors = Subject::whereHas('course', function ($query) use ($departmentId) {
+            $query->where('department_id', $departmentId);
+        })
+            ->where('academic_period_id', $academicPeriodId)
+            ->distinct('instructor_id')
+            ->count('instructor_id');
+        
+        return [
+            'totalStudents' => $totalStudents,
+            'totalInstructors' => $totalInstructors,
+        ];
+    }
+
+    private function getGECoordinatorStats()
+    {
+        $user = Auth::user();
+        $academic_period = $user->academic_period;
+        
+        $countInstructors = Subject::where('academic_period_id', $academic_period)
+            ->distinct('instructor_id')
+            ->count('instructor_id');
+        
+        $countStudents = Student::whereHas('subject', function ($query) use ($academic_period) {
+            $query->where('academic_period_id', $academic_period);
+        })->count();
+        
+        $countCourses = Subject::where('academic_period_id', $academic_period)
+            ->distinct('subject_code')
+            ->count();
+        
+        return [
+            'countInstructors' => $countInstructors,
+            'countStudents' => $countStudents,
+            'countCourses' => $countCourses,
+        ];
+    }
+
+    private function getVPAAStats()
+    {
+        $departmentsCount = Department::where('is_deleted', false)->count();
+        
+        $instructorsCount = User::where('role', 0)
+            ->where('account_status', 'active')
+            ->count();
+        
+        $studentsCount = Student::distinct('student_id')->count('student_id');
+        
+        return [
+            'departmentsCount' => $departmentsCount,
+            'instructorsCount' => $instructorsCount,
+            'studentsCount' => $studentsCount,
+        ];
+    }
+
     private function getTermId($term)
     {
         return [

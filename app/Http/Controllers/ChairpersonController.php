@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\FinalGrade;
 use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
+use App\Traits\BroadcastsTableUpdates;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Rules\Password;
 
 class ChairpersonController extends Controller
 {
+    use BroadcastsTableUpdates;
+    
     public function __construct()
     {
         $this->middleware('auth');
@@ -262,6 +265,10 @@ class ChairpersonController extends Controller
             'updated_by' => Auth::id(),
         ]);
 
+        // Broadcast subject update for real-time dashboard refresh
+        $this->broadcastUpdated('subjects', $subject);
+        event(new \App\Events\DashboardRefresh($instructor->id));
+
         // Notify instructor about new subject assignment (Email + System)
         $academicPeriod = \App\Models\AcademicPeriod::find($academicPeriodId);
         $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
@@ -331,6 +338,10 @@ class ChairpersonController extends Controller
                 'updated_by' => Auth::id(),
             ]);
 
+            // Broadcast subject update for real-time dashboard refresh
+            $this->broadcastUpdated('subjects', $subject);
+            event(new \App\Events\DashboardRefresh($instructor->id));
+
             // Notify instructor about new subject assignment (Email + System)
             NotificationService::notifyCourseAssigned($instructor, $subject, $periodLabel);
 
@@ -348,6 +359,13 @@ class ChairpersonController extends Controller
                 'instructor_id' => null,
                 'updated_by' => Auth::id(),
             ]);
+            
+            // Broadcast subject update for real-time dashboard refresh
+            $this->broadcastUpdated('subjects', $subject);
+            if ($previousInstructorId) {
+                event(new \App\Events\DashboardRefresh($previousInstructorId));
+            }
+            
             return redirect()->route('chairperson.assign-subjects')->with('success', 'Instructor unassigned successfully.');
         }
     }

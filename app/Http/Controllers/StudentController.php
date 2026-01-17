@@ -11,11 +11,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Traits\ActivityManagementTrait;
+use App\Traits\BroadcastsTableUpdates;
 
 
 class StudentController extends Controller
 {
-    use ActivityManagementTrait;
+    use ActivityManagementTrait, BroadcastsTableUpdates;
 
     public function __construct()
     {
@@ -130,6 +131,9 @@ class StudentController extends Controller
             'student_id' => $student->id,
             'subject_id' => $subject->id,
         ]);
+
+        // Broadcast student creation for real-time dashboard updates
+        $this->broadcastCreated('students', $student);
     
         // ✅ Automatically insert default activities for all terms
         foreach (['prelim', 'midterm', 'prefinal', 'final'] as $term) {
@@ -152,6 +156,9 @@ class StudentController extends Controller
         StudentSubject::where('student_id', $studentId)
             ->where('subject_id', $request->subject_id)
             ->delete();
+
+        // Broadcast student deletion for real-time dashboard updates
+        $this->broadcastDeleted('students', $studentId);
 
         return redirect()->back()->with('success', 'Student dropped from subject.');
     }
@@ -176,6 +183,9 @@ class StudentController extends Controller
             'year_level' => $request->year_level,
             'updated_by' => Auth::id(),
         ]);
+
+        // Broadcast student update for real-time dashboard updates
+        $this->broadcastUpdated('students', $student);
 
         return redirect()->back()->with('success', 'Student details updated successfully.');
     }
