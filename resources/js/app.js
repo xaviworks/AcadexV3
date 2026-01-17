@@ -15,6 +15,7 @@ import './store-helpers'; // Global helper functions
 import './components/dashboard-stats';
 import './components/instructor-dashboard';
 import './components/chairperson-dashboard';
+import './components/gecoordinator-dashboard';
 
 // Import page-specific scripts (auto-initialize on DOMContentLoaded)
 import './pages/index.js';

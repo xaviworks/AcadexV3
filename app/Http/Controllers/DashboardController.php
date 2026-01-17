@@ -445,6 +445,60 @@ class DashboardController extends Controller
     }
 
     /**
+     * API endpoint for GE coordinator dashboard data
+     * Returns real-time stats for GE coordinator dashboard
+     */
+    public function gecoordinatorData()
+    {
+        if (!session()->has('active_academic_period_id')) {
+            return response()->json(['error' => 'No active academic period'], 400);
+        }
+
+        $academicPeriodId = session('active_academic_period_id');
+        
+        // Get GE department
+        $geDepartment = Department::where('department_code', 'GE')->first();
+        
+        if (!$geDepartment) {
+            return response()->json(['error' => 'GE department not found'], 404);
+        }
+
+        // Count all instructors in GE department or approved to teach GE subjects
+        $countInstructors = User::where("role", 0)
+            ->where(function($query) use ($geDepartment) {
+                $query->where("department_id", $geDepartment->id)
+                      ->orWhere("can_teach_ge", true)
+                      ->orWhere(function($subQuery) {
+                          $subQuery->where('is_active', false)
+                                   ->whereHas('geSubjectRequests', function($requestQuery) {
+                                       $requestQuery->where('status', 'approved');
+                                   });
+                      });
+            })
+            ->count();
+
+        $countStudents = Student::whereHas('subjects', function($query) use ($geDepartment, $academicPeriodId) {
+                $query->where('department_id', $geDepartment->id)
+                      ->where('academic_period_id', $academicPeriodId);
+            })
+            ->where("is_deleted", false)
+            ->distinct()
+            ->count("students.id");
+
+        $countCourses = Subject::where("department_id", $geDepartment->id)
+            ->where("is_deleted", false)
+            ->where('academic_period_id', $academicPeriodId)
+            ->distinct('subject_code')
+            ->count();
+
+        return response()->json([
+            'countInstructors' => $countInstructors,
+            'countStudents' => $countStudents,
+            'countCourses' => $countCourses
+        ]);
+    }
+
+    /**
      * API endpoint for dashboard statistics (all roles)
      * Used by real-time broadcasting to refresh dashboard stats
      */

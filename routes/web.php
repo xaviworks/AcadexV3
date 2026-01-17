@@ -101,6 +101,7 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::get('/stats', [DashboardController::class, 'stats'])->name('stats');
     Route::get('/instructor/data', [DashboardController::class, 'instructorData'])->name('instructor.data');
     Route::get('/chairperson/data', [DashboardController::class, 'chairpersonData'])->name('chairperson.data');
+    Route::get('/gecoordinator/data', [DashboardController::class, 'gecoordinatorData'])->name('gecoordinator.data');
 });
 
 // Notifications (for all authenticated users)
