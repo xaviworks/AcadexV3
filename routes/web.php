@@ -102,6 +102,7 @@ Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(functi
     Route::get('/instructor/data', [DashboardController::class, 'instructorData'])->name('instructor.data');
     Route::get('/chairperson/data', [DashboardController::class, 'chairpersonData'])->name('chairperson.data');
     Route::get('/gecoordinator/data', [DashboardController::class, 'gecoordinatorData'])->name('gecoordinator.data');
+    Route::get('/dean/data', [DashboardController::class, 'deanData'])->name('dean.data');
 });
 
 // Notifications (for all authenticated users)
@@ -444,6 +445,7 @@ Route::prefix('vpaa')
             ->name('reports.co-program');
         // Dashboard
         Route::get('/dashboard', [VPAAController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/data', [VPAAController::class, 'vpaaData'])->name('dashboard.data');
         
         // Departments
         Route::get('/departments', [VPAAController::class, 'viewDepartments'])->name('departments');

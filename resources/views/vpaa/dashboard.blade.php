@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-4" x-data="vpaaDashboard(@js($departmentsCount ?? 0), @js($instructorsCount ?? 0), @js($studentsCount ?? 0))" x-init="init()">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-1">Welcome Back, {{ Auth::user()->name }}!</h2>
@@ -14,59 +14,60 @@
 
     {{-- Summary Cards --}}
     <div class="row g-3">
-        @php
-            $cards = [
-                [
-                    'label' => 'Total Departments',
-                    'icon' => 'bi bi-building',
-                    'value' => $departmentsCount ?? 0,
-                    'color' => 'primary',
-                    'trend' => 'Active departments'
-                ],
-                [
-                    'label' => 'Total Instructors',
-                    'icon' => 'bi bi-people-fill',
-                    'value' => $instructorsCount ?? 0,
-                    'color' => 'success',
-                    'trend' => 'Active faculty'
-                ],
-                [
-                    'label' => 'Total Students',
-                    'icon' => 'bi bi-mortarboard-fill',
-                    'value' => $studentsCount ?? 0,
-                    'color' => 'info',
-                    'trend' => 'Enrolled students'
-                ],
-                [
-                    'label' => 'Academic Programs',
-                    'icon' => 'bi bi-journal-text',
-                    'value' => $departmentsCount * 3 ?? 0, // Estimated programs per department
-                    'color' => 'warning',
-                    'trend' => 'Course offerings'
-                ]
-            ];
-        @endphp
-
-        @foreach ($cards as $card)
-            <div class="col-md-3">
-                <div class="card h-100 border-0 shadow-sm rounded-3 hover-lift">
-                    <div class="card-body p-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="rounded-2 p-2 bg-{{ $card['color'] }}-subtle me-2">
-                                <i class="{{ $card['icon'] }} text-{{ $card['color'] }} fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-0 small">{{ $card['label'] }}</h6>
-                                <h4 class="fw-bold text-{{ $card['color'] }} mb-0">{{ $card['value'] }}</h4>
-                            </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-3 hover-lift">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rounded-2 p-2 bg-primary-subtle me-2">
+                            <i class="bi bi-building text-primary fs-5"></i>
                         </div>
-                        <p class="text-muted small mb-0" style="font-size: 0.8rem;">
-                            <i class="bi bi-arrow-right"></i> {{ $card['trend'] }}
-                        </p>
+                        <div>
+                            <h6 class="text-muted mb-0 small">Total Departments</h6>
+                            <h4 class="fw-bold text-primary mb-0" x-text="data.departmentsCount"></h4>
+                        </div>
                     </div>
+                    <p class="text-muted small mb-0" style="font-size: 0.8rem;">
+                        <i class="bi bi-arrow-right"></i> Active departments
+                    </p>
                 </div>
             </div>
-        @endforeach
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-3 hover-lift">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rounded-2 p-2 bg-success-subtle me-2">
+                            <i class="bi bi-people-fill text-success fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0 small">Total Instructors</h6>
+                            <h4 class="fw-bold text-success mb-0" x-text="data.instructorsCount"></h4>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0" style="font-size: 0.8rem;">
+                        <i class="bi bi-arrow-right"></i> Active faculty
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-3 hover-lift">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rounded-2 p-2 bg-info-subtle me-2">
+                            <i class="bi bi-mortarboard-fill text-info fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0 small">Total Students</h6>
+                            <h4 class="fw-bold text-info mb-0" x-text="data.studentsCount"></h4>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0" style="font-size: 0.8rem;">
+                        <i class="bi bi-arrow-right"></i> Enrolled students
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     @if (session('status'))

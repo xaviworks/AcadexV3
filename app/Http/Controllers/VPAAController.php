@@ -213,6 +213,25 @@ class VPAAController extends Controller
         ]);
     }
 
+    /**
+     * API endpoint for VPAA dashboard data
+     * Returns real-time stats for VPAA dashboard
+     */
+    public function vpaaData()
+    {
+        $departmentsCount = Department::where('is_deleted', false)->count();
+        $instructorsCount = User::where('role', 0)
+            ->where('is_active', true)
+            ->count();
+        $studentsCount = Student::where('is_deleted', false)->count();
+
+        return response()->json([
+            'departmentsCount' => $departmentsCount,
+            'instructorsCount' => $instructorsCount,
+            'studentsCount' => $studentsCount
+        ]);
+    }
+
     // ============================
     // View All Departments
     // ============================

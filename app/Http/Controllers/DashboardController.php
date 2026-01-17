@@ -499,6 +499,30 @@ class DashboardController extends Controller
     }
 
     /**
+     * API endpoint for Dean dashboard data
+     * Returns real-time stats for Dean dashboard
+     */
+    public function deanData()
+    {
+        $studentsPerDepartment = Student::join('departments', 'students.department_id', '=', 'departments.id')
+            ->select('departments.department_description as department_name', DB::raw('count(*) as total'))
+            ->groupBy('students.department_id', 'departments.department_description')
+            ->pluck('total', 'department_name');
+
+        $studentsPerCourse = Student::join('courses', 'students.course_id', '=', 'courses.id')
+            ->select('courses.course_code', 'courses.course_description', DB::raw('count(*) as total'))
+            ->groupBy('students.course_id', 'courses.course_code', 'courses.course_description')
+            ->pluck('total', 'courses.course_code');
+
+        return response()->json([
+            'totalStudents' => $studentsPerDepartment->sum(),
+            'totalInstructors' => User::where('role', 0)->count(),
+            'totalCourses' => $studentsPerCourse->count(),
+            'totalDepartments' => $studentsPerDepartment->count()
+        ]);
+    }
+
+    /**
      * API endpoint for dashboard statistics (all roles)
      * Used by real-time broadcasting to refresh dashboard stats
      */

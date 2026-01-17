@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-4" x-data="deanDashboard(@js($studentsPerDepartment->sum()), @js($totalInstructors), @js($studentsPerCourse->count()), @js($studentsPerDepartment->count()))" x-init="init()">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-1">Dean's Academic Overview 🎓</h2>
@@ -25,7 +25,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-0">Total Students</h6>
-                            <h3 class="fw-bold text-primary mb-0">{{ $studentsPerDepartment->sum() }}</h3>
+                            <h3 class="fw-bold text-primary mb-0" x-text="data.totalStudents"></h3>
                         </div>
                     </div>
                     <p class="text-muted small mb-0">
@@ -44,7 +44,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-0">Total Instructors</h6>
-                            <h3 class="fw-bold text-success mb-0">{{ $totalInstructors }}</h3>
+                            <h3 class="fw-bold text-success mb-0" x-text="data.totalInstructors"></h3>
                         </div>
                     </div>
                     <p class="text-muted small mb-0">
@@ -63,7 +63,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-0">Total Courses</h6>
-                            <h3 class="fw-bold text-info mb-0">{{ $studentsPerCourse->count() }}</h3>
+                            <h3 class="fw-bold text-info mb-0" x-text="data.totalCourses"></h3>
                         </div>
                     </div>
                     <p class="text-muted small mb-0">
@@ -82,7 +82,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-0">Departments</h6>
-                            <h3 class="fw-bold text-warning mb-0">{{ $studentsPerDepartment->count() }}</h3>
+                            <h3 class="fw-bold text-warning mb-0" x-text="data.totalDepartments"></h3>
                         </div>
                     </div>
                     <p class="text-muted small mb-0">
