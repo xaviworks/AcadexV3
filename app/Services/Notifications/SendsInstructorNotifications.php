@@ -65,7 +65,7 @@ trait SendsInstructorNotifications
     public static function notifyInstructorApproved(User $instructor, ?User $approvedBy = null): void
     {
         try {
-            $instructor->notify(new InstructorApproved($instructor, $approvedBy));
+            $instructor->notifyNow(new InstructorApproved($instructor, $approvedBy));
             
             Log::info('Instructor approved notification sent', [
                 'instructor_id' => $instructor->id,
@@ -102,7 +102,7 @@ trait SendsInstructorNotifications
                 }
             };
             
-            $notifiable->notify(new InstructorRejected($email, $name, $rejectedBy));
+            $notifiable->notifyNow(new InstructorRejected($email, $name, $rejectedBy));
             
             Log::info('Instructor rejected notification sent', [
                 'instructor_email' => $email,

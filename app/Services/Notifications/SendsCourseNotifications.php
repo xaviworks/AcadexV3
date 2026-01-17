@@ -30,7 +30,7 @@ trait SendsCourseNotifications
             return;
         }
 
-        $instructor->notify(new SubjectAssigned($assignedBy, $subject, $academicPeriod));
+        $instructor->notifyNow(new SubjectAssigned($assignedBy, $subject, $academicPeriod));
     }
 
     /**
@@ -48,7 +48,7 @@ trait SendsCourseNotifications
         }
 
         try {
-            $instructor->notify(new CourseAssigned($assignedBy, $subject, $academicPeriod));
+            $instructor->notifyNow(new CourseAssigned($assignedBy, $subject, $academicPeriod));
             
             Log::info('Course assigned notification sent', [
                 'instructor_id' => $instructor->id,
@@ -79,7 +79,7 @@ trait SendsCourseNotifications
         }
 
         try {
-            $instructor->notify(new CourseRemoved($removedBy, $subject, $academicPeriod));
+            $instructor->notifyNow(new CourseRemoved($removedBy, $subject, $academicPeriod));
             
             Log::info('Course removed notification sent', [
                 'instructor_id' => $instructor->id,
