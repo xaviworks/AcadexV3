@@ -39,9 +39,9 @@ function Show-Help {
     Write-Host ""
     Write-Host "  Development:" -ForegroundColor Cyan
     Write-Host "  serve           " -ForegroundColor Green -NoNewline
-    Write-Host "Start production servers (Laravel + Queue + Scheduler)"
+    Write-Host "Start production servers (Laravel + Queue + Scheduler + Reverb)"
     Write-Host "  dev             " -ForegroundColor Green -NoNewline
-    Write-Host "Start dev servers (Laravel + Queue + Logs + Vite)"
+    Write-Host "Start dev servers (Laravel + Queue + Logs + Vite + Reverb)"
     Write-Host "  build           " -ForegroundColor Green -NoNewline
     Write-Host "Build assets for production (npm run build)"
     Write-Host "  ui              " -ForegroundColor Green -NoNewline
@@ -383,13 +383,13 @@ switch ($Command) {
     }
     
     "serve" {
-        Write-Host "Starting production servers (Laravel + Queue + Scheduler)..." -ForegroundColor Green
-        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80" "php artisan serve" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" --names=server,queue,scheduler
+        Write-Host "Starting production servers (Laravel + Queue + Scheduler + Reverb)..." -ForegroundColor Green
+        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80,#fbbf24" "php artisan serve" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" "php artisan reverb:start" --names=server,queue,scheduler,reverb
     }
     
     "dev" {
-        Write-Host "Starting development servers (Laravel + Queue + Logs + Vite)..." -ForegroundColor Green
-        npx concurrently -c "#93c5fd,#c4b5fd,#fb7185,#fdba74" "php artisan serve" "php artisan queue:work --tries=3 --timeout=90" "php artisan pail --timeout=0" "npm run dev" --names=server,queue,logs,vite
+        Write-Host "Starting development servers (Laravel + Queue + Logs + Vite + Reverb)..." -ForegroundColor Green
+        npx concurrently -c "#93c5fd,#c4b5fd,#fb7185,#fdba74,#fbbf24" "php artisan serve" "php artisan queue:work --tries=3 --timeout=90" "php artisan pail --timeout=0" "npm run dev" "php artisan reverb:start" --names=server,queue,logs,vite,reverb
     }
     
     "build" {

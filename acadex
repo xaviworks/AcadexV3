@@ -31,8 +31,8 @@ show_help() {
     echo -e "  ${GREEN}check${NC}           Check system requirements"
     echo ""
     echo -e "  ${BLUE}Development:${NC}"
-    echo -e "  ${GREEN}serve${NC}           Start production servers (Laravel + Queue + Scheduler)"
-    echo -e "  ${GREEN}dev${NC}             Start dev servers (Laravel + Queue + Logs + Vite)"
+    echo -e "  ${GREEN}serve${NC}           Start production servers (Laravel + Queue + Scheduler + Reverb)"
+    echo -e "  ${GREEN}dev${NC}             Start dev servers (Laravel + Queue + Logs + Vite + Reverb)"
     echo -e "  ${GREEN}build${NC}           Build assets for production (npm run build)"
     echo -e "  ${GREEN}ui${NC}              Rebuild UI assets and clear caches"
     echo -e "  ${GREEN}start${NC}           Start Laravel server only"
@@ -347,21 +347,23 @@ case "$1" in
         ;;
     
     serve)
-        echo -e "${GREEN}Starting production servers (Laravel + Queue + Scheduler)...${NC}"
-        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80" \
+        echo -e "${GREEN}Starting production servers (Laravel + Queue + Scheduler + Reverb)...${NC}"
+        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80,#fbbf24" \
             "php artisan serve" \
             "php artisan queue:work --tries=3 --timeout=90" \
             "php artisan schedule:work" \
-            --names=server,queue,scheduler
+            "php artisan reverb:start" \
+            --names=server,queue,scheduler,reverb
         ;;
     dev)
-        echo -e "${GREEN}Starting development servers (Laravel + Queue + Logs + Vite)...${NC}"
-        npx concurrently -c "#93c5fd,#c4b5fd,#fb7185,#fdba74" \
+        echo -e "${GREEN}Starting development servers (Laravel + Queue + Logs + Vite + Reverb)...${NC}"
+        npx concurrently -c "#93c5fd,#c4b5fd,#fb7185,#fdba74,#fbbf24" \
             "php artisan serve" \
             "php artisan queue:work --tries=3 --timeout=90" \
             "php artisan pail --timeout=0" \
             "npm run dev" \
-            --names=server,queue,logs,vite
+            "php artisan reverb:start" \
+            --names=server,queue,logs,vite,reverb
         ;;
     build)
         echo -e "${GREEN}Building assets for production...${NC}"

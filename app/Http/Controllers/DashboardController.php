@@ -69,6 +69,25 @@ class DashboardController extends Controller
         return view('dashboard.instructor', $dashboardData + ['subjectCharts' => $subjectCharts]);
     }
 
+    /**
+     * API endpoint for instructor dashboard data (real-time updates)
+     */
+    public function instructorData()
+    {
+        if (!session()->has('active_academic_period_id')) {
+            return response()->json(['error' => 'No active academic period'], 400);
+        }
+
+        $academicPeriodId = session('active_academic_period_id');
+        $instructorId = Auth::id();
+
+        $subjects = $this->getInstructorSubjects($instructorId, $academicPeriodId);
+        $dashboardData = $this->getInstructorDashboardData($subjects, $academicPeriodId);
+        $subjectCharts = $this->generateSubjectCharts($subjects);
+
+        return response()->json($dashboardData + ['subjectCharts' => $subjectCharts]);
+    }
+
     private function getInstructorSubjects($instructorId, $academicPeriodId)
     {
         return Subject::where(function($query) use ($instructorId) {

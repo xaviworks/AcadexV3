@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-4" x-data="instructorDashboard(@js($instructorStudents), @js($enrolledSubjectsCount), @js($totalPassedStudents), @js($totalFailedStudents), @js($termCompletions), @js($subjectCharts))" x-init="init()">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-1">Welcome Back, {{ Auth::user()->name }}! 👋</h2>
@@ -11,59 +11,78 @@
 
     {{-- Summary Cards --}}
     <div class="row g-4">
-        @php
-            $cards = [
-                [
-                    'label' => 'Total Students',
-                    'icon' => 'bi bi-people-fill',
-                    'value' => $instructorStudents,
-                    'color' => 'primary',
-                    'trend' => 'Currently enrolled'
-                ],
-                [
-                    'label' => 'Course Load',
-                    'icon' => 'bi bi-journal-text',
-                    'value' => $enrolledSubjectsCount,
-                    'color' => 'info',
-                    'trend' => 'Current semester'
-                ],
-                [
-                    'label' => 'Students Passed',
-                    'icon' => 'bi bi-check-circle-fill',
-                    'value' => $totalPassedStudents,
-                    'color' => 'success',
-                    'trend' => 'Final grades'
-                ],
-                [
-                    'label' => 'Students Failed',
-                    'icon' => 'bi bi-x-circle-fill',
-                    'value' => $totalFailedStudents,
-                    'color' => 'danger',
-                    'trend' => 'Final grades'
-                ],
-            ];
-        @endphp
-
-        @foreach ($cards as $card)
-            <div class="col-md-3">
-                <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="rounded-3 p-2 bg-{{ $card['color'] }}-subtle me-3">
-                                <i class="{{ $card['icon'] }} text-{{ $card['color'] }} fs-4"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-0">{{ $card['label'] }}</h6>
-                                <h3 class="fw-bold text-{{ $card['color'] }} mb-0">{{ $card['value'] }}</h3>
-                            </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 p-2 bg-primary-subtle me-3">
+                            <i class="bi bi-people-fill text-primary fs-4"></i>
                         </div>
-                        <p class="text-muted small mb-0">
-                            <i class="bi bi-arrow-right"></i> {{ $card['trend'] }}
-                        </p>
+                        <div>
+                            <h6 class="text-muted mb-0">Total Students</h6>
+                            <h3 class="fw-bold text-primary mb-0" x-text="data.instructorStudents"></h3>
+                        </div>
                     </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-arrow-right"></i> Currently enrolled
+                    </p>
                 </div>
             </div>
-        @endforeach
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 p-2 bg-info-subtle me-3">
+                            <i class="bi bi-journal-text text-info fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Course Load</h6>
+                            <h3 class="fw-bold text-info mb-0" x-text="data.enrolledSubjectsCount"></h3>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-arrow-right"></i> Current semester
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 p-2 bg-success-subtle me-3">
+                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Students Passed</h6>
+                            <h3 class="fw-bold text-success mb-0" x-text="data.totalPassedStudents"></h3>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-arrow-right"></i> Final grades
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 p-2 bg-danger-subtle me-3">
+                            <i class="bi bi-x-circle-fill text-danger fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Students Failed</h6>
+                            <h3 class="fw-bold text-danger mb-0" x-text="data.totalFailedStudents"></h3>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-arrow-right"></i> Final grades
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-4 mt-4">
@@ -78,37 +97,24 @@
                         <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Current Term</span>
                     </div>
                     
-                    @foreach(['prelim', 'midterm', 'prefinal', 'final'] as $term)
-                        @php
-                            $progress = $termCompletions[$term]['total'] > 0
-                                ? round(($termCompletions[$term]['graded'] / $termCompletions[$term]['total']) * 100)
-                                : 0;
-
-                            $color = match(true) {
-                                $progress === 100 => 'success',
-                                $progress > 75 => 'info',
-                                $progress > 50 => 'warning',
-                                default => 'danger'
-                            };
-                        @endphp
+                    <template x-for="(term, index) in ['prelim', 'midterm', 'prefinal', 'final']" :key="term">
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="text-capitalize mb-0">{{ ucfirst($term) }}</h6>
-                                <span class="text-{{ $color }}">{{ $progress }}%</span>
+                                <h6 class="text-capitalize mb-0" x-text="term.charAt(0).toUpperCase() + term.slice(1)"></h6>
+                                <span :class="'text-' + getProgressColor(getTermProgress(term))" x-text="getTermProgress(term) + '%'"></span>
                             </div>
                             <div class="progress" style="height: 8px;">
-                                <div class="progress-bar bg-{{ $color }}" role="progressbar" 
-                                     style="width: {{ $progress }}%;" 
-                                     aria-valuenow="{{ $progress }}" 
+                                <div :class="'progress-bar bg-' + getProgressColor(getTermProgress(term))" 
+                                     role="progressbar" 
+                                     :style="'width: ' + getTermProgress(term) + '%;'"
+                                     :aria-valuenow="getTermProgress(term)" 
                                      aria-valuemin="0" 
                                      aria-valuemax="100">
                                 </div>
                             </div>
-                            <small class="text-muted">
-                                {{ $termCompletions[$term]['graded'] }} of {{ $termCompletions[$term]['total'] }} grades submitted
-                            </small>
+                            <small class="text-muted" x-text="(data.termCompletions[term]?.graded || 0) + ' of ' + (data.termCompletions[term]?.total || 0) + ' grades submitted'"></small>
                         </div>
-                    @endforeach
+                    </template>
                 </div>
             </div>
         </div>
@@ -135,34 +141,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($subjectCharts as $subject)
-                                    @php
-                                        $avgCompletion = array_sum($subject['termPercentages']) / count($subject['termPercentages']);
-                                        $statusColor = match(true) {
-                                            $avgCompletion === 100 => 'success',
-                                            $avgCompletion >= 75 => 'info',
-                                            $avgCompletion >= 50 => 'warning',
-                                            default => 'danger'
-                                        };
-                                    @endphp
+                                <template x-for="subject in data.subjectCharts" :key="subject.code">
                                     <tr>
-                                        <td>{{ $subject['code'] }}</td>
-                                        <td>{{ $subject['description'] }}</td>
+                                        <td x-text="subject.code"></td>
+                                        <td x-text="subject.description"></td>
                                         <td class="text-center">
                                             <div class="d-flex align-items-center justify-content-center gap-2">
                                                 <div class="progress flex-grow-1" style="height: 8px;">
-                                                    <div class="progress-bar bg-{{ $statusColor }}" 
+                                                    <div :class="'progress-bar bg-' + getCompletionColor(getAvgCompletion(subject))" 
                                                          role="progressbar" 
-                                                         style="width: {{ $avgCompletion }}%">
+                                                         :style="'width: ' + getAvgCompletion(subject) + '%'">
                                                     </div>
                                                 </div>
-                                                <span class="badge bg-{{ $statusColor }}-subtle text-{{ $statusColor }} rounded-pill">
-                                                    {{ round($avgCompletion) }}%
-                                                </span>
+                                                <span :class="'badge bg-' + getCompletionColor(getAvgCompletion(subject)) + '-subtle text-' + getCompletionColor(getAvgCompletion(subject)) + ' rounded-pill'" x-text="Math.round(getAvgCompletion(subject)) + '%'"></span>
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                </template>
                             </tbody>
                         </table>
                     </div>

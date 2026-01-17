@@ -96,6 +96,12 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Real-time dashboard data endpoints
+Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::get('/stats', [DashboardController::class, 'stats'])->name('stats');
+    Route::get('/instructor/data', [DashboardController::class, 'instructorData'])->name('instructor.data');
+});
+
 // Notifications (for all authenticated users)
 Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
     Route::get('/', [NotificationController::class, 'index'])->name('index');

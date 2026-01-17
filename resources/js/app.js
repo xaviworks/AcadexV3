@@ -2,11 +2,18 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // Bootstrap Icons loaded via CDN for better caching
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
+// Initialize Laravel Echo and Axios (must be before Alpine components that use Echo)
+import './bootstrap';
+
 import Alpine from 'alpinejs';
 import intersect from '@alpinejs/intersect';
 import { getDeviceFingerprint } from './fingerprint';
 import './stores'; // Initialize Alpine stores
 import './store-helpers'; // Global helper functions
+
+// Import real-time dashboard components
+import './components/dashboard-stats';
+import './components/instructor-dashboard';
 
 // Import page-specific scripts (auto-initialize on DOMContentLoaded)
 import './pages/index.js';
