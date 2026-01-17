@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BroadcastsTableUpdates;
 
 /**
  * @property int $id
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class UserLog extends Model
 {
-    use HasFactory;
+    use HasFactory, BroadcastsTableUpdates;
 
     protected $table = 'user_logs';
     public $timestamps = true;
@@ -33,6 +34,15 @@ class UserLog extends Model
         'device',     
         'platform',   
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($model) {
+            $model->broadcastCreated('user_logs', $model);
+        });
+    }
 
     public function user()
     {

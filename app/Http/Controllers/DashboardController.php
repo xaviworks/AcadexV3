@@ -522,6 +522,24 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function adminData(Request $request)
+    {
+        $selectedDate = $request->query('date', Carbon::today()->toDateString());
+        $selectedYear = $request->query('year', Carbon::today()->year);
+        $loginStats = $this->getLoginStats($selectedDate);
+        $monthlyStats = $this->getMonthlyLoginStats($selectedYear);
+
+        return response()->json([
+            'totalUsers' => User::count(),
+            'loginCount' => $loginStats['loginCount'],
+            'failedLoginCount' => $loginStats['failedLoginCount'],
+            'successfulData' => $loginStats['successfulData'],
+            'failedData' => $loginStats['failedData'],
+            'monthlySuccessfulData' => $monthlyStats['monthlySuccessfulData'],
+            'monthlyFailedData' => $monthlyStats['monthlyFailedData']
+        ]);
+    }
+
     /**
      * API endpoint for dashboard statistics (all roles)
      * Used by real-time broadcasting to refresh dashboard stats

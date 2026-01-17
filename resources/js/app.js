@@ -18,6 +18,7 @@ import './components/chairperson-dashboard';
 import './components/gecoordinator-dashboard';
 import './components/dean-dashboard';
 import './components/vpaa-dashboard';
+import './components/admin-dashboard';
 
 // Import page-specific scripts (auto-initialize on DOMContentLoaded)
 import './pages/index.js';
