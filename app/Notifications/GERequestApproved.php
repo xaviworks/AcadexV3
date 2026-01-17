@@ -4,22 +4,18 @@ namespace App\Notifications;
 
 use App\Models\GESubjectRequest;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 /**
  * Notification sent to Chairperson when a GE assignment request is approved.
  * Supports both database and email channels.
- * Queued for async processing to prevent SMTP timeouts from blocking the UI.
+ * Broadcasts immediately for real-time updates.
  * 
  * Admin view: Full approval details with IDs
  * User view: Friendly notification about GE request approval
  */
-class GERequestApproved extends BaseNotification implements ShouldQueue
+class GERequestApproved extends BaseNotification
 {
-    use Queueable;
-
     /**
      * The number of times the job may be attempted.
      */

@@ -129,7 +129,7 @@ Alpine.data('dashboardStats', (initialStats) => ({
     if (!userId) return;
 
     window.Echo.private(`App.Models.User.${userId}`).listen('.dashboard.refresh', (e) => {
-      console.log('📊 Dashboard refresh triggered for user:', userId);
+      console.log('Dashboard refresh triggered for user:', userId);
       this.refreshStats();
     });
   },

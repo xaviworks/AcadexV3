@@ -87,7 +87,7 @@ trait SendsGERequestNotifications
                 return;
             }
             
-            $chairperson->notify(new GERequestApproved($request, $instructor, $requestedBy, $approvedBy));
+            $chairperson->notifyNow(new GERequestApproved($request, $instructor, $requestedBy, $approvedBy));
             
             Log::info('GE request approved notification sent', [
                 'request_id' => $request->id,
@@ -134,7 +134,7 @@ trait SendsGERequestNotifications
                 return;
             }
             
-            $chairperson->notify(new GERequestRejected($request, $instructor, $requestedBy, $rejectedBy));
+            $chairperson->notifyNow(new GERequestRejected($request, $instructor, $requestedBy, $rejectedBy));
             
             Log::info('GE request rejected notification sent', [
                 'request_id' => $request->id,

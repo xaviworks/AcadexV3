@@ -4,22 +4,18 @@ namespace App\Notifications;
 
 use App\Models\GESubjectRequest;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 /**
  * Notification sent to Chairperson when a GE assignment request is rejected.
  * Supports both database and email channels.
- * Queued for async processing to prevent SMTP timeouts from blocking the UI.
+ * Broadcasts immediately for real-time updates.
  * 
  * Admin view: Full rejection details with IDs
  * User view: Friendly notification about GE request rejection
  */
-class GERequestRejected extends BaseNotification implements ShouldQueue
+class GERequestRejected extends BaseNotification
 {
-    use Queueable;
-
     /**
      * The number of times the job may be attempted.
      */
