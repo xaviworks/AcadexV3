@@ -244,6 +244,41 @@ class DashboardController extends Controller
         return view('dashboard.chairperson', $data);
     }
 
+    /**
+     * API endpoint for chairperson dashboard data (real-time updates)
+     */
+    public function chairpersonData()
+    {
+        if (!session()->has('active_academic_period_id')) {
+            return response()->json(['error' => 'No active academic period'], 400);
+        }
+
+        $departmentId = Auth::user()->department_id;
+        $academicPeriodId = session('active_academic_period_id');
+        $chairpersonCourseId = Auth::user()->course_id;
+        
+        $data = [
+            "countInstructors" => User::where("role", 0)
+                ->where("department_id", $departmentId)
+                ->where("course_id", $chairpersonCourseId)
+                ->where("is_active", true)
+                ->count(),
+            "countStudents" => Student::where("department_id", $departmentId)
+                ->where("is_deleted", false)
+                ->whereHas('subjects', function($query) use ($academicPeriodId) {
+                    $query->where('academic_period_id', $academicPeriodId);
+                })
+                ->count(),
+            "countCourses" => Subject::where('department_id', $departmentId)
+                ->where('academic_period_id', $academicPeriodId)
+                ->where('is_deleted', false)
+                ->distinct('course_id')
+                ->count('course_id'),
+        ];
+
+        return response()->json($data);
+    }
+
     private function adminDashboard(Request $request)
     {
         $selectedDate = $request->query('date', Carbon::today()->toDateString());

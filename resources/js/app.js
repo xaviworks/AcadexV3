@@ -14,6 +14,7 @@ import './store-helpers'; // Global helper functions
 // Import real-time dashboard components
 import './components/dashboard-stats';
 import './components/instructor-dashboard';
+import './components/chairperson-dashboard';
 
 // Import page-specific scripts (auto-initialize on DOMContentLoaded)
 import './pages/index.js';

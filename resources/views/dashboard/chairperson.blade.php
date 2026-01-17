@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-4" x-data="chairpersonDashboard(@js($countInstructors), @js($countStudents), @js($countCourses))" x-init="init()">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-1">Course Chair Overview 👨‍💼</h2>
@@ -14,52 +14,60 @@
 
     {{-- Summary Cards --}}
     <div class="row g-4">
-        @php
-            $cards = [
-                [
-                    'label' => 'Total Instructors',
-                    'icon' => 'bi bi-person-video3',
-                    'value' => $countInstructors,
-                    'color' => 'primary',
-                    'trend' => 'Department faculty'
-                ],
-                [
-                    'label' => 'Total Students',
-                    'icon' => 'bi bi-mortarboard-fill',
-                    'value' => $countStudents,
-                    'color' => 'success',
-                    'trend' => 'Enrolled this semester'
-                ],
-                [
-                    'label' => 'Active Courses',
-                    'icon' => 'bi bi-journal-text',
-                    'value' => $countCourses,
-                    'color' => 'info',
-                    'trend' => 'Current offerings'
-                ]
-            ];
-        @endphp
-
-        @foreach ($cards as $card)
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="rounded-3 p-2 bg-{{ $card['color'] }}-subtle me-3">
-                                <i class="{{ $card['icon'] }} text-{{ $card['color'] }} fs-4"></i>
-                            </div>
-                            <div>
-                                <h6 class="text-muted mb-0">{{ $card['label'] }}</h6>
-                                <h3 class="fw-bold text-{{ $card['color'] }} mb-0">{{ $card['value'] }}</h3>
-                            </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 p-2 bg-primary-subtle me-3">
+                            <i class="bi bi-person-video3 text-primary fs-4"></i>
                         </div>
-                        <p class="text-muted small mb-0">
-                            <i class="bi bi-arrow-right"></i> {{ $card['trend'] }}
-                        </p>
+                        <div>
+                            <h6 class="text-muted mb-0">Total Instructors</h6>
+                            <h3 class="fw-bold text-primary mb-0" x-text="data.countInstructors"></h3>
+                        </div>
                     </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-arrow-right"></i> Department faculty
+                    </p>
                 </div>
             </div>
-        @endforeach
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 p-2 bg-success-subtle me-3">
+                            <i class="bi bi-mortarboard-fill text-success fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Total Students</h6>
+                            <h3 class="fw-bold text-success mb-0" x-text="data.countStudents"></h3>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-arrow-right"></i> Enrolled this semester
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 p-2 bg-info-subtle me-3">
+                            <i class="bi bi-journal-text text-info fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Active Courses</h6>
+                            <h3 class="fw-bold text-info mb-0" x-text="data.countCourses"></h3>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-arrow-right"></i> Current offerings
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-4 mt-4">

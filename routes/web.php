@@ -100,6 +100,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/stats', [DashboardController::class, 'stats'])->name('stats');
     Route::get('/instructor/data', [DashboardController::class, 'instructorData'])->name('instructor.data');
+    Route::get('/chairperson/data', [DashboardController::class, 'chairpersonData'])->name('chairperson.data');
 });
 
 // Notifications (for all authenticated users)
