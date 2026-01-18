@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-3 py-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
+<div class="container-fluid px-4 py-4">
 
   @if (session('error'))
     <script>notify.error('{{ session('error') }}');</script>
@@ -49,425 +49,429 @@
       $structureDefinition = \App\Support\Grades\FormulaStructure::STRUCTURE_DEFINITIONS[$structureTypeKey] ?? null;
     @endphp
 
-    <div class="row g-4">
-      <!-- Left Sidebar: Filters & Formula Info -->
-      <div class="col-12 col-xl-4">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-header bg-white border-0 py-3">
-            <h5 class="mb-0 fw-semibold d-flex align-items-center" style="color: #198754;">
-              <i class="bi bi-funnel me-2"></i>
-              Filters & Formula
-            </h5>
-          </div>
-          <div class="card-body">
-            <!-- Filter Form -->
-            <form method="GET" action="{{ route('instructor.activities.create') }}" class="mb-4">
-              <div class="mb-3">
-                <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
-                  <i class="bi bi-book me-1"></i>Subject
-                </label>
-                <select name="subject_id" class="form-select shadow-sm" onchange="this.form.submit()" style="border: 2px solid #e9ecef;">
-                  @foreach ($subjects as $subject)
-                    <option value="{{ $subject->id }}" {{ optional($selectedSubject)->id === $subject->id ? 'selected' : '' }}>
-                      {{ $subject->subject_code }} — {{ $subject->subject_description }}
-                    </option>
-                  @endforeach
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-list-task text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Manage Activities</span>
+    </h1>
+
+    {{-- Filters --}}
+    <div class="row mb-4 align-items-end">
+        <div class="col-md-5">
+            <form method="GET" action="{{ route('instructor.activities.create') }}">
+                <label class="form-label fw-medium mb-2">Select Course</label>
+                <select name="subject_id" class="form-select" onchange="this.form.submit()">
+                    @foreach ($subjects as $subject)
+                        <option value="{{ $subject->id }}" {{ optional($selectedSubject)->id === $subject->id ? 'selected' : '' }}>
+                            {{ $subject->subject_code }} — {{ $subject->subject_description }}
+                        </option>
+                    @endforeach
                 </select>
-              </div>
-              <div>
-                <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
-                  <i class="bi bi-calendar3 me-1"></i>Term
-                </label>
-                <select name="term" class="form-select shadow-sm" onchange="this.form.submit()" style="border: 2px solid #e9ecef;">
-                  <option value="">All Terms</option>
-                  @foreach ($termLabels as $key => $label)
-                    <option value="{{ $key }}" {{ $selectedTerm === $key ? 'selected' : '' }}>{{ $label }}</option>
-                  @endforeach
-                </select>
-              </div>
             </form>
-
-            @if ($meta)
-              <hr class="my-4" style="border-color: #e9ecef;">
-              
-              <!-- Formula Info -->
-              <div class="mb-3">
-                <p class="text-uppercase fw-semibold small mb-2" style="color: #6c757d; letter-spacing: 0.5px;">Active Formula</p>
-                <h6 class="fw-bold mb-3" style="color: #198754;">{{ $meta['label'] ?? 'ASBME Default' }}</h6>
-                
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                  <span class="badge bg-light text-dark px-3 py-2" style="font-weight: 500;">
-                    <i class="bi bi-plus-circle me-1"></i>Base {{ number_format($formulaSettings['base_score'] ?? 0, 0) }}
-                  </span>
-                  <span class="badge bg-light text-dark px-3 py-2" style="font-weight: 500;">
-                    <i class="bi bi-x-circle me-1"></i>Scale ×{{ number_format($formulaSettings['scale_multiplier'] ?? 0, 0) }}
-                  </span>
-                  <span class="badge bg-light text-dark px-3 py-2" style="font-weight: 500;">
-                    <i class="bi bi-check-circle me-1"></i>Passing {{ number_format($meta['passing_grade'] ?? ($formulaSettings['passing_grade'] ?? 0), 0) }}
-                  </span>
-                </div>
-
-                <div class="badge" style="background: linear-gradient(135deg, #198754, #20c997); color: white; font-weight: 500; padding: 0.5rem 1rem;">
-                  <i class="bi bi-diagram-3 me-1"></i>{{ $structureDefinition['label'] ?? 'Lecture Only' }}
-                </div>
-                
-                @if (! empty($meta['scope']))
-                  <div class="mt-2">
-                    <small class="text-muted">
-                      <i class="bi bi-info-circle me-1"></i>
-                      Scope: <span class="fw-semibold">{{ ucfirst($meta['scope']) }}</span>
-                    </small>
-                  </div>
-                @endif
-              </div>
-
-              @if ($structureDefinition && ! empty($structureDefinition['description']))
-                <div class="alert alert-success border-0 shadow-sm mb-3" style="background-color: #EAF8E7;">
-                  <div class="d-flex align-items-start">
-                    <i class="bi bi-lightbulb text-success me-2 mt-1"></i>
-                    <small class="text-success mb-0">{{ $structureDefinition['description'] }}</small>
-                  </div>
-                </div>
-              @endif
-            @endif
-
-            @if ($structureDetails->isNotEmpty())
-              <div>
-                <p class="text-uppercase fw-semibold small mb-2 d-flex align-items-center gap-2" style="color: #6c757d; letter-spacing: 0.5px;">
-                  Component Breakdown
-                  <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Relative = percent of parent; Overall = effective percent of the course. Decimal shown for backend storage" style="font-size: 0.9rem;"></i>
-                </p>
-                <div class="list-group list-group-flush">
-                  @php
-                    $grouped = collect($structureDetails ?? [])->groupBy(function($d) {
-                      $parts = explode('.', $d['activity_type']);
-                      return $parts[0] ?? $d['activity_type'];
-                    });
-                  @endphp
-                  @foreach ($grouped as $groupKey => $children)
-                    @php
-                      $mainLabel = \App\Support\Grades\FormulaStructure::formatLabel($groupKey);
-                      $mainOverall = $children->sum('weight_percent');
-                      // If the main itself is a leaf, it may appear as an item with activity_type == groupKey
-                      $mainLeaf = $structureDetails->firstWhere('activity_type', $groupKey);
-                    @endphp
-                    <div class="list-group-item px-0 border-0 bg-light-subtle py-2">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <div class="fw-semibold small text-dark">{{ $mainLabel }}</div>
-                          <div class="text-muted" style="font-size: 0.75rem;">
-                            Overall contribution: {{ number_format($mainOverall, 1) }}% ({{ number_format($mainOverall / 100, 2) }})
-                          </div>
-                        </div>
-                        <div class="text-end small text-muted">{{ $mainLeaf && $mainLeaf['max_assessments'] ? 'Max ' . $mainLeaf['max_assessments'] : '' }}</div>
-                      </div>
-                    </div>
-
-                    @foreach ($children as $detail)
-                      @if ($detail['activity_type'] !== $groupKey)
-                        <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 ps-4">
-                          <div>
-                            <div class="fw-semibold small">{{ $detail['label'] }}</div>
-                            <div class="text-muted" style="font-size: 0.75rem;">
-                              {{ $detail['max_assessments'] ? 'Max '.$detail['max_assessments'] : 'Flexible' }}
-                            </div>
-                          </div>
-                          <div class="text-end">
-                            <div class="badge bg-success-subtle text-success fw-semibold">
-                              {{ number_format($detail['relative_weight_percent'] ?? $detail['weight_percent'], 1) }}%
-                            </div>
-                            <div class="text-muted" style="font-size: 0.7rem;">
-                              Overall {{ number_format($detail['weight_percent'], 1) }}% ({{ number_format(($detail['weight_percent'] ?? 0) / 100, 2) }})
-                            </div>
-                          </div>
-                        </div>
-                      @endif
-                    @endforeach
-                  @endforeach
-                </div>
-              </div>
-            @endif
-          </div>
         </div>
-      </div>
-
-      <!-- Right Section: Alignment & Activities -->
-      <div class="col-12 col-xl-8">
-        <!-- Formula Alignment Card -->
-        <div class="card border-0 shadow-sm mb-4">
-          <div class="card-header bg-white border-0 py-3">
-            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
-              <div>
-                <h5 class="mb-1 fw-semibold d-flex align-items-center" style="color: #198754;">
-                  <i class="bi bi-bar-chart-line me-2"></i>
-                  Formula Alignment Status
-                </h5>
-                <small class="text-muted">Track assessment distribution across all terms</small>
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                @if ($isAligned)
-                  <span class="badge bg-success px-3 py-2" style="font-size: 0.9rem;">
-                    <i class="bi bi-check-circle me-1"></i>Perfectly Aligned
-                  </span>
-                @else
-                  <span class="badge bg-danger px-3 py-2" style="font-size: 0.9rem;">
-                    <i class="bi bi-exclamation-triangle me-1"></i>Needs Attention
-                  </span>
-                @endif
-                
-                @if ($selectedSubject)
-                  <form method="POST" action="{{ route('instructor.activities.realign') }}" class="d-inline">
-                    @csrf
-                    <input type="hidden" name="subject_id" value="{{ $selectedSubject->id }}">
-                    @if ($selectedTerm)
-                      <input type="hidden" name="term" value="{{ $selectedTerm }}">
-                    @endif
-                    <button 
-                      type="submit" 
-                      class="btn btn-outline-success btn-sm shadow-sm"
-                      style="font-weight: 500;"
-                      title="Auto-adjust activities to match formula"
-                    >
-                      <i class="bi bi-arrow-repeat me-1"></i>Realign Activities
-                    </button>
-                  </form>
-                @endif
-              </div>
-            </div>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table align-middle mb-0" style="font-size: 0.9rem;">
-                <thead style="background-color: #f8f9fa;">
-                  <tr>
-                    <th class="px-3 py-3 fw-semibold" style="min-width: 220px; color: #198754;">Component</th>
-                    <th class="text-center px-3 py-3 fw-semibold" style="color: #198754;">Relative (Overall) <i class="bi bi-info-circle ms-1 text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Relative = percent of parent; Overall (Decimal) shows effective percent in course. Use decimals for backend weight." style="font-size: 0.9rem;"></i></th>
-                    <th class="text-center px-3 py-3 fw-semibold" style="color: #198754;">Max/Term</th>
+        <div class="col-md-3">
+            <form method="GET" action="{{ route('instructor.activities.create') }}">
+                <input type="hidden" name="subject_id" value="{{ optional($selectedSubject)->id }}">
+                <label class="form-label fw-medium mb-2">Filter by Term</label>
+                <select name="term" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Terms</option>
                     @foreach ($termLabels as $key => $label)
-                      <th class="text-center px-3 py-3 fw-semibold" style="color: #198754;">{{ $label }}</th>
+                        <option value="{{ $key }}" {{ $selectedTerm === $key ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
-                  </tr>
-                </thead>
-                <tbody>
-                  @php
-                    $grouped_table = collect($structureDetails ?? [])->groupBy(function($d) {
-                      $parts = explode('.', $d['activity_type']);
-                      return $parts[0] ?? $d['activity_type'];
-                    });
-                  @endphp
-                  @foreach ($grouped_table as $groupKey => $children)
-                    @php
-                      $mainLabel = \App\Support\Grades\FormulaStructure::formatLabel($groupKey);
-                      $mainOverall = $children->sum('weight_percent');
-                      $mainLeaf = $structureDetails->firstWhere('activity_type', $groupKey);
-                      // Only show header row if there are nested children (activity types with dots)
-                      $hasNestedChildren = $children->contains(fn($c) => $c['activity_type'] !== $groupKey);
-                    @endphp
-                    @if ($hasNestedChildren)
-                      <tr class="border-bottom bg-white">
-                        <td class="px-3 py-3">
-                          <div class="fw-semibold" style="color: #212529;">{{ $mainLabel }}</div>
-                          <div class="text-muted small">{{ $mainLeaf ? $mainLeaf['activity_type'] : '' }}</div>
-                        </td>
-                        <td class="text-center px-3 py-3">
-                          <div class="fw-semibold" style="color: #198754;">-</div>
-                          <div class="text-muted small">Overall {{ number_format($mainOverall, 1) }}% ({{ number_format($mainOverall / 100, 2) }})</div>
-                        </td>
-                        <td class="text-center px-3 py-3">
-                          <span class="badge bg-light text-dark">
-                            {{ $mainLeaf && $mainLeaf['max_assessments'] ? $mainLeaf['max_assessments'] : '∞' }}
-                          </span>
-                        </td>
-                        @foreach ($termLabels as $termKey => $termLabel)
-                          <td class="text-center px-3 py-3">-</td>
-                        @endforeach
-                      </tr>
-                    @endif
-                    @foreach ($children as $detail)
-                      <tr class="border-bottom">
-                        <td class="px-3 py-3 {{ $hasNestedChildren ? 'ps-4' : '' }}">
-                          <div class="fw-semibold" style="color: #212529;">{{ $detail['label'] }}</div>
-                          <div class="text-muted small">{{ $detail['activity_type'] }}</div>
-                        </td>
-                        <td class="text-center px-3 py-3">
-                          <div class="fw-semibold" style="color: #198754;">{{ number_format($detail['relative_weight_percent'] ?? $detail['weight_percent'], 1) }}%</div>
-                          <div class="text-muted small">Overall {{ number_format($detail['weight_percent'], 1) }}% ({{ number_format($detail['weight_percent'] / 100, 2) }})</div>
-                        </td>
-                        <td class="text-center px-3 py-3">
-                          <span class="badge bg-light text-dark">
-                            {{ $detail['max_assessments'] ? $detail['max_assessments'] : '∞' }}
-                          </span>
-                        </td>
-                        @foreach ($termLabels as $termKey => $termLabel)
-                          @php
-                            $termComponent = collect($componentStatuses[$termKey]['components'] ?? [])->firstWhere('type', $detail['activity_type']);
-                            $count = $termComponent['count'] ?? 0;
-                            $status = $termComponent['status'] ?? 'missing';
-                            $minRequired = $termComponent['min_required'] ?? 1;
-                            $maxAllowed = $termComponent['max_allowed'] ?? null;
-                            $badgeClass = match ($status) {
-                              'ok' => 'bg-success',
-                              'exceeds' => 'bg-danger',
-                              default => 'bg-warning text-dark',
-                            };
-                            $badgeIcon = match ($status) {
-                              'ok' => 'check-circle',
-                              'exceeds' => 'x-circle',
-                              default => 'exclamation-circle',
-                            };
-                            $tooltip = match ($status) {
-                              'ok' => 'Matches the active formula',
-                              'exceeds' => 'Exceeds the maximum of '.($maxAllowed ?? 'n/a').' assessments',
-                              default => 'Add at least '.$minRequired.' assessment'.($minRequired > 1 ? 's' : ''),
-                            };
-                          @endphp
-                          <td class="text-center px-3 py-3">
-                            <span 
-                              class="badge {{ $badgeClass }} px-3 py-2" 
-                              data-bs-toggle="tooltip" 
-                              data-bs-placement="top" 
-                              title="{{ $tooltip }}"
-                              style="font-size: 0.85rem; cursor: help;"
-                            >
-                              <i class="bi bi-{{ $badgeIcon }} me-1"></i>{{ $count }}
-                            </span>
-                          </td>
-                        @endforeach
-                      </tr>
-                    @endforeach
-                  @endforeach
-                    
-
-                  @foreach ($termLabels as $termKey => $termLabel)
-                    @if (! empty($componentStatuses[$termKey]['extras']))
-                      <tr style="background-color: #fff3cd;">
-                        <td colspan="{{ 3 + count($termLabels) }}" class="px-3 py-3 small">
-                          <div class="d-flex align-items-start">
-                            <i class="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
-                            <div>
-                              <strong class="text-warning">{{ $termLabel }} Extra Components:</strong>
-                              <div class="mt-1">
-                                @foreach ($componentStatuses[$termKey]['extras'] as $extra)
-                                  <span class="badge bg-warning text-dark me-2 mb-1">
-                                    {{ $extra['type'] }} × {{ $extra['count'] }}
-                                  </span>
-                                @endforeach
-                              </div>
-                              <span class="text-muted">These components are not defined in the current formula.</span>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    @endif
-                  @endforeach
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </select>
+            </form>
         </div>
-
-        <!-- Activities List Card -->
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white border-0 py-3">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-              <div>
-                <h5 class="mb-1 fw-semibold d-flex align-items-center" style="color: #198754;">
-                  <i class="bi bi-list-task me-2"></i>
-                  Activities
-                </h5>
-                <small class="text-muted">
-                  @if ($selectedSubject)
-                    {{ $selectedSubject->subject_code }} • {{ $selectedTerm ? $termLabels[$selectedTerm] : 'All Terms' }}
-                  @else
-                    Select a subject to view activities
-                  @endif
-                </small>
-              </div>
-              <button 
-                type="button" 
-                class="btn btn-success shadow-sm" 
-                data-bs-toggle="modal" 
-                data-bs-target="#createActivityModal"
-                style="font-weight: 500;"
-              >
-                <i class="bi bi-plus-circle me-1"></i>New Activity
-              </button>
-            </div>
-          </div>
-          <div class="card-body p-0">
-            @if ($activities->isNotEmpty())
-              <div class="table-responsive">
-                <table class="table align-middle mb-0" style="font-size: 0.9rem;">
-                  <thead style="background-color: #f8f9fa;">
-                    <tr>
-                      <th class="px-3 py-3 fw-semibold" style="color: #198754;">Title</th>
-                      <th class="px-3 py-3 fw-semibold" style="color: #198754;">Component</th>
-                      <th class="text-center px-3 py-3 fw-semibold" style="color: #198754;">Term</th>
-                      <th class="text-center px-3 py-3 fw-semibold" style="color: #198754;">Items</th>
-                      <th class="text-center px-3 py-3 fw-semibold" style="color: #198754;">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @foreach ($activities as $activity)
-                      @php
-                        $activityLabel = optional($structureDetails->firstWhere('activity_type', mb_strtolower($activity->type)))['label']
-                          ?? \App\Support\Grades\FormulaStructure::formatLabel($activity->type);
-                      @endphp
-                      <tr class="border-bottom" style="transition: background-color 0.2s;">
-                        <td class="px-3 py-3">
-                          <div class="fw-semibold" style="color: #212529;">{{ $activity->title }}</div>
-                        </td>
-                        <td class="px-3 py-3">
-                          <span class="badge bg-light text-dark px-2 py-1">{{ $activityLabel }}</span>
-                        </td>
-                        <td class="text-center px-3 py-3">
-                          <span class="badge bg-success-subtle text-success px-2 py-1 text-capitalize">
-                            {{ $activity->term }}
-                          </span>
-                        </td>
-                        <td class="text-center px-3 py-3">
-                          <span class="fw-semibold" style="color: #198754;">{{ $activity->number_of_items }}</span>
-                        </td>
-                        <td class="text-center px-3 py-3">
-                          <button 
-                            type="button" 
-                            class="btn btn-sm btn-outline-danger shadow-sm" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#confirmDeleteModal" 
-                            data-activity-id="{{ $activity->id }}" 
-                            data-activity-title="{{ $activity->title }}"
-                            title="Delete activity"
-                          >
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    @endforeach
-                  </tbody>
-                </table>
-              </div>
+        <div class="col-md-4 text-end">
+            @if ($isAligned)
+                <span class="badge bg-success px-3 py-2 me-2" style="font-size: 0.9rem;">
+                    <i class="bi bi-check-circle me-1"></i>Perfectly Aligned
+                </span>
             @else
-              <div class="p-5 text-center">
-                <div class="mb-3">
-                  <i class="bi bi-inbox text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                </div>
-                <h6 class="fw-semibold mb-2" style="color: #6c757d;">No Activities Found</h6>
-                <p class="text-muted small mb-3">No activities match your current filter selection.</p>
-                <button 
-                  type="button" 
-                  class="btn btn-success btn-sm shadow-sm" 
-                  data-bs-toggle="modal" 
-                  data-bs-target="#createActivityModal"
-                >
-                  <i class="bi bi-plus-circle me-1"></i>Create Your First Activity
-                </button>
-              </div>
+                <span class="badge bg-warning px-3 py-2 me-2" style="font-size: 0.9rem;">
+                    <i class="bi bi-exclamation-triangle me-1"></i>Needs Alignment
+                </span>
             @endif
-          </div>
         </div>
-      </div>
     </div>
 
+    {{-- Tabs --}}
+    <ul class="nav nav-tabs mb-0" id="activityTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-top border-0 px-4 py-3 fw-semibold" 
+                    id="activities-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#activities" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="activities" 
+                    aria-selected="true">
+                My Activities
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-top border-0 px-4 py-3 fw-semibold" 
+                    id="alignment-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#alignment" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="alignment" 
+                    aria-selected="false">
+                Formula Alignment
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-top border-0 px-4 py-3 fw-semibold" 
+                    id="formula-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#formula" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="formula" 
+                    aria-selected="false">
+                Formula Info
+            </button>
+        </li>
+    </ul>
+
+    <style>
+        #activityTabs {
+            background: transparent !important;
+        }
+        #activityTabs .nav-link {
+            background-color: transparent !important;
+            color: #6c757d !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        #activityTabs .nav-link:not(.active):hover {
+            background-color: rgba(25, 135, 84, 0.08) !important;
+            color: var(--dark-green) !important;
+        }
+        #activityTabs .nav-link.active {
+            background-color: rgba(25, 135, 84, 0.12) !important;
+            color: var(--dark-green) !important;
+            border-bottom: 3px solid var(--dark-green) !important;
+            margin-bottom: -2px;
+            z-index: 1;
+        }
+        #activityTabsContent {
+            background: transparent !important;
+            padding-top: 1.5rem;
+        }
+        #activityTabsContent .tab-pane {
+            background: transparent !important;
+        }
+    </style>
+
+    <div class="tab-content" id="activityTabsContent" style="background: transparent;">
+        {{-- Tab 1: My Activities --}}
+        <div class="tab-pane fade show active" id="activities" role="tabpanel" aria-labelledby="activities-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <p class="text-muted mb-0">
+                    @if ($selectedSubject)
+                        {{ $selectedSubject->subject_code }} • {{ $selectedTerm ? $termLabels[$selectedTerm] : 'All Terms' }}
+                    @else
+                        Select a subject to view activities
+                    @endif
+                </p>
+                <button 
+                    type="button" 
+                    class="btn btn-success" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#createActivityModal"
+                >
+                    <i class="bi bi-plus-circle me-1"></i>New Activity
+                </button>
+            </div>
+
+            @if ($activities->isNotEmpty())
+                <div class="card shadow-sm">
+                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                        <table class="table table-bordered table-hover align-middle mb-0">
+                            <thead class="table-light" style="position: sticky; top: 0; z-index: 10;">
+                                <tr>
+                                    <th class="text-center" style="width: 60px;">#</th>
+                                    <th>Title</th>
+                                    <th>Component</th>
+                                    <th class="text-center">Term</th>
+                                    <th class="text-center">Items</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($activities as $index => $activity)
+                                    @php
+                                        $activityLabel = optional($structureDetails->firstWhere('activity_type', mb_strtolower($activity->type)))['label']
+                                            ?? \App\Support\Grades\FormulaStructure::formatLabel($activity->type);
+                                    @endphp
+                                    <tr>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border" style="font-size: 0.9rem; padding: 0.4rem 0.6rem; min-width: 35px;">
+                                                {{ $index + 1 }}
+                                            </span>
+                                        </td>
+                                        <td class="fw-semibold">{{ $activity->title }}</td>
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success px-2 py-1">{{ $activityLabel }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark px-2 py-1 text-capitalize">
+                                                {{ $termLabels[$activity->term] ?? $activity->term }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center fw-semibold" style="color: #198754;">{{ $activity->number_of_items }}</td>
+                                        <td class="text-center">
+                                            <button 
+                                                type="button"
+                                                class="btn btn-danger btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmDeleteModal"
+                                                data-activity-id="{{ $activity->id }}"
+                                                data-activity-title="{{ $activity->title }}"
+                                                data-delete-url="{{ route('instructor.activities.delete', $activity->id) }}"
+                                                title="Delete activity"
+                                            >
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @else
+                <div class="card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-inbox text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
+                        <h6 class="fw-semibold mb-2" style="color: #6c757d;">No Activities Found</h6>
+                        <p class="text-muted small mb-3">No activities match your current filter selection.</p>
+                        <button 
+                            type="button" 
+                            class="btn btn-success btn-sm shadow-sm" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#createActivityModal"
+                        >
+                            <i class="bi bi-plus-circle me-1"></i>Create Your First Activity
+                        </button>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        {{-- Tab 2: Formula Alignment --}}
+        <div class="tab-pane fade" id="alignment" role="tabpanel" aria-labelledby="alignment-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <p class="text-muted mb-0">Track assessment distribution across all terms</p>
+                @if ($selectedSubject)
+                    <form method="POST" action="{{ route('instructor.activities.realign') }}" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="subject_id" value="{{ $selectedSubject->id }}">
+                        @if ($selectedTerm)
+                            <input type="hidden" name="term" value="{{ $selectedTerm }}">
+                        @endif
+                        <button 
+                            type="submit" 
+                            class="btn btn-success"
+                            title="Auto-adjust activities to match formula"
+                        >
+                            <i class="bi bi-arrow-repeat me-1"></i>Realign Activities
+                        </button>
+                    </form>
+                @endif
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Component</th>
+                                <th class="text-center">Weight</th>
+                                <th class="text-center">Max/Term</th>
+                                @foreach ($termLabels as $key => $label)
+                                    <th class="text-center">{{ $label }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $grouped_table = collect($structureDetails ?? [])->groupBy(function($d) {
+                                    $parts = explode('.', $d['activity_type']);
+                                    return $parts[0] ?? $d['activity_type'];
+                                });
+                            @endphp
+                            @foreach ($grouped_table as $groupKey => $children)
+                                @php
+                                    $mainLabel = \App\Support\Grades\FormulaStructure::formatLabel($groupKey);
+                                    $mainOverall = $children->sum('weight_percent');
+                                    $mainLeaf = $structureDetails->firstWhere('activity_type', $groupKey);
+                                    $hasNestedChildren = $children->contains(fn($c) => $c['activity_type'] !== $groupKey);
+                                @endphp
+                                @if ($hasNestedChildren)
+                                    <tr class="border-bottom bg-white">
+                                        <td class="fw-semibold">
+                                            {{ $mainLabel }}
+                                            <div class="text-muted small">{{ $mainLeaf ? $mainLeaf['activity_type'] : '' }}</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="fw-semibold" style="color: #198754;">-</div>
+                                            <div class="text-muted small">{{ number_format($mainOverall, 1) }}%</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark">
+                                                {{ $mainLeaf && $mainLeaf['max_assessments'] ? $mainLeaf['max_assessments'] : '∞' }}
+                                            </span>
+                                        </td>
+                                        @foreach ($termLabels as $termKey => $termLabel)
+                                            <td class="text-center">-</td>
+                                        @endforeach
+                                    </tr>
+                                @endif
+                                @foreach ($children as $detail)
+                                    <tr class="border-bottom">
+                                        <td class="{{ $hasNestedChildren ? 'ps-4' : '' }}">
+                                            <div class="fw-semibold">{{ $detail['label'] }}</div>
+                                            <div class="text-muted small">{{ $detail['activity_type'] }}</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="fw-semibold" style="color: #198754;">{{ number_format($detail['relative_weight_percent'] ?? $detail['weight_percent'], 1) }}%</div>
+                                            <div class="text-muted small">{{ number_format($detail['weight_percent'], 1) }}%</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark">
+                                                {{ $detail['max_assessments'] ? $detail['max_assessments'] : '∞' }}
+                                            </span>
+                                        </td>
+                                        @foreach ($termLabels as $termKey => $termLabel)
+                                            @php
+                                                $termComponent = collect($componentStatuses[$termKey]['components'] ?? [])->firstWhere('type', $detail['activity_type']);
+                                                $count = $termComponent['count'] ?? 0;
+                                                $status = $termComponent['status'] ?? 'missing';
+                                                $badgeClass = match ($status) {
+                                                    'ok' => 'bg-success',
+                                                    'exceeds' => 'bg-danger',
+                                                    default => 'bg-warning text-dark',
+                                                };
+                                                $badgeIcon = match ($status) {
+                                                    'ok' => 'check-circle',
+                                                    'exceeds' => 'x-circle',
+                                                    default => 'exclamation-circle',
+                                                };
+                                            @endphp
+                                            <td class="text-center">
+                                                <span class="badge {{ $badgeClass }} px-2 py-1">
+                                                    <i class="bi bi-{{ $badgeIcon }} me-1"></i>{{ $count }}
+                                                </span>
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tab 3: Formula Info --}}
+        <div class="tab-pane fade" id="formula" role="tabpanel" aria-labelledby="formula-tab">
+            @if ($meta)
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3" style="color: #198754;">{{ $meta['label'] ?? 'ASBME Default' }}</h6>
+                        
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge bg-light text-dark border px-3 py-2">
+                                <i class="bi bi-plus-circle me-1"></i>Base {{ number_format($formulaSettings['base_score'] ?? 0, 0) }}
+                            </span>
+                            <span class="badge bg-light text-dark border px-3 py-2">
+                                <i class="bi bi-x-circle me-1"></i>Scale ×{{ number_format($formulaSettings['scale_multiplier'] ?? 0, 0) }}
+                            </span>
+                            <span class="badge bg-light text-dark border px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i>Passing {{ number_format($meta['passing_grade'] ?? ($formulaSettings['passing_grade'] ?? 0), 0) }}
+                            </span>
+                        </div>
+
+                        <div class="badge mb-3" style="background: linear-gradient(135deg, #198754, #20c997); color: white; font-weight: 500; padding: 0.5rem 1rem;">
+                            <i class="bi bi-diagram-3 me-1"></i>{{ $structureDefinition['label'] ?? 'Lecture Only' }}
+                        </div>
+                        
+                        @if (! empty($meta['scope']))
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Scope: <span class="fw-semibold">{{ ucfirst($meta['scope']) }}</span>
+                                </small>
+                            </div>
+                        @endif
+
+                        @if ($structureDefinition && ! empty($structureDefinition['description']))
+                            <div class="alert alert-success border-0 mb-3" style="background-color: #EAF8E7;">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-lightbulb text-success me-2 mt-1"></i>
+                                    <small class="text-success mb-0">{{ $structureDefinition['description'] }}</small>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($structureDetails->isNotEmpty())
+                            <hr class="my-3">
+                            <h6 class="fw-semibold mb-3">Component Breakdown</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Component</th>
+                                            <th class="text-center">Weight</th>
+                                            <th class="text-center">Max</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            $grouped = collect($structureDetails ?? [])->groupBy(function($d) {
+                                                $parts = explode('.', $d['activity_type']);
+                                                return $parts[0] ?? $d['activity_type'];
+                                            });
+                                        @endphp
+                                        @foreach ($grouped as $groupKey => $children)
+                                            @php
+                                                $mainLabel = \App\Support\Grades\FormulaStructure::formatLabel($groupKey);
+                                                $mainOverall = $children->sum('weight_percent');
+                                                $mainLeaf = $structureDetails->firstWhere('activity_type', $groupKey);
+                                            @endphp
+                                            <tr class="table-light">
+                                                <td class="fw-semibold">{{ $mainLabel }}</td>
+                                                <td class="text-center fw-semibold">{{ number_format($mainOverall, 1) }}%</td>
+                                                <td class="text-center">{{ $mainLeaf && $mainLeaf['max_assessments'] ? $mainLeaf['max_assessments'] : '∞' }}</td>
+                                            </tr>
+                                            @foreach ($children as $detail)
+                                                @if ($detail['activity_type'] !== $groupKey)
+                                                    <tr>
+                                                        <td class="ps-4">{{ $detail['label'] }}</td>
+                                                        <td class="text-center">{{ number_format($detail['weight_percent'], 1) }}%</td>
+                                                        <td class="text-center">{{ $detail['max_assessments'] ? $detail['max_assessments'] : '∞' }}</td>
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @else
+                <div class="card shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <p class="text-muted">No formula information available.</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
