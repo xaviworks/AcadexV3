@@ -32,39 +32,60 @@
 </div>
 
 @if ($componentComponents->isNotEmpty())
-    <div class="alert alert-light border shadow-sm py-2 px-3 mb-3" id="componentUsageSummary">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
+    <div class="border rounded shadow-sm py-3 px-3 mb-3" id="componentUsageSummary" style="background-color: rgba(25, 135, 84, 0.03);">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
             <div class="d-flex align-items-center gap-2">
                 <i class="bi bi-sliders text-success"></i>
-                <span class="fw-semibold">Activity Slots</span>
+                <span class="fw-semibold text-dark">Activity Slots:</span>
             </div>
-            <span class="text-muted">·</span>
             @foreach ($componentComponents as $component)
                 @php
                     $isFull = $component['max_allowed'] !== null && $component['available_slots'] === 0;
                     $isMissing = $component['status'] === 'missing';
-                    $badgeClass = $isFull
-                        ? 'bg-danger-subtle text-danger border-danger'
-                        : ($isMissing ? 'bg-warning-subtle text-warning border-warning' : 'bg-success-subtle text-success border-success');
+                    $textClass = $isFull
+                        ? 'text-danger'
+                        : ($isMissing ? 'text-warning' : 'text-success');
                     $maxLabel = $component['max_allowed'] ?? '∞';
-                    $remaining = $component['max_allowed'] !== null
-                        ? max(0, $component['max_allowed'] - $component['count'])
-                        : null;
                 @endphp
-                <div class="px-3 py-1 rounded-pill border {{ $badgeClass }}" style="font-size: 0.85rem;">
-                    <strong>{{ $component['count'] }}</strong> {{ $component['label'] }}
-                    @if ($maxLabel !== '∞')
-                        <span class="text-muted">/ {{ $maxLabel }} max</span>
-                    @endif
+                <div class="d-flex align-items-center gap-1">
+                    <span class="{{ $textClass }} fw-medium">
+                        <strong>{{ $component['count'] }}/{{ $maxLabel }}</strong> {{ $component['label'] }}
+                    </span>
                     @if ($isFull)
-                        <span class="badge bg-danger ms-1" style="font-size: 0.7rem;">Full</span>
+                        <span class="badge bg-danger" style="font-size: 0.65rem;">Full</span>
                     @elseif ($isMissing)
-                        <span class="badge bg-warning ms-1" style="font-size: 0.7rem;">Required</span>
-                    @elseif ($remaining !== null && $remaining > 0)
-                        <span class="text-muted ms-1">({{ $remaining }} more)</span>
+                        <span class="badge bg-warning" style="font-size: 0.65rem;">Required</span>
                     @endif
                 </div>
+                @if (!$loop->last)
+                    <span class="text-muted" style="font-size: 1.2rem;">·</span>
+                @endif
             @endforeach
+            @if (!empty($formulaMeta))
+                <span class="text-muted mx-2" style="font-size: 1.2rem;">|</span>
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-calculator text-success"></i>
+                    <span class="fw-semibold text-dark">{{ $formulaMeta['label'] ?? 'ASBME Default' }}</span>
+                    @php
+                        $scopeLabel = strtolower($formulaMeta['scope'] ?? 'global');
+                        $scopeClass = match($scopeLabel) {
+                            'subject' => 'bg-primary-subtle text-primary border-primary',
+                            'course' => 'bg-info-subtle text-info border-info',
+                            'department' => 'bg-warning-subtle text-warning border-warning',
+                            default => 'bg-success-subtle text-success border-success'
+                        };
+                        $scopeIcon = match($scopeLabel) {
+                            'subject' => 'bi-journal-text',
+                            'course' => 'bi-mortarboard',
+                            'department' => 'bi-building',
+                            default => 'bi-globe'
+                        };
+                    @endphp
+                    <span class="badge {{ $scopeClass }}" style="font-size: 0.7rem;">
+                        <i class="{{ $scopeIcon }}"></i> {{ ucfirst($scopeLabel) }}
+                    </span>
+                </div>
+            @endif
         </div>
     </div>
 @endif
@@ -200,8 +221,8 @@
 
             <div class="modal-content rounded-4 shadow-lg overflow-hidden">
                 <!-- Modal Header -->
-                <div class="modal-header text-white" style="background: linear-gradient(135deg, #4da674, #3d865f);">
-                    <h5 class="modal-title" id="addActivityModalLabel">📋 Add New Activity</h5>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addActivityModalLabel"><i class="bi bi-plus-circle me-2"></i>Add New Activity</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 

@@ -69,6 +69,7 @@
                 'term' => $term,
                 'activityTypes' => $activityTypes,
                 'componentStatus' => $componentStatus ?? null,
+                'formulaMeta' => $formulaMeta ?? null,
             ])
             <form id="gradeForm" method="POST" action="{{ route('instructor.grades.store') }}" data-no-page-loader="true">
                 @csrf

@@ -36,32 +36,6 @@
 @endphp
 
 @if ($hasData)
-    @if (!empty($formulaMeta))
-        <div class="alert alert-light border shadow-sm py-2 px-3 mb-3">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <i class="bi bi-calculator text-success"></i>
-                <span class="fw-semibold">{{ $formulaMeta['label'] ?? 'ASBME Default' }}</span>
-                @php
-                    $scopeLabel = strtolower($formulaMeta['scope'] ?? 'global');
-                    $scopeClass = match($scopeLabel) {
-                        'subject' => 'bg-primary-subtle text-primary border-primary',
-                        'course' => 'bg-info-subtle text-info border-info',
-                        'department' => 'bg-warning-subtle text-warning border-warning',
-                        default => 'bg-success-subtle text-success border-success'
-                    };
-                    $scopeIcon = match($scopeLabel) {
-                        'subject' => 'bi-journal-text',
-                        'course' => 'bi-mortarboard',
-                        'department' => 'bi-building',
-                        default => 'bi-globe'
-                    };
-                @endphp
-                <span class="badge {{ $scopeClass }}" style="font-size: 0.75rem;">
-                    <i class="{{ $scopeIcon }}"></i> {{ ucfirst($scopeLabel) }}
-                </span>
-            </div>
-        </div>
-    @endif
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
             <div class="input-group shadow-sm" style="width: 300px;" x-data="{ 

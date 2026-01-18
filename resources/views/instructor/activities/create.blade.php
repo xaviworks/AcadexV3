@@ -54,45 +54,6 @@
         <span>Manage Activities</span>
     </h1>
 
-    {{-- Filters --}}
-    <div class="row mb-4 align-items-end">
-        <div class="col-md-5">
-            <form method="GET" action="{{ route('instructor.activities.create') }}">
-                <label class="form-label fw-medium mb-2">Select Course</label>
-                <select name="subject_id" class="form-select" onchange="this.form.submit()">
-                    @foreach ($subjects as $subject)
-                        <option value="{{ $subject->id }}" {{ optional($selectedSubject)->id === $subject->id ? 'selected' : '' }}>
-                            {{ $subject->subject_code }} — {{ $subject->subject_description }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
-        </div>
-        <div class="col-md-3">
-            <form method="GET" action="{{ route('instructor.activities.create') }}">
-                <input type="hidden" name="subject_id" value="{{ optional($selectedSubject)->id }}">
-                <label class="form-label fw-medium mb-2">Filter by Term</label>
-                <select name="term" class="form-select" onchange="this.form.submit()">
-                    <option value="">All Terms</option>
-                    @foreach ($termLabels as $key => $label)
-                        <option value="{{ $key }}" {{ $selectedTerm === $key ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-            </form>
-        </div>
-        <div class="col-md-4 text-end">
-            @if ($isAligned)
-                <span class="badge bg-success px-3 py-2 me-2" style="font-size: 0.9rem;">
-                    <i class="bi bi-check-circle me-1"></i>Perfectly Aligned
-                </span>
-            @else
-                <span class="badge bg-warning px-3 py-2 me-2" style="font-size: 0.9rem;">
-                    <i class="bi bi-exclamation-triangle me-1"></i>Needs Alignment
-                </span>
-            @endif
-        </div>
-    </div>
-
     {{-- Tabs --}}
     <ul class="nav nav-tabs mb-0" id="activityTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
         <li class="nav-item" role="presentation">
@@ -133,6 +94,45 @@
         </li>
     </ul>
 
+    {{-- Filters section - visible only on My Activities tab --}}
+    <div class="row mb-4 align-items-end" id="activityFilters" style="padding-top: 1rem;">
+        <div class="col-md-5">
+            <form method="GET" action="{{ route('instructor.activities.create') }}">
+                <label class="form-label fw-medium mb-2">Select Course</label>
+                <select name="subject_id" class="form-select" onchange="this.form.submit()">
+                    @foreach ($subjects as $subject)
+                        <option value="{{ $subject->id }}" {{ optional($selectedSubject)->id === $subject->id ? 'selected' : '' }}>
+                            {{ $subject->subject_code }} — {{ $subject->subject_description }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
+        <div class="col-md-3">
+            <form method="GET" action="{{ route('instructor.activities.create') }}">
+                <input type="hidden" name="subject_id" value="{{ optional($selectedSubject)->id }}">
+                <label class="form-label fw-medium mb-2">Filter by Term</label>
+                <select name="term" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Terms</option>
+                    @foreach ($termLabels as $key => $label)
+                        <option value="{{ $key }}" {{ $selectedTerm === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
+        <div class="col-md-4 text-end">
+            @if ($isAligned)
+                <span class="badge bg-success px-3 py-2 me-2" style="font-size: 0.9rem;">
+                    <i class="bi bi-check-circle me-1"></i>Perfectly Aligned
+                </span>
+            @else
+                <span class="badge bg-warning px-3 py-2 me-2" style="font-size: 0.9rem;">
+                    <i class="bi bi-exclamation-triangle me-1"></i>Needs Alignment
+                </span>
+            @endif
+        </div>
+    </div>
+
     <style>
         #activityTabs {
             background: transparent !important;
@@ -162,6 +162,24 @@
             background: transparent !important;
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const activityFilters = document.getElementById('activityFilters');
+            const tabButtons = document.querySelectorAll('#activityTabs button[data-bs-toggle="tab"]');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('shown.bs.tab', function(event) {
+                    // Show filters only on My Activities tab
+                    if (event.target.id === 'activities-tab') {
+                        activityFilters.style.display = '';
+                    } else {
+                        activityFilters.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
 
     <div class="tab-content" id="activityTabsContent" style="background: transparent;">
         {{-- Tab 1: My Activities --}}
@@ -395,7 +413,7 @@
                             </span>
                         </div>
 
-                        <div class="badge mb-3" style="background: linear-gradient(135deg, #198754, #20c997); color: white; font-weight: 500; padding: 0.5rem 1rem;">
+                        <div class="badge bg-success mb-3" style="color: white; font-weight: 500; padding: 0.5rem 1rem;">
                             <i class="bi bi-diagram-3 me-1"></i>{{ $structureDefinition['label'] ?? 'Lecture Only' }}
                         </div>
                         
@@ -513,7 +531,7 @@
         <form method="POST" action="{{ route('instructor.activities.store') }}" class="modal-content border-0 shadow-lg needs-validation" novalidate>
           @csrf
           <input type="hidden" name="create_single" value="1">
-          <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #198754, #20c997);">
+          <div class="modal-header bg-success border-0 pb-0">
             <h5 class="modal-title fw-bold text-white" id="createActivityModalLabel">
               <i class="bi bi-plus-circle me-2"></i>Create New Activity
             </h5>
