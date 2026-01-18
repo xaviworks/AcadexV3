@@ -10,39 +10,89 @@
     </h1>
 
     {{-- Tabs --}}
-    <ul class="nav nav-tabs mb-4" id="studentTabs" role="tablist">
+    <ul class="nav nav-tabs mb-0" id="studentTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="true">Student List</button>
+            <button class="nav-link active rounded-top border-0 px-4 py-3 fw-semibold" 
+                    id="list-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#list" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="list" 
+                    aria-selected="true">
+                Manage Students
+            </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="import-tab" data-bs-toggle="tab" data-bs-target="#import" type="button" role="tab" aria-controls="import" aria-selected="false">Import Students</button>
+            <button class="nav-link rounded-top border-0 px-4 py-3 fw-semibold" 
+                    id="import-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#import" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="import" 
+                    aria-selected="false">
+                Import Students
+            </button>
         </li>
     </ul>
 
-    <div class="tab-content" id="studentTabsContent">
-        {{-- Tab 1: Student List --}}
-        <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
-            {{-- Subject Selection --}}
-            <form method="GET" action="{{ route('instructor.students.index') }}" class="mb-4">
-                <label class="form-label fw-medium mb-1">Select Course</label>
-                <select name="subject_id" class="form-select" onchange="handleSubjectChange(this)" data-base-url="{{ route('instructor.students.index') }}">
-                    <option value="">-- Select Course --</option>
-                    @foreach($subjects as $subject)
-                        <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
-                            {{ $subject->subject_code }} - {{ $subject->subject_description }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
+    <style>
+        #studentTabs {
+            background: transparent !important;
+        }
+        #studentTabs .nav-link {
+            background-color: transparent !important;
+            color: #6c757d !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        #studentTabs .nav-link:not(.active):hover {
+            background-color: rgba(25, 135, 84, 0.08) !important;
+            color: var(--dark-green) !important;
+        }
+        #studentTabs .nav-link.active {
+            background-color: rgba(25, 135, 84, 0.12) !important;
+            color: var(--dark-green) !important;
+            border-bottom: 3px solid var(--dark-green) !important;
+            margin-bottom: -2px;
+            z-index: 1;
+        }
+        #studentTabsContent {
+            background: transparent !important;
+            padding-top: 1.5rem;
+        }
+        #studentTabsContent .tab-pane {
+            background: transparent !important;
+        }
+    </style>
 
-            {{-- Add Student Button (only shows when a subject is selected) --}}
-            @if(request('subject_id'))
-                <div class="mb-3 text-end">
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">
-                        + Enroll Student
-                    </button>
+    <div class="tab-content" id="studentTabsContent" style="background: transparent;">
+        {{-- Tab 1: Manage Students --}}
+        <div class="tab-pane fade show active" id="list" role="tabpanel" aria-labelledby="list-tab">
+            {{-- Subject Selection and Enroll Button --}}
+            <div class="row mb-4 align-items-end">
+                <div class="col-md-10">
+                    <form method="GET" action="{{ route('instructor.students.index') }}">
+                        <label class="form-label fw-medium mb-2">Select Course</label>
+                        <select name="subject_id" class="form-select" onchange="handleSubjectChange(this)" data-base-url="{{ route('instructor.students.index') }}">
+                            <option value="">-- Select Course --</option>
+                            @foreach($subjects as $subject)
+                                <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
+                                    {{ $subject->subject_code }} - {{ $subject->subject_description }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
                 </div>
-            @endif
+                @if(request('subject_id'))
+                    <div class="col-md-2 text-end">
+                        <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">
+                            <i class="bi bi-plus-circle me-1"></i> Enroll Student
+                        </button>
+                    </div>
+                @endif
+            </div>
 
             {{-- Students Table --}}
             @if($students && $students->count())
@@ -51,6 +101,7 @@
                         <table class="table table-bordered table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="text-center" style="width: 60px;">#</th>
                                     <th>Student Name</th>
                                     <th class="text-center">Year Level</th>
                                     <th class="text-center">Status</th>
@@ -58,8 +109,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($students as $student)
+                                @foreach ($students as $index => $student)
                                     <tr>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border" style="font-size: 0.9rem; padding: 0.4rem 0.6rem; min-width: 35px;">
+                                                {{ $index + 1 }}
+                                            </span>
+                                        </td>
                                         <td class="fw-semibold">
                                             {{ $student->last_name }}, {{ $student->first_name }}
                                         </td>

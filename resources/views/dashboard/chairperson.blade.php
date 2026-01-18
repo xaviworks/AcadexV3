@@ -2,9 +2,31 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
+    @php
+        $hour = date('H');
+        $firstName = explode(' ', Auth::user()->name)[0];
+        
+        if ($hour >= 5 && $hour < 12) {
+            $greeting = 'Good Morning';
+            $icon = 'bi bi-cloud-sun-fill';
+            $iconColor = 'text-warning';
+        } elseif ($hour >= 12 && $hour < 18) {
+            $greeting = 'Good Afternoon';
+            $icon = 'bi bi-brightness-high-fill';
+            $iconColor = 'text-warning';
+        } else {
+            $greeting = 'Good Evening';
+            $icon = 'bi bi-cloud-moon-fill';
+            $iconColor = 'text-primary';
+        }
+    @endphp
+    
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark mb-1">Course Chair Overview 👨‍💼</h2>
+            <h2 class="fw-bold text-dark mb-1 d-flex align-items-center">
+                <i class="{{ $icon }} {{ $iconColor }} me-2" style="font-size: 1.8rem;"></i>
+                <span>{{ $greeting }}, {{ $firstName }}!</span>
+            </h2>
             <p class="text-muted mb-0">Monitor Course performance and faculty management</p>
         </div>
         <div class="d-flex align-items-center gap-3">
