@@ -228,17 +228,17 @@
 @section('content')
 <div class="container-fluid px-4 py-4" data-page="instructor.course-outcome-results">
     {{-- Breadcrumbs --}}
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('instructor.course-outcome-attainments.index') }}">Course Outcome Attainment Results</a></li>
-            @if(isset($selectedSubject))
-                <li class="breadcrumb-item active" aria-current="page">
-                    {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
-                </li>
-            @endif
-        </ol>
-    </nav>
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Home', 'url' => '/'],
+            ['label' => 'Course Outcome Attainment Results', 'url' => route('instructor.course-outcome-attainments.index')]
+        ];
+        
+        if(isset($selectedSubject)) {
+            $breadcrumbItems[] = ['label' => $selectedSubject->subject_code . ' - ' . $selectedSubject->subject_description];
+        }
+    @endphp
+    <x-breadcrumbs :items="$breadcrumbItems" />
 
     {{-- Note: $incompleteCOs is now pre-computed in the controller for performance --}}
 

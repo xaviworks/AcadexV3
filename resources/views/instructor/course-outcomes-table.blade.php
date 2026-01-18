@@ -3,17 +3,17 @@
 @section('content')
 <div class="container-fluid px-4 py-4">
     {{-- Breadcrumbs --}}
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.course_outcomes.index') }}" class="text-decoration-none">Course Outcomes</a></li>
-            @if(isset($selectedSubject))
-                <li class="breadcrumb-item active" aria-current="page">
-                    {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
-                </li>
-            @endif
-        </ol>
-    </nav>
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Home', 'url' => '/'],
+            ['label' => 'Course Outcomes', 'url' => route($routePrefix . '.course_outcomes.index')]
+        ];
+        
+        if(isset($selectedSubject)) {
+            $breadcrumbItems[] = ['label' => $selectedSubject->subject_code . ' - ' . $selectedSubject->subject_description];
+        }
+    @endphp
+    <x-breadcrumbs :items="$breadcrumbItems" />
 
     {{-- Page Title --}}
     @if(isset($selectedSubject))

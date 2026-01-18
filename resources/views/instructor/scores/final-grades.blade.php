@@ -70,21 +70,13 @@
             </div>
 
             {{-- Breadcrumb Navigation --}}
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('instructor.final-grades.index') }}" class="text-success text-decoration-none border-bottom border-success">
-                            Final Grades
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active text-muted" aria-current="page">
-                        @php
-                            $selectedSubject = $subjects->firstWhere('id', request('subject_id'));
-                        @endphp
-                        {{ $selectedSubject ? $selectedSubject->subject_code : 'Subject' }}
-                    </li>
-                </ol>
-            </nav>
+            @php
+                $selectedSubject = $subjects->firstWhere('id', request('subject_id'));
+            @endphp
+            <x-breadcrumbs :items="[
+                ['label' => 'Final Grades', 'url' => route('instructor.final-grades.index')],
+                ['label' => $selectedSubject ? $selectedSubject->subject_code : 'Subject']
+            ]" />
 
             {{-- Generate Final Grades --}}
             @if(empty($finalData))

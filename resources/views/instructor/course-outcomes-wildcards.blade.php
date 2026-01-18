@@ -4,18 +4,10 @@
 <div class="container-fluid px-4 py-4">
     {{-- Header Section --}}
     <div class="mb-4">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <h4 class="fw-bold mb-2" style="color: #2c3e50;">
-                    <i class="bi bi-bullseye me-2" style="color: #198754;"></i>Course Outcome Management
-                </h4>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="/" style="color: #198754; text-decoration: none;">Home</a></li>
-                        <li class="breadcrumb-item active" aria-current="page" style="color: #6c757d;">Course Outcomes</li>
-                    </ol>
-                </nav>
-            </div>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h4 class="fw-bold mb-0" style="color: #2c3e50;">
+                <i class="bi bi-bullseye me-2" style="color: #198754;"></i>Course Outcome Management
+            </h4>
             
             {{-- Generate CO Button (Chairperson and GE Coordinator Only) --}}
             @if(Auth::user()->role === 1 || Auth::user()->role === 4)
@@ -26,21 +18,12 @@
             </div>
             @endif
         </div>
+        
+        <x-breadcrumbs :items="[
+            ['label' => 'Home', 'url' => '/'],
+            ['label' => 'Course Outcomes']
+        ]" />
     </div>
-
-    {{-- Year Level Sections --}}
-    @if(isset($subjectsByYear) && count($subjectsByYear) > 0)
-        <div class="mb-3">
-            @if(isset($currentPeriod))
-                <small class="text-muted d-block mb-3">
-                    <i class="bi bi-calendar3 me-1"></i>{{ $currentPeriod->academic_year }} - {{ $currentPeriod->semester }}
-                    @if((Auth::user()->role === 1 || Auth::user()->role === 4) && Auth::user()->course)
-                        • {{ Auth::user()->course->course_code }} Program
-                    @endif
-                </small>
-            @endif
-        </div>
-    @endif
 
     {{-- Subject Cards Grouped by Year Level --}}
     @if(isset($subjectsByYear) && count($subjectsByYear))

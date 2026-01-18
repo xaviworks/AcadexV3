@@ -3,12 +3,10 @@
 @section('content')
 <div class="container-fluid px-4 py-4">
     {{-- Breadcrumbs --}}
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Course Outcome Attainment Results</li>
-        </ol>
-    </nav>
+    <x-breadcrumbs :items="[
+        ['label' => 'Home', 'url' => '/'],
+        ['label' => 'Course Outcome Attainment Results']
+    ]" />
 
 
 

@@ -3,22 +3,20 @@
 @section('content')
 <div class="container-fluid px-4 py-4">
     {{-- Breadcrumbs --}}
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Course Outcomes</li>
-            @if(request('subject_id') && isset($subjects))
-                @php
-                    $selectedSubject = $subjects->firstWhere('id', request('subject_id'));
-                @endphp
-                @if($selectedSubject)
-                    <li class="breadcrumb-item active" aria-current="page">
-                        {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
-                    </li>
-                @endif
-            @endif
-        </ol>
-    </nav>
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Home', 'url' => '/'],
+            ['label' => 'Course Outcomes']
+        ];
+        
+        if(request('subject_id') && isset($subjects)) {
+            $selectedSubject = $subjects->firstWhere('id', request('subject_id'));
+            if($selectedSubject) {
+                $breadcrumbItems[] = ['label' => $selectedSubject->subject_code . ' - ' . $selectedSubject->subject_description];
+            }
+        }
+    @endphp
+    <x-breadcrumbs :items="$breadcrumbItems" />
 
     {{-- Subject Wild Cards --}}
     @if(isset($subjects) && count($subjects))
