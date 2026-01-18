@@ -25,50 +25,71 @@
         ]" />
     </div>
 
-    {{-- Subject Cards Grouped by Year Level --}}
+    {{-- Subject Cards Grouped by Year Level with Tabs --}}
     @if(isset($subjectsByYear) && count($subjectsByYear))
-        @foreach($subjectsByYear as $yearLevel => $subjects)
-            <div class="mb-4 year-section" id="year-{{ $yearLevel }}" data-year="{{ $yearLevel }}">
-                {{-- Year Level Header --}}
-                <div class="d-flex align-items-center mb-3">
-                    <i class="bi bi-award me-2" style="color: #198754; font-size: 1.2rem;"></i>
-                    <h5 class="fw-bold mb-0" style="color: #2c3e50;">
-                        @php
-                            $yearLabels = [1 => '1st Year', 2 => '2nd Year', 3 => '3rd Year', 4 => '4th Year'];
-                        @endphp
-                        {{ $yearLabels[$yearLevel] ?? ($yearLevel ? 'Year ' . $yearLevel : 'Unspecified Year') }}
-                    </h5>
-                    <span class="badge bg-success ms-2 rounded-pill">
-                        {{ count($subjects) }} {{ count($subjects) == 1 ? 'subject' : 'subjects' }}
-                    </span>
-                </div>
-
-                {{-- Subject Cards Grid --}}
-                <div class="row g-3" id="subject-selection-year-{{ $yearLevel }}">
-                    @foreach($subjects as $subjectItem)
-                        <div class="col-md-4">
-                            <div
-                                class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden"
-                                data-url="{{ route($routePrefix . '.course_outcomes.index', ['subject_id' => $subjectItem->id]) }}"
-                                style="cursor: pointer;"
-                            >
-                                <div class="position-relative" style="height: 80px;">
-                                    <div class="subject-circle position-absolute start-50 translate-middle"
-                                        style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                                        <h5 class="mb-0 text-white fw-bold">{{ $subjectItem->subject_code }}</h5>
+        @php
+            $yearLabels = [1 => '1st Year', 2 => '2nd Year', 3 => '3rd Year', 4 => '4th Year'];
+            $firstYear = $subjectsByYear->keys()->first();
+        @endphp
+        
+        {{-- Year Level Tabs --}}
+        <ul class="nav nav-tabs mb-0" id="yearTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
+            @foreach($subjectsByYear as $yearLevel => $subjects)
+                <li class="nav-item" role="presentation">
+                    <button 
+                        class="nav-link {{ $yearLevel === $firstYear ? 'active' : '' }} rounded-top border-0 px-4 py-3 fw-semibold" 
+                        id="year-{{ $yearLevel }}-tab" 
+                        data-bs-toggle="tab" 
+                        data-bs-target="#year-{{ $yearLevel }}-pane" 
+                        type="button" 
+                        role="tab" 
+                        aria-controls="year-{{ $yearLevel }}-pane" 
+                        aria-selected="{{ $yearLevel === $firstYear ? 'true' : 'false' }}"
+                    >
+                        <i class="bi bi-award me-2"></i>{{ $yearLabels[$yearLevel] ?? 'Year ' . $yearLevel }}
+                        <span class="badge bg-success ms-2 rounded-pill">{{ count($subjects) }}</span>
+                    </button>
+                </li>
+            @endforeach
+        </ul>
+        
+        {{-- Year Level Tab Content --}}
+        <div class="tab-content" id="yearTabContent" style="padding-top: 1.5rem;">
+            @foreach($subjectsByYear as $yearLevel => $subjects)
+                <div 
+                    class="tab-pane fade {{ $yearLevel === $firstYear ? 'show active' : '' }}" 
+                    id="year-{{ $yearLevel }}-pane" 
+                    role="tabpanel" 
+                    aria-labelledby="year-{{ $yearLevel }}-tab" 
+                    tabindex="0"
+                >
+                    {{-- Subject Cards Grid --}}
+                    <div class="row g-3" id="subject-selection-year-{{ $yearLevel }}">
+                        @foreach($subjects as $subjectItem)
+                            <div class="col-md-4">
+                                <div
+                                    class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden"
+                                    data-url="{{ route($routePrefix . '.course_outcomes.index', ['subject_id' => $subjectItem->id]) }}"
+                                    style="cursor: pointer;"
+                                >
+                                    <div class="position-relative" style="height: 80px;">
+                                        <div class="subject-circle position-absolute start-50 translate-middle"
+                                            style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                            <h5 class="mb-0 text-white fw-bold">{{ $subjectItem->subject_code }}</h5>
+                                        </div>
+                                    </div>
+                                    <div class="card-body pt-5 text-center">
+                                        <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $subjectItem->subject_description }}">
+                                            {{ $subjectItem->subject_description }}
+                                        </h6>
                                     </div>
                                 </div>
-                                <div class="card-body pt-5 text-center">
-                                    <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $subjectItem->subject_description }}">
-                                        {{ $subjectItem->subject_description }}
-                                    </h6>
-                                </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-        @endforeach
+            @endforeach
+        </div>
     @else
         {{-- Enhanced Empty State --}}
         <div class="text-center py-5">
@@ -351,6 +372,52 @@
         @endif
     };
 </script>
+@endpush
+
+@push('styles')
+<style>
+    /* Custom Tab Styling */
+    #yearTabs {
+        background: transparent !important;
+    }
+    
+    #yearTabs .nav-link {
+        background-color: transparent !important;
+        color: #6c757d !important;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    #yearTabs .nav-link:not(.active):hover {
+        background-color: rgba(25, 135, 84, 0.08) !important;
+        color: #198754 !important;
+    }
+    
+    #yearTabs .nav-link.active {
+        background-color: rgba(25, 135, 84, 0.12) !important;
+        color: #198754 !important;
+        border-bottom: 3px solid #198754 !important;
+        margin-bottom: -2px;
+        z-index: 1;
+    }
+    
+    #yearTabs .nav-link.active .badge {
+        background-color: #198754 !important;
+    }
+    
+    #yearTabContent {
+        background: transparent !important;
+        padding-top: 1.5rem;
+    }
+    
+    #yearTabContent .tab-pane {
+        background: transparent !important;
+    }
+    
+    #yearTabs .nav-link .badge {
+        font-size: 0.75rem;
+    }
+</style>
 @endpush
 
 {{-- Styles: resources/css/instructor/course-outcomes.css --}}

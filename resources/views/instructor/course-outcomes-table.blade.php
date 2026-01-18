@@ -2,25 +2,28 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
+
+    {{-- Page Title --}}
+    @if(isset($selectedSubject))
+        <div class="mb-2">
+            <h4 class="fw-bold mb-0" style="color: #2c3e50;">
+                <i class="bi bi-bullseye me-2" style="color: #198754;"></i>
+                Subject: {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
+            </h4>
+        </div>
+    @endif
+
     {{-- Breadcrumbs --}}
     @php
         $breadcrumbItems = [
             ['label' => 'Home', 'url' => '/'],
             ['label' => 'Course Outcomes', 'url' => route($routePrefix . '.course_outcomes.index')]
         ];
-        
         if(isset($selectedSubject)) {
             $breadcrumbItems[] = ['label' => $selectedSubject->subject_code . ' - ' . $selectedSubject->subject_description];
         }
     @endphp
     <x-breadcrumbs :items="$breadcrumbItems" />
-
-    {{-- Page Title --}}
-    @if(isset($selectedSubject))
-        <div class="mb-4">
-            <h2 class="fw-bold text-dark">Subject: {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}</h2>
-        </div>
-    @endif
 
     {{-- Course Outcomes Management Section --}}
     <div class="row mb-4">
