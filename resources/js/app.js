@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (loginForms.length > 0) {
     // Get fingerprint immediately
     const fingerprint = await getDeviceFingerprint();
-    console.log('Device fingerprint generated:', fingerprint);
 
     loginForms.forEach((form) => {
       // Check if input already exists
