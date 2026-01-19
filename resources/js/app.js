@@ -20,7 +20,8 @@ Alpine.start();
 
 // Initialize device fingerprinting on login page
 document.addEventListener('DOMContentLoaded', async () => {
-  const loginForms = document.querySelectorAll('form[action*="login"]');
+  // Target both login and 2FA forms
+  const loginForms = document.querySelectorAll('form[action*="login"], form[action*="two-factor"]');
 
   if (loginForms.length > 0) {
     // Get fingerprint immediately
@@ -40,7 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Also add to form submit handler to ensure it's always set
       form.addEventListener('submit', function (e) {
         input.value = fingerprint;
-        console.log('Submitting with fingerprint:', fingerprint);
       });
     });
   }

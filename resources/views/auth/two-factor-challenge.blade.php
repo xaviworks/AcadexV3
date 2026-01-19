@@ -144,38 +144,6 @@
             }
         }
         
-        document.addEventListener('DOMContentLoaded', async function () {
-            // Generate device fingerprint and hash it
-            const generateFingerprint = async () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                ctx.textBaseline = 'top';
-                ctx.font = '14px Arial';
-                ctx.fillText('browser fingerprint', 2, 2);
-                
-                const fingerprintData = JSON.stringify({
-                    canvas: canvas.toDataURL(),
-                    userAgent: navigator.userAgent,
-                    language: navigator.language,
-                    platform: navigator.platform,
-                    screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    plugins: Array.from(navigator.plugins || []).map(p => p.name).join(','),
-                });
-
-                // Hash the fingerprint using SHA-256
-                const encoder = new TextEncoder();
-                const data = encoder.encode(fingerprintData);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                
-                return hashHex;
-            };
-
-            // Set the hashed fingerprint
-            const hash = await generateFingerprint();
-            document.getElementById('device_fingerprint').value = hash;
-        });
+        // Device fingerprint is handled by app.js
     </script>
 @endsection
