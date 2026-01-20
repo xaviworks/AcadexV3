@@ -29,12 +29,12 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
 <div class="team-grid">
   <div class="team-card">
     <h3>Rumel Eumague</h3>
-    <p>UI/UX Designer</p>
+    <p>Senior UI/UX Designer & Design Lead</p>
   </div>
   
   <div class="team-card">
     <h3>Nico Andre Monajan</h3>
-    <p>Quality Assurance</p>
+    <p>Quality Assurance Engineer</p>
   </div>
   
   <div class="team-card">
@@ -44,22 +44,22 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
   
   <div class="team-card">
     <h3>Kyle Lamigo</h3>
-    <p>Backend Developer</p>
+    <p>Full-Stack Software Engineer</p>
   </div>
   
   <div class="team-card">
     <h3>Nj Palicte</h3>
-    <p>Backend Developer</p>
+    <p>Full-Stack Software Engineer & API Engineer</p>
   </div>
   
   <div class="team-card">
     <h3>Bam Jielove Pasa</h3>
-    <p>Frontend Developer</p>
+    <p>Frontend Engineer</p>
   </div>
   
   <div class="team-card">
     <h3>Chesedh Morales</h3>
-    <p>Frontend Developer</p>
+    <p>Lead Frontend Engineer</p>
   </div>
 </div>
 
@@ -70,7 +70,7 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
 <div class="team-grid">
   <div class="team-card">
     <h3>Leah Arguelles</h3>
-    <p>Head Documentation Specialist</p>
+    <p>Lead Technical Writer & Documentation Architect</p>
   </div>
   
   <div class="team-card">
