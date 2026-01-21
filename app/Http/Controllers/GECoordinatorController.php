@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\Course;
 use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
+use App\Services\SessionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -181,7 +182,11 @@ class GECoordinatorController extends Controller
                 'can_teach_ge' => false,
                 'is_active' => false
             ]);
-            $message = 'Instructor deactivated successfully.';
+            
+            // Immediately invalidate all sessions for the instructor to force logout
+            SessionService::invalidateUserSessions($instructor);
+            
+            $message = 'Instructor deactivated and logged out successfully.';
         } else {
             // For non-GE department instructors, only remove GE teaching capability
             $instructor->update([

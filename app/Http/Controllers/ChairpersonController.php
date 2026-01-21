@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\FinalGrade;
 use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
+use App\Services\SessionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -137,7 +138,10 @@ class ChairpersonController extends Controller
             'is_active' => false,
         ]);
         
-        return redirect()->back()->with('success', 'Instructor deactivated successfully.');
+        // Immediately invalidate all sessions for the instructor to force logout
+        SessionService::invalidateUserSessions($instructor);
+        
+        return redirect()->back()->with('success', 'Instructor deactivated and logged out successfully.');
     }
 
     public function activateInstructor($id)
