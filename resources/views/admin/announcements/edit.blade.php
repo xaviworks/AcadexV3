@@ -94,11 +94,6 @@
                                     <label class="form-check-label" for="role_dean">Deans</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="target_roles[]" value="3" id="role_admin"
-                                           {{ in_array(3, $targetRoles) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="role_admin">Admins</label>
-                                </div>
-                                <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="target_roles[]" value="4" id="role_ge"
                                            {{ in_array(4, $targetRoles) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="role_ge">GE Coordinators</label>
