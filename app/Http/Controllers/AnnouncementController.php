@@ -80,7 +80,7 @@ class AnnouncementController extends Controller
             'type' => 'required|in:info,warning,success,danger',
             'priority' => 'required|in:low,normal,high,urgent',
             'target_roles' => 'nullable|array',
-            'target_roles.*' => 'integer|in:0,1,2,3,4,5',
+            'target_roles.*' => 'integer|in:0,1,2,4,5',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'boolean',
@@ -89,6 +89,14 @@ class AnnouncementController extends Controller
         ]);
 
         $validated['created_by'] = Auth::id();
+        
+        // If target_roles is not in request or is empty, set to null (meaning "All Users")
+        if (!isset($validated['target_roles']) || empty($validated['target_roles'])) {
+            $validated['target_roles'] = null;
+        } else {
+            // Ensure target_roles are integers, not strings
+            $validated['target_roles'] = array_map('intval', $validated['target_roles']);
+        }
 
         Announcement::create($validated);
 
@@ -119,13 +127,21 @@ class AnnouncementController extends Controller
             'type' => 'required|in:info,warning,success,danger',
             'priority' => 'required|in:low,normal,high,urgent',
             'target_roles' => 'nullable|array',
-            'target_roles.*' => 'integer|in:0,1,2,3,4,5',
+            'target_roles.*' => 'integer|in:0,1,2,4,5',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'boolean',
             'is_dismissible' => 'boolean',
             'show_once' => 'boolean',
         ]);
+        
+        // If target_roles is not in request or is empty, set to null (meaning "All Users")
+        if (!isset($validated['target_roles']) || empty($validated['target_roles'])) {
+            $validated['target_roles'] = null;
+        } else {
+            // Ensure target_roles are integers, not strings
+            $validated['target_roles'] = array_map('intval', $validated['target_roles']);
+        }
 
         $announcement->update($validated);
 

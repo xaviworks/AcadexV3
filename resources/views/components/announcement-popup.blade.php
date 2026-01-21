@@ -155,12 +155,29 @@ function announcementPopup() {
                 
                 const data = await response.json();
                 
-                // Check session storage for dismissed announcements (convert to numbers for comparison)
-                const dismissedInSession = JSON.parse(sessionStorage.getItem('dismissedAnnouncements') || '[]')
+                if (data.length === 0) {
+                    this.announcements = [];
+                    return;
+                }
+                
+                // Get dismissed announcements from session storage
+                let dismissedInSession = JSON.parse(sessionStorage.getItem('dismissedAnnouncements') || '[]')
                     .map(id => parseInt(id, 10));
                 
-                // Filter out any announcements already dismissed in this session
-                this.announcements = data.filter(ann => !dismissedInSession.includes(parseInt(ann.id, 10)));
+                // Get all valid announcement IDs from server response
+                const validAnnouncementIds = data.map(ann => parseInt(ann.id, 10));
+                
+                // Auto-cleanup: if there are dismissed IDs that don't exist anymore, remove them
+                const hasStaleIds = dismissedInSession.some(id => !validAnnouncementIds.includes(id));
+                if (hasStaleIds) {
+                    dismissedInSession = dismissedInSession.filter(id => validAnnouncementIds.includes(id));
+                    sessionStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissedInSession));
+                }
+                
+                // Filter: Remove only announcements dismissed in this session
+                this.announcements = data.filter(ann => {
+                    return !dismissedInSession.includes(parseInt(ann.id, 10));
+                });
                 
             } catch (error) {
                 console.error('Failed to fetch announcements:', error);
@@ -173,14 +190,18 @@ function announcementPopup() {
             const announcementId = this.currentAnnouncement.id;
             const showOnce = this.currentAnnouncement.show_once;
             
-            // Save to session storage for this session (prevents showing again on page refresh)
+            // Only save to session storage to prevent re-showing during CURRENT session
+            // This is just for UX - prevents popup from appearing on every page navigation
             const dismissedInSession = JSON.parse(sessionStorage.getItem('dismissedAnnouncements') || '[]');
             if (!dismissedInSession.includes(announcementId)) {
                 dismissedInSession.push(announcementId);
                 sessionStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissedInSession));
             }
             
-            // Mark as viewed in backend (for analytics and show_once tracking)
+            // Mark as viewed in backend (for show_once tracking)
+            // The backend will track this in the database
+            // For show_once announcements: won't show again ever
+            // For regular announcements: will show again in next session
             try {
                 await fetch(`/announcements/${announcementId}/view`, {
                     method: 'POST',
@@ -222,6 +243,9 @@ function announcementPopup() {
         },
         
         logout() {
+            // Clear session storage before logout
+            sessionStorage.removeItem('dismissedAnnouncements');
+            
             // Create a form and submit POST request to logout
             const form = document.createElement('form');
             form.method = 'POST';
