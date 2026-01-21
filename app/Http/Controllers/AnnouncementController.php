@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Announcement;
+use App\Models\AnnouncementTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -54,7 +55,11 @@ class AnnouncementController extends Controller
             ->orderByDesc('created_at')
             ->paginate(20);
 
-        return view('admin.announcements.index', compact('announcements'));
+        $templates = AnnouncementTemplate::active()
+            ->ordered()
+            ->get();
+
+        return view('admin.announcements.index', compact('announcements', 'templates'));
     }
 
     /**
@@ -79,6 +84,7 @@ class AnnouncementController extends Controller
             'message' => 'required|string',
             'type' => 'required|in:info,warning,success,danger',
             'priority' => 'required|in:low,normal,high,urgent',
+            'icon' => 'nullable|string|max:50',
             'target_roles' => 'nullable|array',
             'target_roles.*' => 'integer|in:0,1,2,4,5',
             'start_date' => 'nullable|date',
@@ -126,6 +132,7 @@ class AnnouncementController extends Controller
             'message' => 'required|string',
             'type' => 'required|in:info,warning,success,danger',
             'priority' => 'required|in:low,normal,high,urgent',
+            'icon' => 'nullable|string|max:50',
             'target_roles' => 'nullable|array',
             'target_roles.*' => 'integer|in:0,1,2,4,5',
             'start_date' => 'nullable|date',

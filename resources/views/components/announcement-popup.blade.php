@@ -40,13 +40,8 @@
                 
                 <!-- Compact Header -->
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <i class="bi fs-5" 
-                       :class="{
-                           'bi-info-circle-fill': currentAnnouncement.type === 'info',
-                           'bi-check-circle-fill': currentAnnouncement.type === 'success',
-                           'bi-exclamation-triangle-fill': currentAnnouncement.type === 'warning',
-                           'bi-x-circle-fill': currentAnnouncement.type === 'danger'
-                       }"></i>
+                    <i class="fs-5" 
+                       :class="currentAnnouncement.icon ? 'fas ' + currentAnnouncement.icon : (currentAnnouncement.type === 'info' ? 'bi bi-info-circle-fill' : (currentAnnouncement.type === 'success' ? 'bi bi-check-circle-fill' : (currentAnnouncement.type === 'warning' ? 'bi bi-exclamation-triangle-fill' : 'bi bi-x-circle-fill')))"></i>
                     <h5 class="alert-heading fw-bold mb-0" id="announcement-title" x-text="currentAnnouncement.title"></h5>
                 </div>
                 
@@ -180,7 +175,7 @@ function announcementPopup() {
                 });
                 
             } catch (error) {
-                console.error('Failed to fetch announcements:', error);
+                // Silently fail
             }
         },
         
@@ -211,7 +206,7 @@ function announcementPopup() {
                     }
                 });
             } catch (error) {
-                console.error('Failed to mark announcement as viewed:', error);
+                // Silently fail
             }
             
             // Remove from array

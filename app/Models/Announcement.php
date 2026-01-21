@@ -13,6 +13,7 @@ class Announcement extends Model
         'message',
         'type',
         'priority',
+        'icon',
         'target_roles',
         'start_date',
         'end_date',
