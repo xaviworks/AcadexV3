@@ -204,19 +204,38 @@ class GECoordinatorController extends Controller
             abort(403);
         }
         
-        // Find the instructor (don't restrict to GE department since they might be from another department)
+        // Find the instructor
         $instructor = User::where('id', $id)
             ->where('role', 0)
-            ->where('can_teach_ge', false)
             ->firstOrFail();
-            
-        // Enable GE teaching capability AND activate the account
-        $instructor->update([
-            'can_teach_ge' => true,
-            'is_active' => true
-        ]);
         
-        return redirect()->back()->with('success', 'Instructor activated successfully.');
+        // Get GE department to check if instructor belongs to it
+        $geDepartment = Department::where('department_code', 'GE')->first();
+        
+        // Only GE department instructors can be fully activated by GE Coordinator
+        // For instructors from other departments, GE Coordinator cannot activate their account
+        if ($instructor->department_id === $geDepartment?->id) {
+            // Full activation for GE department instructors
+            $instructor->update([
+                'can_teach_ge' => true,
+                'is_active' => true
+            ]);
+            $message = 'Instructor activated successfully.';
+        } else {
+            // For non-GE department instructors, GE Coordinator cannot activate their account
+            // They can only restore GE access if the instructor is already active
+            if (!$instructor->is_active) {
+                return redirect()->back()->with('error', 'Cannot activate instructors from other departments. Please contact the department chairperson to activate this instructor first.');
+            }
+            
+            // Restore GE teaching capability only
+            $instructor->update([
+                'can_teach_ge' => true
+            ]);
+            $message = 'GE teaching access restored successfully.';
+        }
+        
+        return redirect()->back()->with('success', $message);
     }
 
     // ============================
