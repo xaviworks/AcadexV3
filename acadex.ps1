@@ -93,8 +93,8 @@ function Show-Help {
     Write-Host "  queue           " -ForegroundColor Green -NoNewline
     Write-Host "Start queue worker"
     Write-Host "  schedule        " -ForegroundColor Green -NoNewline
-    Write-Host "Run scheduled tasks"
-    Write-Host "  phpmyadmin      " -ForegroundColor Green -NoNewline
+    Write-Host "Run scheduled tasks"    Write-Host "  share           " -ForegroundColor Green -NoNewline
+    Write-Host "Share site publicly via Expose"    Write-Host "  phpmyadmin      " -ForegroundColor Green -NoNewline
     Write-Host "Start Apache & open phpMyAdmin (Windows)"
     Write-Host "  phpmyadmin:stop " -ForegroundColor Green -NoNewline
     Write-Host "Stop Apache (Windows)"
@@ -550,6 +550,14 @@ switch ($Command) {
     "schedule" {
         Write-Host "Running scheduled tasks..." -ForegroundColor Green
         php artisan schedule:run
+    }
+    
+    "share" {
+        Write-Host "Sharing site via Expose..." -ForegroundColor Green
+        Write-Host "Public URL will be displayed below" -ForegroundColor Yellow
+        Write-Host "Press Ctrl+C to stop sharing" -ForegroundColor Yellow
+        Write-Host ""
+        expose share http://localhost:8000
     }
     
     "phpmyadmin" {

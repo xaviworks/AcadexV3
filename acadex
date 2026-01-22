@@ -65,6 +65,7 @@ show_help() {
     echo -e "  ${GREEN}routes${NC}          List all routes"
     echo -e "  ${GREEN}queue${NC}           Start queue worker"
     echo -e "  ${GREEN}schedule${NC}        Run scheduled tasks"
+    echo -e "  ${GREEN}share${NC}           Share site publicly via Expose"
     echo -e "  ${GREEN}phpmyadmin${NC}      Start Apache & open phpMyAdmin (port 8080)"
     echo -e "  ${GREEN}phpmyadmin:stop${NC} Stop Apache"
     echo -e "  ${GREEN}docs${NC}            Open ACADEX documentation"
@@ -468,6 +469,13 @@ case "$1" in
     schedule)
         echo -e "${GREEN}Running scheduled tasks...${NC}"
         php artisan schedule:run
+        ;;
+    share)
+        echo -e "${GREEN}Sharing site via Expose...${NC}"
+        echo -e "${YELLOW}Public URL will be displayed below${NC}"
+        echo -e "${YELLOW}Press Ctrl+C to stop sharing${NC}"
+        echo ""
+        expose share https://acadexv3.test
         ;;
     phpmyadmin)
         echo -e "${GREEN}Starting Apache & opening phpMyAdmin...${NC}"
