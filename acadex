@@ -32,6 +32,7 @@ show_help() {
     echo ""
     echo -e "  ${BLUE}Development:${NC}"
     echo -e "  ${GREEN}serve${NC}           Start production servers (Laravel + Queue + Scheduler)"
+    echo -e "  ${GREEN}services${NC}        Start background services only (for Herd)"
     echo -e "  ${GREEN}dev${NC}             Start dev servers (Laravel + Queue + Logs + Vite)"
     echo -e "  ${GREEN}build${NC}           Build assets for production (npm run build)"
     echo -e "  ${GREEN}ui${NC}              Rebuild UI assets and clear caches"
@@ -64,10 +65,14 @@ show_help() {
     echo -e "  ${GREEN}routes${NC}          List all routes"
     echo -e "  ${GREEN}queue${NC}           Start queue worker"
     echo -e "  ${GREEN}schedule${NC}        Run scheduled tasks"
+    echo -e "  ${GREEN}phpmyadmin${NC}      Start Apache & open phpMyAdmin (port 8080)"
+    echo -e "  ${GREEN}phpmyadmin:stop${NC} Stop Apache"
     echo -e "  ${GREEN}docs${NC}            Open ACADEX documentation"
     echo ""
     echo -e "${YELLOW}Examples:${NC}"
     echo -e "  acadex setup          # First-time installation"
+    echo -e "  acadex services       # Start services for Herd (recommended)"
+    echo -e "  acadex serve          # Start full stack (without Herd)"
     echo -e "  acadex dev            # Start development"
     echo -e "  acadex test           # Run tests"
     echo -e "  acadex migrate:fresh  # Reset database"
@@ -347,12 +352,23 @@ case "$1" in
         ;;
     
     serve)
-        echo -e "${GREEN}Starting production servers (Laravel + Queue + Scheduler)...${NC}"
-        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80" \
+        echo -e "${GREEN}Starting production servers (Laravel + Queue + Scheduler + Reverb)...${NC}"
+        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80,#fbbf24" \
             "php artisan serve" \
             "php artisan queue:work --tries=3 --timeout=90" \
             "php artisan schedule:work" \
-            --names=server,queue,scheduler
+            "php artisan reverb:start" \
+            --names=server,queue,scheduler,reverb
+        ;;
+    services)
+        echo -e "${GREEN}Starting background services (Queue + Scheduler + Reverb)...${NC}"
+        echo -e "${YELLOW}Use this when running with Herd (https://AcadexV3.test)${NC}"
+        echo ""
+        npx concurrently -c "#c4b5fd,#4ade80,#fbbf24" \
+            "php artisan queue:work --tries=3 --timeout=90" \
+            "php artisan schedule:work" \
+            "php artisan reverb:start" \
+            --names=queue,scheduler,reverb
         ;;
     dev)
         echo -e "${GREEN}Starting development servers (Laravel + Queue + Logs + Vite)...${NC}"
@@ -452,6 +468,20 @@ case "$1" in
     schedule)
         echo -e "${GREEN}Running scheduled tasks...${NC}"
         php artisan schedule:run
+        ;;
+    phpmyadmin)
+        echo -e "${GREEN}Starting Apache & opening phpMyAdmin...${NC}"
+        sudo /Applications/XAMPP/xamppfiles/bin/apachectl start
+        echo -e "${GREEN}✓ Apache started on port 8080${NC}"
+        echo -e "${YELLOW}Opening http://localhost:8080/phpmyadmin/${NC}"
+        open http://localhost:8080/phpmyadmin/
+        echo ""
+        echo -e "${YELLOW}To stop Apache: acadex phpmyadmin:stop${NC}"
+        ;;
+    phpmyadmin:stop)
+        echo -e "${GREEN}Stopping Apache...${NC}"
+        sudo /Applications/XAMPP/xamppfiles/bin/apachectl stop
+        echo -e "${GREEN}✓ Apache stopped${NC}"
         ;;
     docs)
         echo -e "${GREEN}Opening ACADEX documentation...${NC}"
