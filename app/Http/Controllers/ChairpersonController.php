@@ -11,6 +11,7 @@ use App\Models\FinalGrade;
 use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
 use App\Services\SessionService;
+use App\Traits\ActivityManagementTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -19,6 +20,8 @@ use Illuminate\Validation\Rules\Password;
 
 class ChairpersonController extends Controller
 {
+    use ActivityManagementTrait;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -277,6 +280,9 @@ class ChairpersonController extends Controller
             'updated_by' => Auth::id(),
         ]);
 
+        // Auto-align activities to the department's formula for the newly assigned subject
+        $this->realignActivitiesToFormula($subject, null, Auth::id());
+
         // Notify instructor about new subject assignment (Email + System)
         $academicPeriod = \App\Models\AcademicPeriod::find($academicPeriodId);
         $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
@@ -345,6 +351,9 @@ class ChairpersonController extends Controller
                 'instructor_id' => $instructor->id,
                 'updated_by' => Auth::id(),
             ]);
+
+            // Auto-align activities to the department's formula for the newly assigned subject
+            $this->realignActivitiesToFormula($subject, null, Auth::id());
 
             // Notify instructor about new subject assignment (Email + System)
             NotificationService::notifyCourseAssigned($instructor, $subject, $periodLabel);

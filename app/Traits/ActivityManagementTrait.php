@@ -7,6 +7,7 @@ use App\Models\Subject;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 trait ActivityManagementTrait
 {
@@ -31,36 +32,44 @@ trait ActivityManagementTrait
             ->unique()
             ->values();
 
-        $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
+        // Use a transaction with pessimistic locking to prevent race conditions
+        // when multiple requests try to create default activities simultaneously
+        return DB::transaction(function () use ($subjectId, $term, $types, $maxAssessments, $labels) {
+            // Lock the subject row to prevent concurrent activity creation
+            Subject::where('id', $subjectId)->lockForUpdate()->first();
 
-        if ($activities->isEmpty()) {
-            $defaultActivities = [];
+            // Re-check after acquiring lock to prevent double-creation
+            $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
 
-            foreach ($types as $type) {
-                $baseType = FormulaStructure::baseActivityType($type);
-                $maxPerComponent = (int) ($maxAssessments[$type] ?? $maxAssessments[$baseType] ?? ($baseType === 'exam' ? 1 : 3));
-                $defaultCount = $baseType === 'exam' ? 1 : min(3, $maxPerComponent);
-                $label = $labels[$type] ?? $labels[$baseType] ?? FormulaStructure::formatLabel($type);
+            if ($activities->isEmpty()) {
+                $defaultActivities = [];
 
-                for ($i = 1; $i <= max(1, $defaultCount); $i++) {
-                    $defaultActivities[] = [
-                        'subject_id' => $subjectId,
-                        'term' => $term,
-                        'type' => $type,
-                        'title' => trim($label . ' ' . $i),
-                        'number_of_items' => 100,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                foreach ($types as $type) {
+                    $baseType = FormulaStructure::baseActivityType($type);
+                    $maxPerComponent = (int) ($maxAssessments[$type] ?? $maxAssessments[$baseType] ?? ($baseType === 'exam' ? 1 : 3));
+                    $defaultCount = $baseType === 'exam' ? 1 : min(3, $maxPerComponent);
+                    $label = $labels[$type] ?? $labels[$baseType] ?? FormulaStructure::formatLabel($type);
+
+                    for ($i = 1; $i <= max(1, $defaultCount); $i++) {
+                        $defaultActivities[] = [
+                            'subject_id' => $subjectId,
+                            'term' => $term,
+                            'type' => $type,
+                            'title' => trim($label . ' ' . $i),
+                            'number_of_items' => 100,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
                 }
+
+                Activity::insert($defaultActivities);
+
+                $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
             }
 
-            Activity::insert($defaultActivities);
-
-            $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
-        }
-
-        return $activities;
+            return $activities;
+        });
     }
 
     protected function orderedActivityQuery(int $subjectId, string $term, \Illuminate\Support\Collection $typeOrder)
@@ -134,71 +143,33 @@ trait ActivityManagementTrait
             ? [$term]
             : ['prelim', 'midterm', 'prefinal', 'final'];
 
-        $summary = [
-            'processed_terms' => 0,
-            'created' => 0,
-            'archived' => 0,
-            'per_term' => [],
-        ];
+        // Use a transaction with pessimistic locking to prevent race conditions
+        return DB::transaction(function () use ($subject, $terms, $allowedTypes, $weightDetails, $maxAssessments, $actingUserId) {
+            // Lock the subject row to prevent concurrent activity modifications
+            Subject::where('id', $subject->id)->lockForUpdate()->first();
 
-        foreach ($terms as $termName) {
-            $termName = mb_strtolower($termName);
-            $termSummary = ['created' => 0, 'archived' => 0];
+            $summary = [
+                'processed_terms' => 0,
+                'created' => 0,
+                'archived' => 0,
+                'per_term' => [],
+            ];
 
-            foreach ($allowedTypes as $activityType) {
-                $detail = $weightDetails->get($activityType);
-                if (! $detail) {
-                    continue;
-                }
+            foreach ($terms as $termName) {
+                $termName = mb_strtolower($termName);
+                $termSummary = ['created' => 0, 'archived' => 0];
 
-                $baseType = $detail['base_type'];
-                $label = $detail['label'] ?? FormulaStructure::formatLabel($activityType);
-                $maxAllowed = $maxAssessments[$activityType]
-                    ?? $maxAssessments[$baseType]
-                    ?? null;
-
-                $existing = Activity::where('subject_id', $subject->id)
-                    ->where('term', $termName)
-                    ->where('type', $activityType)
-                    ->where('is_deleted', false)
-                    ->orderBy('created_at')
-                    ->get();
-
-                $existingCount = $existing->count();
-                $minRequired = $detail['relative_weight_percent'] > 0 ? 1 : 0;
-                if ($baseType === 'exam') {
-                    $minRequired = max(1, $minRequired);
-                }
-
-                if ($this->activityTypeHasKeyword($activityType, ['quiz', 'ocr'])
-                    || $this->activityTypeHasKeyword($baseType, ['quiz', 'ocr'])) {
-                    $minRequired = max(3, $minRequired);
-                }
-
-                if ($maxAllowed !== null) {
-                    $minRequired = min($minRequired, (int) $maxAllowed);
-                }
-
-                if ($existingCount < $minRequired) {
-                    $toCreate = $minRequired - $existingCount;
-                    $sequenceStart = $existingCount + 1;
-
-                    for ($index = 0; $index < $toCreate; $index++) {
-                        Activity::create([
-                            'subject_id' => $subject->id,
-                            'term' => $termName,
-                            'type' => $activityType,
-                            'title' => trim($label . ' ' . ($sequenceStart + $index)),
-                            'number_of_items' => 100,
-                            'course_outcome_id' => null,
-                            'is_deleted' => false,
-                            'created_by' => $actingUserId,
-                            'updated_by' => $actingUserId,
-                        ]);
+                foreach ($allowedTypes as $activityType) {
+                    $detail = $weightDetails->get($activityType);
+                    if (! $detail) {
+                        continue;
                     }
 
-                    $termSummary['created'] += $toCreate;
-                    $summary['created'] += $toCreate;
+                    $baseType = $detail['base_type'];
+                    $label = $detail['label'] ?? FormulaStructure::formatLabel($activityType);
+                    $maxAllowed = $maxAssessments[$activityType]
+                        ?? $maxAssessments[$baseType]
+                        ?? null;
 
                     $existing = Activity::where('subject_id', $subject->id)
                         ->where('term', $termName)
@@ -206,47 +177,91 @@ trait ActivityManagementTrait
                         ->where('is_deleted', false)
                         ->orderBy('created_at')
                         ->get();
-                }
 
-                if ($maxAllowed !== null && $existing->count() > $maxAllowed) {
-                    $excess = $existing->sortByDesc('created_at')
-                        ->take($existing->count() - $maxAllowed);
-
-                    foreach ($excess as $activity) {
-                        $activity->update([
-                            'is_deleted' => true,
-                            'updated_by' => $actingUserId,
-                        ]);
+                    $existingCount = $existing->count();
+                    $minRequired = $detail['relative_weight_percent'] > 0 ? 1 : 0;
+                    if ($baseType === 'exam') {
+                        $minRequired = max(1, $minRequired);
                     }
 
-                    $termSummary['archived'] += $excess->count();
-                    $summary['archived'] += $excess->count();
+                    if ($this->activityTypeHasKeyword($activityType, ['quiz', 'ocr'])
+                        || $this->activityTypeHasKeyword($baseType, ['quiz', 'ocr'])) {
+                        $minRequired = max(3, $minRequired);
+                    }
+
+                    if ($maxAllowed !== null) {
+                        $minRequired = min($minRequired, (int) $maxAllowed);
+                    }
+
+                    if ($existingCount < $minRequired) {
+                        $toCreate = $minRequired - $existingCount;
+                        $sequenceStart = $existingCount + 1;
+
+                        for ($index = 0; $index < $toCreate; $index++) {
+                            Activity::create([
+                                'subject_id' => $subject->id,
+                                'term' => $termName,
+                                'type' => $activityType,
+                                'title' => trim($label . ' ' . ($sequenceStart + $index)),
+                                'number_of_items' => 100,
+                                'course_outcome_id' => null,
+                                'is_deleted' => false,
+                                'created_by' => $actingUserId,
+                                'updated_by' => $actingUserId,
+                            ]);
+                        }
+
+                        $termSummary['created'] += $toCreate;
+                        $summary['created'] += $toCreate;
+
+                        $existing = Activity::where('subject_id', $subject->id)
+                            ->where('term', $termName)
+                            ->where('type', $activityType)
+                            ->where('is_deleted', false)
+                            ->orderBy('created_at')
+                            ->get();
+                    }
+
+                    if ($maxAllowed !== null && $existing->count() > $maxAllowed) {
+                        $excess = $existing->sortByDesc('created_at')
+                            ->take($existing->count() - $maxAllowed);
+
+                        foreach ($excess as $activity) {
+                            $activity->update([
+                                'is_deleted' => true,
+                                'updated_by' => $actingUserId,
+                            ]);
+                        }
+
+                        $termSummary['archived'] += $excess->count();
+                        $summary['archived'] += $excess->count();
+                    }
                 }
+
+                $extraActivities = Activity::where('subject_id', $subject->id)
+                    ->where('term', $termName)
+                    ->whereNotIn('type', $allowedTypes->all())
+                    ->where('is_deleted', false)
+                    ->get();
+
+                foreach ($extraActivities as $activity) {
+                    $activity->update([
+                        'is_deleted' => true,
+                        'updated_by' => $actingUserId,
+                    ]);
+                }
+
+                if ($extraActivities->isNotEmpty()) {
+                    $termSummary['archived'] += $extraActivities->count();
+                    $summary['archived'] += $extraActivities->count();
+                }
+
+                $summary['per_term'][$termName] = $termSummary;
+                $summary['processed_terms']++;
             }
 
-            $extraActivities = Activity::where('subject_id', $subject->id)
-                ->where('term', $termName)
-                ->whereNotIn('type', $allowedTypes->all())
-                ->where('is_deleted', false)
-                ->get();
-
-            foreach ($extraActivities as $activity) {
-                $activity->update([
-                    'is_deleted' => true,
-                    'updated_by' => $actingUserId,
-                ]);
-            }
-
-            if ($extraActivities->isNotEmpty()) {
-                $termSummary['archived'] += $extraActivities->count();
-                $summary['archived'] += $extraActivities->count();
-            }
-
-            $summary['per_term'][$termName] = $termSummary;
-            $summary['processed_terms']++;
-        }
-
-        return $summary;
+            return $summary;
+        });
     }
 
     protected function activityTypeHasKeyword(?string $activityType, array $keywords): bool
