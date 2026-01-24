@@ -13,6 +13,7 @@ class Announcement extends Model
         'message',
         'type',
         'priority',
+        'icon',
         'target_roles',
         'start_date',
         'end_date',
@@ -80,8 +81,8 @@ class Announcement extends Model
             return false;
         }
 
-        // Don't show announcements to the admin who created them
-        if ($user->role === 3 && $this->created_by === $user->id) {
+        // Don't show announcements to admins (role 3)
+        if ($user->role === 3) {
             return false;
         }
 

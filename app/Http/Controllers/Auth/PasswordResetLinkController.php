@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -29,9 +30,20 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
+        // Check if user exists and has 2FA enabled
+        $user = User::where('email', $request->email)->first();
+        
+        if ($user && $user->two_factor_secret && $user->two_factor_confirmed_at) {
+            // Store email in session for 2FA verification
+            session([
+                'password_reset.email' => $request->email,
+                'password_reset.requires_2fa' => true,
+            ]);
+            
+            return redirect()->route('password.2fa.challenge');
+        }
+
+        // Send reset link for users without 2FA or non-existent users
         $status = Password::sendResetLink(
             $request->only('email')
         );

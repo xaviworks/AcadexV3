@@ -484,6 +484,11 @@
     @include('components.announcement-popup')
 
     <script>
+        // Clear announcement session storage on logout
+        function clearAnnouncementSession() {
+            sessionStorage.removeItem('dismissedAnnouncements');
+        }
+
         (function () {
             // Display branded message to anyone inspecting the console
             if (!window.console) {

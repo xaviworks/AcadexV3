@@ -100,7 +100,7 @@
                 </a>
             @endif
 
-            <button type="submit" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-100 text-black dark:bg-gray-700 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+            <button type="submit" style="background-color: #198754; border-color: #198754;" class="inline-flex items-center px-4 py-2 text-white rounded-md font-semibold text-xs uppercase tracking-widest shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 {{ __('Log in') }}
             </button>
         </div>
@@ -147,41 +147,8 @@
         document.addEventListener('DOMContentLoaded', function () {
             const emailField = document.getElementById('email');
             const warning = document.getElementById('email-warning');
-            const togglePassword = document.getElementById('togglePassword');
-            const passwordField = document.getElementById('password');
 
-            // Generate device fingerprint and hash it
-            const generateFingerprint = async () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                ctx.textBaseline = 'top';
-                ctx.font = '14px Arial';
-                ctx.fillText('browser fingerprint', 2, 2);
-                
-                const fingerprintData = JSON.stringify({
-                    canvas: canvas.toDataURL(),
-                    userAgent: navigator.userAgent,
-                    language: navigator.language,
-                    platform: navigator.platform,
-                    screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    plugins: Array.from(navigator.plugins || []).map(p => p.name).join(','),
-                });
-
-                // Hash the fingerprint using SHA-256
-                const encoder = new TextEncoder();
-                const data = encoder.encode(fingerprintData);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                
-                return hashHex;
-            };
-
-            // Set the hashed fingerprint
-            generateFingerprint().then(hash => {
-                document.getElementById('device_fingerprint').value = hash;
-            });
+            // Device fingerprint is handled by app.js
 
             emailField.addEventListener('input', () => {
                 if (emailField.value.includes('@')) {

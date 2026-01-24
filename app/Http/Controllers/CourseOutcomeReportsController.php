@@ -259,8 +259,9 @@ class CourseOutcomeReportsController extends Controller
             ->where('is_deleted', false)
             ->firstOrFail();
         
-        // Get all subjects for this course in the active period
+        // Get subjects for this course in the active period (excluding GE subjects)
         $subjects = Subject::where('course_id', $courseId)
+            ->where('department_id', '!=', 1) // Exclude GE subjects (department_id = 1)
             ->where('is_deleted', false)
             ->when($periodId, fn($q) => $q->where('academic_period_id', $periodId))
             ->orderBy('subject_code')
@@ -302,6 +303,7 @@ class CourseOutcomeReportsController extends Controller
             
             $subjects = Subject::with('course')
                 ->where('course_id', $userCourseId)
+                ->where('department_id', '!=', 1) // Exclude GE subjects
                 ->where('is_deleted', false)
                 ->when($periodId, fn($q)=>$q->where('academic_period_id', $periodId))
                 ->orderBy('subject_code')
@@ -326,10 +328,11 @@ class CourseOutcomeReportsController extends Controller
             ]);
         }
 
-        // Ensure the subject belongs to the chairperson's assigned course
+        // Ensure the subject belongs to the chairperson's assigned course and is not a GE subject
         $userCourseId = auth()->user()?->course_id;
         $subject = Subject::with(['course','academicPeriod'])
             ->where('course_id', $userCourseId)
+            ->where('department_id', '!=', 1) // Exclude GE subjects
             ->where('id', $subjectId)
             ->where('is_deleted', false)
             ->firstOrFail();

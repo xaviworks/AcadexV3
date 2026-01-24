@@ -419,10 +419,23 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('gecoordinator.course_outcomes.index') }}" 
+                           class="nav-link {{ request()->routeIs('gecoordinator.course_outcomes.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-book me-3"></i>
+                            <span>Course Outcomes</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h6 class="px-3 mb-2 sidebar-heading">Grades & Assessment</h6>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
                         <a href="{{ route('gecoordinator.viewGrades') }}"
                            class="nav-link {{ request()->routeIs('gecoordinator.viewGrades') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-clipboard-data me-3"></i>
-                            <span>Grades</span>
+                            <span>View Grades</span>
                         </a>
                     </li>
                 </ul>

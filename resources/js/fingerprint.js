@@ -1,28 +1,49 @@
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
-
 /**
- * Initialize and get device fingerprint
- * This creates a unique identifier for the device that persists across sessions
+ * Get stable device fingerprint
+ * Uses localStorage to persist the same fingerprint across sessions
+ * Generates SHA-256 hash based on stable browser properties only
  */
 export async function getDeviceFingerprint() {
   try {
-    // Initialize the agent
-    const fp = await FingerprintJS.load();
+    // Check localStorage first for existing fingerprint
+    const stored = localStorage.getItem('device_fingerprint');
+    if (stored) {
+      return stored;
+    }
 
-    // Get the visitor identifier
-    const result = await fp.get();
+    // Generate new fingerprint from stable browser properties
+    const fingerprintData = JSON.stringify({
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      languages: navigator.languages ? navigator.languages.join(',') : '',
+      platform: navigator.platform,
+      screenResolution: `${screen.width}x${screen.height}`,
+      colorDepth: screen.colorDepth,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezoneOffset: new Date().getTimezoneOffset(),
+      hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+      deviceMemory: navigator.deviceMemory || 'unknown',
+    });
 
-    // Return the unique fingerprint
-    return result.visitorId;
+    // Generate SHA-256 hash
+    const encoder = new TextEncoder();
+    const data = encoder.encode(fingerprintData);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const fingerprint = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    // Store in localStorage for future use
+    localStorage.setItem('device_fingerprint', fingerprint);
+
+    return fingerprint;
   } catch (error) {
     console.error('Error generating fingerprint:', error);
-    // Fallback to a simple hash if fingerprinting fails
     return generateFallbackFingerprint();
   }
 }
 
 /**
- * Fallback fingerprint generation using basic browser properties
+ * Fallback fingerprint using simple hash (only if crypto.subtle fails)
  */
 function generateFallbackFingerprint() {
   const data = [
@@ -31,29 +52,27 @@ function generateFallbackFingerprint() {
     screen.colorDepth,
     screen.width + 'x' + screen.height,
     new Date().getTimezoneOffset(),
-    navigator.hardwareConcurrency || 'unknown',
-    navigator.deviceMemory || 'unknown',
   ].join('|||');
 
-  // Simple hash function
   let hash = 0;
   for (let i = 0; i < data.length; i++) {
     const char = data.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
-  return Math.abs(hash).toString(16);
+  
+  // Pad to make it longer and more unique
+  const baseHash = Math.abs(hash).toString(16);
+  return baseHash.padStart(32, '0');
 }
 
 /**
- * Store fingerprint in a hidden input or send with login form
- * @deprecated Use getDeviceFingerprint() directly instead
+ * Inject fingerprint into a form
  */
 export function injectFingerprint(formSelector) {
   getDeviceFingerprint().then((fingerprint) => {
     const form = document.querySelector(formSelector);
     if (form) {
-      // Check if input already exists
       let input = form.querySelector('input[name="device_fingerprint"]');
       if (!input) {
         input = document.createElement('input');

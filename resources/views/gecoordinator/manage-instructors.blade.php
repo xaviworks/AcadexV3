@@ -137,7 +137,12 @@
                                     <tbody>
                                         @foreach($inactiveInstructors as $instructor)
                                             <tr>
-                                                <td>{{ $instructor->last_name }}, {{ $instructor->first_name }} {{ $instructor->middle_name }}</td>
+                                                <td>
+                                                    {{ $instructor->last_name }}, {{ $instructor->first_name }} {{ $instructor->middle_name }}
+                                                    @if($instructor->department_id !== $geDepartment?->id)
+                                                        <span class="badge bg-info text-white ms-1" title="Has GE teaching access (not GE Dept)">GE Access Only</span>
+                                                    @endif
+                                                </td>
                                                 <td>{{ $instructor->email }}</td>
                                                 <td class="text-center">
                                                     <span class="badge border border-secondary text-secondary px-3 py-2 rounded-pill">
@@ -145,15 +150,24 @@
                                                     </span>
                                                 </td>
                                                 <td class="text-center">
-                                                    <button type="button"
-                                                        class="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#confirmActivateModal"
-                                                        data-id="{{ $instructor->id }}"
-                                                        data-name="{{ $instructor->last_name }}, {{ $instructor->first_name }}">
-                                                        <i class="bi bi-person-check-fill"></i>
-                                                        Activate
-                                                    </button>
+                                                    @if($instructor->department_id === $geDepartment?->id)
+                                                        {{-- GE Department instructors can be fully activated --}}
+                                                        <button type="button"
+                                                            class="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#confirmActivateModal"
+                                                            data-id="{{ $instructor->id }}"
+                                                            data-name="{{ $instructor->last_name }}, {{ $instructor->first_name }}">
+                                                            <i class="bi bi-person-check-fill"></i>
+                                                            Activate
+                                                        </button>
+                                                    @else
+                                                        {{-- Non-GE Department instructors cannot be activated by GE Coordinator --}}
+                                                        <span class="text-muted small" title="Contact the department chairperson to activate this instructor">
+                                                            <i class="bi bi-info-circle me-1"></i>
+                                                            Managed by {{ $instructor->department->department_code ?? 'Dept' }} Chairperson
+                                                        </span>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach

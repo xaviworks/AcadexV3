@@ -48,4 +48,8 @@ function initAdminSubjectsPage() {
 window.initAdminSubjectsPage = initAdminSubjectsPage;
 
 // Auto-initialize when DOM is ready
-$(document).ready(initAdminSubjectsPage);
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof $ !== 'undefined' && $('#subjectsTable').length) {
+    initAdminSubjectsPage();
+  }
+});

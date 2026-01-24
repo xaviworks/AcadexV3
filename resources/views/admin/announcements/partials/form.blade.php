@@ -37,7 +37,7 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-5 mb-3">
                 <label for="{{ $prefix }}type" class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
                 <select class="form-select @error('type') is-invalid @enderror" id="{{ $prefix }}type" name="type" required>
                     <option value="info" {{ old('type', $announcement?->type ?? 'info') === 'info' ? 'selected' : '' }}>Info</option>
@@ -50,7 +50,7 @@
                 @enderror
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-5 mb-3">
                 <label for="{{ $prefix }}priority" class="form-label fw-semibold">Priority</label>
                 <select class="form-select @error('priority') is-invalid @enderror" id="{{ $prefix }}priority" name="priority" required>
                     <option value="low" {{ old('priority', $announcement?->priority ?? '') === 'low' ? 'selected' : '' }}>Low</option>
@@ -60,6 +60,92 @@
                 </select>
                 @error('priority')
                     <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <label for="{{ $prefix }}icon" class="form-label fw-semibold">Icon</label>
+                <input type="hidden" id="{{ $prefix }}icon" name="icon" value="{{ old('icon', $announcement?->icon ?? '') }}">
+                <div class="dropdown w-100">
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100 text-center d-flex align-items-center justify-content-center" type="button" id="{{ $prefix }}iconDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i id="{{ $prefix }}icon-selected" class="fas {{ old('icon', $announcement?->icon ?? '') }}" style="width: 20px; display: {{ old('icon', $announcement?->icon ?? '') ? 'inline-block' : 'none' }};"></i>
+                        <span id="{{ $prefix }}icon-label" style="display: {{ old('icon', $announcement?->icon ?? '') ? 'none' : 'inline' }};">Select</span>
+                    </button>
+                    <ul class="dropdown-menu p-2" aria-labelledby="{{ $prefix }}iconDropdown" style="min-width: 280px;">
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ empty(old('icon', $announcement?->icon ?? '')) ? 'active' : '' }}" data-icon="" data-prefix="{{ $prefix }}">
+                                <small class="text-muted">None</small>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-bullhorn' ? 'active' : '' }}" data-icon="fa-bullhorn" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-bullhorn"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-hand-paper' ? 'active' : '' }}" data-icon="fa-hand-paper" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-hand-paper"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-tools' ? 'active' : '' }}" data-icon="fa-tools" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-tools"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-exclamation-triangle' ? 'active' : '' }}" data-icon="fa-exclamation-triangle" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-star' ? 'active' : '' }}" data-icon="fa-star" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-star"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-clock' ? 'active' : '' }}" data-icon="fa-clock" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-calendar-alt' ? 'active' : '' }}" data-icon="fa-calendar-alt" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-calendar-alt"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-file-upload' ? 'active' : '' }}" data-icon="fa-file-upload" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-file-upload"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-gavel' ? 'active' : '' }}" data-icon="fa-gavel" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-gavel"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-bug' ? 'active' : '' }}" data-icon="fa-bug" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-bug"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-info-circle' ? 'active' : '' }}" data-icon="fa-info-circle" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-check-circle' ? 'active' : '' }}" data-icon="fa-check-circle" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-check-circle"></i>
+                            </button>
+                        </li>
+                        <li class="d-inline-block">
+                            <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-option-btn {{ old('icon', $announcement?->icon ?? '') === 'fa-bell' ? 'active' : '' }}" data-icon="fa-bell" data-prefix="{{ $prefix }}">
+                                <i class="fas fa-bell"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                @error('icon')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
             </div>
         </div>
@@ -149,6 +235,65 @@
     </div>
 </div>
 
+<style>
+.icon-option-btn {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-option-btn.active {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Icon picker functionality
+    document.querySelectorAll('.icon-option-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const icon = this.dataset.icon;
+            const prefix = this.dataset.prefix;
+            
+            // Update hidden input
+            document.getElementById(prefix + 'icon').value = icon;
+            
+            // Update button display
+            const selectedIcon = document.getElementById(prefix + 'icon-selected');
+            const label = document.getElementById(prefix + 'icon-label');
+            
+            if (icon) {
+                selectedIcon.className = 'fas ' + icon;
+                selectedIcon.style.width = '20px';
+                selectedIcon.style.display = 'inline-block';
+                label.style.display = 'none';
+            } else {
+                selectedIcon.className = '';
+                selectedIcon.style.display = 'none';
+                label.style.display = 'inline';
+            }
+            
+            // Update active state
+            this.closest('.dropdown-menu').querySelectorAll('.icon-option-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Close dropdown
+            const dropdown = bootstrap.Dropdown.getInstance(document.getElementById(prefix + 'iconDropdown'));
+            if (dropdown) {
+                dropdown.hide();
+            }
+        });
+    });
+});
+</script>
 {{-- Schedule Section (Optional) --}}
 <div class="card border-0 bg-light mb-3">
     <div class="card-body py-3">

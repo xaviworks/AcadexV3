@@ -656,7 +656,7 @@
             height: 32px;
         }
     }
-</link>
+</style>
 @endpush
 
 @push('scripts')
@@ -723,8 +723,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize Summernote for Edit modal when shown
     const editModal = document.getElementById('editGuideModal');
+    let pendingEditContent = null;
+    
     editModal.addEventListener('shown.bs.modal', function() {
-        if (!$('#edit_content').hasClass('note-editor')) {
+        if (!$('#edit_content').hasClass('note-editor') && !$('#edit_content').next('.note-editor').length) {
             $('#edit_content').summernote({
                 ...summernoteConfig,
                 callbacks: {
@@ -733,6 +735,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+        }
+        
+        // Set content if there's pending content to load
+        if (pendingEditContent !== null) {
+            $('#edit_content').summernote('code', pendingEditContent);
+            pendingEditContent = null;
         }
     });
 
@@ -853,15 +861,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set title
             document.getElementById('edit_title').value = title;
 
-            // Set content (will be set after Summernote initializes)
-            document.getElementById('edit_content').value = content;
-            
-            // Wait for modal to be shown then set Summernote content
-            setTimeout(() => {
-                if ($('#edit_content').hasClass('note-editor') || $('#edit_content').next('.note-editor').length) {
-                    $('#edit_content').summernote('code', content);
-                }
-            }, 300);
+            // Store content to be set when modal is shown
+            pendingEditContent = content;
 
             // Set visible roles
             document.querySelectorAll('#editGuideModal input[name="visible_roles[]"]').forEach(cb => {

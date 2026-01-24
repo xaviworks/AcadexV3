@@ -237,11 +237,18 @@ class CourseOutcomeReportingService
     /**
      * Aggregate CO attainment for a course (program) across all its subjects in a given academic period.
      * Returns same structure as aggregateSubject but merged across subjects.
+     * 
+     * @param int $courseId The course ID to aggregate
+     * @param int|null $academicPeriodId Optional academic period filter
+     * @param bool $excludeGE If true, excludes GE subjects (department_id = 1)
      */
-    public function aggregateCourse(int $courseId, ?int $academicPeriodId = null): array
+    public function aggregateCourse(int $courseId, ?int $academicPeriodId = null, bool $excludeGE = false): array
     {
         $subjects = Subject::where('course_id', $courseId)
             ->where('is_deleted', false)
+            ->when($excludeGE, function ($q) {
+                $q->where('department_id', '!=', 1);
+            })
             ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
                 $q->where('academic_period_id', $academicPeriodId);
             })
