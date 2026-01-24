@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
 use App\Services\SessionService;
+use App\Traits\ActivityManagementTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Rules\Password;
 
 class GECoordinatorController extends Controller
 {
+    use ActivityManagementTrait;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -331,6 +334,9 @@ class GECoordinatorController extends Controller
         // Attach the instructor to the subject (many-to-many)
         $subject->instructors()->syncWithoutDetaching([$request->instructor_id]);
 
+        // Auto-align activities to the department's formula for the newly assigned subject
+        $this->realignActivitiesToFormula($subject, null, Auth::id());
+
         return redirect()->back()->with('success', 'Instructor assigned to subject successfully.');
     }
 
@@ -464,6 +470,9 @@ class GECoordinatorController extends Controller
             // Assign the instructor (if not already assigned)
             $subject->instructors()->syncWithoutDetaching([$request->instructor_id]);
             $instructor = User::find($request->instructor_id);
+            
+            // Auto-align activities to the department's formula for the newly assigned subject
+            $this->realignActivitiesToFormula($subject, null, Auth::id());
             
             // Send notification to the instructor (Email + System)
             if ($instructor) {

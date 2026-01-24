@@ -305,18 +305,27 @@
                             $status = $termComponent['status'] ?? 'missing';
                             $minRequired = $termComponent['min_required'] ?? 1;
                             $maxAllowed = $termComponent['max_allowed'] ?? null;
+                            
+                            // Status meanings:
+                            // - 'ok': meets minimum, has available slots
+                            // - 'full': meets minimum, no available slots (at max capacity)
+                            // - 'missing': below minimum required
+                            // - 'exceeds': above maximum allowed
+                            // Both 'ok' and 'full' are valid aligned states (green)
                             $badgeClass = match ($status) {
-                              'ok' => 'bg-success',
+                              'ok', 'full' => 'bg-success',
                               'exceeds' => 'bg-danger',
                               default => 'bg-warning text-dark',
                             };
                             $badgeIcon = match ($status) {
                               'ok' => 'check-circle',
+                              'full' => 'check-circle-fill',
                               'exceeds' => 'x-circle',
                               default => 'exclamation-circle',
                             };
                             $tooltip = match ($status) {
-                              'ok' => 'Matches the active formula',
+                              'ok' => 'Aligned — '.($maxAllowed ? ($maxAllowed - $count).' slot(s) available' : 'No limit'),
+                              'full' => 'Aligned — At maximum capacity ('.$maxAllowed.')',
                               'exceeds' => 'Exceeds the maximum of '.($maxAllowed ?? 'n/a').' assessments',
                               default => 'Add at least '.$minRequired.' assessment'.($minRequired > 1 ? 's' : ''),
                             };
