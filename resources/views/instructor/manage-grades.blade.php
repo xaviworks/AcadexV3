@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-0">
+<div class="container-fluid px-0" data-page="instructor-manage-grades">
     <div id="grade-section">
         @if (!$subject)
             @if(count($subjects))
@@ -17,6 +17,7 @@
                             <div
                                 class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden"
                                 data-url="{{ route('instructor.grades.index') }}?subject_id={{ $subjectItem->id }}&term=prelim"
+                                data-subject-id="{{ $subjectItem->id }}"
                                 style="cursor: pointer;"
                             >
                                 {{-- Top header --}}
@@ -58,9 +59,14 @@
                     @endforeach
                 </div>
             @else
-                <div class="alert alert-warning text-center mt-5 rounded">
+                <div class="alert alert-warning text-center mt-5 rounded" id="no-subjects-alert">
                     No subjects have been assigned to you yet.
+                    <p class="small mb-0 mt-2 text-muted">
+                        <i class="bi bi-info-circle"></i> This page will automatically update when subjects are assigned.
+                    </p>
                 </div>
+                {{-- Hidden container for live updates to add cards --}}
+                <div class="row g-4 px-4 py-4 d-none" id="subject-selection"></div>
             @endif
         @else
             @include('instructor.partials.term-stepper')
@@ -104,6 +110,7 @@
 @include('instructor.partials.grade-script')
 
 <style>
+/* Base card transitions */
 .subject-card h6 {
     transition: color 0.3s;
 }
@@ -118,6 +125,90 @@
 
 .subject-card:hover .badge {
     transform: scale(1.05);
+}
+
+/* ===== Live Update Animations ===== */
+
+/* New card glow effect */
+.subject-card-new {
+    animation: cardAppear 0.5s ease-out forwards;
+}
+
+.subject-card-glow {
+    box-shadow: 0 0 20px rgba(77, 166, 116, 0.5), 0 4px 15px rgba(0,0,0,0.1) !important;
+    animation: pulseGlow 1.5s ease-in-out 2;
+}
+
+@keyframes cardAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(77, 166, 116, 0.4), 0 4px 15px rgba(0,0,0,0.1);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(77, 166, 116, 0.7), 0 4px 20px rgba(0,0,0,0.15);
+    }
+}
+
+/* Badge update flash */
+.badge-updated {
+    animation: badgeFlash 0.6s ease-out;
+}
+
+@keyframes badgeFlash {
+    0% {
+        transform: scale(1);
+        background-color: rgba(77, 166, 116, 0.3);
+    }
+    50% {
+        transform: scale(1.1);
+        background-color: rgba(77, 166, 116, 0.5);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Card removal animation */
+.subject-card-removing {
+    animation: cardRemove 0.3s ease-out forwards;
+}
+
+@keyframes cardRemove {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+}
+
+/* Subject circle animation for new cards */
+.subject-card-new .subject-circle {
+    animation: circlePopIn 0.4s ease-out 0.2s both;
+}
+
+@keyframes circlePopIn {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 </style>
 @endpush

@@ -59,6 +59,78 @@ class GradeController extends Controller
         
         return response()->json($result->values());
     }
+
+    /**
+     * API endpoint: Get instructor's subjects for Manage Grades (live updates)
+     *
+     * Returns subjects with grade status, student count, and metadata
+     * for real-time updates without full page reload.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function subjectsApi()
+    {
+        Gate::authorize('instructor');
+
+        $academicPeriodId = session('active_academic_period_id');
+        if (!$academicPeriodId) {
+            return response()->json(['error' => 'No active academic period'], 400);
+        }
+
+        $subjects = Subject::where(function($query) use ($academicPeriodId) {
+            $query->where('instructor_id', Auth::id())
+                  ->orWhereHas('instructors', function($q) {
+                      $q->where('instructor_id', Auth::id());
+                  });
+        })
+        ->when($academicPeriodId, fn($q) => $q->where('academic_period_id', $academicPeriodId))
+        ->withCount(['students' => function($q) {
+            // Qualify is_deleted with table name to avoid ambiguity with student_subjects pivot
+            $q->where('students.is_deleted', false);
+        }])
+        ->get();
+
+        // Calculate grade status for each subject
+        $terms = ['prelim', 'midterm', 'prefinal', 'final'];
+        $subjectsData = $subjects->map(function ($subject) use ($terms) {
+            $total = $subject->students_count;
+            $gradedCount = 0;
+
+            foreach ($terms as $t) {
+                $gradedTerms = TermGrade::where('subject_id', $subject->id)
+                    ->where('term_id', $this->getTermId($t))
+                    ->distinct('student_id')
+                    ->count('student_id');
+
+                if ($gradedTerms === $total && $total > 0) {
+                    $gradedCount++;
+                }
+            }
+
+            $gradeStatus = match (true) {
+                $total === 0 => 'not_started',
+                $gradedCount === 0 => 'pending',
+                $gradedCount < count($terms) => 'pending',
+                default => 'completed',
+            };
+
+            return [
+                'id' => $subject->id,
+                'subject_code' => $subject->subject_code,
+                'subject_description' => $subject->subject_description,
+                'students_count' => $total,
+                'grade_status' => $gradeStatus,
+                'url' => route('instructor.grades.index') . '?subject_id=' . $subject->id . '&term=prelim',
+            ];
+        });
+
+        return response()->json([
+            'subjects' => $subjectsData->values(),
+            'count' => $subjectsData->count(),
+            'timestamp' => now()->toIso8601String(),
+        ]);
+    }
+
     use GradeCalculationTrait, ActivityManagementTrait;
 
     public function __construct()

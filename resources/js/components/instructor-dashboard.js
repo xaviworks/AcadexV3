@@ -1,8 +1,15 @@
 /**
  * Real-Time Instructor Dashboard (No Reload)
  * Auto-updates all dashboard data when changes occur
+ *
+ * Uses LiveUpdateService for broadcaster-agnostic updates:
+ * - WebSockets (Echo) when available
+ * - Polling fallback when WebSockets unavailable
+ *
+ * Security: All requests include CSRF token and proper headers
  */
 import Alpine from 'alpinejs';
+import liveUpdateService from '../services/LiveUpdateService';
 
 Alpine.data(
   'instructorDashboard',
@@ -23,31 +30,124 @@ Alpine.data(
       subjectCharts,
     },
     loading: false,
+    lastUpdated: null,
 
     init() {
-      if (!window.Echo) {
-        console.error('Laravel Echo not initialized');
-        return;
+      // Subscribe to live updates using the service
+      liveUpdateService.subscribe('instructor-dashboard', {
+        endpoint: '/dashboard/instructor/data',
+        channels: ['table.students', 'table.grades', 'table.subjects'],
+        events: ['.row.created', '.row.updated', '.row.deleted'],
+        pollingInterval: 15000, // 15 seconds
+        onUpdate: (newData, previousData) => {
+          this.handleDataUpdate(newData, previousData);
+        },
+        // Only update if data actually changed
+        shouldUpdate: (newData, oldData) => {
+          if (!oldData) return true;
+          return JSON.stringify(newData) !== JSON.stringify(oldData);
+        },
+      });
+
+      // Also listen on private channel for targeted refresh (if user is logged in)
+      this._setupPrivateChannel();
+
+    },
+
+    /**
+     * Set up private channel for user-specific dashboard refresh
+     */
+    _setupPrivateChannel() {
+      const userId = window.Laravel?.user?.id;
+      if (!userId || !window.Echo) return;
+
+      try {
+        window.Echo.private(`App.Models.User.${userId}`).listen(
+          '.dashboard.refresh',
+          () => {
+            this.refreshDashboard();
+          }
+        );
+      } catch (e) {
+        // Private channel may fail if not authenticated - ignore silently
+      }
+    },
+
+    /**
+     * Handle data update from LiveUpdateService
+     */
+    handleDataUpdate(newData, previousData) {
+      if (this.loading) return;
+
+      // Track what changed for animations
+      const changes = this._detectChanges(newData, previousData);
+
+      // Update data
+      this.data = newData;
+      this.lastUpdated = new Date();
+
+      // Trigger animations for changed values
+      if (changes.length > 0) {
+        this._animateChanges(changes);
       }
 
-      // Listen for student changes
-      window.Echo.channel('table.students')
-        .listen('.row.created', () => this.refreshDashboard())
-        .listen('.row.updated', () => this.refreshDashboard())
-        .listen('.row.deleted', () => this.refreshDashboard());
+    },
 
-      // Listen for grade changes
-      window.Echo.channel('table.grades')
-        .listen('.row.created', () => this.refreshDashboard())
-        .listen('.row.updated', () => this.refreshDashboard());
+    /**
+     * Detect which values changed
+     */
+    _detectChanges(newData, oldData) {
+      if (!oldData) return [];
 
-      // Listen for subject changes
-      window.Echo.channel('table.subjects')
-        .listen('.row.created', () => this.refreshDashboard())
-        .listen('.row.updated', () => this.refreshDashboard())
-        .listen('.row.deleted', () => this.refreshDashboard());
+      const changes = [];
+      const keys = [
+        'instructorStudents',
+        'enrolledSubjectsCount',
+        'totalPassedStudents',
+        'totalFailedStudents',
+      ];
 
-      console.log('Instructor dashboard real-time updates active');
+      keys.forEach((key) => {
+        if (newData[key] !== oldData[key]) {
+          changes.push({
+            key,
+            oldValue: oldData[key],
+            newValue: newData[key],
+            increased: newData[key] > oldData[key],
+          });
+        }
+      });
+
+      return changes;
+    },
+
+    /**
+     * Animate changed stat cards
+     */
+    _animateChanges(changes) {
+      this.$nextTick(() => {
+        changes.forEach((change) => {
+          const cardMap = {
+            instructorStudents: 'total-students',
+            enrolledSubjectsCount: 'course-load',
+            totalPassedStudents: 'students-passed',
+            totalFailedStudents: 'students-failed',
+          };
+
+          const cardId = cardMap[change.key];
+          const element = document.querySelector(`[data-stat="${cardId}"]`);
+
+          if (element) {
+            // Add flash animation
+            element.classList.add('stat-updated');
+            element.classList.add(change.increased ? 'stat-increased' : 'stat-decreased');
+
+            setTimeout(() => {
+              element.classList.remove('stat-updated', 'stat-increased', 'stat-decreased');
+            }, 1500);
+          }
+        });
+      });
     },
 
     async refreshDashboard() {
@@ -60,19 +160,27 @@ Alpine.data(
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             Accept: 'application/json',
+            'X-CSRF-TOKEN':
+              document.querySelector('meta[name="csrf-token"]')?.content || '',
           },
+          credentials: 'same-origin',
         });
 
         if (response.ok) {
           const newData = await response.json();
-          this.data = newData;
-          console.log('Dashboard data updated');
+          this.handleDataUpdate(newData, this.data);
         }
       } catch (error) {
-        console.error('Failed to refresh dashboard:', error);
       } finally {
         this.loading = false;
       }
+    },
+
+    /**
+     * Cleanup when component is destroyed
+     */
+    destroy() {
+      liveUpdateService.unsubscribe('instructor-dashboard');
     },
 
     getTermProgress(term) {

@@ -11,7 +11,7 @@
 
     {{-- Summary Cards --}}
     <div class="row g-4">
-        <div class="col-md-3">
+        <div class="col-md-3" data-stat="total-students">
             <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
@@ -29,7 +29,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3" data-stat="course-load">
             <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
@@ -47,7 +47,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3" data-stat="students-passed">
             <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">
@@ -65,7 +65,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3" data-stat="students-failed">
             <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-3">

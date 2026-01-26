@@ -390,6 +390,96 @@ div::-webkit-scrollbar-thumb:hover {
 }
 
 /* ===========================
+   LIVE UPDATE ANIMATIONS
+   =========================== */
+
+/* Stat card update flash */
+.stat-updated {
+  animation: statFlash 1s ease-out;
+}
+
+.stat-increased .card {
+  animation: statIncrease 0.5s ease-out;
+}
+
+.stat-decreased .card {
+  animation: statDecrease 0.5s ease-out;
+}
+
+@keyframes statFlash {
+  0% {
+    box-shadow: 0 0 0 rgba(77, 166, 116, 0);
+  }
+  30% {
+    box-shadow: 0 0 20px rgba(77, 166, 116, 0.5);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+@keyframes statIncrease {
+  0% {
+    transform: scale(1);
+    background-color: rgba(28, 200, 138, 0);
+  }
+  50% {
+    transform: scale(1.02);
+    background-color: rgba(28, 200, 138, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    background-color: transparent;
+  }
+}
+
+@keyframes statDecrease {
+  0% {
+    transform: scale(1);
+    background-color: rgba(231, 74, 59, 0);
+  }
+  50% {
+    transform: scale(0.98);
+    background-color: rgba(231, 74, 59, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    background-color: transparent;
+  }
+}
+
+/* Number counting animation */
+.stat-number-update {
+  animation: numberPop 0.3s ease-out;
+}
+
+@keyframes numberPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Flash updated class for general use */
+.flash-updated {
+  animation: flashUpdate 1s ease-out;
+}
+
+@keyframes flashUpdate {
+  0% {
+    background-color: rgba(77, 166, 116, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* ===========================
    MOBILE OPTIMIZATIONS
    =========================== */
 
