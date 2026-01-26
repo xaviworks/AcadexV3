@@ -4,6 +4,13 @@
  */
 
 export function initVpaaCourseOutcomeResultsWildcardsPage() {
+  // Only run on VPAA pages - check for VPAA-specific elements or data attributes
+  const isVpaaPage =
+    document.querySelector('[data-page="vpaa-course-outcome-results-wildcards"]') ||
+    document.querySelector('.vpaa-course-outcome-wildcards') ||
+    window.location.pathname.includes('/vpaa/');
+
+  if (!isVpaaPage) return;
   // Subject card click handlers
   document.querySelectorAll('.subject-card[data-url]').forEach((card) => {
     card.addEventListener('click', function () {

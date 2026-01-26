@@ -211,10 +211,7 @@ class LiveUpdateService {
     // Calculate interval with backoff for failures
     let interval = subscription.pollingInterval;
     if (this.consecutiveFailures > 0) {
-      interval = Math.min(
-        interval * Math.pow(1.5, this.consecutiveFailures),
-        this.config.maxPollingInterval
-      );
+      interval = Math.min(interval * Math.pow(1.5, this.consecutiveFailures), this.config.maxPollingInterval);
     }
 
     const timer = setTimeout(async () => {
@@ -268,8 +265,7 @@ class LiveUpdateService {
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
           Accept: 'application/json',
-          'X-CSRF-TOKEN':
-            document.querySelector('meta[name="csrf-token"]')?.content || '',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
         },
         credentials: 'same-origin',
       });
@@ -332,8 +328,7 @@ class LiveUpdateService {
    * Debug logging
    * @private
    */
-  _log(...args) {
-  }
+  _log(...args) {}
 }
 
 // Export singleton instance and class

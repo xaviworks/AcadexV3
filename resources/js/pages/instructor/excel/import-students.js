@@ -621,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const hasUploadForm = document.getElementById('uploadForm');
   const hasCrossCheckBtn = document.getElementById('crossCheckBtn');
   const isTabbed = document.getElementById('studentTabs');
-  
+
   // Only init if we have the import elements AND we're NOT on the tabbed manage-students page
   if ((hasUploadForm || hasCrossCheckBtn) && !isTabbed) {
     initImportStudentsPage();

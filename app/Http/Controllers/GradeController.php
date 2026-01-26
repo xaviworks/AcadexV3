@@ -77,7 +77,7 @@ class GradeController extends Controller
             return response()->json(['error' => 'No active academic period'], 400);
         }
 
-        $subjects = Subject::where(function($query) use ($academicPeriodId) {
+        $subjects = Subject::where(function($query) {
             $query->where('instructor_id', Auth::id())
                   ->orWhereHas('instructors', function($q) {
                       $q->where('instructor_id', Auth::id());
@@ -152,7 +152,7 @@ class GradeController extends Controller
         $term = $request->term ?? 'prelim';
         $termLabels = $this->getTermLabelMap();
     
-        $subjects = Subject::where(function($query) use ($academicPeriodId) {
+        $subjects = Subject::where(function($query) {
             $query->where('instructor_id', Auth::id())
                   ->orWhereHas('instructors', function($q) {
                       $q->where('instructor_id', Auth::id());

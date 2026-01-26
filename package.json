@@ -8,6 +8,16 @@
     "lint": "prettier --check resources/js resources/css",
     "lint:fix": "prettier --write resources/js resources/css"
   },
+  "lint-staged": {
+    "resources/js/**/*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ],
+    "resources/css/**/*.css": [
+      "prettier --write",
+      "git add"
+    ]
+  },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.2",
     "@tailwindcss/vite": "^4.0.0",

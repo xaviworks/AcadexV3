@@ -63,8 +63,8 @@ class Subject extends Model
         return $this->belongsToMany(Student::class, 'student_subjects', 'subject_id', 'student_id')
             ->withTimestamps()
             ->wherePivot('is_deleted', false)
-            ->orderBy('last_name')
-            ->orderBy('first_name');
+            ->orderBy('students.last_name')
+            ->orderBy('students.first_name');
     }
 
     public function courseOutcomes()

@@ -51,7 +51,6 @@ Alpine.data(
 
       // Also listen on private channel for targeted refresh (if user is logged in)
       this._setupPrivateChannel();
-
     },
 
     /**
@@ -62,12 +61,9 @@ Alpine.data(
       if (!userId || !window.Echo) return;
 
       try {
-        window.Echo.private(`App.Models.User.${userId}`).listen(
-          '.dashboard.refresh',
-          () => {
-            this.refreshDashboard();
-          }
-        );
+        window.Echo.private(`App.Models.User.${userId}`).listen('.dashboard.refresh', () => {
+          this.refreshDashboard();
+        });
       } catch (e) {
         // Private channel may fail if not authenticated - ignore silently
       }
@@ -90,7 +86,6 @@ Alpine.data(
       if (changes.length > 0) {
         this._animateChanges(changes);
       }
-
     },
 
     /**
@@ -100,12 +95,7 @@ Alpine.data(
       if (!oldData) return [];
 
       const changes = [];
-      const keys = [
-        'instructorStudents',
-        'enrolledSubjectsCount',
-        'totalPassedStudents',
-        'totalFailedStudents',
-      ];
+      const keys = ['instructorStudents', 'enrolledSubjectsCount', 'totalPassedStudents', 'totalFailedStudents'];
 
       keys.forEach((key) => {
         if (newData[key] !== oldData[key]) {
@@ -160,8 +150,7 @@ Alpine.data(
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             Accept: 'application/json',
-            'X-CSRF-TOKEN':
-              document.querySelector('meta[name="csrf-token"]')?.content || '',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
           },
           credentials: 'same-origin',
         });
