@@ -708,7 +708,7 @@ export function bindGradeInputEvents() {
           .catch((error) => {
             console.error('Error:', error);
             const errorMessage = error?.message || 'Failed to save grades. Please try again.';
-            
+
             // Use the global notify helper for consistency
             if (typeof window.notify !== 'undefined' && window.notify.error) {
               window.notify.error(errorMessage);
@@ -928,7 +928,8 @@ export function refreshGradeSection() {
       })
       .catch((error) => {
         console.error('Unable to refresh grade section:', error);
-        const warningMsg = 'Grades were saved, but we could not reload the table automatically. Please refresh the page.';
+        const warningMsg =
+          'Grades were saved, but we could not reload the table automatically. Please refresh the page.';
         if (typeof window.notify !== 'undefined' && window.notify.warning) {
           window.notify.warning(warningMsg);
         } else {

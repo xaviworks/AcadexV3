@@ -12,11 +12,9 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
   const isGECoordinator = userRole === 4;
 
   const curriculumSelect = document.getElementById('curriculumSelect');
-  const loadSubjectsBtn = document.getElementById('loadSubjectsBtn');
   const subjectsContainer = document.getElementById('subjectsContainer');
   const subjectsTableBody = document.getElementById('subjectsTableBody');
   const formCurriculumId = document.getElementById('formCurriculumId');
-  const loadBtnText = document.getElementById('loadBtnText');
   const loadBtnSpinner = document.getElementById('loadBtnSpinner');
   const yearTabs = document.getElementById('yearTabs');
   const selectAllBtn = document.getElementById('selectAllBtn');
@@ -25,32 +23,38 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
   if (!curriculumSelect || !subjectsContainer) return;
 
   curriculumSelect.addEventListener('change', function () {
-    if (loadSubjectsBtn) {
-      // Enable/disable button based on selection instead of hiding
-      loadSubjectsBtn.disabled = !this.value;
-    }
+    console.log('Curriculum changed:', this.value);
     subjectsContainer.classList.add('d-none');
     if (yearTabs) yearTabs.innerHTML = '';
     if (subjectsTableBody) subjectsTableBody.innerHTML = '';
-  });
 
-  if (loadSubjectsBtn) {
-    loadSubjectsBtn.addEventListener('click', loadSubjects);
-  }
+    // Automatically load subjects when curriculum is selected
+    if (this.value) {
+      console.log('Loading subjects for curriculum:', this.value);
+      loadSubjects();
+    }
+  });
 
   function loadSubjects() {
     const curriculumId = curriculumSelect.value;
+    console.log('loadSubjects called with curriculumId:', curriculumId);
     if (!curriculumId) return;
 
     if (formCurriculumId) formCurriculumId.value = curriculumId;
     if (yearTabs) yearTabs.innerHTML = '';
     if (subjectsTableBody) subjectsTableBody.innerHTML = '';
 
-    if (loadSubjectsBtn) loadSubjectsBtn.disabled = true;
-    if (loadBtnText) loadBtnText.classList.add('d-none');
-    if (loadBtnSpinner) loadBtnSpinner.classList.remove('d-none');
+    // Disable select and show spinner
+    curriculumSelect.disabled = true;
+    if (loadBtnSpinner) {
+      console.log('Showing spinner');
+      loadBtnSpinner.classList.remove('d-none');
+    }
 
-    fetch(`/curriculum/${curriculumId}/fetch-subjects`, {
+    const url = `/curriculum/${curriculumId}/fetch-subjects`;
+    console.log('Fetching from URL:', url);
+
+    fetch(url, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
     })
       .then((res) => res.json())
@@ -135,10 +139,10 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
               if (s.already_imported) {
                 selectCell = '<i class="bi bi-check-circle-fill text-success" title="Already added to subjects"></i>';
               } else if (isDisabled) {
-                // Disabled checkbox - just show empty square icon for restricted subjects
-                selectCell = '<i class="bi bi-square text-muted" title="Managed by another coordinator"></i>';
+                // Disabled - show dash for restricted subjects
+                selectCell = '<span class="text-muted" title="Managed by another coordinator">—</span>';
               } else {
-                selectCell = `<input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}">`;
+                selectCell = `<input type="checkbox" class="form-check-input subject-checkbox" name="subject_ids[]" value="${s.id}" data-year="${s.year_level}" data-semester="${s.semester}" style="border: 2px solid #198754; cursor: pointer;">`;
               }
 
               // Same table layout for both roles
@@ -162,7 +166,11 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-success">
                     <tr>
-                        <th style="width: 60px;" class="text-center">Select</th>
+                        <th style="width: 80px;" class="text-center">
+                            <div class="d-flex align-items-center justify-content-center m-0">
+                                <input type="checkbox" class="form-check-input m-0" id="selectAllBtn" data-selected="false" style="width: 20px; height: 20px; cursor: pointer; border: 2px solid #198754;" title="Select/Unselect All">
+                            </div>
+                        </th>
                         <th style="width: 180px;">Course Code</th>
                         <th>Description</th>
                         <th style="width: 80px;" class="text-center">Year</th>
@@ -208,19 +216,18 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
         subjectsContainer.classList.remove('d-none');
       })
       .finally(() => {
-        if (loadSubjectsBtn) loadSubjectsBtn.disabled = false;
-        if (loadBtnText) loadBtnText.classList.remove('d-none');
+        // Re-enable select and hide spinner
+        curriculumSelect.disabled = false;
         if (loadBtnSpinner) loadBtnSpinner.classList.add('d-none');
       });
   }
 
   // Select/Unselect All Handler
-  document.addEventListener('click', function (e) {
-    if (e.target.closest('#selectAllBtn')) {
-      const btn = e.target.closest('#selectAllBtn');
-      let allSelected = btn.dataset.selected === 'true';
-      allSelected = !allSelected;
-      btn.dataset.selected = allSelected;
+  document.addEventListener('change', function (e) {
+    if (e.target.id === 'selectAllBtn' && e.target.type === 'checkbox') {
+      const checkbox = e.target;
+      const allSelected = checkbox.checked;
+      checkbox.dataset.selected = allSelected;
 
       // Only select enabled checkboxes
       document.querySelectorAll('.subject-checkbox').forEach((cb) => {
@@ -230,22 +237,6 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
           cb.checked = allSelected;
         }
       });
-
-      // Toggle button styling
-      if (isChairperson) {
-        if (allSelected) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      } else {
-        btn.classList.toggle('btn-outline-success', !allSelected);
-        btn.classList.toggle('btn-success', allSelected);
-      }
-
-      btn.innerHTML = allSelected
-        ? '<i class="bi bi-x-square me-1"></i> Unselect All'
-        : '<i class="bi bi-check2-square me-1"></i> Select All';
 
       updateSelectedCount();
     }

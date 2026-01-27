@@ -2,19 +2,14 @@
 
 @section('content')
 <div class="container-fluid px-4 py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-person-lines-fill text-success me-2"></i>Student Outcomes Summary
-            </h2>
-                <p class="text-dark fw-bold fs-4 mb-0">{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_name ?? '' }}</p>
-        </div>
-        <div>
-            <a href="{{ route('chairperson.reports.co-student') }}" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i>Choose Student
-            </a>
-        </div>
-    </div>
+    {{-- Page Header --}}
+    @include('chairperson.partials.reports-header', [
+        'title' => 'Student Outcomes Summary',
+        'subtitle' => $student->last_name . ', ' . $student->first_name . ' ' . ($student->middle_name ?? ''),
+        'icon' => 'bi-person-lines-fill',
+        'backRoute' => route('chairperson.reports.co-student'),
+        'backLabel' => 'Choose Student'
+    ])
 
     {{-- Subject Info Card --}}
     <div class="card border-0 shadow-sm rounded-4 mb-4">

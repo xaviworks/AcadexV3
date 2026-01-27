@@ -2,24 +2,16 @@
 
 @section('content')
 <div class="container-fluid px-4 py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-book text-success me-2"></i>{{ $course->course_code }} – Course Outcomes Summary
-            </h2>
-            <p class="text-muted mb-0">{{ $course->course_description }}</p>
-        </div>
-        <div>
-            @if($academicYear && $semester)
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">
-                    <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
-                </span>
-            @endif
-            <a href="{{ route('chairperson.reports.co-course') }}" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i>Choose Course
-            </a>
-        </div>
-    </div>
+    {{-- Page Header --}}
+    @include('chairperson.partials.reports-header', [
+        'title' => $course->course_code . ' – Course Outcomes Summary',
+        'subtitle' => $course->course_description,
+        'icon' => 'bi-book',
+        'academicYear' => $academicYear,
+        'semester' => $semester,
+        'backRoute' => route('chairperson.reports.co-course'),
+        'backLabel' => 'Choose Course'
+    ])
 
     {{-- CO Results Table --}}
     <div class="card border-0 shadow-sm rounded-4">

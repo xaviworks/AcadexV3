@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- Styles: resources/css/chairperson/structure-templates.css --}}
+
 <div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
     <div class="row mb-3">
         <div class="col">
@@ -21,9 +23,8 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <script>notify.success('{{ session('success') }}');</script>
-    @endif
+    {{-- Toast Notifications --}}
+    @include('chairperson.partials.toast-notifications')
 
     @if ($errors->any())
         <div class="alert alert-danger shadow-sm">

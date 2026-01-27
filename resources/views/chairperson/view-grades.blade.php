@@ -5,14 +5,12 @@
 
 <div class="import-courses-wrapper">
     <div class="import-courses-container">
-        <!-- Page Title -->
-        <div class="page-title">
-            <h1>
-                <i class="bi bi-bar-chart-fill"></i>
-                Students' Final Grades
-            </h1>
-            <p class="page-subtitle">Select an instructor and subject to view students' final grades</p>
-        </div>
+        {{-- Page Header --}}
+        @include('chairperson.partials.page-header', [
+            'title' => "Students' Final Grades",
+            'subtitle' => 'Select an instructor and subject to view students\'s final grades',
+            'icon' => 'bi-bar-chart-fill'
+        ])
 
     {{-- Breadcrumb Navigation --}}
     <nav aria-label="breadcrumb">
@@ -254,7 +252,6 @@
     };
 </script>
 @endpush
-
     </div>
 </div>
 @endsection
