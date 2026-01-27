@@ -16,12 +16,12 @@ let currentSubjects = new Map();
 let liveUpdateInitialized = false;
 
 export function initManageGradesPage() {
-  const cards = document.querySelectorAll('#subject-selection .subject-card[data-url]');
-  if (!cards.length) {
-    return;
-  }
+  const container = document.getElementById('subject-selection');
+  if (!container) return;
 
-  // Initialize current subjects map from DOM
+  const cards = container.querySelectorAll('.subject-card[data-url]');
+
+  // Initialize current subjects map from DOM (if any)
   cards.forEach((card) => {
     const subjectId = extractSubjectIdFromUrl(card.dataset.url);
     if (subjectId) {
@@ -68,7 +68,7 @@ export function initManageGradesPage() {
     });
   });
 
-  // Initialize live updates
+  // Initialize live updates even if there are currently no cards
   initLiveUpdates();
 }
 
@@ -101,7 +101,6 @@ function initLiveUpdates() {
       handleSubjectsUpdate(data, previousData);
     },
   });
-
 }
 
 /**
@@ -171,8 +170,10 @@ function handleSubjectsUpdate(data, previousData) {
     }
   });
 
-  // Show notification if new subjects were added
-  if (newSubjects.length > 0) {
+  const isInitialLoad = !previousData || !Array.isArray(previousData.subjects) || previousData.subjects.length === 0;
+
+  // Show notification if new subjects were added and this isn't the initial load
+  if (newSubjects.length > 0 && !isInitialLoad) {
     showNewSubjectNotification(newSubjects);
   }
 }
@@ -219,6 +220,13 @@ function addSubjectCard(container, subject) {
     </div>
   `;
 
+  // If the container was hidden and the "no subjects" alert exists, remove the alert and show the container
+  if (container.classList.contains('d-none')) {
+    container.classList.remove('d-none');
+    const noAlert = document.getElementById('no-subjects-alert');
+    if (noAlert) noAlert.remove();
+  }
+
   container.appendChild(colWrapper);
 
   // Bind click events to the new card
@@ -242,7 +250,6 @@ function addSubjectCard(container, subject) {
 
   // Update tracking
   currentSubjects.set(subject.id, { element: card, url: subject.url });
-
 }
 
 /**
@@ -262,10 +269,29 @@ function removeSubjectCard(subjectId) {
 
   setTimeout(() => {
     colWrapper.remove();
+
+    // If no subjects remain, show the no-subjects alert and hide container
+    if (currentSubjects.size === 0) {
+      const container = document.getElementById('subject-selection');
+      if (container) {
+        container.classList.add('d-none');
+        const existing = document.getElementById('no-subjects-alert');
+        if (!existing) {
+          const alert = document.createElement('div');
+          alert.className = 'alert alert-warning text-center mt-5 rounded';
+          alert.id = 'no-subjects-alert';
+          alert.innerHTML = `No subjects have been assigned to you yet.
+                    <p class="small mb-0 mt-2 text-muted">
+                        <i class="bi bi-info-circle"></i> This page will automatically update when subjects are assigned.
+                    </p>`;
+          container.parentNode.insertBefore(alert, container);
+        }
+      }
+    }
   }, 300);
 
   currentSubjects.delete(subjectId);
-} 
+}
 
 /**
  * Update an existing subject card
@@ -291,9 +317,7 @@ function updateSubjectCard(subject) {
   // Update status badge
   const statusBadgeContainer = card.querySelector('.d-flex.justify-content-between');
   if (statusBadgeContainer) {
-    const existingStatusBadge = statusBadgeContainer.querySelector(
-      '.badge:not(.bg-light)'
-    );
+    const existingStatusBadge = statusBadgeContainer.querySelector('.badge:not(.bg-light)');
     const newStatusHtml = getStatusBadge(subject.grade_status);
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = newStatusHtml;
@@ -351,9 +375,7 @@ function bindCardEvents(card) {
 /**
  * Show notification for new subjects
  */
-function showNewSubjectNotification(subjects) {
-}
-
+function showNewSubjectNotification(subjects) {}
 
 /**
  * Escape HTML to prevent XSS

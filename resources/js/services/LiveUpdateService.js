@@ -115,6 +115,10 @@ class LiveUpdateService {
     // Always set up polling as fallback (or primary if WebSockets unavailable)
     this._startPolling(resourceKey, subscription);
 
+    // Trigger an immediate fetch so pages with no initial DOM state receive data right away
+    // (fire-and-forget - errors handled in _fetchAndUpdate)
+    this._fetchAndUpdate(resourceKey, subscription).catch((e) => this._log('Initial fetch failed', e));
+
     this._log(`Subscribed to ${resourceKey}`, {
       useEcho: this.echoAvailable && this.config.preferWebSockets,
       channels: subscription.channels,
