@@ -40,6 +40,8 @@ function Show-Help {
     Write-Host "  Development:" -ForegroundColor Cyan
     Write-Host "  serve           " -ForegroundColor Green -NoNewline
     Write-Host "Start production servers (Laravel + Queue + Scheduler)"
+    Write-Host "  services        " -ForegroundColor Green -NoNewline
+    Write-Host "Start background services only (for Herd/Laragon)"
     Write-Host "  dev             " -ForegroundColor Green -NoNewline
     Write-Host "Start dev servers (Laravel + Queue + Logs + Vite)"
     Write-Host "  build           " -ForegroundColor Green -NoNewline
@@ -91,12 +93,18 @@ function Show-Help {
     Write-Host "  queue           " -ForegroundColor Green -NoNewline
     Write-Host "Start queue worker"
     Write-Host "  schedule        " -ForegroundColor Green -NoNewline
-    Write-Host "Run scheduled tasks"
+    Write-Host "Run scheduled tasks"    Write-Host "  share           " -ForegroundColor Green -NoNewline
+    Write-Host "Share site publicly via Expose"    Write-Host "  phpmyadmin      " -ForegroundColor Green -NoNewline
+    Write-Host "Start Apache & open phpMyAdmin (Windows)"
+    Write-Host "  phpmyadmin:stop " -ForegroundColor Green -NoNewline
+    Write-Host "Stop Apache (Windows)"
     Write-Host "  docs            " -ForegroundColor Green -NoNewline
     Write-Host "Open ACADEX documentation"
     Write-Host ""
     Write-Host "Examples:" -ForegroundColor Yellow
     Write-Host "  acadex setup          # First-time installation"
+    Write-Host "  acadex services       # Start services for Herd/Laragon (recommended)"
+    Write-Host "  acadex serve          # Start full stack (without Herd/Laragon)"
     Write-Host "  acadex dev            # Start development"
     Write-Host "  acadex test           # Run tests"
     Write-Host "  acadex migrate:fresh  # Reset database"
@@ -383,8 +391,15 @@ switch ($Command) {
     }
     
     "serve" {
-        Write-Host "Starting production servers (Laravel + Queue + Scheduler)..." -ForegroundColor Green
-        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80" "php artisan serve" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" --names=server,queue,scheduler
+        Write-Host "Starting production servers (Laravel + Queue + Scheduler + Reverb)..." -ForegroundColor Green
+        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80,#fbbf24" "php artisan serve" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" "php artisan reverb:start" --names=server,queue,scheduler,reverb
+    }
+    
+    "services" {
+        Write-Host "Starting background services (Queue + Scheduler + Reverb)..." -ForegroundColor Green
+        Write-Host "Use this when running with Herd/Laragon" -ForegroundColor Yellow
+        Write-Host ""
+        npx concurrently -c "#c4b5fd,#4ade80,#fbbf24" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" "php artisan reverb:start" --names=queue,scheduler,reverb
     }
     
     "dev" {
@@ -535,6 +550,37 @@ switch ($Command) {
     "schedule" {
         Write-Host "Running scheduled tasks..." -ForegroundColor Green
         php artisan schedule:run
+    }
+    
+    "share" {
+        Write-Host "Sharing site via Expose..." -ForegroundColor Green
+        Write-Host "Public URL will be displayed below" -ForegroundColor Yellow
+        Write-Host "Press Ctrl+C to stop sharing" -ForegroundColor Yellow
+        Write-Host ""
+        expose share http://localhost:8000
+    }
+    
+    "phpmyadmin" {
+        Write-Host "Starting Apache & opening phpMyAdmin..." -ForegroundColor Green
+        # Adjust path for your XAMPP/Laragon installation
+        $apachePath = "C:\xampp\apache\bin\httpd.exe"
+        if (Test-Path $apachePath) {
+            Start-Process $apachePath -WindowStyle Hidden
+            Write-Host "[OK] Apache started" -ForegroundColor Green
+            Write-Host "Opening http://localhost/phpmyadmin/" -ForegroundColor Yellow
+            Start-Process "http://localhost/phpmyadmin/"
+            Write-Host ""
+            Write-Host "To stop Apache: acadex phpmyadmin:stop" -ForegroundColor Yellow
+        } else {
+            Write-Host "[X] Apache not found at $apachePath" -ForegroundColor Red
+            Write-Host "Please adjust the path in acadex.ps1" -ForegroundColor Yellow
+        }
+    }
+    
+    "phpmyadmin:stop" {
+        Write-Host "Stopping Apache..." -ForegroundColor Green
+        Stop-Process -Name "httpd" -Force -ErrorAction SilentlyContinue
+        Write-Host "[OK] Apache stopped" -ForegroundColor Green
     }
     
     "docs" {

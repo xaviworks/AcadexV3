@@ -18,7 +18,7 @@ The dedicated individuals behind ACADEX - An Outcome Based Grading System.
 <div class="team-grid">
   <div class="team-card team-lead">
     <h3>Junn Xavier Adalid</h3>
-    <p>Project Manager / System Analyst / Full-Stack Developer</p>
+    <p>Project Manager / System Analyst / Full-Stack Developer / DevOps Engineer</p>
   </div>
 </div>
 
