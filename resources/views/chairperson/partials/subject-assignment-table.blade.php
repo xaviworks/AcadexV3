@@ -19,8 +19,9 @@
 @endphp
 
 @if ($subjects->isNotEmpty())
-    <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
-        <table class="table table-bordered align-middle mb-0">
+    <div class="shadow-lg rounded-4 overflow-hidden border">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
                     <th>Course Code</th>
@@ -69,6 +70,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     </div>
 @else
     <div class="bg-warning bg-opacity-25 text-warning border border-warning px-4 py-3 rounded-4 shadow-sm">

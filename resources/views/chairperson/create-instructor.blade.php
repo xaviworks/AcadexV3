@@ -1,19 +1,18 @@
 @extends('layouts.app')
 
-@section('content')
 {{-- Styles: resources/css/chairperson/common.css --}}
 
-<div class="import-courses-wrapper">
-    <div class="import-courses-container">
-        {{-- Page Header --}}
-        @include('chairperson.partials.page-header', [
-            'title' => 'Add New Instructor',
-            'subtitle' => 'Create a new instructor account for your department',
-            'icon' => 'bi-person-plus-fill'
-        ])
+@section('content')
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-person-plus-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Add New Instructor</span>
+    </h1>
+    <p class="text-muted mb-4">Create a new instructor account for your department</p>
 
-        {{-- Toast Notifications --}}
-        @include('chairperson.partials.toast-notifications')
+    {{-- Toast Notifications --}}
+    @include('chairperson.partials.toast-notifications')
 
         {{-- Error Messages --}}
         @if ($errors->any())
@@ -123,6 +122,5 @@
                 </div>
             </form>
         </div>
-    </div>
 </div>
 @endsection

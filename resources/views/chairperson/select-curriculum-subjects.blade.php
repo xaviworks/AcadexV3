@@ -1,19 +1,18 @@
 @extends('layouts.app')
 
-@section('content')
 {{-- Styles: resources/css/chairperson/common.css, resources/css/chairperson/select-curriculum.css --}}
 
-<div class="import-courses-wrapper">
-    <div class="import-courses-container">
-        {{-- Page Header --}}
-        @include('chairperson.partials.page-header', [
-            'title' => 'Import Courses',
-            'subtitle' => 'Select a curriculum and choose courses to import into the system',
-            'icon' => 'bi-file-earmark-arrow-up'
-        ])
+@section('content')
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-file-earmark-arrow-up text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Import Courses</span>
+    </h1>
+    <p class="text-muted mb-4">Select a curriculum and choose courses to import into the system</p>
 
-        {{-- Toast Notifications --}}
-        @include('chairperson.partials.toast-notifications')
+    {{-- Toast Notifications --}}
+    @include('chairperson.partials.toast-notifications')
 
         @if(Auth::user()->role === 1)
             <div class="alert alert-custom" role="alert">
@@ -92,7 +91,26 @@
         </div>
     </div>
 </div>
-@endsection
+{{-- Confirmation Modal --}}
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="confirmModalLabel">Confirm Submission</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to confirm and save the selected subjects for this curriculum?
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="submitConfirmBtn" class="btn btn-success">Yes, Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
 
 @php
     $activePeriod = \App\Models\AcademicPeriod::find(session('active_academic_period_id'));
@@ -110,3 +128,4 @@
 </script>
 @endpush
 
+@endsection

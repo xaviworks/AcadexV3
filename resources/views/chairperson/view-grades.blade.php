@@ -1,16 +1,15 @@
 @extends('layouts.app')
 
-@section('content')
 {{-- Styles: resources/css/chairperson/common.css --}}
 
-<div class="import-courses-wrapper">
-    <div class="import-courses-container">
-        {{-- Page Header --}}
-        @include('chairperson.partials.page-header', [
-            'title' => "Students' Final Grades",
-            'subtitle' => 'Select an instructor and subject to view students\'s final grades',
-            'icon' => 'bi-bar-chart-fill'
-        ])
+@section('content')
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-bar-chart-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Students' Final Grades</span>
+    </h1>
+    <p class="text-muted mb-4">Select an instructor and subject to view students's final grades</p>
 
     {{-- Breadcrumb Navigation --}}
     <nav aria-label="breadcrumb">
@@ -252,6 +251,5 @@
     };
 </script>
 @endpush
-    </div>
 </div>
 @endsection

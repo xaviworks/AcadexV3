@@ -4,24 +4,22 @@
 
 @extends('layouts.app')
 
-@section('content')
 {{-- Styles: resources/css/chairperson/common.css --}}
 
-<div class="import-courses-wrapper">
-    <div class="import-courses-container">
-        {{-- Page Header --}}
-        @include('chairperson.partials.page-header', [
-            'title' => 'Assign Courses to Instructors',
-            'subtitle' => 'Assign subjects to instructors by year level',
-            'icon' => 'bi-person-badge'
-        ])
+@section('content')
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-person-badge text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Assign Courses to Instructors</span>
+    </h1>
+    <p class="text-muted mb-4">Assign subjects to instructors by year level</p>
 
-        {{-- Toast Notifications --}}
-        @include('chairperson.partials.toast-notifications')
+    {{-- Toast Notifications --}}
+    @include('chairperson.partials.toast-notifications')
 
-        {{-- YEAR VIEW (Tabbed) --}}
-        <div>
-            <ul class="nav nav-tabs" id="yearTabs" role="tablist">
+    {{-- Tabs --}}
+    <ul class="nav nav-tabs mb-0" id="yearTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
                 @for ($level = 1; $level <= 4; $level++)
                     <li class="nav-item" role="presentation">
                         <a class="nav-link {{ $level === 1 ? 'active' : '' }}"
@@ -37,7 +35,37 @@
                 @endfor
             </ul>
 
-            <div class="tab-content" id="yearTabsContent">
+    <style>
+        #yearTabs {
+            background: transparent !important;
+        }
+        #yearTabs .nav-link {
+            background-color: transparent !important;
+            color: #6c757d !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        #yearTabs .nav-link:not(.active):hover {
+            background-color: rgba(25, 135, 84, 0.08) !important;
+            color: var(--dark-green) !important;
+        }
+        #yearTabs .nav-link.active {
+            background-color: rgba(25, 135, 84, 0.12) !important;
+            color: var(--dark-green) !important;
+            border-bottom: 3px solid var(--dark-green) !important;
+            margin-bottom: -2px;
+            z-index: 1;
+        }
+        #yearTabsContent {
+            background: transparent !important;
+            padding-top: 1.5rem;
+        }
+        #yearTabsContent .tab-pane {
+            background: transparent !important;
+        }
+    </style>
+
+    <div class="tab-content" id="yearTabsContent" style="background: transparent;">
                 @for ($level = 1; $level <= 4; $level++)
                     @php
                         $subjectsByYear = $yearLevels[$level] ?? collect();
@@ -54,8 +82,6 @@
                     </div>
                 @endfor
             </div>
-        </div>
-    </div>
 </div>
 
 {{-- Modals --}}
