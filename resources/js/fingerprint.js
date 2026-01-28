@@ -30,7 +30,7 @@ export async function getDeviceFingerprint() {
     const data = encoder.encode(fingerprintData);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const fingerprint = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const fingerprint = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
     // Store in localStorage for future use
     localStorage.setItem('device_fingerprint', fingerprint);
@@ -60,7 +60,7 @@ function generateFallbackFingerprint() {
     hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
-  
+
   // Pad to make it longer and more unique
   const baseHash = Math.abs(hash).toString(16);
   return baseHash.padStart(32, '0');

@@ -5,9 +5,12 @@
     {{-- Header Section --}}
     <div class="mb-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
-            <h4 class="fw-bold mb-0" style="color: #2c3e50;">
-                <i class="bi bi-bullseye me-2" style="color: #198754;"></i>Course Outcome Management
-            </h4>
+            <div>
+                <h4 class="fw-bold mb-4" style="color: #2c3e50;">
+                    <i class="bi bi-bullseye text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>Course Outcome Management
+                </h4>
+                <p class="text-muted mb-0 mt-1">Manage and define course outcomes for your subjects</p>
+            </div>
             
             {{-- Generate CO Button (Chairperson and GE Coordinator Only) --}}
             @if(Auth::user()->role === 1 || Auth::user()->role === 4)

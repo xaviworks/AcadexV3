@@ -2,6 +2,13 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-2 d-flex align-items-center">
+        <i class="bi bi-bullseye text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Course Outcomes</span>
+    </h1>
+    <p class="text-muted mb-4">Select a subject to view and manage its course outcomes</p>
+
     {{-- Breadcrumbs --}}
     @php
         $breadcrumbItems = [

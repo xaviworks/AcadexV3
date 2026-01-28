@@ -12,18 +12,19 @@
     <p class="text-muted mb-4">Select an instructor and subject to view students's final grades</p>
 
     {{-- Breadcrumb Navigation --}}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item">
-                <a href="{{ route('chairperson.viewGrades') }}" class="{{ empty($selectedInstructorId) && empty($selectedSubjectId) ? 'active' : '' }}">Select Instructor</a>
-            </li>
-            @if (!empty($selectedInstructorId) && empty($selectedSubjectId))
-                <li class="breadcrumb-item active" aria-current="page">Select Subject</li>
-            @elseif (!empty($selectedInstructorId) && !empty($selectedSubjectId))
-                <li class="breadcrumb-item active" aria-current="page">Students' Final Grades</li>
-            @endif
-        </ol>
-    </nav>
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Home', 'url' => '/'],
+            ['label' => 'Select Instructor', 'url' => route('chairperson.viewGrades')]
+        ];
+        
+        if (!empty($selectedInstructorId) && empty($selectedSubjectId)) {
+            $breadcrumbItems[] = ['label' => 'Select Subject'];
+        } elseif (!empty($selectedInstructorId) && !empty($selectedSubjectId)) {
+            $breadcrumbItems[] = ['label' => 'Students\' Final Grades'];
+        }
+    @endphp
+    <x-breadcrumbs :items="$breadcrumbItems" />
 
     {{-- Step 1: Instructor Selection --}}
     @if (empty($selectedInstructorId) && empty($selectedSubjectId))

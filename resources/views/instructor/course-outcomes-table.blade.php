@@ -10,6 +10,7 @@
                 <i class="bi bi-bullseye me-2" style="color: #198754;"></i>
                 Subject: {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
             </h4>
+            <p class="text-muted mb-0 mt-1">Define and manage course outcomes for this subject</p>
         </div>
     @endif
 
