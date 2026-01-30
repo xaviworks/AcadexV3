@@ -8,61 +8,81 @@
 
 @extends('layouts.app')
 
-@section('content')
 {{-- Styles: resources/css/gecoordinator/common.css --}}
 
-<div class="page-wrapper">
-    <div class="page-container">
-        <!-- Page Title -->
-        <div class="page-title">
-            <h1 class="text-3xl font-bold mb-2 text-gray-800 flex items-center">
-                <i class="bi bi-journal-plus text-success me-3 fs-2"></i>
-                Manage Courses
-            </h1>
-            <p class="text-muted mb-0 small">
-                <i class="bi bi-info-circle me-1"></i>
-                View and manage instructor assignments for each course. Click the "Edit" button to add or remove instructors.
-            </p>
+@section('content')
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-journal-plus text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Manage Courses</span>
+    </h1>
+    <p class="text-muted mb-4">View and manage instructor assignments for each course. Click the "Edit" button to add or remove instructors.</p>
+
+    {{-- View Mode Switcher --}}
+    <div class="d-flex justify-content-end mb-3">
+        <div class="d-flex align-items-center">
+            <label for="viewMode" class="me-2 fw-semibold">
+                <i class="bi bi-eye me-1"></i>View Mode:
+            </label>
+            <select id="viewMode" class="form-select form-select-sm w-auto" onchange="toggleViewMode()"
+                    data-bs-toggle="tooltip" title="Year View: See subjects by year level. Full View: See all subjects at once.">
+                <option value="year" selected>Year View</option>
+                <option value="full">Full View</option>
+            </select>
         </div>
+    </div>
 
-        {{-- Flash messages (server-side) will be displayed as toasts on load via JS --}}
+    {{-- Tabs --}}
+    <ul class="nav nav-tabs mb-0" id="yearTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
+        @for ($level = 1; $level <= 4; $level++)
+            <li class="nav-item" role="presentation">
+                <a class="nav-link {{ $level === 1 ? 'active' : '' }}"
+                   id="year-level-{{ $level }}"
+                   data-bs-toggle="tab"
+                   href="#level-{{ $level }}"
+                   role="tab"
+                   aria-controls="level-{{ $level }}"
+                   aria-selected="{{ $level === 1 ? 'true' : 'false' }}">
+                   {{ ordinalSuffix($level) }} Year
+                </a>
+            </li>
+        @endfor
+    </ul>
 
-        <!-- Content Wrapper -->
-        <div class="content-wrapper">
-            <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 0.5rem;">
-                <!-- Year Level Tabs -->
-                <ul class="nav nav-tabs mb-0" id="yearTabs" role="tablist" style="border-bottom: none !important;">
-                    @for ($level = 1; $level <= 4; $level++)
-                        <li class="nav-item" role="presentation">
-                            <a class="nav-link {{ $level === 1 ? 'active' : '' }}"
-                               id="year-level-{{ $level }}"
-                               data-bs-toggle="tab"
-                               href="#level-{{ $level }}"
-                               role="tab"
-                               aria-controls="level-{{ $level }}"
-                               aria-selected="{{ $level === 1 ? 'true' : 'false' }}">
-                               {{ ordinalSuffix($level) }} Year
-                            </a>
-                        </li>
-                    @endfor
-                </ul>
-                
-                <!-- View Mode Switcher -->
-                <div class="d-flex align-items-center">
-                    <label for="viewMode" class="me-2 fw-semibold">
-                        <i class="bi bi-eye me-1"></i>View Mode:
-                    </label>
-                    <select id="viewMode" class="form-select form-select-sm w-auto" onchange="toggleViewMode()"
-                            data-bs-toggle="tooltip" title="Year View: See subjects by year level. Full View: See all subjects at once.">
-                        <option value="year" selected>Year View</option>
-                        <option value="full">Full View</option>
-                    </select>
-                </div>
-            </div>
+    <style>
+        #yearTabs {
+            background: transparent !important;
+        }
+        #yearTabs .nav-link {
+            background-color: transparent !important;
+            color: #6c757d !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        #yearTabs .nav-link:not(.active):hover {
+            background-color: rgba(25, 135, 84, 0.08) !important;
+            color: var(--dark-green) !important;
+        }
+        #yearTabs .nav-link.active {
+            background-color: rgba(25, 135, 84, 0.12) !important;
+            color: var(--dark-green) !important;
+            border-bottom: 3px solid var(--dark-green) !important;
+            margin-bottom: -2px;
+            z-index: 1;
+        }
+        #yearTabsContent {
+            background: transparent !important;
+            padding-top: 1.5rem;
+        }
+        #yearTabsContent .tab-pane {
+            background: transparent !important;
+        }
+    </style>
 
-            <!-- YEAR VIEW (Tabbed) -->
-            <div id="yearView">
-        <div class="tab-content" id="yearTabsContent">
+    <!-- YEAR VIEW (Tabbed) -->
+    <div id="yearView">
+        <div class="tab-content" id="yearTabsContent" style="background: transparent;">
             @for ($level = 1; $level <= 4; $level++)
                 @php
                     $subjectsByYear = $yearLevels[$level] ?? collect();
@@ -193,7 +213,6 @@
                     </div>
                 </div>
             @endfor
-        </div>
         </div>
     </div>
 </div>

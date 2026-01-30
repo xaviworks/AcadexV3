@@ -1,37 +1,30 @@
 @extends('layouts.app')
 
-@section('content')
 {{-- Styles: resources/css/gecoordinator/common.css --}}
 
-<div class="page-wrapper">
-    <div class="page-container">
-        <!-- Page Title -->
-        <div class="page-title">
-            <h1>
-                <i class="bi bi-clipboard-data"></i>
-                View Grades
-            </h1>
-            <p class="page-subtitle">View and monitor students' final grades by instructor and subject</p>
-        </div>
-
-        <div class="content-wrapper">
+@section('content')
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-bar-chart-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Students' Final Grades</span>
+    </h1>
+    <p class="text-muted mb-4">View and monitor students' final grades by instructor and subject</p>
 
     {{-- Breadcrumb Navigation --}}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item">
-                <a href="{{ route('gecoordinator.viewGrades') }}" class="{{ empty($selectedInstructorId) && empty($selectedSubjectId) ? 'active' : '' }}">Select Instructor</a>
-            </li>
-            @if (!empty($selectedInstructorId) && empty($selectedSubjectId))
-                <li class="breadcrumb-item active" aria-current="page">Select Subject</li>
-            @elseif (!empty($selectedInstructorId) && !empty($selectedSubjectId))
-                <li class="breadcrumb-item">
-                    <a href="{{ route('gecoordinator.viewGrades', ['instructor_id' => $selectedInstructorId]) }}">Select Subject</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">Students' Grades</li>
-            @endif
-        </ol>
-    </nav>
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Home', 'url' => '/'],
+            ['label' => 'Select Instructor', 'url' => route('gecoordinator.viewGrades')]
+        ];
+        
+        if (!empty($selectedInstructorId) && empty($selectedSubjectId)) {
+            $breadcrumbItems[] = ['label' => 'Select Subject'];
+        } elseif (!empty($selectedInstructorId) && !empty($selectedSubjectId)) {
+            $breadcrumbItems[] = ['label' => 'Students\' Final Grades'];
+        }
+    @endphp
+    <x-breadcrumbs :items="$breadcrumbItems" />
 
     {{-- Step 1: Instructor Selection --}}
     @if (empty($selectedInstructorId) && empty($selectedSubjectId))
@@ -171,7 +164,5 @@
             </div>
         @endif
     @endif
-        </div>
-    </div>
 </div>
 @endsection

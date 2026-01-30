@@ -1,141 +1,145 @@
 @extends('layouts.app')
 
+{{-- Styles: resources/css/gecoordinator/common.css --}}
+
 @section('content')
-<div class="container mx-auto p-6">
-    <div class="bg-white shadow-lg rounded-lg">
-        <div class="border-b border-gray-200 px-6 py-4">
-            <h2 class="text-2xl font-bold text-gray-900">GE Coordinator Reports</h2>
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-file-earmark-bar-graph text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>GE Coordinator Reports</span>
+    </h1>
+    <p class="text-muted mb-4">Overview of GE subjects, instructors, and enrollment statistics</p>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Total Subjects Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-3 bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-book text-primary" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Total GE Subjects</div>
+                        <div class="fs-3 fw-bold text-dark">{{ $reportData['total_subjects'] }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="p-6">
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <!-- Total Subjects Card -->
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
-                                <i class="fas fa-book text-white"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <div class="text-sm font-medium text-blue-600">Total GE Subjects</div>
-                            <div class="text-2xl font-bold text-gray-900">{{ $reportData['total_subjects'] }}</div>
-                        </div>
+        <!-- Assigned Subjects Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-3 bg-success bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-person-check text-success" style="font-size: 1.5rem;"></i>
                     </div>
-                </div>
-
-                <!-- Assigned Subjects Card -->
-                <div class="bg-green-50 border border-green-200 rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-green-600 rounded-md flex items-center justify-center">
-                                <i class="fas fa-user-check text-white"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <div class="text-sm font-medium text-green-600">Assigned Subjects</div>
-                            <div class="text-2xl font-bold text-gray-900">{{ $reportData['assigned_subjects'] }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Unassigned Subjects Card -->
-                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-red-600 rounded-md flex items-center justify-center">
-                                <i class="fas fa-user-times text-white"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <div class="text-sm font-medium text-red-600">Unassigned Subjects</div>
-                            <div class="text-2xl font-bold text-gray-900">{{ $reportData['unassigned_subjects'] }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Total Instructors Card -->
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-purple-600 rounded-md flex items-center justify-center">
-                                <i class="fas fa-chalkboard-teacher text-white"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <div class="text-sm font-medium text-purple-600">Available Instructors</div>
-                            <div class="text-2xl font-bold text-gray-900">{{ $reportData['total_instructors'] }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Total Enrollments Card -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-yellow-600 rounded-md flex items-center justify-center">
-                                <i class="fas fa-users text-white"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <div class="text-sm font-medium text-yellow-600">Total Enrollments</div>
-                            <div class="text-2xl font-bold text-gray-900">{{ $reportData['total_enrollments'] }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Assignment Rate Card -->
-                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center">
-                                <i class="fas fa-percentage text-white"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <div class="text-sm font-medium text-indigo-600">Assignment Rate</div>
-                            <div class="text-2xl font-bold text-gray-900">
-                                @if($reportData['total_subjects'] > 0)
-                                    {{ round(($reportData['assigned_subjects'] / $reportData['total_subjects']) * 100, 1) }}%
-                                @else
-                                    0%
-                                @endif
-                            </div>
-                        </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Assigned Subjects</div>
+                        <div class="fs-3 fw-bold text-dark">{{ $reportData['assigned_subjects'] }}</div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Subjects by Year Level -->
-            <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Subjects by Year Level</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    @for($year = 1; $year <= 4; $year++)
-                        <div class="text-center p-4 bg-gray-50 rounded-lg">
-                            <div class="text-2xl font-bold text-gray-900">
-                                {{ $reportData['subjects_by_year'][$year] ?? 0 }}
-                            </div>
-                            <div class="text-sm text-gray-600">Year {{ $year }}</div>
-                        </div>
-                    @endfor
+        <!-- Unassigned Subjects Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-3 bg-danger bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-person-x text-danger" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Unassigned Subjects</div>
+                        <div class="fs-3 fw-bold text-dark">{{ $reportData['unassigned_subjects'] }}</div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Actions -->
-            <div class="flex space-x-4">
-                <a href="{{ route('gecoordinator.assign-subjects') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    <i class="fas fa-user-plus mr-2"></i>Assign Subjects
-                </a>
-                <a href="{{ route('gecoordinator.manage-schedule') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                    <i class="fas fa-calendar-alt mr-2"></i>Manage Schedule
-                </a>
-                <button onclick="window.print()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                    <i class="fas fa-print mr-2"></i>Print Report
-                </button>
+        <!-- Total Instructors Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-3 bg-info bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-person-workspace text-info" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Available Instructors</div>
+                        <div class="fs-3 fw-bold text-dark">{{ $reportData['total_instructors'] }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Enrollments Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-3 bg-warning bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-people text-warning" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Total Enrollments</div>
+                        <div class="fs-3 fw-bold text-dark">{{ $reportData['total_enrollments'] }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Rate Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-3 bg-secondary bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-percent text-secondary" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Assignment Rate</div>
+                        <div class="fs-3 fw-bold text-dark">
+                            @if($reportData['total_subjects'] > 0)
+                                {{ round(($reportData['assigned_subjects'] / $reportData['total_subjects']) * 100, 1) }}%
+                            @else
+                                0%
+                            @endif
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Subjects by Year Level -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <h5 class="fw-semibold mb-4">Subjects by Year Level</h5>
+            <div class="row g-3">
+                @for($year = 1; $year <= 4; $year++)
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded-4">
+                            <div class="fs-3 fw-bold text-success">
+                                {{ $reportData['subjects_by_year'][$year] ?? 0 }}
+                            </div>
+                            <div class="text-muted small">Year {{ $year }}</div>
+                        </div>
+                    </div>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex gap-3">
+        <a href="{{ route('gecoordinator.assign-subjects') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-2"></i>Assign Subjects
+        </a>
+        <a href="{{ route('gecoordinator.manage-schedule') }}" class="btn btn-success">
+            <i class="bi bi-calendar-week me-2"></i>Manage Schedule
+        </a>
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="bi bi-printer me-2"></i>Print Report
+        </button>
+    </div>
 </div>
-{{-- Styles: resources/css/gecoordinator/common.css --}}
 @endsection

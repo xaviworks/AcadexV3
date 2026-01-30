@@ -1,20 +1,15 @@
 @extends('layouts.app')
 
-@section('content')
 {{-- Styles: resources/css/gecoordinator/common.css --}}
 
-<div class="page-wrapper">
-    <div class="page-container">
-        <!-- Page Title -->
-        <div class="page-title">
-            <h1>
-                <i class="bi bi-people-fill"></i>
-                View Students
-            </h1>
-            <p class="page-subtitle">View all students enrolled in GE subjects</p>
-        </div>
-
-        <div class="content-wrapper">
+@section('content')
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-people-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>View Students</span>
+    </h1>
+    <p class="text-muted mb-4">View all students enrolled in GE subjects</p>
 
     @if(empty($selectedSubjectId))
         {{-- Subject Selection Cards --}}
@@ -162,8 +157,6 @@
         </div>
     @endif
     @endif
-        </div>
-    </div>
 </div>
 {{-- JavaScript: resources/js/pages/gecoordinator/students-by-year.js --}}
 @endsection

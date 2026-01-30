@@ -1,11 +1,15 @@
 @extends('layouts.app')
 
+{{-- Styles: resources/css/gecoordinator/common.css --}}
+
 @section('content')
-<div class="container-fluid px-4 py-5">
-    <h1 class="text-2xl font-bold mb-4">
-        <i class="bi bi-book-half text-success me-2"></i>
-        Confirm Curriculum Subjects
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-book-half text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Confirm Curriculum Subjects</span>
     </h1>
+    <p class="text-muted mb-4">Select and confirm subjects from the curriculum to enable them for the current academic period</p>
 
     {{-- Success/Error Messages via Notify --}}
     @if(session('success'))

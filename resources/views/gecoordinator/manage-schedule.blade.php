@@ -1,103 +1,86 @@
 @extends('layouts.app')
 
+{{-- Styles: resources/css/gecoordinator/common.css --}}
+
 @section('content')
-<div class="container mx-auto p-6">
-    <div class="bg-white shadow-lg rounded-lg">
-        <div class="border-b border-gray-200 px-6 py-4">
-            <h2 class="text-2xl font-bold text-gray-900">Manage Schedule - GE Subjects</h2>
-        </div>
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-calendar-week text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Manage Schedule - GE Subjects</span>
+    </h1>
+    <p class="text-muted mb-4">View and manage GE subjects, instructor assignments, and enrollment information</p>
 
-        <div class="p-6">
-            @if(session('success'))
-                <script>notify.success('{{ session('success') }}');</script>
-            @endif
+    @if(session('success'))
+        <script>notify.success('{{ session('success') }}');</script>
+    @endif
 
-            @if(session('error'))
-                <script>notify.error('{{ session('error') }}');</script>
-            @endif
+    @if(session('error'))
+        <script>notify.error('{{ session('error') }}');</script>
+    @endif
 
-            @if($subjects->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white border border-gray-300">
-                        <thead class="bg-gray-100">
+    @if($subjects->count() > 0)
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Course Code</th>
+                            <th>Subject Title</th>
+                            <th class="text-center">Units</th>
+                            <th class="text-center">Year Level</th>
+                            <th>Assigned Instructors</th>
+                            <th class="text-center">Enrolled Students</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($subjects as $subject)
                             <tr>
-                                <th class="border-bottom">
-                                    Course Code
-                                </th>
-                                <th class="border-bottom">
-                                    Subject Title
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                                    Units
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                                    Year Level
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                                    Assigned Instructors
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                                    Enrolled Students
-                                </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            @foreach($subjects as $subject)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-b">
-                                        {{ $subject->subject_code }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
-                                        {{ $subject->subject_title }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
-                                        {{ $subject->units }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
+                                <td class="fw-semibold">{{ $subject->subject_code }}</td>
+                                <td>{{ $subject->subject_title }}</td>
+                                <td class="text-center">{{ $subject->units }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
                                         Year {{ $subject->year_level }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 border-b">
-                                        @if($subject->instructors->count() > 0)
-                                            @foreach($subject->instructors as $instructor)
-                                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">
-                                                    {{ $instructor->first_name }} {{ $instructor->last_name }}
-                                                </span>
-                                            @endforeach
-                                        @else
-                                            <span class="text-gray-500 italic">No instructor assigned</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
-                                        {{ $subject->students->count() }} students
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">
-                                        <button onclick="openScheduleModal({{ $subject->id }}, '{{ $subject->subject_code }}', '{{ addslashes($subject->subject_title) }}')" 
-                                                class="text-indigo-600 hover:text-indigo-900 mr-2 px-3 py-1 rounded border border-indigo-600 hover:bg-indigo-50">
-                                            <i class="fas fa-calendar-alt mr-1"></i>Manage Schedule
-                                        </button>
-                                        <button onclick="viewSubjectDetails({{ $subject->id }})" 
-                                                class="text-green-600 hover:text-green-900 px-3 py-1 rounded border border-green-600 hover:bg-green-50">
-                                            <i class="fas fa-eye mr-1"></i>View Details
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="text-center py-12">
-                    <div class="text-gray-500">
-                        <i class="fas fa-calendar-alt text-4xl mb-4"></i>
-                        <p class="text-lg">No GE subjects found for the current academic period.</p>
-                        <p class="text-sm">Please check if subjects have been created for this academic period.</p>
-                    </div>
-                </div>
-            @endif
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($subject->instructors->count() > 0)
+                                        @foreach($subject->instructors as $instructor)
+                                            <span class="badge bg-primary-subtle text-primary me-1 mb-1">
+                                                {{ $instructor->first_name }} {{ $instructor->last_name }}
+                                            </span>
+                                        @endforeach
+                                    @else
+                                        <span class="text-muted fst-italic">No instructor assigned</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border">{{ $subject->students->count() }} students</span>
+                                </td>
+                                <td class="text-center">
+                                    <button onclick="openScheduleModal({{ $subject->id }}, '{{ $subject->subject_code }}', '{{ addslashes($subject->subject_title) }}')" 
+                                            class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="bi bi-calendar-week me-1"></i>Schedule
+                                    </button>
+                                    <button onclick="viewSubjectDetails({{ $subject->id }})" 
+                                            class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-eye me-1"></i>Details
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    @else
+        <div class="text-center py-5">
+            <i class="bi bi-calendar-x text-muted mb-3 d-block" style="font-size: 4rem;"></i>
+            <h5 class="text-muted mb-2">No GE Subjects Found</h5>
+            <p class="text-muted">No GE subjects found for the current academic period. Please check if subjects have been created for this academic period.</p>
+        </div>
+    @endif
 </div>
 @endsection
