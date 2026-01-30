@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'ACADEX') }}</title>
+    @include('layouts.partials.favicon')
 
     <!-- Preload Background Image -->
     <link rel="preload" as="image" href="{{ asset('images/bg.jpg') }}">

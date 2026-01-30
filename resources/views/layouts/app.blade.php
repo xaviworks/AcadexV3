@@ -19,6 +19,7 @@
     <meta name="color-scheme" content="light">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
+    @include('layouts.partials.favicon')
     
     <!-- DNS Prefetch & Preconnect for CDN resources -->
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
