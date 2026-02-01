@@ -9,23 +9,43 @@
         </button>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover" style="min-width: 1400px;">
-                    <thead>
-                        <tr>
-                            <th style="min-width: 100px;">Status</th>
-                            <th style="min-width: 300px;">Title</th>
-                            <th style="min-width: 100px;">Type</th>
-                            <th style="min-width: 100px;">Priority</th>
-                            <th style="min-width: 200px;">Target</th>
-                            <th style="min-width: 180px;">Date Range</th>
-                            <th style="min-width: 100px;">Views</th>
-                            <th style="min-width: 120px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+    {{-- Tab Navigation --}}
+    <ul class="nav nav-tabs mb-4" id="announcementTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="announcements-tab" data-bs-toggle="tab" data-bs-target="#announcements-pane" 
+                    type="button" role="tab" aria-controls="announcements-pane" aria-selected="true">
+                <i class="fas fa-bullhorn me-2"></i>Announcements
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="templates-tab" data-bs-toggle="tab" data-bs-target="#templates-pane" 
+                    type="button" role="tab" aria-controls="templates-pane" aria-selected="false">
+                <i class="fas fa-file-alt me-2"></i>Templates
+            </button>
+        </li>
+    </ul>
+
+    {{-- Tab Content --}}
+    <div class="tab-content" id="announcementTabContent">
+        {{-- Announcements Tab --}}
+        <div class="tab-pane fade show active" id="announcements-pane" role="tabpanel" aria-labelledby="announcements-tab">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" style="min-width: 1400px;">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 100px;">Status</th>
+                                    <th style="min-width: 300px;">Title</th>
+                                    <th style="min-width: 100px;">Type</th>
+                                    <th style="min-width: 100px;">Priority</th>
+                                    <th style="min-width: 200px;">Target</th>
+                                    <th style="min-width: 180px;">Date Range</th>
+                                    <th style="min-width: 100px;">Views</th>
+                                    <th style="min-width: 120px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                         @forelse($announcements as $announcement)
                             <tr>
                                 <td>
@@ -121,7 +141,62 @@
             <div class="mt-3">
                 {{ $announcements->links() }}
             </div>
+                </div>
+            </div>
         </div>
+        {{-- End Announcements Tab --}}
+
+        {{-- Templates Tab --}}
+        <div class="tab-pane fade" id="templates-pane" role="tabpanel" aria-labelledby="templates-tab">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-4" id="templates-container">
+                        @forelse($templates as $template)
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 border-{{ $template->type }} shadow-sm template-card">
+                                    <div class="card-header bg-{{ $template->type }} {{ $template->type === 'warning' ? 'text-dark' : 'text-white' }}">
+                                        <i class="fas {{ $template->icon }} me-2"></i>{{ $template->name }}
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ $template->title }}</h6>
+                                        <p class="card-text small text-muted">
+                                            {{ $template->description }}
+                                        </p>
+                                        <div class="mt-3">
+                                            <span class="badge bg-{{ $template->type }} {{ $template->type === 'warning' ? 'text-dark' : '' }}">
+                                                {{ ucfirst($template->type) }}
+                                            </span>
+                                            <span class="badge bg-{{ match($template->priority) {
+                                                'low' => 'secondary',
+                                                'normal' => 'secondary',
+                                                'high' => 'warning',
+                                                'urgent' => 'danger',
+                                            } }}">
+                                                {{ ucfirst($template->priority) }} Priority
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-sm btn-success w-100" 
+                                                onclick='importTemplate(@json($template))'>
+                                            <i class="fas fa-download me-2"></i>Import Template
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No templates available. Run the seeder to populate templates.
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- End Templates Tab --}}
     </div>
 </div>
 
@@ -286,6 +361,43 @@ function loadAnnouncementForEdit(id, announcement) {
     document.getElementById('edit_type').value = announcement.type;
     document.getElementById('edit_priority').value = announcement.priority;
     
+    // Set icon from announcement
+    if (document.getElementById('edit_icon')) {
+        const iconValue = announcement.icon || '';
+        document.getElementById('edit_icon').value = iconValue;
+        
+        // Update the icon button display
+        const selectedIcon = document.getElementById('edit_icon-selected');
+        const label = document.getElementById('edit_icon-label');
+        
+        if (iconValue) {
+            selectedIcon.className = 'fas ' + iconValue;
+            selectedIcon.style.width = '20px';
+            selectedIcon.style.display = 'inline-block';
+            label.style.display = 'none';
+            
+            // Update active state in dropdown
+            document.querySelectorAll('[data-prefix="edit_"] .icon-option-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.icon === iconValue) {
+                    btn.classList.add('active');
+                }
+            });
+        } else {
+            selectedIcon.className = '';
+            selectedIcon.style.display = 'none';
+            label.style.display = 'inline';
+            
+            // Set "None" as active
+            document.querySelectorAll('[data-prefix="edit_"] .icon-option-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.icon === '') {
+                    btn.classList.add('active');
+                }
+            });
+        }
+    }
+    
     // Format dates for datetime-local inputs (YYYY-MM-DDTHH:mm)
     document.getElementById('edit_start_date').value = announcement.start_date 
         ? formatDateTimeLocal(announcement.start_date) 
@@ -360,6 +472,112 @@ function toggleRoleSelection(prefix = '') {
         }
     }
 }
+
+function importTemplate(template) {
+    if (!template) {
+        if (typeof Alpine !== 'undefined' && Alpine.store('notifications')) {
+            Alpine.store('notifications').error('Template not found');
+        }
+        return;
+    }
+    
+    // Populate the create form with template data
+    document.getElementById('title').value = template.title;
+    document.getElementById('message').value = template.message;
+    document.getElementById('type').value = template.type;
+    
+    // Set priority from template
+    document.getElementById('priority').value = template.priority || 'normal';
+    
+    // Set icon from template
+    if (document.getElementById('icon')) {
+        const iconValue = template.icon || '';
+        document.getElementById('icon').value = iconValue;
+        
+        // Update the icon button display
+        const selectedIcon = document.getElementById('icon-selected');
+        const label = document.getElementById('icon-label');
+        
+        if (iconValue) {
+            selectedIcon.className = 'fas ' + iconValue;
+            selectedIcon.style.width = '20px';
+            selectedIcon.style.display = 'inline-block';
+            label.style.display = 'none';
+            
+            // Update active state in dropdown
+            document.querySelectorAll('[data-prefix=""] .icon-option-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.icon === iconValue) {
+                    btn.classList.add('active');
+                }
+            });
+        } else {
+            selectedIcon.className = '';
+            selectedIcon.style.display = 'none';
+            label.style.display = 'inline';
+            
+            // Set "None" as active
+            document.querySelectorAll('[data-prefix=""] .icon-option-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.icon === '') {
+                    btn.classList.add('active');
+                }
+            });
+        }
+    }
+    
+    // Switch to announcements tab and open create modal
+    const announcementsTab = document.getElementById('announcements-tab');
+    const createModal = new bootstrap.Modal(document.getElementById('createAnnouncementModal'));
+    
+    announcementsTab.click();
+    
+    setTimeout(() => {
+        createModal.show();
+    }, 100);
+    
+    // Show success message
+    const toast = document.createElement('div');
+    toast.className = 'toast position-fixed bottom-0 end-0 m-3';
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="toast-header bg-success text-white">
+            <strong class="me-auto">Template Imported</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body">
+            Template has been loaded into the create form. You can now customize and publish it.
+        </div>
+    `;
+    document.body.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    setTimeout(() => toast.remove(), 3000);
+}
 </script>
+
+<style>
+.template-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.template-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.template-card .card-header {
+    font-weight: 600;
+}
+
+.template-card .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.template-card .card-text {
+    flex-grow: 1;
+}
+</style>
 @endpush
 @endsection

@@ -19,6 +19,7 @@
     <meta name="color-scheme" content="light">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
+    @include('layouts.partials.favicon')
     
     <!-- DNS Prefetch & Preconnect for CDN resources -->
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -484,6 +485,11 @@
     @include('components.announcement-popup')
 
     <script>
+        // Clear announcement session storage on logout
+        function clearAnnouncementSession() {
+            sessionStorage.removeItem('dismissedAnnouncements');
+        }
+
         (function () {
             // Display branded message to anyone inspecting the console
             if (!window.console) {
