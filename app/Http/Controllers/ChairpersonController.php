@@ -40,8 +40,8 @@ class ChairpersonController extends Controller
         $query = User::where('role', 0);
 
         // If the current user is a chairperson (role === 1), only list instructors within the
-        // same department and course so Chairpersons cannot see instructors from other departments
-        // (including those approved to teach GE). GE department instructors are excluded.
+        // same department and course so Chairpersons cannot see instructors from other programs.
+        // GE department instructors are excluded.
         if (Auth::user()->role === 1) {
             $query->where('department_id', Auth::user()->department_id)
                   ->where('course_id', Auth::user()->course_id)
@@ -227,9 +227,11 @@ class ChairpersonController extends Controller
             ->where('course_id', Auth::user()->course_id) // Only subjects for user's course
             ->where('is_deleted', false)
             ->where('academic_period_id', $academicPeriodId)
+            ->with('instructor') // Eager load instructor relationship
             ->orderBy('subject_code')
             ->get();
             
+        // Get instructors from the same department and course
         $instructors = User::where('role', 0)
             ->where('department_id', Auth::user()->department_id)
             ->where('course_id', Auth::user()->course_id)
@@ -261,6 +263,7 @@ class ChairpersonController extends Controller
             ->where('academic_period_id', $academicPeriodId)
             ->firstOrFail();
             
+        // Verify instructor belongs to same department and course
         $instructor = User::where('id', $request->instructor_id)
             ->where('role', 0)
             ->where('department_id', Auth::user()->department_id)

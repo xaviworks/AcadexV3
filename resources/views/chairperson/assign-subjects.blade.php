@@ -15,7 +15,37 @@
     </h1>
     <p class="text-muted mb-4">Assign subjects to instructors by year level</p>
 
-    {{-- Toast Notifications --}}
+    {{-- Success/Error Messages --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Validation Error:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    {{-- Toast Notifications (backup) --}}
     @include('chairperson.partials.toast-notifications')
 
     {{-- Tabs --}}
@@ -88,4 +118,55 @@
 @include('chairperson.partials.assign-modals')
 
 {{-- JavaScript: resources/js/pages/chairperson/assign-subjects.js --}}
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle Assign Modal
+    const assignModal = document.getElementById('confirmAssignModal');
+    if (assignModal) {
+        assignModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const subjectId = button.getAttribute('data-subject-id');
+            const subjectName = button.getAttribute('data-subject-name');
+            
+            console.log('Opening assign modal for subject:', subjectId, subjectName);
+            
+            document.getElementById('assign_subject_id').value = subjectId;
+            document.getElementById('assignSubjectName').textContent = subjectName;
+        });
+    }
+
+    // Handle Unassign Modal
+    const unassignModal = document.getElementById('confirmUnassignModal');
+    if (unassignModal) {
+        unassignModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const subjectId = button.getAttribute('data-subject-id');
+            const subjectName = button.getAttribute('data-subject-name');
+            
+            console.log('Opening unassign modal for subject:', subjectId, subjectName);
+            
+            document.getElementById('unassign_subject_id').value = subjectId;
+            document.getElementById('unassignSubjectName').textContent = subjectName;
+        });
+    }
+
+    // Log form submission
+    const assignForm = document.getElementById('assignForm');
+    if (assignForm) {
+        assignForm.addEventListener('submit', function(e) {
+            const subjectId = document.getElementById('assign_subject_id').value;
+            const instructorId = assignForm.querySelector('[name="instructor_id"]').value;
+            console.log('Submitting assignment:', { subjectId, instructorId });
+            
+            if (!subjectId || !instructorId) {
+                e.preventDefault();
+                alert('Please select an instructor and ensure subject is selected');
+                return false;
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection
