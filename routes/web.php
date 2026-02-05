@@ -31,7 +31,6 @@ use App\Http\Controllers\FaviconController;
 // Serve favicon at both /favicon.ico and /assets/favicon.ico (keeps browser requests working when Herd/Valet proxies static files)
 Route::get('/favicon.ico', [FaviconController::class, 'show']);
 Route::get('/assets/favicon.ico', [FaviconController::class, 'show']);
-
 // Google OAuth routes
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
