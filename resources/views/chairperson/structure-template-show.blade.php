@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+{{-- Styles: resources/css/chairperson/common.css --}}
+
 @section('content')
 @php
     $statusBadge = match ($request->status) {
@@ -52,44 +54,51 @@
     }
 @endphp
 
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
-    <div class="row mb-3">
-        <div class="col">
-            <nav aria-label="breadcrumb" class="mb-2">
-                <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('chairperson.structureTemplates.index') }}" class="text-success text-decoration-none">
-                            <i class="bi bi-diagram-3 me-1"></i>Formula Requests
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ $request->label }}</li>
-                </ol>
-            </nav>
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <div class="text-end mb-3">
+        <a href="{{ route('chairperson.structureTemplates.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Requests
+        </a>
+    </div>
 
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-circle" style="background: linear-gradient(135deg, #198754, #20c997);">
-                        <i class="bi bi-{{ $statusBadge['icon'] }} text-white" style="font-size: 1.5rem;"></i>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-1" style="color: #198754;">{{ $request->label }}</h3>
-                        <span class="badge {{ $statusBadge['class'] }} px-3 py-2">
-                            <i class="bi bi-{{ $statusBadge['icon'] }} me-1"></i>{{ $statusBadge['label'] }}
-                        </span>
-                    </div>
+    <div class="text-center mb-3">
+        <h1 class="text-2xl font-bold mb-2">
+            <i class="bi bi-diagram-3 text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+            <span>{{ $request->label }}</span>
+        </h1>
+    </div>
+
+    {{-- Breadcrumb Navigation --}}
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Formula Requests', 'url' => route('chairperson.structureTemplates.index')],
+            ['label' => $request->label]
+        ];
+    @endphp
+    <div class="d-flex justify-content-center">
+        <x-breadcrumbs :items="$breadcrumbItems" />
+    </div>
+
+    {{-- Status Badge Centered --}}
+    <div class="d-flex justify-content-center mb-4">
+        <div class="card border-0 shadow-sm" style="max-width: 400px; width: 100%;">
+            <div class="card-body text-center py-4">
+                <div class="mb-2">
+                    <i class="bi bi-{{ $statusBadge['icon'] }} {{ $request->status === 'approved' ? 'text-success' : ($request->status === 'rejected' ? 'text-danger' : 'text-warning') }}" style="font-size: 3rem;"></i>
                 </div>
-                <a href="{{ route('chairperson.structureTemplates.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Back to Requests
-                </a>
+                <span class="badge {{ $statusBadge['class'] }} px-4 py-2" style="font-size: 1.1rem;">
+                    {{ $statusBadge['label'] }}
+                </span>
             </div>
         </div>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm mb-3">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold">Request Information</h5>
+                    <h5 class="mb-0 fw-semibold">Request Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -115,7 +124,7 @@
 
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold">Grading Structure</h5>
+                    <h5 class="mb-0 fw-semibold">Grading Structure</h5>
                 </div>
                 <div class="card-body">
                     @if (empty($groupedComponents))
@@ -163,9 +172,9 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm mb-3">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-0 py-3">
-                    <h6 class="mb-0 fw-bold">Timeline</h6>
+                    <h6 class="mb-0 fw-semibold">Timeline</h6>
                 </div>
                 <div class="card-body">
                     <div class="timeline">
@@ -204,7 +213,7 @@
             @if ($request->admin_notes && in_array($request->status, ['approved', 'rejected']))
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-0 py-3">
-                        <h6 class="mb-0 fw-bold">Admin Feedback</h6>
+                        <h6 class="mb-0 fw-semibold">Admin Feedback</h6>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-{{ $request->status === 'approved' ? 'success' : 'danger' }} mb-0">
