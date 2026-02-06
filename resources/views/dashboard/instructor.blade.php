@@ -31,11 +31,6 @@
             </h2>
             <p class="text-muted mb-0">Here's what's happening with your classes today.</p>
         </div>
-        <div x-show="polling" x-cloak>
-            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2" style="font-size: 0.75rem;">
-                <i class="bi bi-broadcast me-1"></i> Live
-            </span>
-        </div>
     </div>
 
     {{-- Summary Cards --}}
