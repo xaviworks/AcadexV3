@@ -52,6 +52,15 @@
   color: #4da674 !important;
 }
 
+/* Badge hover effect */
+.subject-card .badge {
+  transition: all 0.3s;
+}
+
+.subject-card:hover .badge {
+  transform: scale(1.05);
+}
+
 /* Subject Circle */
 .subject-circle {
   transition: all 0.3s ease;

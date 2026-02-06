@@ -123,6 +123,7 @@ Route::middleware('auth')->prefix('notifications')->name('notifications.')->grou
 // Help Guides (for all authenticated users to view)
 Route::middleware('auth')->group(function () {
     Route::get('/help-guides', [\App\Http\Controllers\HelpGuideController::class, 'index'])->name('help-guides.index');
+    Route::get('/help-guides/poll', [\App\Http\Controllers\HelpGuideController::class, 'pollGuides'])->name('help-guides.poll');
     Route::get('/help-guides/{helpGuide}', [\App\Http\Controllers\HelpGuideController::class, 'show'])->name('help-guides.show');
     Route::get('/help-guides/{helpGuide}/download', [\App\Http\Controllers\HelpGuideController::class, 'download'])->name('help-guides.download');
     Route::get('/help-guides/{helpGuide}/preview', [\App\Http\Controllers\HelpGuideController::class, 'preview'])->name('help-guides.preview');

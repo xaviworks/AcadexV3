@@ -28,7 +28,44 @@ class HelpGuideController extends Controller
             ->ordered()
             ->get();
 
-        return view('help-guides.index', compact('guides'));
+        // Prepare guides data for Alpine.js (same structure as pollGuides)
+        $guidesData = $guides->map(function ($guide) {
+            $attachments = [];
+            
+            // Legacy single attachment
+            if ($guide->attachment_path) {
+                $attachments[] = [
+                    'type' => 'legacy',
+                    'preview_url' => route('help-guides.preview', $guide),
+                    'download_url' => route('help-guides.download', $guide),
+                    'file_name' => $guide->attachment_name,
+                ];
+            }
+            
+            // Multiple attachments
+            foreach ($guide->attachments as $attachment) {
+                $attachments[] = [
+                    'type' => 'multiple',
+                    'id' => $attachment->id,
+                    'preview_url' => route('help-guides.attachment.preview', $attachment),
+                    'download_url' => route('help-guides.attachment.download', $attachment),
+                    'file_name' => $attachment->file_name,
+                ];
+            }
+
+            return [
+                'id' => $guide->id,
+                'title' => $guide->title,
+                'content' => $guide->content,
+                'has_attachment' => $guide->hasAttachment(),
+                'attachment_count' => count($attachments),
+                'attachments' => $attachments,
+                'updated_at' => $guide->updated_at->diffForHumans(),
+                'updated_at_timestamp' => $guide->updated_at->timestamp,
+            ];
+        });
+
+        return view('help-guides.index', compact('guides', 'guidesData'));
     }
 
     /**
@@ -148,5 +185,60 @@ class HelpGuideController extends Controller
             $attachment->file_path,
             $attachment->file_name
         );
+    }
+
+    /**
+     * Return help guides as JSON for real-time polling.
+     * Mirrors the guides query from index() with role-based filtering.
+     */
+    public function pollGuides(): \Illuminate\Http\JsonResponse
+    {
+        $user = Auth::user();
+        
+        $guides = HelpGuide::with('attachments')
+            ->active()
+            ->visibleToRole($user->role)
+            ->ordered()
+            ->get();
+
+        $guidesData = $guides->map(function ($guide) {
+            $attachments = [];
+            
+            // Legacy single attachment
+            if ($guide->attachment_path) {
+                $attachments[] = [
+                    'type' => 'legacy',
+                    'preview_url' => route('help-guides.preview', $guide),
+                    'download_url' => route('help-guides.download', $guide),
+                    'file_name' => $guide->attachment_name,
+                ];
+            }
+            
+            // Multiple attachments
+            foreach ($guide->attachments as $attachment) {
+                $attachments[] = [
+                    'type' => 'multiple',
+                    'id' => $attachment->id,
+                    'preview_url' => route('help-guides.attachment.preview', $attachment),
+                    'download_url' => route('help-guides.attachment.download', $attachment),
+                    'file_name' => $attachment->file_name,
+                ];
+            }
+
+            return [
+                'id' => $guide->id,
+                'title' => $guide->title,
+                'content' => $guide->content,
+                'has_attachment' => $guide->hasAttachment(),
+                'attachment_count' => count($attachments),
+                'attachments' => $attachments,
+                'updated_at' => $guide->updated_at->diffForHumans(),
+                'updated_at_timestamp' => $guide->updated_at->timestamp,
+            ];
+        });
+
+        return response()->json([
+            'guides' => $guidesData->values(),
+        ]);
     }
 }

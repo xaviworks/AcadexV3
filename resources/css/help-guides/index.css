@@ -1,0 +1,115 @@
+/* Help Guides - Index Page Styles */
+
+[x-cloak] {
+    display: none !important;
+}
+
+.guide-item .card-header:hover {
+    background-color: #f8fdf9 !important;
+}
+
+.guide-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background-color: #e8f5e9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guide-icon i {
+    font-size: 1.2rem;
+}
+
+.guide-content {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #444;
+}
+
+.guide-content p {
+    margin-bottom: 0.75rem;
+}
+
+.guide-content p:last-child {
+    margin-bottom: 0;
+}
+
+.guide-content ul, .guide-content ol {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+}
+
+.guide-content a {
+    color: #198754;
+    text-decoration: underline;
+}
+
+.guide-content a:hover {
+    color: #146c43;
+}
+
+.transition-transform {
+    transition: transform 0.2s ease;
+}
+
+#searchGuides:focus {
+    box-shadow: none;
+    border-color: #198754;
+}
+
+/* PDF Thumbnail Styles */
+.pdf-thumbnail-card {
+    transition: all 0.2s ease;
+    background: #fff;
+    max-width: 120px;
+}
+
+.pdf-thumbnail-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pdf-thumbnail-preview {
+    height: 80px;
+    overflow: hidden;
+}
+
+.pdf-thumb-iframe {
+    width: 200%;
+    height: 300%;
+    transform: scale(0.5);
+    transform-origin: top left;
+    pointer-events: none;
+    border: none;
+}
+
+.pdf-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.pdf-thumbnail-card:hover .pdf-overlay {
+    opacity: 1;
+}
+
+.pdf-thumbnail-info {
+    border-top: 1px solid #e9ecef;
+    padding: 6px 8px !important;
+}
+
+.pdf-thumbnail-info .small {
+    font-size: 0.65rem !important;
+}
+
+/* Modal full-screen PDF */
+#pdfViewerModal .modal-body iframe {
+    min-height: calc(100vh - 56px);
+}

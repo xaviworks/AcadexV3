@@ -26,6 +26,7 @@
 @import './instructor/course-outcomes.css';
 @import './vpaa/common.css';
 @import './vpaa/cards.css';
+@import './help-guides/index.css';
 
 @tailwind base;
 @tailwind components;

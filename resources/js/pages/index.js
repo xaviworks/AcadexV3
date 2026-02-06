@@ -33,6 +33,7 @@ import './dashboard/gecoordinator.js';
 // Instructor pages
 import './instructor/manage-students.js';
 import './instructor/manage-grades.js';
+import './instructor/grades-poll.js';
 import './instructor/course-outcomes.js';
 import './instructor/activities-create.js';
 import './instructor/partials/grade-script.js';
@@ -58,6 +59,7 @@ import './gecoordinator/assign-subjects.js';
 
 // Shared pages
 import './shared/select-curriculum-subjects.js';
+import './shared/help-guides.js';
 
 // VPAA pages
 import './vpaa/index.js';

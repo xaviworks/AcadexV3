@@ -100,76 +100,18 @@
 @endsection
 
 {{-- Styles: resources/css/instructor/common.css, resources/css/instructor/subject-cards.css --}}
-{{-- JavaScript: resources/js/pages/instructor/manage-grades.js --}}
+{{-- JavaScript: resources/js/pages/instructor/manage-grades.js, resources/js/pages/instructor/grades-poll.js --}}
 
 @push('scripts')
 @include('instructor.partials.grade-script')
 
 @if (!$subject)
 <script>
-    function gradesSubjectCards() {
-        return {
-            polling: false,
-            pollInterval: null,
-            subjects: @json($subjectsData ?? []),
-            _lastJson: '',
-
-            init() {
-                this.polling = true;
-                this.fetchData();
-                this.startPolling();
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) { clearInterval(this.pollInterval); }
-                    else { this.fetchData(); this.startPolling(); }
-                });
-            },
-
-            destroy() {
-                if (this.pollInterval) clearInterval(this.pollInterval);
-            },
-
-            startPolling() {
-                if (this.pollInterval) clearInterval(this.pollInterval);
-                this.pollInterval = setInterval(() => this.fetchData(), 2000);
-            },
-
-            async fetchData() {
-                try {
-                    const r = await fetch('{{ route("instructor.grades.poll") }}', {
-                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-                    });
-                    if (!r.ok) return;
-                    const text = await r.text();
-                    if (text === this._lastJson) return;
-                    this._lastJson = text;
-                    const d = JSON.parse(text);
-                    this.subjects = d.subjects;
-                } catch (e) { console.error('Grades poll error:', e); }
-            },
-
-            navigateToSubject(subjectItem) {
-                window.location.href = '{{ route("instructor.grades.index") }}?subject_id=' + subjectItem.id + '&term=prelim';
-            },
-        };
-    }
+    window.gradesPageConfig = {
+        subjects: @json($subjectsData ?? []),
+        pollUrl: '{{ route("instructor.grades.poll") }}',
+        indexUrl: '{{ route("instructor.grades.index") }}'
+    };
 </script>
 @endif
-
-<style>
-.subject-card h6 {
-    transition: color 0.3s;
-}
-
-.subject-card:hover h6 {
-    color: #4da674 !important;
-}
-
-.subject-card .badge {
-    transition: all 0.3s;
-}
-
-.subject-card:hover .badge {
-    transform: scale(1.05);
-}
-</style>
 @endpush
