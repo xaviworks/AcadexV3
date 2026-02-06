@@ -210,6 +210,25 @@ class VPAAController extends Controller
         ]);
     }
 
+    /**
+     * Return VPAA dashboard data as JSON for real-time polling.
+     */
+    public function pollData(): \Illuminate\Http\JsonResponse
+    {
+        $departmentsCount = Department::where('is_deleted', false)->count();
+        $instructorsCount = User::where('role', 0)
+            ->where('is_active', true)
+            ->count();
+        $studentsCount = Student::where('is_deleted', false)->count();
+
+        return response()->json([
+            'departmentsCount' => $departmentsCount,
+            'instructorsCount' => $instructorsCount,
+            'studentsCount' => $studentsCount,
+            'academicPrograms' => $departmentsCount * 3,
+        ]);
+    }
+
     // ============================
     // View All Departments
     // ============================

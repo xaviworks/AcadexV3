@@ -12,11 +12,11 @@
     <p class="text-muted mb-4">View and manage GE subjects, instructor assignments, and enrollment information</p>
 
     @if(session('success'))
-        <script>notify.success('{{ session('success') }}');</script>
+        <script>document.addEventListener('DOMContentLoaded', () => window.notify?.success(@json(session('success'))));</script>
     @endif
 
     @if(session('error'))
-        <script>notify.error('{{ session('error') }}');</script>
+        <script>document.addEventListener('DOMContentLoaded', () => window.notify?.error(@json(session('error'))));</script>
     @endif
 
     @if($subjects->count() > 0)

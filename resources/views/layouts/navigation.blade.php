@@ -221,8 +221,13 @@ document.addEventListener('alpine:init', () => {
             this.fetchUnreadCount();
             // Setup real-time listener if Echo is available, otherwise use polling
             this.setupRealtimeListener();
-            // Start polling for live updates (every 10 seconds)
+            // Start polling for live updates
             this.startPolling();
+            // Pause when tab hidden, instant fetch when visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) { clearInterval(this.pollInterval); }
+                else { this.pollForNewNotifications(); this.startPolling(); }
+            });
         },
         
         destroy() {
@@ -245,10 +250,10 @@ document.addEventListener('alpine:init', () => {
             // Initialize with current timestamp to only get new notifications
             this.lastPollTimestamp = new Date().toISOString();
             
-            // Poll every 10 seconds for new notifications
+            if (this.pollInterval) clearInterval(this.pollInterval);
             this.pollInterval = setInterval(() => {
                 this.pollForNewNotifications();
-            }, 10000);
+            }, 2000);
         },
         
         async pollForNewNotifications() {
@@ -281,6 +286,9 @@ document.addEventListener('alpine:init', () => {
                         this.lastPollTimestamp = data.latest_timestamp;
                     }
                 }
+                
+                // Signal dashboard to refresh in sync
+                window.dispatchEvent(new CustomEvent('dashboard:refresh'));
             } catch (error) {
                 console.error('Error polling for notifications:', error);
             }
@@ -434,8 +442,13 @@ document.addEventListener('alpine:init', () => {
             this.fetchUnreadCount();
             // Setup real-time listener if Echo is available
             this.setupRealtimeListener();
-            // Start polling for live updates (every 10 seconds)
+            // Start polling for live updates
             this.startPolling();
+            // Pause when tab hidden, instant fetch when visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) { clearInterval(this.pollInterval); }
+                else { this.pollForNewNotifications(); this.startPolling(); }
+            });
         },
         
         destroy() {
@@ -456,9 +469,10 @@ document.addEventListener('alpine:init', () => {
         startPolling() {
             this.lastPollTimestamp = new Date().toISOString();
             
+            if (this.pollInterval) clearInterval(this.pollInterval);
             this.pollInterval = setInterval(() => {
                 this.pollForNewNotifications();
-            }, 10000);
+            }, 2000);
         },
         
         async pollForNewNotifications() {
@@ -487,6 +501,9 @@ document.addEventListener('alpine:init', () => {
                         this.lastPollTimestamp = data.latest_timestamp;
                     }
                 }
+                
+                // Signal dashboard to refresh in sync
+                window.dispatchEvent(new CustomEvent('dashboard:refresh'));
             } catch (error) {
                 console.error('Error polling for notifications:', error);
             }

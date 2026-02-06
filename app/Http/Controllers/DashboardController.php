@@ -399,4 +399,231 @@ class DashboardController extends Controller
             'final' => 4,
         ][$term] ?? null;
     }
+
+    /**
+     * Return dashboard data as JSON for real-time polling.
+     * Dispatches based on the authenticated user's role.
+     */
+    public function pollData(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = Auth::user();
+
+        if ($user->role === 0) {
+            return $this->pollInstructorData();
+        }
+
+        if ($user->isChairperson()) {
+            return $this->pollChairpersonData();
+        }
+
+        if ($user->isGECoordinator()) {
+            return $this->pollGECoordinatorData();
+        }
+
+        if ($user->isAdmin()) {
+            return $this->pollAdminData($request);
+        }
+
+        if ($user->role === 2) {
+            return $this->pollDeanData();
+        }
+
+        return response()->json(['error' => 'Unknown role'], 403);
+    }
+
+    private function pollInstructorData(): \Illuminate\Http\JsonResponse
+    {
+        if (!session()->has('active_academic_period_id')) {
+            return response()->json(['error' => 'No academic period set'], 400);
+        }
+
+        $academicPeriodId = session('active_academic_period_id');
+        $instructorId = Auth::id();
+        $subjects = $this->getInstructorSubjects($instructorId, $academicPeriodId);
+        $dashboardData = $this->getInstructorDashboardData($subjects, $academicPeriodId);
+        $subjectCharts = $this->generateSubjectCharts($subjects);
+
+        return response()->json([
+            'instructorStudents' => $dashboardData['instructorStudents'],
+            'enrolledSubjectsCount' => $dashboardData['enrolledSubjectsCount'],
+            'totalPassedStudents' => $dashboardData['totalPassedStudents'],
+            'totalFailedStudents' => $dashboardData['totalFailedStudents'],
+            'termCompletions' => $dashboardData['termCompletions'],
+            'subjectCharts' => $subjectCharts,
+        ]);
+    }
+
+    private function pollChairpersonData(): \Illuminate\Http\JsonResponse
+    {
+        if (!session()->has('active_academic_period_id')) {
+            return response()->json(['error' => 'No academic period set'], 400);
+        }
+
+        $departmentId = Auth::user()->department_id;
+        $academicPeriodId = session('active_academic_period_id');
+        $chairpersonCourseId = Auth::user()->course_id;
+
+        $countInstructors = User::where("role", 0)
+            ->where("department_id", $departmentId)
+            ->where("course_id", $chairpersonCourseId)
+            ->where("is_active", true)
+            ->count();
+
+        $countStudents = Student::where("department_id", $departmentId)
+            ->where("is_deleted", false)
+            ->whereHas('subjects', function($query) use ($academicPeriodId) {
+                $query->where('academic_period_id', $academicPeriodId);
+            })
+            ->count();
+
+        $countCourses = Subject::where('department_id', $departmentId)
+            ->where('academic_period_id', $academicPeriodId)
+            ->where('is_deleted', false)
+            ->distinct('course_id')
+            ->count('course_id');
+
+        $countActiveInstructors = User::where("is_active", 1)
+            ->where("role", 0)
+            ->where("department_id", $departmentId)
+            ->where("course_id", $chairpersonCourseId)
+            ->count();
+
+        $countInactiveInstructors = User::where("is_active", 0)
+            ->where("role", 0)
+            ->where("department_id", $departmentId)
+            ->where("course_id", $chairpersonCourseId)
+            ->count();
+
+        $countUnverifiedInstructors = UnverifiedUser::where("department_id", $departmentId)->count();
+
+        return response()->json([
+            'countInstructors' => $countInstructors,
+            'countStudents' => $countStudents,
+            'countCourses' => $countCourses,
+            'countActiveInstructors' => $countActiveInstructors,
+            'countInactiveInstructors' => $countInactiveInstructors,
+            'countUnverifiedInstructors' => $countUnverifiedInstructors,
+            'activePercentage' => $countInstructors > 0 ? round(($countActiveInstructors / $countInstructors) * 100, 1) : 0,
+            'inactivePercentage' => $countInstructors > 0 ? round(($countInactiveInstructors / $countInstructors) * 100, 1) : 0,
+            'pendingPercentage' => $countInstructors > 0 ? round(($countUnverifiedInstructors / $countInstructors) * 100, 1) : 0,
+        ]);
+    }
+
+    private function pollGECoordinatorData(): \Illuminate\Http\JsonResponse
+    {
+        if (!session()->has('active_academic_period_id')) {
+            return response()->json(['error' => 'No academic period set'], 400);
+        }
+
+        $academicPeriodId = session('active_academic_period_id');
+        $geDepartment = Department::where('department_code', 'GE')->first();
+
+        if (!$geDepartment) {
+            return response()->json(['error' => 'GE department not found'], 404);
+        }
+
+        $countInstructors = User::where("role", 0)
+            ->where(function($query) use ($geDepartment) {
+                $query->where("department_id", $geDepartment->id)
+                      ->orWhere("can_teach_ge", true)
+                      ->orWhere(function($subQuery) {
+                          $subQuery->where('is_active', false)
+                                   ->whereHas('geSubjectRequests', function($requestQuery) {
+                                       $requestQuery->where('status', 'approved');
+                                   });
+                      });
+            })
+            ->count();
+
+        $countActiveInstructors = User::where("is_active", 1)
+            ->where("role", 0)
+            ->where(function($query) use ($geDepartment) {
+                $query->where("department_id", $geDepartment->id)
+                      ->orWhere("can_teach_ge", true);
+            })
+            ->count();
+
+        $countInactiveInstructors = User::where("is_active", 0)
+            ->where("role", 0)
+            ->where(function($query) use ($geDepartment) {
+                $query->where("department_id", $geDepartment->id)
+                      ->orWhere(function($subQuery) {
+                          $subQuery->whereHas('geSubjectRequests', function($requestQuery) {
+                              $requestQuery->where('status', 'approved');
+                          });
+                      });
+            })
+            ->count();
+
+        $countPendingInstructors = UnverifiedUser::where("department_id", $geDepartment->id)->count();
+
+        $countStudents = Student::whereHas('subjects', function($query) use ($geDepartment, $academicPeriodId) {
+                $query->where('department_id', $geDepartment->id)
+                      ->where('academic_period_id', $academicPeriodId);
+            })
+            ->where("is_deleted", false)
+            ->distinct()
+            ->count("students.id");
+
+        $countCourses = Subject::where("department_id", $geDepartment->id)
+            ->where("is_deleted", false)
+            ->where('academic_period_id', $academicPeriodId)
+            ->distinct('subject_code')
+            ->count();
+
+        return response()->json([
+            'countInstructors' => $countInstructors,
+            'countStudents' => $countStudents,
+            'countCourses' => $countCourses,
+            'countActiveInstructors' => $countActiveInstructors,
+            'countInactiveInstructors' => $countInactiveInstructors,
+            'countPendingInstructors' => $countPendingInstructors,
+            'activePercentage' => $countInstructors > 0 ? round(($countActiveInstructors / $countInstructors) * 100, 1) : 0,
+            'inactivePercentage' => $countInstructors > 0 ? round(($countInactiveInstructors / $countInstructors) * 100, 1) : 0,
+            'pendingPercentage' => ($countInstructors + $countPendingInstructors) > 0 ? round(($countPendingInstructors / ($countInstructors + $countPendingInstructors)) * 100, 1) : 0,
+        ]);
+    }
+
+    private function pollAdminData(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $selectedDate = $request->query('date', \Carbon\Carbon::today()->toDateString());
+        $selectedYear = $request->query('year', now()->year);
+
+        $loginStats = $this->getLoginStats($selectedDate);
+        $monthlyStats = $this->getMonthlyLoginStats($selectedYear);
+
+        return response()->json([
+            'totalUsers' => User::count(),
+            'loginCount' => $loginStats['loginCount'],
+            'failedLoginCount' => $loginStats['failedLoginCount'],
+            'successfulData' => $loginStats['successfulData'],
+            'failedData' => $loginStats['failedData'],
+            'monthlySuccessfulData' => $monthlyStats['monthlySuccessfulData'],
+            'monthlyFailedData' => $monthlyStats['monthlyFailedData'],
+            'selectedDate' => $selectedDate,
+            'selectedYear' => $selectedYear,
+        ]);
+    }
+
+    private function pollDeanData(): \Illuminate\Http\JsonResponse
+    {
+        $studentsPerDepartment = Student::join('departments', 'students.department_id', '=', 'departments.id')
+            ->select('departments.department_description as department_name', DB::raw('count(*) as total'))
+            ->groupBy('students.department_id', 'departments.department_description')
+            ->pluck('total', 'department_name');
+
+        $studentsPerCourse = Student::join('courses', 'students.course_id', '=', 'courses.id')
+            ->select('courses.course_code', 'courses.course_description', DB::raw('count(*) as total'))
+            ->groupBy('students.course_id', 'courses.course_code', 'courses.course_description')
+            ->pluck('total', 'courses.course_code');
+
+        return response()->json([
+            'totalStudents' => $studentsPerDepartment->sum(),
+            'totalInstructors' => User::where('role', 'instructor')->count(),
+            'totalCourses' => $studentsPerCourse->count(),
+            'totalDepartments' => $studentsPerDepartment->count(),
+            'studentsPerDepartment' => $studentsPerDepartment,
+            'studentsPerCourse' => $studentsPerCourse,
+        ]);
+    }
 }

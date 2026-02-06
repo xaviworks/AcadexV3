@@ -14,7 +14,7 @@
     </div>
 
     @if (session('success'))
-        <script>notify.success('{{ session('success') }}');</script>
+        <script>document.addEventListener('DOMContentLoaded', () => window.notify?.success(@json(session('success'))));</script>
     @endif
 
     @if ($errors->any())

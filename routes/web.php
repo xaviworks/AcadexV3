@@ -100,6 +100,11 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Dashboard real-time polling endpoint
+Route::get('/dashboard/poll', [DashboardController::class, 'pollData'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard.poll');
+
 // Notifications (for all authenticated users)
 Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
     Route::get('/', [NotificationController::class, 'index'])->name('index');
@@ -440,6 +445,7 @@ Route::prefix('vpaa')
             ->name('reports.co-program');
         // Dashboard
         Route::get('/dashboard', [VPAAController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/poll', [VPAAController::class, 'pollData'])->name('dashboard.poll');
         
         // Departments
         Route::get('/departments', [VPAAController::class, 'viewDepartments'])->name('departments');

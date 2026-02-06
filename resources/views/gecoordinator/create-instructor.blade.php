@@ -26,9 +26,11 @@
                     @endif
 
                     @if (session('status'))
-                        <div class="alert alert-success">
-                            {{ session('status') }}
-                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                window.notify?.success(@json(session('status')));
+                            });
+                        </script>
                     @endif
 
                     <form action="{{ route('gecoordinator.storeInstructor') }}" method="POST">

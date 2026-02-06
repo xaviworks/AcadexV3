@@ -4,7 +4,7 @@
 <div class="container-fluid px-4 py-4">
 
   @if (session('error'))
-    <script>notify.error('{{ session('error') }}');</script>
+    <script>document.addEventListener('DOMContentLoaded', () => window.notify?.error(@json(session('error'))));</script>
   @endif
 
   @if ($errors->any())

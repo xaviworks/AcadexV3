@@ -11,10 +11,20 @@
     </h1>
     <p class="text-muted mb-4">Manage instructor accounts, requests, and GE courses assignments</p>
 
+    {{-- Toast Notifications (replaces inline alert) --}}
     @if(session('status'))
-        <div class="alert alert-success shadow-sm rounded">
-            {{ session('status') }}
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify?.success(@json(session('status')));
+            });
+        </script>
+    @endif
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.notify?.error(@json(session('error')));
+            });
+        </script>
     @endif
 
     @php

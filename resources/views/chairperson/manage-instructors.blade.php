@@ -14,13 +14,6 @@
     {{-- Toast Notifications --}}
     @include('chairperson.partials.toast-notifications')
 
-    {{-- Status Alert --}}
-    @if(session('status'))
-        <div class="alert alert-success shadow-sm rounded">
-            {{ session('status') }}
-        </div>
-    @endif
-
     {{-- Tabs --}}
     <ul class="nav nav-tabs mb-0" id="instructorTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
             <li class="nav-item" role="presentation">
