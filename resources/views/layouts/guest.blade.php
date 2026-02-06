@@ -15,14 +15,11 @@
         }
     </style>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap (Local) -->
+    <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 
-    <!-- Google Fonts (Poppins) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
-
-    <!-- CDNFonts: Feeling Passionate -->
-    <link href="https://fonts.cdnfonts.com/css/feeling-passionate" rel="stylesheet">
+    <!-- Local Fonts (Poppins, Feeling Passionate, Inter, Instrument Sans) -->
+    <link rel="stylesheet" href="{{ asset('css/local-fonts.css') }}">
 
     <!-- Tailwind & App Assets -->
     @vite(['resources/css/app.css', 'resources/css/guest-entry.css', 'resources/js/app.js'])
@@ -50,8 +47,8 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS (Local) -->
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
     <!-- Alpine.js for interactivity (optional) -->
     <script>

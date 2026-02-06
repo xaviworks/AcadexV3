@@ -384,7 +384,7 @@
 @endsection
 
 @push('styles')
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
+<link href="{{ asset('vendor/summernote/css/summernote-bs5.min.css') }}" rel="stylesheet">
 <style>
     /* Validation styles for non-input elements */
     .is-invalid:not(input):not(textarea):not(select) {
@@ -660,7 +660,7 @@
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
+<script src="{{ asset('vendor/summernote/js/summernote-bs5.min.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Summernote config

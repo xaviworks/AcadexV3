@@ -3,7 +3,7 @@
 @section('content')
 {{-- Styles: resources/css/admin/sessions.css --}}
 @push('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
 @endpush
 
 <div class="container py-4">

@@ -7,8 +7,8 @@
 
     <title>Select Academic Period - {{ config('app.name', 'Laravel') }}</title>
 
-    {{-- Bootstrap Icons --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    {{-- Bootstrap Icons (Local) --}}
+    <link rel="stylesheet" href="{{ asset('vendor/bootstrap-icons/font/bootstrap-icons.min.css') }}">
 
     @include('layouts.partials.favicon')
     @vite(['resources/css/app.css', 'resources/js/app.js'])

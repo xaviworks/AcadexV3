@@ -21,34 +21,28 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     @include('layouts.partials.favicon')
     
-    <!-- DNS Prefetch & Preconnect for CDN resources -->
-    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
     {{-- Styles: resources/css/layout/app.css --}}
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS (Local) -->
+    <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     
-    <!-- Bootstrap Icons via CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap Icons (Local) -->
+    <link rel="stylesheet" href="{{ asset('vendor/bootstrap-icons/font/bootstrap-icons.min.css') }}">
 
-    <!-- DataTables CSS with Bootstrap 5 Integration -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <!-- DataTables CSS with Bootstrap 5 Integration (Local) -->
+    <link rel="stylesheet" href="{{ asset('vendor/datatables/css/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/datatables-custom.css') }}">
     
-    <!-- Google Fonts - Inter (with display=swap to prevent FOIT) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Local Fonts (Inter, Poppins, Feeling Passionate, Instrument Sans) -->
+    <link rel="stylesheet" href="{{ asset('css/local-fonts.css') }}">
 
-    <!-- SweetAlert2 -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css" rel="stylesheet">
+    <!-- SweetAlert2 (Local) -->
+    <link href="{{ asset('vendor/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet">
     
     <!-- App CSS & JS (with cache busting) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+    <!-- SweetAlert2 JS (Local) -->
+    <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
 
     {{-- Styles: resources/css/layout/app.css --}}
 
@@ -104,17 +98,17 @@
         </main>
     </div>
 
-    <!-- Scripts Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Scripts Bundle (Local) -->
+    <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- Alpine.js is loaded via Vite with stores configured in resources/js/app.js -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="{{ asset('vendor/jquery/jquery-3.7.1.min.js') }}"></script>
     
     <!-- Bootbox.js (requires jQuery and Bootstrap) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootbox@6.0.0/dist/bootbox.all.min.js"></script>
+    <script src="{{ asset('vendor/bootbox/bootbox.all.min.js') }}"></script>
     
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('vendor/datatables/js/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ asset('vendor/chartjs/chart.js') }}"></script>
 
     <!-- Remove loading class when page is ready -->
     <script>

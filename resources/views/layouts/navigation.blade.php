@@ -156,12 +156,10 @@
         <div class="dropdown" style="min-width: 200px; position: relative; z-index: 2000;">
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle hover-lift" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             <div class="position-relative" style="flex-shrink: 0;">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($displayName) }}&background=259c59&color=fff"
-                     alt="avatar"
-                     class="rounded-circle me-2 border-2 border-success"
-                     width="38"
-                     height="38"
-                     style="display: block;">
+                <svg class="rounded-circle me-2 border-2 border-success" width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                    <rect width="38" height="38" rx="19" fill="#259c59"/>
+                    <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="#fff" font-family="Inter, sans-serif" font-size="14" font-weight="600">{{ collect(explode(' ', $displayName))->map(fn($w) => strtoupper(mb_substr($w, 0, 1)))->take(2)->join('') }}</text>
+                </svg>
                 <span class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-white" style="width: 10px; height: 10px;"></span>
             </div>
             <div class="d-flex flex-column ms-2" style="min-width: 100px;">
@@ -172,11 +170,10 @@
         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg" style="min-width: 280px; z-index: 2010 !important; position: absolute !important;" aria-labelledby="profileDropdown">
             <li class="px-3 py-3 border-bottom">
                 <div class="d-flex align-items-center">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($displayName) }}&background=259c59&color=fff"
-                         alt="avatar"
-                         class="rounded-circle me-3"
-                         width="45"
-                         height="45">
+                    <svg class="rounded-circle me-3" width="45" height="45" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="45" height="45" rx="22.5" fill="#259c59"/>
+                        <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" fill="#fff" font-family="Inter, sans-serif" font-size="16" font-weight="600">{{ collect(explode(' ', $displayName))->map(fn($w) => strtoupper(mb_substr($w, 0, 1)))->take(2)->join('') }}</text>
+                    </svg>
                     <div class="d-flex flex-column">
                         <span class="fw-semibold text-dark">{{ $displayName }}</span>
                         <span class="text-muted small text-truncate" style="max-width: 180px;">{{ Auth::user()->email }}</span>

@@ -3,8 +3,8 @@
 @section('content')
 {{-- Styles: resources/css/admin/users.css --}}
 @push('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/all.min.css') }}">
+    <link href="{{ asset('vendor/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet">
     <style>
         #usersTable {
             font-size: 0.95rem;
@@ -613,7 +613,7 @@
 </div>
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js" defer></script>
+    <script src="{{ asset('vendor/sweetalert2/sweetalert2.all.min.js') }}" defer></script>
     <script defer>
         // Add this at the start of your scripts
         const swalCustomClass = {

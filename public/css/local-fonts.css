@@ -1,0 +1,89 @@
+/*
+ * Local Font Definitions
+ * Replaces Google Fonts, Bunny Fonts, and CDNFonts CDN references
+ * for fully offline operation.
+ */
+
+/* Inter - Multiple weights */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('/fonts/inter/inter-latin-300.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/inter/inter-latin-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/inter/inter-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/inter/inter-latin-600.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/inter/inter-latin-700.woff2') format('woff2');
+}
+
+/* Poppins - Bold (700) */
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/poppins/poppins-latin-700.woff2') format('woff2');
+}
+
+/* Feeling Passionate */
+@font-face {
+    font-family: 'Feeling Passionate';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/feeling-passionate/feeling-passionate.woff') format('woff');
+}
+
+/* Instrument Sans - Multiple weights */
+@font-face {
+    font-family: 'Instrument Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/instrument-sans/instrument-sans-latin-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Instrument Sans';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/instrument-sans/instrument-sans-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Instrument Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/instrument-sans/instrument-sans-latin-600.woff2') format('woff2');
+}

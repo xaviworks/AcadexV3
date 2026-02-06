@@ -191,7 +191,7 @@
 {{-- Styles: resources/css/dashboard/common.css --}}
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('vendor/chartjs/chart.js') }}"></script>
 <script>
     window.pageData = { subjectCharts: @json($subjectCharts) };
 
