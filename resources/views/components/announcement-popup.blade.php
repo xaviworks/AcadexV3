@@ -129,15 +129,27 @@
 
 <script>
 function announcementPopup() {
+    // Keep last-seen JSON outside Alpine proxy for cheap diff
+    let _lastJson = '';
+    let _pollTimer = null;
+
     return {
         announcements: [],
         currentIndex: 0,
-        
+        polling: false,
+
         get currentAnnouncement() {
             return this.announcements[this.currentIndex] || null;
         },
-        
+
+        /* ── Bootstrap: first fetch + start polling ── */
         async fetchAnnouncements() {
+            await this._doFetch();
+            this._startPolling();
+        },
+
+        /* ── Core fetch logic (reused by init & poll) ── */
+        async _doFetch() {
             try {
                 const response = await fetch('/announcements/active', {
                     headers: {
@@ -145,58 +157,92 @@ function announcementPopup() {
                         'Accept': 'application/json',
                     }
                 });
-                
+
                 if (!response.ok) return;
-                
-                const data = await response.json();
-                
+
+                const text = await response.text();
+
+                // Smart diff — skip DOM work if nothing changed
+                if (text === _lastJson) return;
+                _lastJson = text;
+
+                const data = JSON.parse(text);
+
                 if (data.length === 0) {
                     this.announcements = [];
                     return;
                 }
-                
+
                 // Get dismissed announcements from session storage
                 let dismissedInSession = JSON.parse(sessionStorage.getItem('dismissedAnnouncements') || '[]')
                     .map(id => parseInt(id, 10));
-                
+
                 // Get all valid announcement IDs from server response
                 const validAnnouncementIds = data.map(ann => parseInt(ann.id, 10));
-                
-                // Auto-cleanup: if there are dismissed IDs that don't exist anymore, remove them
+
+                // Auto-cleanup: remove stale dismissed IDs
                 const hasStaleIds = dismissedInSession.some(id => !validAnnouncementIds.includes(id));
                 if (hasStaleIds) {
                     dismissedInSession = dismissedInSession.filter(id => validAnnouncementIds.includes(id));
                     sessionStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissedInSession));
                 }
-                
+
                 // Filter: Remove only announcements dismissed in this session
-                this.announcements = data.filter(ann => {
+                const filtered = data.filter(ann => {
                     return !dismissedInSession.includes(parseInt(ann.id, 10));
                 });
-                
+
+                // Preserve current view when user is reading an announcement
+                // Only reset index if the list actually changed
+                const currentIds = this.announcements.map(a => a.id).join(',');
+                const newIds = filtered.map(a => a.id).join(',');
+
+                if (currentIds !== newIds) {
+                    this.announcements = filtered;
+                    // Keep index in bounds
+                    if (this.currentIndex >= this.announcements.length) {
+                        this.currentIndex = Math.max(0, this.announcements.length - 1);
+                    }
+                }
+
             } catch (error) {
                 // Silently fail
             }
         },
-        
+
+        /* ── Polling engine (5s) + Page Visibility API ── */
+        _startPolling() {
+            this.polling = true;
+
+            // Poll every 5 seconds (announcements are less frequent than notifications)
+            _pollTimer = setInterval(() => this._doFetch(), 5000);
+
+            // Pause when tab is hidden, resume immediately when visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+                } else {
+                    this._doFetch(); // instant fetch on return
+                    if (!_pollTimer) {
+                        _pollTimer = setInterval(() => this._doFetch(), 5000);
+                    }
+                }
+            });
+        },
+
         async dismissCurrentAnnouncement() {
             if (!this.currentAnnouncement) return;
-            
+
             const announcementId = this.currentAnnouncement.id;
-            const showOnce = this.currentAnnouncement.show_once;
-            
-            // Only save to session storage to prevent re-showing during CURRENT session
-            // This is just for UX - prevents popup from appearing on every page navigation
+
+            // Save to session storage to prevent re-showing during CURRENT session
             const dismissedInSession = JSON.parse(sessionStorage.getItem('dismissedAnnouncements') || '[]');
             if (!dismissedInSession.includes(announcementId)) {
                 dismissedInSession.push(announcementId);
                 sessionStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissedInSession));
             }
-            
+
             // Mark as viewed in backend (for show_once tracking)
-            // The backend will track this in the database
-            // For show_once announcements: won't show again ever
-            // For regular announcements: will show again in next session
             try {
                 await fetch(`/announcements/${announcementId}/view`, {
                     method: 'POST',
@@ -208,52 +254,49 @@ function announcementPopup() {
             } catch (error) {
                 // Silently fail
             }
-            
+
             // Remove from array
             this.announcements.splice(this.currentIndex, 1);
-            
+
             // Adjust current index if needed
             if (this.currentIndex >= this.announcements.length && this.currentIndex > 0) {
                 this.currentIndex = this.announcements.length - 1;
             }
         },
-        
+
         nextAnnouncement() {
             if (this.currentIndex < this.announcements.length - 1) {
                 this.currentIndex++;
             }
         },
-        
+
         previousAnnouncement() {
             if (this.currentIndex > 0) {
                 this.currentIndex--;
             }
         },
-        
+
         handleEscape() {
-            // Allow ESC key to close announcement only if dismissible
             if (this.currentAnnouncement && this.currentAnnouncement.is_dismissible) {
                 this.dismissCurrentAnnouncement();
             }
         },
-        
+
         logout() {
-            // Clear session storage before logout
             sessionStorage.removeItem('dismissedAnnouncements');
-            
-            // Create a form and submit POST request to logout
+            if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/logout';
-            
-            // Add CSRF token
+
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
             csrfInput.name = '_token';
             csrfInput.value = csrfToken;
             form.appendChild(csrfInput);
-            
+
             document.body.appendChild(form);
             form.submit();
         }
