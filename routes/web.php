@@ -268,6 +268,7 @@ Route::prefix('instructor')
 
         // Grades
         Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
+        Route::get('/grades/poll', [GradeController::class, 'pollSubjects'])->name('grades.poll');
         Route::get('/grades/partial', [GradeController::class, 'partial'])->name('grades.partial');
         Route::post('/grades/save', [GradeController::class, 'store'])->name('grades.store');
         Route::post('/grades/ajax-save-score', [GradeController::class, 'ajaxSaveScore'])->name('grades.ajaxSaveScore');

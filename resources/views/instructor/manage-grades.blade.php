@@ -4,64 +4,65 @@
 <div class="container-fluid px-0">
     <div id="grade-section">
         @if (!$subject)
-            @if(count($subjects))
-                <div class="px-4 pt-4 pb-2">
-                    <h1 class="h4 fw-bold mb-0 d-flex align-items-center">
-                        <i class="bi bi-card-checklist text-success me-2" style="font-size: 1.5rem;"></i>
-                        <span>Manage Grades</span>
-                    </h1>
-                </div>
-                <div class="row g-4 px-4 py-4" id="subject-selection">
-                    @foreach($subjects as $subjectItem)
-                        <div class="col-md-4">
-                            <div
-                                class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden"
-                                data-url="{{ route('instructor.grades.index') }}?subject_id={{ $subjectItem->id }}&term=prelim"
-                                style="cursor: pointer;"
-                            >
-                                {{-- Top header --}}
-                                <div class="position-relative" style="height: 80px;">
-                                    <div class="subject-circle position-absolute start-50 translate-middle"
-                                        style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                                        <h5 class="mb-0 text-white fw-bold">{{ $subjectItem->subject_code }}</h5>
-                                    </div>
-                                </div>
-
-                                {{-- Card body --}}
-                                <div class="card-body pt-5 text-center">
-                                    <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $subjectItem->subject_description }}">
-                                        {{ $subjectItem->subject_description }}
-                                    </h6>
-
-                                    {{-- Footer badges --}}
-                                    <div class="d-flex justify-content-between align-items-center mt-4 px-2">
-                                        <span class="badge bg-light border text-secondary px-3 py-2 rounded-pill">
-                                            👥 {{ $subjectItem->students_count }} Students
-                                        </span>
-                                        <span class="badge px-3 py-2 fw-semibold text-uppercase rounded-pill
-                                            @if($subjectItem->grade_status === 'completed') bg-success
-                                            @elseif($subjectItem->grade_status === 'pending') bg-warning text-dark
-                                            @else bg-secondary
-                                            @endif">
-                                            @if($subjectItem->grade_status === 'completed')
-                                                ✔ Completed
-                                            @elseif($subjectItem->grade_status === 'pending')
-                                                ⏳ Pending
-                                            @else
-                                                ⭕ Not Started
-                                            @endif
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+            <div x-data="gradesSubjectCards()" x-init="init()">
+                <template x-if="subjects.length > 0">
+                    <div>
+                        <div class="px-4 pt-4 pb-2">
+                            <h1 class="h4 fw-bold mb-0 d-flex align-items-center">
+                                <i class="bi bi-card-checklist text-success me-2" style="font-size: 1.5rem;"></i>
+                                <span>Manage Grades</span>
+                            </h1>
                         </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="alert alert-warning text-center mt-5 rounded">
-                    No subjects have been assigned to you yet.
-                </div>
-            @endif
+                        <div class="row g-4 px-4 py-4" id="subject-selection">
+                            <template x-for="subjectItem in subjects" :key="subjectItem.id">
+                                <div class="col-md-4">
+                                    <div
+                                        class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden"
+                                        :data-url="'{{ route('instructor.grades.index') }}?subject_id=' + subjectItem.id + '&term=prelim'"
+                                        style="cursor: pointer;"
+                                        role="button"
+                                        tabindex="0"
+                                        @click="navigateToSubject(subjectItem)"
+                                        @keydown.enter.prevent="navigateToSubject(subjectItem)"
+                                        @keydown.space.prevent="navigateToSubject(subjectItem)"
+                                    >
+                                        {{-- Top header --}}
+                                        <div class="position-relative" style="height: 80px;">
+                                            <div class="subject-circle position-absolute start-50 translate-middle"
+                                                style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                                <h5 class="mb-0 text-white fw-bold" x-text="subjectItem.subject_code"></h5>
+                                            </div>
+                                        </div>
+
+                                        {{-- Card body --}}
+                                        <div class="card-body pt-5 text-center">
+                                            <h6 class="fw-semibold mt-4 text-dark text-truncate" :title="subjectItem.subject_description" x-text="subjectItem.subject_description"></h6>
+
+                                            {{-- Footer badges --}}
+                                            <div class="d-flex justify-content-between align-items-center mt-4 px-2">
+                                                <span class="badge bg-light border text-secondary px-3 py-2 rounded-pill" x-text="'👥 ' + subjectItem.students_count + ' Students'"></span>
+                                                <span class="badge px-3 py-2 fw-semibold text-uppercase rounded-pill"
+                                                      :class="{
+                                                          'bg-success': subjectItem.grade_status === 'completed',
+                                                          'bg-warning text-dark': subjectItem.grade_status === 'pending',
+                                                          'bg-secondary': subjectItem.grade_status !== 'completed' && subjectItem.grade_status !== 'pending'
+                                                      }"
+                                                      x-text="subjectItem.grade_status === 'completed' ? '✔ Completed' : (subjectItem.grade_status === 'pending' ? '⏳ Pending' : '⭕ Not Started')">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                <template x-if="subjects.length === 0">
+                    <div class="alert alert-warning text-center mt-5 rounded">
+                        No subjects have been assigned to you yet.
+                    </div>
+                </template>
+            </div>
         @else
             @include('instructor.partials.term-stepper')
             @include('instructor.partials.activity-header', [
@@ -103,6 +104,56 @@
 
 @push('scripts')
 @include('instructor.partials.grade-script')
+
+@if (!$subject)
+<script>
+    function gradesSubjectCards() {
+        return {
+            polling: false,
+            pollInterval: null,
+            subjects: @json($subjectsData ?? []),
+            _lastJson: '',
+
+            init() {
+                this.polling = true;
+                this.fetchData();
+                this.startPolling();
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) { clearInterval(this.pollInterval); }
+                    else { this.fetchData(); this.startPolling(); }
+                });
+            },
+
+            destroy() {
+                if (this.pollInterval) clearInterval(this.pollInterval);
+            },
+
+            startPolling() {
+                if (this.pollInterval) clearInterval(this.pollInterval);
+                this.pollInterval = setInterval(() => this.fetchData(), 2000);
+            },
+
+            async fetchData() {
+                try {
+                    const r = await fetch('{{ route("instructor.grades.poll") }}', {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+                    });
+                    if (!r.ok) return;
+                    const text = await r.text();
+                    if (text === this._lastJson) return;
+                    this._lastJson = text;
+                    const d = JSON.parse(text);
+                    this.subjects = d.subjects;
+                } catch (e) { console.error('Grades poll error:', e); }
+            },
+
+            navigateToSubject(subjectItem) {
+                window.location.href = '{{ route("instructor.grades.index") }}?subject_id=' + subjectItem.id + '&term=prelim';
+            },
+        };
+    }
+</script>
+@endif
 
 <style>
 .subject-card h6 {

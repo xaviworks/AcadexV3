@@ -192,8 +192,20 @@ class GradeController extends Controller
             ));
         }
 
+        // Prepare subjects data for Alpine.js JSON (avoid arrow functions in Blade @json)
+        $subjectsData = $subjects->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'subject_code' => $s->subject_code,
+                'subject_description' => $s->subject_description,
+                'students_count' => $s->students_count,
+                'grade_status' => $s->grade_status,
+            ];
+        })->values();
+
         return view('instructor.manage-grades', compact(
             'subjects',
+            'subjectsData',
             'subject',
             'term',
             'students',
@@ -465,6 +477,65 @@ class GradeController extends Controller
             'formulaMeta',
             'componentStatus'
         ));
+    }
+
+    /**
+     * Return subject card data as JSON for real-time polling on the grades page.
+     * Mirrors the subject query + grade_status logic from index().
+     */
+    public function pollSubjects(): \Illuminate\Http\JsonResponse
+    {
+        Gate::authorize('instructor');
+
+        $academicPeriodId = session('active_academic_period_id');
+
+        if (!$academicPeriodId) {
+            return response()->json(['error' => 'No academic period set'], 400);
+        }
+
+        $subjects = Subject::where(function ($query) use ($academicPeriodId) {
+            $query->where('instructor_id', Auth::id())
+                  ->orWhereHas('instructors', function ($q) {
+                      $q->where('instructor_id', Auth::id());
+                  });
+        })
+        ->where('academic_period_id', $academicPeriodId)
+        ->withCount('students')
+        ->get();
+
+        foreach ($subjects as $subject) {
+            $total = $subject->students_count;
+            $terms = ['prelim', 'midterm', 'prefinal', 'final'];
+            $gradedCount = 0;
+
+            foreach ($terms as $t) {
+                $gradedTerms = TermGrade::where('subject_id', $subject->id)
+                    ->where('term_id', $this->getTermId($t))
+                    ->distinct('student_id')
+                    ->count('student_id');
+
+                if ($gradedTerms === $total && $total > 0) {
+                    $gradedCount++;
+                }
+            }
+
+            $subject->grade_status = match (true) {
+                $total === 0 => 'not_started',
+                $gradedCount === 0 => 'pending',
+                $gradedCount < count($terms) => 'pending',
+                default => 'completed',
+            };
+        }
+
+        return response()->json([
+            'subjects' => $subjects->map(fn ($s) => [
+                'id' => $s->id,
+                'subject_code' => $s->subject_code,
+                'subject_description' => $s->subject_description,
+                'students_count' => $s->students_count,
+                'grade_status' => $s->grade_status,
+            ])->values(),
+        ]);
     }
 
     private function getTermId($term)
