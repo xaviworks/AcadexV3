@@ -61,18 +61,17 @@
     </div>
 
     @if ($requests->isEmpty())
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center py-5">
-                <div class="mb-4">
-                    <i class="bi bi-diagram-3" style="font-size: 4rem; color: #dee2e6;"></i>
-                </div>
-                <h5 class="text-muted mb-3">No Formula Requests Yet</h5>
-                <p class="text-muted mb-4">Create your first custom grading structure formula request.</p>
+        <x-empty-state
+            icon="bi-diagram-3"
+            title="No Formula Requests Yet"
+            message="Create your first custom grading structure formula request."
+        >
+            <x-slot:actions>
                 <a href="{{ route('chairperson.structureTemplates.create') }}" class="btn btn-success">
                     <i class="bi bi-plus-circle me-1"></i>Create New Request
                 </a>
-            </div>
-        </div>
+            </x-slot:actions>
+        </x-empty-state>
     @else
         <div class="row g-4">
             @foreach ($requests as $request)

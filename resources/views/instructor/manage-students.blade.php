@@ -157,9 +157,18 @@
                     </div>
                 </div>
             @elseif(request('subject_id'))
-                <div class="alert alert-warning bg-warning-subtle text-dark border-0 text-center">
-                    No students found for the selected subject.
-                </div> 
+                <x-empty-state
+                    icon="bi-people"
+                    title="No Students Found"
+                    message="No students found for the selected subject."
+                    :compact="true"
+                />
+            @else
+                <x-empty-state
+                    icon="bi-hand-index"
+                    title="Select a Course"
+                    message="Please select a course above to view and manage enrolled students."
+                />
             @endif
         </div>
 

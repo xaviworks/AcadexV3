@@ -128,7 +128,7 @@
                 </div>
                 <div class="card-body">
                     @if (empty($groupedComponents))
-                        <p class="text-muted mb-0">No components defined.</p>
+                        <x-inline-alert type="muted" icon="bi-puzzle" message="No components defined for this grading structure." />
                     @else
                         <div class="structure-preview">
                             @foreach ($groupedComponents as $group)

@@ -95,48 +95,39 @@
         </div>
     @else
         {{-- Enhanced Empty State --}}
-        <div class="text-center py-5">
-            <div class="card border-0 shadow-sm mx-auto" style="max-width: 500px;">
-                <div class="card-body p-5">
-                    <div class="mb-4">
-                        <div class="p-4 rounded-circle mx-auto d-inline-flex" style="background: linear-gradient(135deg, #198754, #20c997);">
-                            <i class="bi bi-search text-white" style="font-size: 2rem;"></i>
+        @php
+            $emptyMessage = (Auth::user()->role === 1 || Auth::user()->role === 4)
+                ? 'No subjects are currently available for your program <strong style="color: #198754;">' . e(Auth::user()->course->course_code ?? 'Unknown') . '</strong> in the current academic period.'
+                : 'No subjects have been assigned to you for the current academic period.';
+        @endphp
+        <x-empty-state
+            icon="bi-folder-x"
+            title="No Subjects Found"
+            :message="$emptyMessage"
+        >
+            @if(Auth::user()->role === 1 || Auth::user()->role === 4)
+                <div class="alert alert-light border border-success text-start">
+                    <div class="d-flex align-items-start">
+                        <i class="bi bi-info-circle text-success me-3 mt-1"></i>
+                        <div>
+                            <strong>What to do:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Contact the administrator to assign subjects to your program</li>
+                                <li>Ensure subjects are properly configured for this academic period</li>
+                                <li>Check if the academic period is correctly set</li>
+                            </ul>
                         </div>
                     </div>
-                    <h4 class="fw-bold mb-3" style="color: #198754;">No Subjects Found</h4>
-                    @if(Auth::user()->role === 1 || Auth::user()->role === 4)
-                        <p class="text-muted mb-4">
-                            No subjects are currently available for your program 
-                            <strong style="color: #198754;">{{ Auth::user()->course->course_code ?? 'Unknown' }}</strong> 
-                            in the current academic period.
-                        </p>
-                        <div class="alert alert-light border border-warning">
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-info-circle text-warning me-3 mt-1"></i>
-                                <div>
-                                    <strong>What to do:</strong>
-                                    <ul class="mb-0 mt-2 text-start">
-                                        <li>Contact the administrator to assign subjects to your program</li>
-                                        <li>Ensure subjects are properly configured for this academic period</li>
-                                        <li>Check if the academic period is correctly set</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <p class="text-muted mb-4">
-                            No subjects have been assigned to you for the current academic period.
-                        </p>
-                        <div class="alert alert-light border border-info">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-info-circle text-info me-2"></i>
-                                <span>Please contact your department chairperson for subject assignments.</span>
-                            </div>
-                        </div>
-                    @endif
                 </div>
-            </div>
-        </div>
+            @else
+                <div class="alert alert-light border border-success">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle text-success me-2"></i>
+                        <span>Please contact your department chairperson for subject assignments.</span>
+                    </div>
+                </div>
+            @endif
+        </x-empty-state>
     @endif
 </div>
 
@@ -424,5 +415,3 @@
 @endpush
 
 {{-- Styles: resources/css/instructor/course-outcomes.css --}}
-
-@section('content')

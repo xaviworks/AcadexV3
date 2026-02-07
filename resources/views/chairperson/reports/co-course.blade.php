@@ -17,10 +17,12 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
             @if(empty($subjectCOs))
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
-                    <p class="text-muted mb-0">No subjects found for this course in the selected academic period.</p>
-                </div>
+                <x-empty-state
+                    :compact="true"
+                    icon="bi-journal-x"
+                    title="No Subjects Found"
+                    message="No subjects found for this course in the selected academic period."
+                />
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">

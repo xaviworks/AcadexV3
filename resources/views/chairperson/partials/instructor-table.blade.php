@@ -17,9 +17,11 @@
 @endphp
 
 @if($filteredInstructors->isEmpty())
-    <div class="alert alert-warning shadow-sm rounded">
-        No {{ $filterActive ? 'active' : 'inactive' }} instructors.
-    </div>
+    <x-empty-state
+        icon="bi-people"
+        title="No {{ $filterActive ? 'Active' : 'Inactive' }} Instructors"
+        message="There are no {{ $filterActive ? 'active' : 'inactive' }} instructors found in your department."
+    />
 @else
     <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
         <table class="table table-bordered align-middle mb-0">

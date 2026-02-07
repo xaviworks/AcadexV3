@@ -14,9 +14,7 @@
     ])
 
     @if(!$department)
-        <div class="alert alert-warning border-0 rounded-4 shadow-sm">
-            <i class="bi bi-exclamation-triangle me-2"></i>Your account has no department assigned. Please contact admin.
-        </div>
+        <x-inline-alert type="warning" message="Your account has no department assigned. Please contact admin." />
     @endif
 
     <div class="card border-0 shadow-sm rounded-4">

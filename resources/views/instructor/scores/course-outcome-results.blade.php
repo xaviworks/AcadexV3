@@ -758,13 +758,12 @@
                             </tbody>
                         </table>
                     @else
-                        <div class="text-center py-5">
-                            <div class="mb-3">
-                                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-                            </div>
-                            <h5 class="text-muted mb-2">No Data Available</h5>
-                            <p class="text-muted mb-0">No course outcomes or activities have been set up for the {{ strtoupper($term) }} term yet.</p>
-                        </div>
+                        <x-empty-state
+                            icon="bi-inbox"
+                            title="No Data Available"
+                            :message="'No course outcomes or activities have been set up for the ' . strtoupper($term) . ' term yet.'"
+                            :compact="true"
+                        />
                     @endif
                 </div>
             </div>
@@ -854,13 +853,12 @@
                             </tbody>
                         </table>
                     @else
-                        <div class="text-center py-5">
-                            <div class="mb-3">
-                                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-                            </div>
-                            <h5 class="text-muted mb-2">No Data Available</h5>
-                            <p class="text-muted mb-0">No course outcomes or activities have been set up for the {{ strtoupper($term) }} term yet.</p>
-                        </div>
+                        <x-empty-state
+                            icon="bi-inbox"
+                            title="No Data Available"
+                            :message="'No course outcomes or activities have been set up for the ' . strtoupper($term) . ' term yet.'"
+                            :compact="true"
+                        />
                     @endif
                 </div>
             </div>
@@ -927,78 +925,57 @@
                             </tbody>
                         </table>
                     @else
-                        <div class="text-center py-5">
-                            <div class="mb-3">
-                                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-                            </div>
-                            <h5 class="text-muted mb-2">No Data Available</h5>
-                            <p class="text-muted mb-0">No course outcomes or activities have been set up for the {{ strtoupper($term) }} term yet.</p>
-                        </div>
+                        <x-empty-state
+                            icon="bi-inbox"
+                            title="No Data Available"
+                            :message="'No course outcomes or activities have been set up for the ' . strtoupper($term) . ' term yet.'"
+                            :compact="true"
+                        />
                     @endif
                 </div>
             </div>
         @endforeach
         @else
             {{-- Enhanced Splash Page for No Course Outcomes in Results View --}}
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-5 text-center">
-                    <div class="text-muted mb-3">
-                        <i class="bi bi-graph-up fs-1 opacity-50"></i>
-                    </div>
-                    <h5 class="text-muted mb-2">No Course Outcome Results Available</h5>
-                    <p class="text-muted mb-4">
-                        @if(isset($selectedSubject))
-                            for <strong>{{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}</strong>
-                        @else
-                            for this subject
-                        @endif
+            <x-empty-state
+                icon="bi-graph-up"
+                title="No Course Outcome Results Available"
+                :message="isset($selectedSubject)
+                    ? 'for <strong>' . e($selectedSubject->subject_code) . ' - ' . e($selectedSubject->subject_description) . '</strong>'
+                    : 'for this subject'"
+            >
+                <div class="alert alert-info bg-info-subtle text-dark border-0 text-start">
+                    <h6 class="alert-heading">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                        No Course Outcomes Found
+                    </h6>
+                    <p class="mb-3">
+                        Before viewing course outcome results, course outcomes must be created for this subject. 
+                        Course outcomes define the specific learning objectives and competencies that students 
+                        should achieve by the end of the course.
                     </p>
-                    
-                    <div class="alert alert-info bg-info-subtle text-dark border-0 mb-4">
-                        <h6 class="alert-heading">
-                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                            No Course Outcomes Found
-                        </h6>
-                        <p class="mb-3">
-                            Before viewing course outcome results, course outcomes must be created for this subject. 
-                            Course outcomes define the specific learning objectives and competencies that students 
-                            should achieve by the end of the course.
-                        </p>
-                        <hr>
-                        <h6 class="mb-2">
-                            <i class="bi bi-list-check me-2" style="color: #0F4B36;"></i>
-                            What You Need to Do:
-                        </h6>
-                        <ul class="text-start mb-0">
-                            <li>🎯 Define course outcomes that align with learning objectives</li>
-                            <li>📝 Create assessment activities linked to course outcomes</li>
-                            <li>👥 Input student scores for each activity</li>
-                            <li>📊 Then return here to view comprehensive results</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="d-flex justify-content-center gap-3">
-                        <a href="{{ route('instructor.course_outcomes.index') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-2"></i>Set Up Course Outcomes
-                        </a>
-                        <a href="{{ route('instructor.course-outcome-attainments.index') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-2"></i>Back to Subjects
-                        </a>
-                    </div>
-                    
-                    <div class="mt-3">
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Course outcomes can be created for 
-                            @if(isset($activePeriod))
-                                <strong>{{ $activePeriod->academic_year }} - {{ $activePeriod->semester }}</strong>
-                            @else
-                                the current academic period
-                            @endif
-                        </small>
-                    </div>
+                    <hr>
+                    <h6 class="mb-2">
+                        <i class="bi bi-list-check me-2" style="color: #0F4B36;"></i>
+                        What You Need to Do:
+                    </h6>
+                    <ul class="text-start mb-0">
+                        <li>🎯 Define course outcomes that align with learning objectives</li>
+                        <li>📝 Create assessment activities linked to course outcomes</li>
+                        <li>👥 Input student scores for each activity</li>
+                        <li>📊 Then return here to view comprehensive results</li>
+                    </ul>
                 </div>
-            </div>
+
+                <x-slot:actions>
+                    <a href="{{ route('instructor.course_outcomes.index') }}" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-2"></i>Set Up Course Outcomes
+                    </a>
+                    <a href="{{ route('instructor.course-outcome-attainments.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Subjects
+                    </a>
+                </x-slot:actions>
+            </x-empty-state>
         @endif
         </div> {{-- End of print-area --}}
     </div> {{-- End of main-results-container --}}

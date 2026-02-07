@@ -9,14 +9,13 @@
     ])
 --}}
 
-<section class="mt-4">
-    <h2 class="h5 fw-semibold mb-3 d-flex align-items-center">
-        <i class="bi bi-person-check-fill text-warning me-2"></i>
-        Pending For Approvals
-    </h2>
-
+<div>
     @if($pendingAccounts->isEmpty())
-        <div class="alert alert-info shadow-sm rounded">No pending instructor applications.</div>
+        <x-empty-state
+            icon="bi-check-circle"
+            title="All Caught Up!"
+            message="There are no pending instructor applications at this time."
+        />
     @else
         <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
             <table class="table table-bordered align-middle mb-0">
@@ -65,4 +64,4 @@
             </table>
         </div>
     @endif
-</section>
+</div>

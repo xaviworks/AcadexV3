@@ -48,9 +48,11 @@
                 @endforeach
             </div>
         @else
-            <div class="alert alert-warning text-center mt-5 mx-4 rounded">
-                No subjects have been assigned to you yet.
-            </div>
+            <x-empty-state
+                icon="bi-journal-x"
+                title="No Assigned Subjects"
+                message="No subjects have been assigned to you yet."
+            />
         @endif
     @else
         {{-- Selected Subject View --}}
@@ -138,9 +140,12 @@
             </div>
         </div>
         @else
-            <div class="alert alert-warning text-center mt-3 rounded-3">
-                No students or grades found for the selected subject.
-            </div>
+            <x-empty-state
+                icon="bi-graph-up"
+                title="No Grade Data Found"
+                message="No students or grades found for the selected subject."
+                :compact="true"
+            />
         @endif
         </div>
     @endif

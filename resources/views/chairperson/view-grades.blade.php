@@ -61,10 +61,11 @@
                 @endforeach
             </div>
         @else
-            <div class="text-center text-muted mt-8 bg-info bg-opacity-25 border border-info px-6 py-4 rounded-4">
-                <i class="bi bi-info-circle me-2"></i>
-                No instructors available in your department/program.
-            </div>
+            <x-empty-state
+                icon="bi-people"
+                title="No Instructors Available"
+                message="There are no instructors in your department or program yet."
+            />
         @endif
     @elseif (empty($selectedSubjectId))
         {{-- Step 2: Subject Selection --}}
@@ -96,9 +97,11 @@
                 @endforeach
             </div>
         @else
-            <div class="text-center text-muted mt-8 bg-warning bg-opacity-25 border border-warning px-6 py-4 rounded-4">
-                No subjects found for this instructor.
-            </div>
+            <x-empty-state
+                icon="bi-journal-x"
+                title="No Subjects Found"
+                message="This instructor has no subjects assigned for the current academic period."
+            />
         @endif
     @else
         {{-- Step 3: Display Students' Final Grades --}}
@@ -182,9 +185,11 @@
                 </table>
             </div>
         @elseif(!empty($selectedSubjectId))
-            <div class="text-center text-muted mt-8 bg-warning bg-opacity-25 border border-warning px-6 py-4 rounded-4">
-                No students found for this subject.
-            </div>
+            <x-empty-state
+                icon="bi-person-x"
+                title="No Students Found"
+                message="No students are enrolled in this subject."
+            />
         @endif
     @endif
 </div>

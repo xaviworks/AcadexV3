@@ -58,9 +58,11 @@
                     @endforeach
                 </div>
             @else
-                <div class="alert alert-warning text-center mt-5 rounded">
-                    No subjects have been assigned to you yet.
-                </div>
+                <x-empty-state
+                    icon="bi-journal-x"
+                    title="No Assigned Subjects"
+                    message="No subjects have been assigned to you yet."
+                />
             @endif
         @else
             @include('instructor.partials.term-stepper')

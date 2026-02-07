@@ -39,15 +39,11 @@
             </div>
         @empty
             <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body text-center py-5">
-                        <div class="text-muted mb-3">
-                            <i class="bi bi-journal-x fs-1 opacity-50"></i>
-                        </div>
-                        <h5 class="text-muted mb-2">No Courses Found</h5>
-                        <p class="text-muted mb-0">No courses available at this time.</p>
-                    </div>
-                </div>
+                <x-empty-state
+                    icon="bi-journal-x"
+                    title="No Courses Found"
+                    message="No courses available at this time."
+                />
             </div>
         @endforelse
     </div>

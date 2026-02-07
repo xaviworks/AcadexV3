@@ -19,6 +19,7 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
   const yearTabs = document.getElementById('yearTabs');
   const selectAllBtn = document.getElementById('selectAllBtn');
   const selectedCountEl = document.getElementById('selectedCount');
+  const noCurriculumSelected = document.getElementById('noCurriculumSelected');
 
   if (!curriculumSelect || !subjectsContainer) return;
 
@@ -28,10 +29,13 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
     if (yearTabs) yearTabs.innerHTML = '';
     if (subjectsTableBody) subjectsTableBody.innerHTML = '';
 
-    // Automatically load subjects when curriculum is selected
+    // Toggle empty state
     if (this.value) {
+      if (noCurriculumSelected) noCurriculumSelected.classList.add('d-none');
       console.log('Loading subjects for curriculum:', this.value);
       loadSubjects();
+    } else {
+      if (noCurriculumSelected) noCurriculumSelected.classList.remove('d-none');
     }
   });
 
@@ -98,8 +102,8 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
             yearTabs.insertAdjacentHTML(
               'beforeend',
               `
-                        <li class="nav-item">
-                            <button class="nav-link ${isActive}" style="color: #198754; font-weight: 500;" data-bs-toggle="tab" data-bs-target="#tab-${key}" type="button" role="tab">${yearLabels[year]}</button>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link ${isActive}" data-bs-toggle="tab" data-bs-target="#tab-${key}" type="button" role="tab">${yearLabels[year]}</button>
                         </li>
                     `
             );
