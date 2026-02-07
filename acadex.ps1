@@ -391,15 +391,15 @@ switch ($Command) {
     }
     
     "serve" {
-        Write-Host "Starting production servers (Laravel + Queue + Scheduler + Reverb)..." -ForegroundColor Green
-        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80,#fbbf24" "php artisan serve" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" "php artisan reverb:start" --names=server,queue,scheduler,reverb
+        Write-Host "Starting production servers (Laravel + Queue + Scheduler)..." -ForegroundColor Green
+        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80" "php artisan serve" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" --names=server,queue,scheduler
     }
     
     "services" {
-        Write-Host "Starting background services (Queue + Scheduler + Reverb)..." -ForegroundColor Green
+        Write-Host "Starting background services (Queue + Scheduler)..." -ForegroundColor Green
         Write-Host "Use this when running with Herd/Laragon" -ForegroundColor Yellow
         Write-Host ""
-        npx concurrently -c "#c4b5fd,#4ade80,#fbbf24" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" "php artisan reverb:start" --names=queue,scheduler,reverb
+        npx concurrently -c "#c4b5fd,#4ade80" "php artisan queue:work --tries=3 --timeout=90" "php artisan schedule:work" --names=queue,scheduler
     }
     
     "dev" {
