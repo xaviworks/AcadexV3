@@ -179,6 +179,16 @@ Route::prefix('chairperson')
         Route::post('/structure-templates', [ChairpersonController::class, 'storeTemplateRequest'])->name('structureTemplates.store');
         Route::get('/structure-templates/{request}', [ChairpersonController::class, 'showTemplateRequest'])->name('structureTemplates.show');
         Route::delete('/structure-templates/{request}', [ChairpersonController::class, 'destroyTemplateRequest'])->name('structureTemplates.destroy');
+
+        // Help Guides Management
+        Route::prefix('help-guides')->name('help-guides.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Chairperson\HelpGuideController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Chairperson\HelpGuideController::class, 'store'])->name('store');
+            Route::put('/{helpGuide}', [\App\Http\Controllers\Chairperson\HelpGuideController::class, 'update'])->name('update');
+            Route::delete('/{helpGuide}', [\App\Http\Controllers\Chairperson\HelpGuideController::class, 'destroy'])->name('destroy');
+            Route::post('/{helpGuide}/toggle-active', [\App\Http\Controllers\Chairperson\HelpGuideController::class, 'toggleActive'])->name('toggle-active');
+            Route::delete('/attachment/{attachment}', [\App\Http\Controllers\Chairperson\HelpGuideController::class, 'deleteAttachment'])->name('attachment.delete');
+        });
     });
 
 // GE Coordinator Routes
@@ -238,6 +248,16 @@ Route::prefix('gecoordinator')
             ->name('reports.co-course');
         Route::get('/reports/co-program', [\App\Http\Controllers\ProgramReportsController::class, 'geCoordinatorProgram'])
             ->name('reports.co-program');
+
+        // Help Guides Management
+        Route::prefix('help-guides')->name('help-guides.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\GECoordinator\HelpGuideController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\GECoordinator\HelpGuideController::class, 'store'])->name('store');
+            Route::put('/{helpGuide}', [\App\Http\Controllers\GECoordinator\HelpGuideController::class, 'update'])->name('update');
+            Route::delete('/{helpGuide}', [\App\Http\Controllers\GECoordinator\HelpGuideController::class, 'destroy'])->name('destroy');
+            Route::post('/{helpGuide}/toggle-active', [\App\Http\Controllers\GECoordinator\HelpGuideController::class, 'toggleActive'])->name('toggle-active');
+            Route::delete('/attachment/{attachment}', [\App\Http\Controllers\GECoordinator\HelpGuideController::class, 'deleteAttachment'])->name('attachment.delete');
+        });
     });
 
 // Curriculum Routes

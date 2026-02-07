@@ -542,7 +542,7 @@
         {{-- Help Guides (All Users) --}}
         @if($role !== 3) {{-- Admins have their own management link --}}
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2 sidebar-heading">Support</h6>
+                <h6 class="px-3 mb-2 sidebar-heading">User Guides</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
                         <a href="{{ route('help-guides.index') }}" 
@@ -551,6 +551,24 @@
                             <span>Help Guides</span>
                         </a>
                     </li>
+                    @if($role === 1)
+                        <li class="nav-item">
+                            <a href="{{ route('chairperson.help-guides.index') }}" 
+                               class="nav-link {{ request()->routeIs('chairperson.help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                                <i class="bi bi-pencil-square me-3"></i>
+                                <span>Manage Help Guides</span>
+                            </a>
+                        </li>
+                    @endif
+                    @if($role === 4)
+                        <li class="nav-item">
+                            <a href="{{ route('gecoordinator.help-guides.index') }}" 
+                               class="nav-link {{ request()->routeIs('gecoordinator.help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                                <i class="bi bi-pencil-square me-3"></i>
+                                <span>Manage Help Guides</span>
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </div>
         @endif
@@ -558,6 +576,6 @@
     
     <!-- Version Display -->
     <div class="version-display">
-        Acadex System v1.5.5
+        Acadex System 3.0.2
     </div>
 </div>
