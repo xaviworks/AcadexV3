@@ -118,7 +118,12 @@
                     </table>
                 </div>
             @else
-                <p class="text-muted">No activities found for this subject.</p>
+                <x-empty-state
+                    icon="bi-clipboard-x"
+                    title="No Activities Found"
+                    message="No activities found for this subject."
+                    :compact="true"
+                />
             @endif
         </div>
     @endif

@@ -87,9 +87,12 @@
         </div>
     </form>
     @elseif(request('subject_id') && request('term'))
-        <div class="text-center text-gray-500 mt-10">
-            No students or activities found for the selected subject and term.
-        </div>
+        <x-empty-state
+            icon="bi-clipboard-data"
+            title="No Data Found"
+            message="No students or activities found for the selected subject and term."
+            :compact="true"
+        />
     @endif
 </div>
 @endsection

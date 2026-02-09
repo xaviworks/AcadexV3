@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Chairperson;
 
 use App\Http\Controllers\Controller;
 use App\Models\HelpGuide;
@@ -19,13 +19,14 @@ class HelpGuideController extends Controller
     }
 
     /**
-     * Display a listing of help guides (Admin).
+     * Display help guides management page for the chairperson.
      */
     public function index()
     {
-        Gate::authorize('admin');
+        Gate::authorize('chairperson');
 
         $guides = HelpGuide::with(['creator', 'updater', 'attachments'])
+            ->where('created_by', Auth::id())
             ->ordered()
             ->get();
 
@@ -35,64 +36,33 @@ class HelpGuideController extends Controller
             ARRAY_FILTER_USE_BOTH
         );
 
-        return view('admin.help-guides.index', compact('guides', 'availableRoles'));
+        return view('chairperson.help-guides.index', compact('guides', 'availableRoles'));
     }
 
     /**
-     * Show the form for creating a new help guide.
-     */
-    public function create()
-    {
-        Gate::authorize('admin');
-
-        $availableRoles = HelpGuide::availableRoles();
-
-        return view('admin.help-guides.create', compact('availableRoles'));
-    }
-
-    /**
-     * Store a newly created help guide.
+     * Store a new help guide created by the chairperson.
      */
     public function store(Request $request)
     {
-        Gate::authorize('admin');
-
-        $filteredRoles = array_filter(
-            HelpGuide::availableRoles(),
-            fn($label, $roleId) => $roleId !== HelpGuide::ROLE_ADMIN,
-            ARRAY_FILTER_USE_BOTH
-        );
+        Gate::authorize('chairperson');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'visible_roles' => 'required|array|min:1',
-            'visible_roles.*' => ['integer', Rule::in(array_keys($filteredRoles))],
+            'visible_roles.*' => ['integer', Rule::in(array_keys(HelpGuide::availableRoles()))],
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
-            'attachment' => 'nullable|file|max:10240|mimes:pdf',
             'attachments' => 'nullable|array|max:10',
             'attachments.*' => 'file|max:10240|mimes:pdf',
         ], [
             'visible_roles.required' => 'Please select at least one role that can view this guide.',
             'visible_roles.min' => 'Please select at least one role that can view this guide.',
-            'attachment.max' => 'The attachment must not exceed 10MB.',
-            'attachment.mimes' => 'Only PDF files are allowed.',
             'attachments.*.max' => 'Each attachment must not exceed 10MB.',
             'attachments.*.mimes' => 'Only PDF files are allowed.',
             'attachments.max' => 'Maximum 10 attachments allowed.',
         ]);
 
-        $attachmentPath = null;
-        $attachmentName = null;
-
-        if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $attachmentName = $file->getClientOriginalName();
-            $attachmentPath = $file->store('help-guides', 'public');
-        }
-
-        // Cast visible_roles to integers
         $visibleRoles = array_map('intval', $validated['visible_roles']);
 
         $helpGuide = HelpGuide::create([
@@ -101,17 +71,13 @@ class HelpGuideController extends Controller
             'visible_roles' => $visibleRoles,
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $request->has('is_active'),
-            'attachment_path' => $attachmentPath,
-            'attachment_name' => $attachmentName,
             'created_by' => Auth::id(),
         ]);
 
-        // Handle multiple attachments
         if ($request->hasFile('attachments')) {
             $sortOrder = 0;
             foreach ($request->file('attachments') as $file) {
                 $filePath = $file->store('help-guides', 'public');
-                
                 $helpGuide->attachments()->create([
                     'file_path' => $filePath,
                     'file_name' => $file->getClientOriginalName(),
@@ -123,44 +89,25 @@ class HelpGuideController extends Controller
         }
 
         return redirect()
-            ->route('admin.help-guides.index')
+            ->route('chairperson.help-guides.index')
             ->with('success', 'Help guide created successfully.');
     }
 
     /**
-     * Show the form for editing a help guide.
-     */
-    public function edit(HelpGuide $helpGuide)
-    {
-        Gate::authorize('admin');
-
-        $helpGuide->load('attachments');
-        $availableRoles = HelpGuide::availableRoles();
-
-        return view('admin.help-guides.edit', compact('helpGuide', 'availableRoles'));
-    }
-
-    /**
-     * Update the specified help guide.
+     * Update an existing help guide owned by the chairperson.
      */
     public function update(Request $request, HelpGuide $helpGuide)
     {
-        Gate::authorize('admin');
-
-        $filteredRoles = array_filter(
-            HelpGuide::availableRoles(),
-            fn($label, $roleId) => $roleId !== HelpGuide::ROLE_ADMIN,
-            ARRAY_FILTER_USE_BOTH
-        );
+        Gate::authorize('chairperson');
+        $this->authorizeOwnership($helpGuide);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'visible_roles' => 'required|array|min:1',
-            'visible_roles.*' => ['integer', Rule::in(array_keys($filteredRoles))],
+            'visible_roles.*' => ['integer', Rule::in(array_keys(HelpGuide::availableRoles()))],
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
-            'attachment' => 'nullable|file|max:10240|mimes:pdf',
             'attachments' => 'nullable|array|max:10',
             'attachments.*' => 'file|max:10240|mimes:pdf',
             'remove_attachment' => 'boolean',
@@ -169,18 +116,14 @@ class HelpGuideController extends Controller
         ], [
             'visible_roles.required' => 'Please select at least one role that can view this guide.',
             'visible_roles.min' => 'Please select at least one role that can view this guide.',
-            'attachment.max' => 'The attachment must not exceed 10MB.',
-            'attachment.mimes' => 'Only PDF files are allowed.',
             'attachments.*.max' => 'Each attachment must not exceed 10MB.',
             'attachments.*.mimes' => 'Only PDF files are allowed.',
         ]);
 
-        // Handle legacy attachment removal
         if ($request->boolean('remove_attachment')) {
             $helpGuide->deleteAttachment();
         }
 
-        // Handle multiple attachment deletions
         if ($request->has('delete_attachments')) {
             foreach ($request->input('delete_attachments') as $attachmentId) {
                 $attachment = $helpGuide->attachments()->find($attachmentId);
@@ -191,20 +134,6 @@ class HelpGuideController extends Controller
             }
         }
 
-        // Handle new attachment upload
-        $attachmentPath = $helpGuide->attachment_path;
-        $attachmentName = $helpGuide->attachment_name;
-
-        if ($request->hasFile('attachment')) {
-            // Delete old attachment if exists
-            $helpGuide->deleteAttachment();
-            
-            $file = $request->file('attachment');
-            $attachmentName = $file->getClientOriginalName();
-            $attachmentPath = $file->store('help-guides', 'public');
-        }
-
-        // Cast visible_roles to integers
         $visibleRoles = array_map('intval', $validated['visible_roles']);
 
         $helpGuide->update([
@@ -213,19 +142,14 @@ class HelpGuideController extends Controller
             'visible_roles' => $visibleRoles,
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $request->has('is_active'),
-            'attachment_path' => $attachmentPath,
-            'attachment_name' => $attachmentName,
             'updated_by' => Auth::id(),
         ]);
 
-        // Handle new multiple attachments
         if ($request->hasFile('attachments')) {
             $maxSortOrder = $helpGuide->attachments()->max('sort_order') ?? -1;
             $sortOrder = $maxSortOrder + 1;
-            
             foreach ($request->file('attachments') as $file) {
                 $filePath = $file->store('help-guides', 'public');
-                
                 $helpGuide->attachments()->create([
                     'file_path' => $filePath,
                     'file_name' => $file->getClientOriginalName(),
@@ -237,44 +161,40 @@ class HelpGuideController extends Controller
         }
 
         return redirect()
-            ->route('admin.help-guides.index')
+            ->route('chairperson.help-guides.index')
             ->with('success', 'Help guide updated successfully.');
     }
 
     /**
-     * Remove the specified help guide.
+     * Delete a help guide owned by the chairperson.
      */
     public function destroy(HelpGuide $helpGuide)
     {
-        Gate::authorize('admin');
+        Gate::authorize('chairperson');
+        $this->authorizeOwnership($helpGuide);
 
-        // Delete legacy single attachment if exists
         $helpGuide->deleteAttachment();
-        
-        // Delete all attachments files from storage
         foreach ($helpGuide->attachments as $attachment) {
             $attachment->deleteFile();
         }
-        
-        // The cascade delete will handle removing attachment records
         $helpGuide->delete();
 
         return redirect()
-            ->route('admin.help-guides.index')
+            ->route('chairperson.help-guides.index')
             ->with('success', 'Help guide deleted successfully.');
     }
 
     /**
-     * Delete a specific attachment (AJAX).
+     * Delete a single attachment via AJAX.
      */
     public function deleteAttachment(HelpGuideAttachment $attachment)
     {
-        Gate::authorize('admin');
+        Gate::authorize('chairperson');
 
-        // Delete file from storage
+        $helpGuide = $attachment->helpGuide;
+        $this->authorizeOwnership($helpGuide);
+
         $attachment->deleteFile();
-        
-        // Delete database record
         $attachment->delete();
 
         return response()->json([
@@ -284,32 +204,12 @@ class HelpGuideController extends Controller
     }
 
     /**
-     * Update sort order (AJAX).
-     */
-    public function updateOrder(Request $request)
-    {
-        Gate::authorize('admin');
-
-        $request->validate([
-            'guides' => 'required|array',
-            'guides.*.id' => 'required|integer|exists:help_guides,id',
-            'guides.*.sort_order' => 'required|integer|min:0',
-        ]);
-
-        foreach ($request->guides as $guideData) {
-            HelpGuide::where('id', $guideData['id'])
-                ->update(['sort_order' => $guideData['sort_order']]);
-        }
-
-        return response()->json(['success' => true]);
-    }
-
-    /**
-     * Toggle guide active status (AJAX).
+     * Toggle the active status of a help guide.
      */
     public function toggleActive(HelpGuide $helpGuide)
     {
-        Gate::authorize('admin');
+        Gate::authorize('chairperson');
+        $this->authorizeOwnership($helpGuide);
 
         $helpGuide->update([
             'is_active' => !$helpGuide->is_active,
@@ -323,29 +223,12 @@ class HelpGuideController extends Controller
     }
 
     /**
-     * Download attachment.
+     * Ensure the chairperson can only manage guides they created.
      */
-    public function downloadAttachment(HelpGuide $helpGuide)
+    private function authorizeOwnership(HelpGuide $helpGuide): void
     {
-        // Allow any authenticated user to download if they can view the guide
-        if (!$helpGuide->hasAttachment()) {
-            abort(404, 'Attachment not found.');
+        if ($helpGuide->created_by !== Auth::id()) {
+            abort(403, 'You can only manage help guides you created.');
         }
-
-        $user = Auth::user();
-        
-        // Admin can always download
-        if ($user->role !== 3 && !$helpGuide->isVisibleToRole($user->role)) {
-            abort(403, 'You do not have permission to access this attachment.');
-        }
-
-        if (!Storage::disk('public')->exists($helpGuide->attachment_path)) {
-            abort(404, 'Attachment file not found.');
-        }
-
-        return Storage::disk('public')->download(
-            $helpGuide->attachment_path,
-            $helpGuide->attachment_name
-        );
     }
 }

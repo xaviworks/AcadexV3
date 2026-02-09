@@ -87,22 +87,19 @@
     @if(!$cos || $cos->count() == 0)
         <div class="row mb-5">
             <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-3">
-                    <div class="card-body text-center py-5">
-                        <div class="mb-4">
-                            <i class="bi bi-file-earmark-x text-muted" style="font-size: 4rem;"></i>
-                        </div>
-                        <h4 class="fw-bold text-dark mb-3">No Course Outcome Data Available</h4>
-                        <p class="text-muted mb-4">
-                            No course outcomes have been set for {{ $selectedSubject->subject_code ?? 'this subject' }} yet.
-                        </p>
+                <x-empty-state
+                    icon="bi-file-earmark-x"
+                    title="No Course Outcome Data Available"
+                    :message="'No course outcomes have been set for ' . e($selectedSubject->subject_code ?? 'this subject') . ' yet.'"
+                >
+                    <x-slot:actions>
                         @if(Auth::user()->isChairperson())
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCourseOutcomeModal">
                                 <i class="bi bi-plus-circle me-2"></i>Create First Course Outcome
                             </button>
                         @endif
-                    </div>
-                </div>
+                    </x-slot:actions>
+                </x-empty-state>
             </div>
         </div>
     @else
@@ -242,18 +239,20 @@
                                 </div>
                             @endif
                         @else
-                            <div class="text-center py-5">
-                                <div class="mb-3">
-                                    <i class="bi bi-mortarboard text-muted" style="font-size: 3rem;"></i>
-                                </div>
-                                <h5 class="text-muted mb-2">No Course Outcomes Found</h5>
-                                <p class="text-muted mb-4">Get started by creating your first course outcome for this subject.</p>
-                                @if(Auth::user()->isChairperson())
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCourseOutcomeModal">
-                                        <i class="bi bi-plus-circle me-2"></i>Create First Course Outcome
-                                    </button>
-                                @endif
-                            </div>
+                            <x-empty-state
+                                icon="bi-mortarboard"
+                                title="No Course Outcomes Found"
+                                message="Get started by creating your first course outcome for this subject."
+                                :compact="true"
+                            >
+                                <x-slot:actions>
+                                    @if(Auth::user()->isChairperson())
+                                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCourseOutcomeModal">
+                                            <i class="bi bi-plus-circle me-2"></i>Create First Course Outcome
+                                        </button>
+                                    @endif
+                                </x-slot:actions>
+                            </x-empty-state>
                         @endif
                     </div>
                 </div>

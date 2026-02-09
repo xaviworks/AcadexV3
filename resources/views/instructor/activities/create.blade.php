@@ -25,23 +25,16 @@
   @endif
 
   @if ($subjects->isEmpty())
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-          <div class="card-body text-center py-5">
-            <div class="mb-4">
-              <i class="bi bi-inbox text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
-            </div>
-            <h5 class="fw-semibold mb-2" style="color: #198754;">No Assigned Subjects Found</h5>
-            <p class="text-muted mb-4">You don't have any subjects assigned for the current academic period.</p>
-            <p class="small text-muted">
-              <i class="bi bi-info-circle me-1"></i>
-              Contact your chairperson to get subjects assigned so you can start managing activities.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <x-empty-state
+        icon="bi-clipboard-x"
+        title="No Assigned Subjects Found"
+        message="You don't have any subjects assigned for the current academic period."
+    >
+        <p class="small text-muted mb-0">
+          <i class="bi bi-info-circle me-1"></i>
+          Contact your chairperson to get subjects assigned so you can start managing activities.
+        </p>
+    </x-empty-state>
   @else
     @php
       $meta = $formulaSettings['meta'] ?? null;
@@ -260,20 +253,24 @@
                 </div>
             @else
                 <div class="card shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <div class="mb-3">
-                            <i class="bi bi-inbox text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-                        </div>
-                        <h6 class="fw-semibold mb-2" style="color: #6c757d;">No Activities Found</h6>
-                        <p class="text-muted small mb-3">No activities match your current filter selection.</p>
-                        <button 
-                            type="button" 
-                            class="btn btn-success btn-sm shadow-sm" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#createActivityModal"
+                    <div class="card-body py-3">
+                        <x-empty-state
+                            icon="bi-inbox"
+                            title="No Activities Found"
+                            message="No activities match your current filter selection."
+                            :compact="true"
                         >
-                            <i class="bi bi-plus-circle me-1"></i>Create Your First Activity
-                        </button>
+                            <x-slot:actions>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-success btn-sm shadow-sm" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#createActivityModal"
+                                >
+                                    <i class="bi bi-plus-circle me-1"></i>Create Your First Activity
+                                </button>
+                            </x-slot:actions>
+                        </x-empty-state>
                     </div>
                 </div>
             @endif
@@ -483,8 +480,13 @@
                 </div>
             @else
                 <div class="card shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <p class="text-muted">No formula information available.</p>
+                    <div class="card-body py-3">
+                        <x-empty-state
+                            icon="bi-calculator"
+                            title="No Formula Available"
+                            message="No formula information available."
+                            :compact="true"
+                        />
                     </div>
                 </div>
             @endif

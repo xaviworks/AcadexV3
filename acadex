@@ -353,23 +353,21 @@ case "$1" in
         ;;
     
     serve)
-        echo -e "${GREEN}Starting production servers (Laravel + Queue + Scheduler + Reverb)...${NC}"
-        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80,#fbbf24" \
+        echo -e "${GREEN}Starting production servers (Laravel + Queue + Scheduler)...${NC}"
+        npx concurrently -c "#93c5fd,#c4b5fd,#4ade80" \
             "php artisan serve" \
             "php artisan queue:work --tries=3 --timeout=90" \
             "php artisan schedule:work" \
-            "php artisan reverb:start" \
-            --names=server,queue,scheduler,reverb
+            --names=server,queue,scheduler
         ;;
     services)
-        echo -e "${GREEN}Starting background services (Queue + Scheduler + Reverb)...${NC}"
+        echo -e "${GREEN}Starting background services (Queue + Scheduler)...${NC}"
         echo -e "${YELLOW}Use this when running with Herd (https://AcadexV3.test)${NC}"
         echo ""
-        npx concurrently -c "#c4b5fd,#4ade80,#fbbf24" \
+        npx concurrently -c "#c4b5fd,#4ade80" \
             "php artisan queue:work --tries=3 --timeout=90" \
             "php artisan schedule:work" \
-            "php artisan reverb:start" \
-            --names=queue,scheduler,reverb
+            --names=queue,scheduler
         ;;
     dev)
         echo -e "${GREEN}Starting development servers (Laravel + Queue + Logs + Vite)...${NC}"

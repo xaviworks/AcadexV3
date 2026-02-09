@@ -14,6 +14,12 @@
     {{-- Toast Notifications --}}
     @include('chairperson.partials.toast-notifications')
 
+    @php
+        $activeInstructors = $instructors->filter(fn($i) => $i->is_active);
+        $inactiveInstructors = $instructors->filter(fn($i) => !$i->is_active);
+        $pendingCount = $pendingAccounts->count();
+    @endphp
+
     {{-- Tabs --}}
     <ul class="nav nav-tabs mb-0" id="instructorTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
             <li class="nav-item" role="presentation">
@@ -25,6 +31,23 @@
                    aria-controls="active-instructors" 
                    aria-selected="true">
                     Active Instructors
+                    <span class="badge bg-light text-muted ms-2">{{ $activeInstructors->count() }}</span>
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" 
+                   id="pending-approvals-tab" 
+                   data-bs-toggle="tab" 
+                   href="#pending-approvals" 
+                   role="tab" 
+                   aria-controls="pending-approvals" 
+                   aria-selected="false">
+                    Pending Approvals
+                    @if($pendingCount > 0)
+                        <span class="badge bg-warning text-dark ms-1 rounded-pill">{{ $pendingCount }}</span>
+                    @else
+                        <span class="badge bg-light text-muted ms-2">0</span>
+                    @endif
                 </a>
             </li>
             <li class="nav-item" role="presentation">
@@ -36,6 +59,7 @@
                    aria-controls="inactive-instructors" 
                    aria-selected="false">
                     Inactive Instructors
+                    <span class="badge bg-light text-muted ms-2">{{ $inactiveInstructors->count() }}</span>
                 </a>
             </li>
         </ul>
@@ -90,12 +114,14 @@
                     'geRequests' => collect()
                 ])
             </div>
-        </div>
 
-    {{-- Pending Account Approvals Section --}}
-    @include('chairperson.partials.pending-accounts-table', [
-        'pendingAccounts' => $pendingAccounts
-    ])
+            {{-- Pending Approvals Tab --}}
+            <div class="tab-pane fade" id="pending-approvals" role="tabpanel" aria-labelledby="pending-approvals-tab">
+                @include('chairperson.partials.pending-accounts-table', [
+                    'pendingAccounts' => $pendingAccounts
+                ])
+            </div>
+        </div>
 </div>
 
 {{-- Modals --}}

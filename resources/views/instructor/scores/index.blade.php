@@ -42,9 +42,12 @@
             'term' => $term
         ])
     @else
-        <div class="text-center text-gray-500 mt-8">
-            Please select a subject and term to manage grades.
-        </div>
+        <x-empty-state
+            icon="bi-hand-index"
+            title="Select Subject & Term"
+            message="Please select a subject and term to manage grades."
+            :compact="true"
+        />
     @endif
 </div>
 @endsection

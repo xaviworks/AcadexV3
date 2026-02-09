@@ -12,9 +12,11 @@
     <p class="text-muted mb-4">View all students under your department and filter by year level</p>
 
         @if($students->isEmpty())
-            <div class="bg-warning bg-opacity-25 text-warning border border-warning px-4 py-3 rounded-4 shadow-sm">
-                No students found under your department and course.
-            </div>
+            <x-empty-state
+                icon="bi-people"
+                title="No Students Found"
+                message="No students found under your department and course."
+            />
         @else
             {{-- Tabs --}}
             <ul class="nav nav-tabs mb-0" id="yearTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">

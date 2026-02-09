@@ -23,11 +23,6 @@
         @endif
     </div>
     <div class="d-flex align-items-center gap-2">
-        @if(!empty($academicYear) && !empty($semester))
-            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
-                <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
-            </span>
-        @endif
         @if(!empty($backRoute))
             <a href="{{ $backRoute }}" class="btn btn-outline-secondary rounded-pill">
                 <i class="bi bi-arrow-left me-1"></i>{{ $backLabel ?? 'Back' }}

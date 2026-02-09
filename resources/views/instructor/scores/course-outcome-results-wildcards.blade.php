@@ -36,33 +36,24 @@
             @endforeach
         </div>
     @else
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-5 text-center">
-                <div class="text-muted mb-3">
-                    <i class="bi bi-folder-x fs-1 opacity-50"></i>
-                </div>
-                <h5 class="text-muted mb-2">No Subjects Found</h5>
-                <p class="text-muted mb-4">
-                    @if($academicYear && $semester)
-                        No subjects found for the current academic period.
-                        <br><strong>Academic Year:</strong> {{ $academicYear }}
-                        <br><strong>Semester:</strong> {{ $semester }}
-                    @else
-                        No active academic period is currently set. Please contact your administrator to set up an active academic period.
-                    @endif
-                </p>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="{{ route('instructor.dashboard') }}" class="btn btn-success">
-                        <i class="bi bi-house me-2"></i>Go to Dashboard
+        <x-empty-state
+            icon="bi-folder-x"
+            title="No Subjects Found"
+            :message="$academicYear && $semester
+                ? 'No subjects found for the current academic period.<br><strong>Academic Year:</strong> ' . e($academicYear) . '<br><strong>Semester:</strong> ' . e($semester)
+                : 'No active academic period is currently set. Please contact your administrator to set up an active academic period.'"
+        >
+            <x-slot:actions>
+                <a href="{{ route('instructor.dashboard') }}" class="btn btn-success">
+                    <i class="bi bi-house me-2"></i>Go to Dashboard
+                </a>
+                @if($academicYear && $semester)
+                    <a href="{{ route('instructor.course-outcome-attainments.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Refresh
                     </a>
-                    @if($academicYear && $semester)
-                        <a href="{{ route('instructor.course-outcome-attainments.index') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-clockwise me-2"></i>Refresh
-                        </a>
-                    @endif
-                </div>
-            </div>
-        </div>
+                @endif
+            </x-slot:actions>
+        </x-empty-state>
     @endif
 </div>
 @endsection

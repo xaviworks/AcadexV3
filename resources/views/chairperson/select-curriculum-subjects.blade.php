@@ -51,12 +51,40 @@
 
             <div class="d-none" id="subjectsContainer">
                 <!-- Tabs -->
-                <div class="mb-3">
-                    <ul class="nav nav-tabs" id="yearTabs" style="margin-bottom: 0;"></ul>
-                </div>
+                <ul class="nav nav-tabs mb-0" id="yearTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;"></ul>
+
+                <style>
+                    #yearTabs {
+                        background: transparent !important;
+                    }
+                    #yearTabs .nav-link {
+                        background-color: transparent !important;
+                        color: #6c757d !important;
+                        transition: all 0.3s ease;
+                        position: relative;
+                    }
+                    #yearTabs .nav-link:not(.active):hover {
+                        background-color: rgba(25, 135, 84, 0.08) !important;
+                        color: var(--dark-green) !important;
+                    }
+                    #yearTabs .nav-link.active {
+                        background-color: rgba(25, 135, 84, 0.12) !important;
+                        color: var(--dark-green) !important;
+                        border-bottom: 3px solid var(--dark-green) !important;
+                        margin-bottom: -2px;
+                        z-index: 1;
+                    }
+                    #yearTabsContent {
+                        background: transparent !important;
+                        padding-top: 1.5rem;
+                    }
+                    #yearTabsContent .tab-pane {
+                        background: transparent !important;
+                    }
+                </style>
 
                 <!-- Tab Content -->
-                <div class="tab-content" id="subjectsTableBody"></div>
+                <div class="tab-content" id="subjectsTableBody" style="padding-top: 1.5rem;"></div>
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
@@ -68,6 +96,15 @@
                         <i class="bi bi-check-circle me-2"></i>Confirm Selected Courses
                     </button>
                 </div>
+            </div>
+
+            {{-- Empty state: shown until a curriculum is selected --}}
+            <div id="noCurriculumSelected">
+                <x-empty-state
+                    icon="bi-arrow-up-circle"
+                    title="Select a Curriculum"
+                    message="Choose a curriculum from the dropdown above to view available courses for import."
+                />
             </div>
         </form>
     </div>

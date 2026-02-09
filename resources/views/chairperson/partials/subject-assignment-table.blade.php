@@ -73,8 +73,9 @@
         </div>
     </div>
 @else
-    <div class="bg-warning bg-opacity-25 text-warning border border-warning px-4 py-3 rounded-4 shadow-sm">
-        <i class="bi bi-info-circle me-2"></i>
-        No subjects available{{ $yearLevel ? ' for ' . $yearSuffix : '' }}.
-    </div>
+    <x-empty-state
+        icon="bi-journal-x"
+        title="No Subjects Available"
+        message="There are no subjects available{{ $yearLevel ? ' for ' . $yearSuffix : '' }}."
+    />
 @endif

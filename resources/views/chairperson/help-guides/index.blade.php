@@ -5,7 +5,7 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-question-circle-fill text-success me-2"></i>Manage Guides</h1>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-question-circle-fill text-success me-2"></i>Manage Help Guides</h1>
             <p class="text-muted mb-0">Create and manage help guides for different user roles</p>
         </div>
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createGuideModal">
@@ -62,7 +62,6 @@
                                 <th style="min-width: 250px;">Title</th>
                                 <th class="text-center" style="min-width: 180px;">Visible To</th>
                                 <th class="text-center" style="min-width: 120px;">Status</th>
-                                <th class="text-center" style="min-width: 150px;">Created By</th>
                                 <th class="text-center" style="min-width: 140px;">Updated</th>
                                 <th class="text-center" style="min-width: 120px;">Actions</th>
                             </tr>
@@ -110,9 +109,6 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <span class="creator-name">{{ $guide->creator->full_name ?? 'Unknown' }}</span>
-                                    </td>
-                                    <td class="text-center">
                                         <div class="updated-info">
                                             <span class="updated-time">{{ $guide->updated_at->diffForHumans() }}</span>
                                             <small class="updated-date">{{ $guide->updated_at->format('M d, Y') }}</small>
@@ -152,7 +148,7 @@
             <h6 class="fw-bold text-success mb-2"><i class="bi bi-lightbulb me-2"></i>Quick Tips</h6>
             <ul class="mb-0 small text-muted ps-3">
                 <li>Guides are displayed to users based on their assigned roles.</li>
-                <li>Attach documents (PDF, Word, Excel, images) for additional resources.</li>
+                <li>Attach PDF documents for additional resources.</li>
                 <li>Use priority to control the display order for users.</li>
                 <li>Hidden guides remain in the system but are not visible to users.</li>
             </ul>
@@ -194,7 +190,7 @@
                 <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Create Help Guide</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="createGuideForm" action="{{ route('admin.help-guides.store') }}" method="POST" enctype="multipart/form-data" data-no-page-loader>
+            <form id="createGuideForm" action="{{ route('chairperson.help-guides.store') }}" method="POST" enctype="multipart/form-data" data-no-page-loader>
                 @csrf
                 <div class="modal-body">
                     {{-- Title --}}
@@ -402,21 +398,16 @@
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css" rel="stylesheet">
 <style>
-    /* Validation styles for non-input elements */
     .is-invalid:not(input):not(textarea):not(select) {
         border-color: #dc3545 !important;
     }
     
-    /* Help Guides Table Styles - Matching Sessions Table Design */
-    
-    /* Table wrapper with max height and scroll */
     .guides-table-wrapper {
-        max-height: 580px; /* Approximately 10 rows */
+        max-height: 580px;
         overflow-y: auto;
         overflow-x: auto;
     }
 
-    /* Sticky header when scrolling */
     #guidesTable thead th {
         position: sticky;
         top: 0;
@@ -431,7 +422,6 @@
         white-space: nowrap;
     }
 
-    /* Guide info styling */
     .guide-info {
         display: flex;
         flex-direction: column;
@@ -453,7 +443,6 @@
         max-width: 250px;
     }
 
-    /* Priority badges */
     .priority-badge {
         display: inline-flex;
         align-items: center;
@@ -479,7 +468,6 @@
         color: #1a1a1a;
     }
 
-    /* Status badges */
     .status-badge {
         display: inline-flex;
         align-items: center;
@@ -501,7 +489,6 @@
         color: #41464b;
     }
 
-    /* Role badges container */
     .role-badges {
         display: flex;
         flex-wrap: wrap;
@@ -517,14 +504,12 @@
         font-weight: 600;
     }
 
-    /* Creator name */
     .creator-name {
         font-size: 0.875rem;
         color: #495057;
         font-weight: 500;
     }
 
-    /* Updated info styling */
     .updated-info {
         display: flex;
         flex-direction: column;
@@ -544,7 +529,6 @@
         white-space: nowrap;
     }
 
-    /* Action buttons */
     .action-btn-group {
         display: inline-flex;
         gap: 0.5rem;
@@ -597,7 +581,6 @@
         box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
     }
 
-    /* DataTable search box styling */
     .dataTables_filter input {
         border-radius: 6px;
         border: 1px solid #dee2e6;
@@ -610,7 +593,6 @@
         outline: none;
     }
 
-    /* Modal styles */
     .form-check-input:checked {
         background-color: #198754;
         border-color: #198754;
@@ -632,7 +614,6 @@
         min-height: 150px;
     }
 
-    /* Attachment item in modal */
     .attachment-item {
         display: flex;
         align-items: center;
@@ -659,7 +640,6 @@
         max-width: 300px;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 768px) {
         .guide-title,
         .guide-excerpt {
@@ -679,7 +659,6 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Summernote config
     const summernoteConfig = {
         height: 200,
         placeholder: 'Write the help guide content here...',
@@ -708,13 +687,12 @@ document.addEventListener('DOMContentLoaded', function() {
             dom: 'rt<"d-flex justify-content-between align-items-center mt-3 px-3 pb-3"ip>'
         });
 
-        // Connect custom search box to DataTable
         $('#guidesSearch').on('keyup', function() {
             guidesTable.search(this.value).draw();
         });
     }
 
-    // Initialize Summernote for Create modal when shown
+    // Initialize Summernote for Create modal
     const createModal = document.getElementById('createGuideModal');
     createModal.addEventListener('shown.bs.modal', function() {
         if (!$('#create_content').hasClass('note-editor')) {
@@ -729,7 +707,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Reset Create modal on close
     createModal.addEventListener('hidden.bs.modal', function() {
         document.getElementById('createGuideForm').reset();
         $('#create_content').summernote('code', '');
@@ -737,7 +714,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearValidationErrors('create');
     });
 
-    // Initialize Summernote for Edit modal when shown
+    // Initialize Summernote for Edit modal
     const editModal = document.getElementById('editGuideModal');
     let pendingEditContent = null;
     
@@ -753,14 +730,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Set content if there's pending content to load
         if (pendingEditContent !== null) {
             $('#edit_content').summernote('code', pendingEditContent);
             pendingEditContent = null;
         }
     });
 
-    // Reset Edit modal on close
     editModal.addEventListener('hidden.bs.modal', function() {
         document.getElementById('editGuideForm').reset();
         $('#edit_content').summernote('code', '');
@@ -768,69 +743,44 @@ document.addEventListener('DOMContentLoaded', function() {
         clearValidationErrors('edit');
     });
 
-    // Form validation function
     function validateGuideForm(prefix) {
         let isValid = true;
-        const errors = [];
-        
-        // Clear previous validation errors
         clearValidationErrors(prefix);
         
-        // Validate title
         const titleInput = document.getElementById(`${prefix}_title`);
-        const title = titleInput.value.trim();
-        if (!title) {
+        if (!titleInput.value.trim()) {
             isValid = false;
-            errors.push('Title is required');
             titleInput.classList.add('is-invalid');
         }
         
-        // Validate content
-        const contentTextarea = document.getElementById(`${prefix}_content`);
         const content = $(`#${prefix}_content`).summernote('code').replace(/<[^>]*>/g, '').trim();
-        if (!content || content === '') {
+        if (!content) {
             isValid = false;
-            errors.push('Content is required');
-            const noteEditor = contentTextarea.closest('.mb-3').querySelector('.note-editor');
-            if (noteEditor) {
-                noteEditor.classList.add('is-invalid');
-            }
+            const noteEditor = document.getElementById(`${prefix}_content`).closest('.mb-3').querySelector('.note-editor');
+            if (noteEditor) noteEditor.classList.add('is-invalid');
         }
         
-        // Validate visible roles (at least one selected)
         const visibleRoles = document.querySelectorAll(`#${prefix}GuideModal input[name="visible_roles[]"]:checked`);
         if (visibleRoles.length === 0) {
             isValid = false;
-            errors.push('At least one role must be selected');
             const rolesContainer = document.getElementById(`${prefix}_roles_container`);
-            if (rolesContainer) {
-                rolesContainer.classList.add('is-invalid');
-            }
+            if (rolesContainer) rolesContainer.classList.add('is-invalid');
         }
         
-        // Show notification if validation failed
         if (!isValid) {
-            window.notify.warning('Please fill in all required fields');
+            window.notify?.warning('Please fill in all required fields');
         }
         
         return isValid;
     }
     
-    // Clear validation errors
     function clearValidationErrors(prefix) {
         const modal = document.getElementById(`${prefix}GuideModal`);
         if (!modal) return;
-        
-        // Remove error messages
         modal.querySelectorAll('.validation-error').forEach(el => el.remove());
-        
-        // Remove invalid classes
-        modal.querySelectorAll('.is-invalid').forEach(el => {
-            el.classList.remove('is-invalid');
-        });
+        modal.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
     }
     
-    // Create form submission
     document.getElementById('createGuideForm').addEventListener('submit', function(e) {
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalContent = submitBtn.innerHTML;
@@ -853,7 +803,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     });
     
-    // Edit form submission
     document.getElementById('editGuideForm').addEventListener('submit', function(e) {
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalContent = submitBtn.innerHTML;
@@ -883,7 +832,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const title = this.dataset.title;
             
             document.getElementById('deleteGuideTitle').textContent = title;
-            document.getElementById('deleteForm').action = `{{ url('admin/help-guides') }}/${id}`;
+            document.getElementById('deleteForm').action = `{{ url('chairperson/help-guides') }}/${id}`;
             
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         });
@@ -901,38 +850,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const attachments = JSON.parse(this.dataset.attachments || '[]');
             const legacyAttachment = this.dataset.legacyAttachment || '';
 
-            // Set form action
-            document.getElementById('editGuideForm').action = `{{ url('admin/help-guides') }}/${id}`;
-
-            // Set title
+            document.getElementById('editGuideForm').action = `{{ url('chairperson/help-guides') }}/${id}`;
             document.getElementById('edit_title').value = title;
-
-            // Store content to be set when modal is shown
             pendingEditContent = content;
 
-            // Set visible roles
             document.querySelectorAll('#editGuideModal input[name="visible_roles[]"]').forEach(cb => {
                 cb.checked = visibleRoles.includes(parseInt(cb.value));
             });
 
-            // Set sort order (map to closest priority)
             let priority = sortOrder <= 25 ? '0' : (sortOrder <= 75 ? '50' : '100');
             document.getElementById('edit_sort_order').value = priority;
-
-            // Set is_active
             document.getElementById('edit_is_active').checked = isActive;
-
-            // Reset remove_attachment
             document.getElementById('edit_remove_attachment').value = '0';
 
-            // Build existing attachments list
             const attachmentsList = document.getElementById('editAttachmentsList');
             const existingSection = document.getElementById('editExistingAttachments');
             
             if (attachments.length > 0 || legacyAttachment) {
                 let html = '';
                 
-                // Legacy attachment
                 if (legacyAttachment) {
                     html += `
                         <div class="attachment-item" id="legacy-attachment-item">
@@ -948,7 +884,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                 }
                 
-                // Multiple attachments
                 attachments.forEach(att => {
                     html += `
                         <div class="attachment-item" id="attachment-item-${att.id}">
@@ -971,17 +906,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 existingSection.style.display = 'block';
             }
 
-            // Show modal
             new bootstrap.Modal(document.getElementById('editGuideModal')).show();
         });
     });
 
-    // File input handlers
     setupFileInput('create_attachments', 'createFilesPreview', 'createFilesList');
     setupFileInput('edit_attachments', 'editFilesPreview', 'editFilesList');
 });
 
-// Setup file input preview
 function setupFileInput(inputId, previewId, listId) {
     const input = document.getElementById(inputId);
     const preview = document.getElementById(previewId);
@@ -991,12 +923,12 @@ function setupFileInput(inputId, previewId, listId) {
     
     input.addEventListener('change', function() {
         if (this.files && this.files.length > 0) {
-            const maxSize = 10 * 1024 * 1024; // 10MB
+            const maxSize = 10 * 1024 * 1024;
             let hasError = false;
             
             for (const file of this.files) {
                 if (file.size > maxSize) {
-                    window.notify.error(`File Too Large: "${file.name}" exceeds 10MB limit.`);
+                    window.notify?.error(`File Too Large: "${file.name}" exceeds 10MB limit.`);
                     hasError = true;
                     break;
                 }
@@ -1009,7 +941,7 @@ function setupFileInput(inputId, previewId, listId) {
             }
             
             if (this.files.length > 10) {
-                window.notify.error('Too Many Files: Maximum 10 files allowed.');
+                window.notify?.error('Too Many Files: Maximum 10 files allowed.');
                 this.value = '';
                 preview.classList.add('d-none');
                 return;
@@ -1034,14 +966,12 @@ function setupFileInput(inputId, previewId, listId) {
     });
 }
 
-// Toggle all role checkboxes
 function toggleAllRoles(prefix, checked) {
     document.querySelectorAll(`#${prefix}GuideModal input[name="visible_roles[]"]`).forEach(cb => {
         cb.checked = checked;
     });
 }
 
-// Clear selected files
 function clearFiles(prefix) {
     const input = document.getElementById(`${prefix}_attachments`);
     const preview = document.getElementById(`${prefix}FilesPreview`);
@@ -1050,7 +980,6 @@ function clearFiles(prefix) {
     if (preview) preview.classList.add('d-none');
 }
 
-// Remove legacy attachment (mark for deletion)
 function removeLegacyAttachment() {
     document.getElementById('edit_remove_attachment').value = '1';
     const item = document.getElementById('legacy-attachment-item');
@@ -1061,12 +990,10 @@ function removeLegacyAttachment() {
     }
 }
 
-// Mark attachment for deletion (for AJAX delete or hidden input approach)
 let attachmentsToDelete = [];
 function markAttachmentForDeletion(attachmentId) {
     attachmentsToDelete.push(attachmentId);
     
-    // Add hidden input to form
     const form = document.getElementById('editGuideForm');
     const input = document.createElement('input');
     input.type = 'hidden';
@@ -1074,7 +1001,6 @@ function markAttachmentForDeletion(attachmentId) {
     input.value = attachmentId;
     form.appendChild(input);
     
-    // Visual feedback
     const item = document.getElementById(`attachment-item-${attachmentId}`);
     if (item) {
         item.style.opacity = '0.5';
@@ -1083,7 +1009,6 @@ function markAttachmentForDeletion(attachmentId) {
     }
 }
 
-// Format file size
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;

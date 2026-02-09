@@ -1,34 +1,28 @@
 @extends('layouts.app')
 
-@section('content')
-<div class="container-fluid px-3 py-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh;">
-    <div class="row mb-3">
-        <div class="col">
-            <nav aria-label="breadcrumb" class="mb-2">
-                <ol class="breadcrumb bg-white rounded-pill px-3 py-1 shadow-sm mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('chairperson.structureTemplates.index') }}" class="text-success text-decoration-none">
-                            <i class="bi bi-diagram-3 me-1"></i>Formula Requests
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">Create New Request</li>
-                </ol>
-            </nav>
+{{-- Styles: resources/css/chairperson/common.css --}}
+{{-- Styles: resources/css/chairperson/structure-templates.css --}}
 
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="p-3 rounded-circle" style="background: linear-gradient(135deg, #198754, #20c997);">
-                    <i class="bi bi-plus-circle text-white" style="font-size: 1.5rem;"></i>
-                </div>
-                <div>
-                    <h3 class="fw-bold mb-1" style="color: #198754;">Create Structure Template Request</h3>
-                    <p class="text-muted mb-0">Design a custom grading structure and submit it for admin approval</p>
-                </div>
-            </div>
-        </div>
-    </div>
+@section('content')
+<div class="container-fluid px-4 py-4">
+    {{-- Page Header --}}
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-plus-circle text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Create Structure Template Request</span>
+    </h1>
+    <p class="text-muted mb-4">Design a custom grading structure and submit it for admin approval</p>
+
+    {{-- Breadcrumb Navigation --}}
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Formula Requests', 'url' => route('chairperson.structureTemplates.index')],
+            ['label' => 'Create New Request']
+        ];
+    @endphp
+    <x-breadcrumbs :items="$breadcrumbItems" />
 
     @if ($errors->any())
-        <div class="alert alert-danger shadow-sm">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm">
             <i class="bi bi-exclamation-triangle me-2"></i>
             <strong>Please fix the following errors:</strong>
             <ul class="mb-0 mt-2">
@@ -36,15 +30,16 @@
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     <form method="POST" action="{{ route('chairperson.structureTemplates.store') }}" id="templateRequestForm">
         @csrf
 
-        <div class="card border-0 shadow-sm mb-3">
+        <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-0 py-3">
-                <h5 class="mb-0 fw-bold">Template Information</h5>
+                <h5 class="mb-0 fw-semibold">Template Information</h5>
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -67,10 +62,10 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm mb-3">
+        <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white border-0 py-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold">Grading Components</h5>
+                    <h5 class="mb-0 fw-semibold">Grading Components</h5>
                     <div id="weight-indicator" class="badge bg-secondary">
                         Total: <span id="weight-total">0</span>%
                     </div>
@@ -91,7 +86,7 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm mb-3">
+        <div class="card border-0 shadow-sm mb-4">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <a href="{{ route('chairperson.structureTemplates.index') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-1"></i>Cancel

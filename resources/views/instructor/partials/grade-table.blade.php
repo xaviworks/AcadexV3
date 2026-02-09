@@ -208,9 +208,12 @@
             </div>
         </div>
     @else
-        <div class="alert alert-warning text-center rounded-4 m-0 py-4">
-            No students or activities found for <strong>{{ ucfirst($term) }}</strong>.
-        </div>
+        <x-empty-state
+            icon="bi-clipboard-data"
+            title="No Data Found"
+            :message="'No students or activities found for <strong>' . ucfirst($term) . '</strong>.'"
+            :compact="true"
+        />
     @endif
 </div>
 

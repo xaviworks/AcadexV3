@@ -113,14 +113,20 @@
                     </div>
                 </div>
             @else
-                <div class="alert alert-warning bg-warning-subtle text-dark border-0 text-center">
-                    No course outcomes found for this subject.
-                </div>
+                <x-empty-state
+                    icon="bi-journal-x"
+                    title="No Course Outcomes Found"
+                    message="No course outcomes found for this subject."
+                    :compact="true"
+                />
             @endif
         @else
-            <div class="alert alert-info bg-info-subtle text-dark border-0 text-center">
-                Please select a subject to view its course outcomes.
-            </div>
+            <x-empty-state
+                icon="bi-hand-index"
+                title="Select a Subject"
+                message="Please select a subject to view its course outcomes."
+                :compact="true"
+            />
         @endif
     </div>
 </div>
