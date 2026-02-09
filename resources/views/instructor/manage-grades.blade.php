@@ -55,15 +55,15 @@
                                 </div>
                             </template>
                         </div>
-                    @endforeach
+                    </template>
+                    <template x-if="subjects.length === 0">
+                        <x-empty-state
+                            icon="bi-journal-x"
+                            title="No Assigned Subjects"
+                            message="No subjects have been assigned to you yet."
+                        />
+                    </template>
                 </div>
-            @else
-                <x-empty-state
-                    icon="bi-journal-x"
-                    title="No Assigned Subjects"
-                    message="No subjects have been assigned to you yet."
-                />
-            @endif
         @else
             @include('instructor.partials.term-stepper')
             @include('instructor.partials.activity-header', [
