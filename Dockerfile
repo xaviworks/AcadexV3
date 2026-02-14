@@ -36,12 +36,13 @@ RUN npm run build
 
 # Setup Laravel storage directories
 RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache \
-    && composer dump-autoload --optimize
+    && chmod -R 777 storage bootstrap/cache
 
 EXPOSE ${PORT:-8080}
 
-CMD php artisan migrate --force && \
+CMD composer dump-autoload --optimize --no-scripts && \
+    php artisan package:discover --ansi && \
+    php artisan migrate --force && \
     php artisan storage:link 2>/dev/null; \
     php artisan config:cache && \
     php artisan route:cache && \
