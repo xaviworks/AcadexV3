@@ -1,4 +1,7 @@
-FROM php:8.2-cli
+FROM php:8.2-apache
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -16,6 +19,17 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Configure Apache to serve from /app/public
+ENV APACHE_DOCUMENT_ROOT=/app/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && echo '<Directory /app/public>\n    AllowOverride All\n    Require all granted\n</Directory>' > /etc/apache2/conf-available/laravel.conf \
+    && a2enconf laravel
+
+# Set Railway port via Apache
+RUN sed -ri -e 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf \
+    && sed -ri -e 's/:80/:${PORT}/g' /etc/apache2/sites-available/*.conf
 
 WORKDIR /app
 
@@ -40,16 +54,21 @@ RUN npm run build
 
 # Setup Laravel storage directories
 RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache
+    && chmod -R 777 storage bootstrap/cache \
+    && chown -R www-data:www-data /app
+
+# Create startup script
+RUN echo '#!/bin/bash\n\
+composer dump-autoload --optimize --no-scripts\n\
+php artisan package:discover --ansi\n\
+php artisan migrate --force\n\
+php artisan db:seed --force\n\
+php artisan storage:link 2>/dev/null\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+php artisan view:cache\n\
+apache2-foreground' > /start.sh && chmod +x /start.sh
 
 EXPOSE ${PORT:-8080}
 
-CMD composer dump-autoload --optimize --no-scripts && \
-    php artisan package:discover --ansi && \
-    php artisan migrate --force && \
-    php artisan db:seed --force && \
-    php artisan storage:link 2>/dev/null; \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache && \
-    php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+CMD ["/start.sh"]
