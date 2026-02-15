@@ -9,8 +9,23 @@ RUN apt-get update && apt-get install -y \
     libpng-dev libjpeg-dev libfreetype6-dev \
     libzip-dev libonig-dev libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring xml bcmath gd zip \
+    && docker-php-ext-install pdo_mysql mbstring xml bcmath gd zip opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# PHP performance tuning (OPcache + memory)
+RUN echo 'opcache.enable=1\n\
+opcache.memory_consumption=128\n\
+opcache.interned_strings_buffer=16\n\
+opcache.max_accelerated_files=10000\n\
+opcache.validate_timestamps=0\n\
+opcache.save_comments=1\n\
+opcache.enable_cli=1' > /usr/local/etc/php/conf.d/opcache.ini \
+    && echo 'memory_limit=256M\n\
+upload_max_filesize=64M\n\
+post_max_size=64M\n\
+max_execution_time=60\n\
+realpath_cache_size=4096K\n\
+realpath_cache_ttl=600' > /usr/local/etc/php/conf.d/performance.ini
 
 # Install Node.js 22
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
