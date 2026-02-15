@@ -52,6 +52,9 @@ COPY . .
 # Build frontend assets
 RUN npm run build
 
+# Optimize autoloader and discover packages at build time
+RUN composer dump-autoload --optimize --no-scripts 2>/dev/null || true
+
 # Setup Laravel storage directories
 RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \
     && chmod -R 777 storage bootstrap/cache \
