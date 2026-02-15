@@ -158,6 +158,13 @@ function announcementPopup() {
                     }
                 });
 
+                // Stop polling if session expired (redirected to login)
+                if (response.redirected) {
+                    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+                    window.location.href = response.url;
+                    return;
+                }
+
                 if (!response.ok) return;
 
                 const text = await response.text();

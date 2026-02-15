@@ -264,6 +264,12 @@ document.addEventListener('alpine:init', () => {
                 }
                 
                 const response = await fetch(url.toString());
+                // Stop polling if session expired (redirected to login)
+                if (response.redirected) {
+                    clearInterval(this.pollInterval);
+                    window.location.href = response.url;
+                    return;
+                }
                 if (!response.ok) return;
                 
                 const data = await response.json();
@@ -483,6 +489,12 @@ document.addEventListener('alpine:init', () => {
                 }
                 
                 const response = await fetch(url.toString());
+                // Stop polling if session expired (redirected to login)
+                if (response.redirected) {
+                    clearInterval(this.pollInterval);
+                    window.location.href = response.url;
+                    return;
+                }
                 if (!response.ok) return;
                 
                 const data = await response.json();

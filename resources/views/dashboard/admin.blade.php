@@ -246,6 +246,7 @@ function adminDashboard() {
                 const r = await fetch(url, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                 });
+                if (r.redirected) { clearInterval(this.pollInterval); window.location.href = r.url; return; }
                 if (!r.ok) return;
                 const d = await r.json();
                 const j = JSON.stringify(d);

@@ -281,6 +281,7 @@ function vpaaDashboard() {
                 const r = await fetch('{{ route("vpaa.dashboard.poll") }}', {
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                 });
+                if (r.redirected) { clearInterval(this.pollInterval); window.location.href = r.url; return; }
                 if (!r.ok) return;
                 const d = await r.json();
                 const j = JSON.stringify(d);

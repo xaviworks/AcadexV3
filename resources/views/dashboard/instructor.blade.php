@@ -281,6 +281,7 @@
                     const r = await fetch('{{ route("dashboard.poll") }}', {
                         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                     });
+                    if (r.redirected) { clearInterval(this.pollInterval); window.location.href = r.url; return; }
                     if (!r.ok) return;
                     const text = await r.text();
                     if (text === this._lastJson) return;
