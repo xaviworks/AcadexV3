@@ -1,7 +1,7 @@
 FROM php:8.2-apache
 
-# Enable mod_rewrite (MPM fix handled at runtime in start.sh)
-RUN a2enmod rewrite
+# Enable mod_rewrite and suppress ServerName warning
+RUN a2enmod rewrite && echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
