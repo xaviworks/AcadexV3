@@ -5,10 +5,10 @@ RUN a2enmod rewrite && echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Tune Apache prefork MPM for Railway (limited RAM container)
 RUN echo '<IfModule mpm_prefork_module>\n\
-    StartServers          5\n\
-    MinSpareServers       5\n\
-    MaxSpareServers      10\n\
-    MaxRequestWorkers    50\n\
+    StartServers          3\n\
+    MinSpareServers       3\n\
+    MaxSpareServers       5\n\
+    MaxRequestWorkers    20\n\
     MaxConnectionsPerChild 1000\n\
 </IfModule>' > /etc/apache2/mods-available/mpm_prefork.conf
 
@@ -64,6 +64,9 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV DB_CONNECTION=mysql
 ENV DB_HOST=placeholder
 ENV DB_DATABASE=placeholder
+# Use file-based sessions/cache to avoid DB queries on every request
+ENV SESSION_DRIVER=file
+ENV CACHE_STORE=file
 RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction
 
 # Copy package files and install
