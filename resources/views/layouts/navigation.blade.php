@@ -247,6 +247,8 @@ document.addEventListener('alpine:init', () => {
         },
         
         startPolling() {
+            // TEMPORARILY DISABLED — testing without polling
+            return;
             // Initialize with current timestamp to only get new notifications
             this.lastPollTimestamp = new Date().toISOString();
             
@@ -473,6 +475,8 @@ document.addEventListener('alpine:init', () => {
         },
         
         startPolling() {
+            // TEMPORARILY DISABLED — testing without polling
+            return;
             this.lastPollTimestamp = new Date().toISOString();
             
             if (this.pollInterval) clearInterval(this.pollInterval);

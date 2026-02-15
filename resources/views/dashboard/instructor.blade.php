@@ -273,6 +273,8 @@
                 if (_chart) { try { _chart.destroy(); } catch(e) {} _chart = null; }
             },
             startPolling() {
+                // TEMPORARILY DISABLED — testing without polling
+                return;
                 if (this.pollInterval) clearInterval(this.pollInterval);
                 this.pollInterval = setInterval(() => this.fetchData(), 10000);
             },

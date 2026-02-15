@@ -307,6 +307,8 @@ function geCoordinatorDashboard() {
             if (this.pollInterval) clearInterval(this.pollInterval);
         },
         startPolling() {
+            // TEMPORARILY DISABLED — testing without polling
+            return;
             if (this.pollInterval) clearInterval(this.pollInterval);
             this.pollInterval = setInterval(() => this.fetchData(), 10000);
         },

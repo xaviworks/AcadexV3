@@ -145,7 +145,8 @@ function announcementPopup() {
         /* ── Bootstrap: first fetch + start polling ── */
         async fetchAnnouncements() {
             await this._doFetch();
-            this._startPolling();
+            // TEMPORARILY DISABLED — testing without polling
+            // this._startPolling();
         },
 
         /* ── Core fetch logic (reused by init & poll) ── */
