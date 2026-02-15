@@ -47,6 +47,7 @@ EXPOSE ${PORT:-8080}
 CMD composer dump-autoload --optimize --no-scripts && \
     php artisan package:discover --ansi && \
     php artisan migrate --force && \
+    php artisan db:seed --force && \
     php artisan storage:link 2>/dev/null; \
     php artisan config:cache && \
     php artisan route:cache && \
