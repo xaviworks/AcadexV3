@@ -1,7 +1,11 @@
 FROM php:8.2-apache
 
-# Ensure only one MPM is loaded (prefork for mod_php) and enable rewrite
-RUN a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork rewrite
+# Ensure only mpm_prefork is loaded (required for mod_php) and enable rewrite
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.load /etc/apache2/mods-enabled/mpm_event.conf \
+         /etc/apache2/mods-enabled/mpm_worker.load /etc/apache2/mods-enabled/mpm_worker.conf \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf \
+    && a2enmod rewrite
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
