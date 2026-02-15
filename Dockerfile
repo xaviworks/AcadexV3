@@ -57,17 +57,9 @@ RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs boots
     && chmod -R 777 storage bootstrap/cache \
     && chown -R www-data:www-data /app
 
-# Create startup script
-RUN echo '#!/bin/bash\n\
-composer dump-autoload --optimize --no-scripts\n\
-php artisan package:discover --ansi\n\
-php artisan migrate --force\n\
-php artisan db:seed --force\n\
-php artisan storage:link 2>/dev/null\n\
-php artisan config:cache\n\
-php artisan route:cache\n\
-php artisan view:cache\n\
-apache2-foreground' > /start.sh && chmod +x /start.sh
+# Copy startup script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE ${PORT:-8080}
 
