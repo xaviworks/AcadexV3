@@ -22,6 +22,10 @@ WORKDIR /app
 # Copy composer files first (Docker layer caching)
 COPY composer.json composer.lock ./
 ENV COMPOSER_ALLOW_SUPERUSER=1
+# Prevent SQLite fallback during build (no DB available at build time)
+ENV DB_CONNECTION=mysql
+ENV DB_HOST=placeholder
+ENV DB_DATABASE=placeholder
 RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction
 
 # Copy package files and install
