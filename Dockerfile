@@ -3,6 +3,15 @@ FROM php:8.2-apache
 # Enable mod_rewrite and suppress ServerName warning
 RUN a2enmod rewrite && echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
+# Tune Apache prefork MPM for Railway (limited RAM container)
+RUN echo '<IfModule mpm_prefork_module>\n\
+    StartServers          5\n\
+    MinSpareServers       5\n\
+    MaxSpareServers      10\n\
+    MaxRequestWorkers    50\n\
+    MaxConnectionsPerChild 1000\n\
+</IfModule>' > /etc/apache2/mods-available/mpm_prefork.conf
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip \

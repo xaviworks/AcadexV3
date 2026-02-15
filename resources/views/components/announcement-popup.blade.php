@@ -210,12 +210,12 @@ function announcementPopup() {
             }
         },
 
-        /* ── Polling engine (5s) + Page Visibility API ── */
+        /* ── Polling engine (30s) + Page Visibility API ── */
         _startPolling() {
             this.polling = true;
 
-            // Poll every 5 seconds (announcements are less frequent than notifications)
-            _pollTimer = setInterval(() => this._doFetch(), 5000);
+            // Poll every 30 seconds (announcements are infrequent)
+            _pollTimer = setInterval(() => this._doFetch(), 30000);
 
             // Pause when tab is hidden, resume immediately when visible
             document.addEventListener('visibilitychange', () => {
@@ -224,7 +224,7 @@ function announcementPopup() {
                 } else {
                     this._doFetch(); // instant fetch on return
                     if (!_pollTimer) {
-                        _pollTimer = setInterval(() => this._doFetch(), 5000);
+                        _pollTimer = setInterval(() => this._doFetch(), 30000);
                     }
                 }
             });
