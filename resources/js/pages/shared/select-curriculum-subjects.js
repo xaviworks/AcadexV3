@@ -206,12 +206,12 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
         }
 
         subjectsContainer.classList.remove('d-none');
-        
+
         // Initialize select-all state for all tables
-        document.querySelectorAll('#subjectsTableBody table').forEach(table => {
+        document.querySelectorAll('#subjectsTableBody table').forEach((table) => {
           updateSelectAllState(table);
         });
-        
+
         updateSelectedCount();
       })
       .catch(() => {
@@ -289,7 +289,7 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
     if (!selectAllBtn) return;
 
     const checkboxes = Array.from(table.querySelectorAll('.subject-checkbox:not(:disabled)'));
-    const checkedBoxes = checkboxes.filter(cb => cb.checked);
+    const checkedBoxes = checkboxes.filter((cb) => cb.checked);
 
     if (checkboxes.length === 0) {
       selectAllBtn.checked = false;
@@ -310,7 +310,7 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
   document.addEventListener('change', function (e) {
     if (e.target.classList.contains('subject-checkbox')) {
       updateSelectedCount();
-      
+
       // Update the select-all checkbox state for this table
       const table = e.target.closest('table');
       if (table) {
