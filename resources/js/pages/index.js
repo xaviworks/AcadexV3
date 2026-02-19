@@ -18,6 +18,7 @@ import './admin/departments.js';
 import './admin/courses.js';
 import './admin/structure-template-requests.js';
 import './admin/structure-template-requests-poll.js';
+import './admin/sessions-poll.js';
 import './admin/grades-formula-course.js';
 import './admin/grades-formula-edit-global.js';
 import './admin/grades-formula-department.js';

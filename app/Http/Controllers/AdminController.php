@@ -4132,7 +4132,198 @@ class AdminController extends Controller
         $userLogs = $userLogsQuery->paginate(10, ['*'], 'logs_page')->appends($request->except('sessions_page'));
         $selectedDate = $request->input('date', '');
 
-        return view('admin.sessions', compact('sessions', 'userLogs', 'selectedDate'));
+        // Prepare JSON-ready data for Alpine.js live polling initial state
+        $roleLabels = [
+            0 => 'Instructor',
+            1 => 'Chairperson',
+            2 => 'Dean',
+            3 => 'Admin',
+            4 => 'GE Coordinator',
+            5 => 'VPAA',
+        ];
+        $currentSessionId = session()->getId();
+
+        $sessionsData = $sessions->getCollection()->map(function ($session) use ($currentSessionId, $roleLabels) {
+            $lastActivity = \Carbon\Carbon::createFromTimestamp($session->last_activity);
+            $minutesInactive = $lastActivity->diffInMinutes(now());
+
+            return [
+                'id' => $session->id,
+                'user_id' => $session->user_id,
+                'user_name' => $session->user_name ?? 'Unknown',
+                'email' => $session->email,
+                'role' => $roleLabels[$session->role] ?? 'Unknown',
+                'is_current' => $session->id === $currentSessionId,
+                'status' => $minutesInactive > config('session.lifetime', 120) ? 'expired' : 'active',
+                'device_type' => $session->device_type ?? 'Unknown',
+                'browser' => $session->browser ?? 'Unknown',
+                'platform' => $session->platform ?? 'Unknown',
+                'ip_address' => $session->ip_address ?? 'N/A',
+                'device_fingerprint' => $session->device_fingerprint
+                    ? Str::limit($session->device_fingerprint, 12, '...')
+                    : null,
+                'device_fingerprint_full' => $session->device_fingerprint,
+                'last_activity_formatted' => $session->last_activity_at
+                    ? \Carbon\Carbon::parse($session->last_activity_at)->diffForHumans()
+                    : $lastActivity->diffForHumans(),
+                'last_activity_date' => $lastActivity->format('M d, Y g:i A'),
+            ];
+        })->values();
+
+        $eventColors = [
+            'login' => 'success',
+            'logout' => 'secondary',
+            'failed_login' => 'danger',
+            'session_revoked' => 'warning',
+            'all_sessions_revoked' => 'warning',
+            'bulk_sessions_revoked' => 'danger',
+        ];
+
+        $userLogsData = $userLogs->getCollection()->map(function ($log) use ($eventColors) {
+            return [
+                'id' => $log->id,
+                'user_name' => $log->user
+                    ? ($log->user->first_name . ' ' . $log->user->last_name)
+                    : null,
+                'user_email' => $log->user?->email,
+                'event_type' => str_replace('_', ' ', ucwords($log->event_type, '_')),
+                'event_type_raw' => $log->event_type,
+                'event_color' => $eventColors[$log->event_type] ?? 'info',
+                'ip_address' => $log->ip_address ?? 'N/A',
+                'browser' => $log->browser ?? 'N/A',
+                'device' => $log->device ?? 'N/A',
+                'platform' => $log->platform ?? 'N/A',
+                'date' => $log->created_at ? $log->created_at->format('M j, Y') : 'N/A',
+                'time' => $log->created_at ? $log->created_at->format('g:i A') : 'N/A',
+            ];
+        })->values();
+
+        return view('admin.sessions', compact('sessions', 'userLogs', 'selectedDate', 'sessionsData', 'userLogsData'));
+    }
+
+    /**
+     * Poll active sessions data for live updates.
+     *
+     * Returns JSON with the current active sessions so the admin
+     * sessions table can refresh in real-time without a full page reload.
+     */
+    public function pollSessions(Request $request): \Illuminate\Http\JsonResponse
+    {
+        Gate::authorize('admin');
+
+        $roleLabels = [
+            0 => 'Instructor',
+            1 => 'Chairperson',
+            2 => 'Dean',
+            3 => 'Admin',
+            4 => 'GE Coordinator',
+            5 => 'VPAA',
+        ];
+
+        $sessions = DB::table('sessions')
+            ->leftJoin('users', 'sessions.user_id', '=', 'users.id')
+            ->select(
+                'sessions.id',
+                'sessions.user_id',
+                'sessions.ip_address',
+                'sessions.user_agent',
+                'sessions.last_activity',
+                'sessions.last_activity_at',
+                'sessions.device_type',
+                'sessions.browser',
+                'sessions.platform',
+                'sessions.device_fingerprint',
+                DB::raw('CONCAT(users.first_name, " ", users.last_name) as user_name'),
+                'users.email',
+                'users.role',
+                'users.is_active',
+                'users.two_factor_secret',
+                'users.two_factor_confirmed_at'
+            )
+            ->whereNotNull('sessions.user_id')
+            ->orderByDesc('sessions.last_activity')
+            ->get();
+
+        $currentSessionId = session()->getId();
+
+        $mapped = $sessions->map(function ($session) use ($currentSessionId, $roleLabels) {
+            $lastActivity = \Carbon\Carbon::createFromTimestamp($session->last_activity);
+            $minutesInactive = $lastActivity->diffInMinutes(now());
+
+            return [
+                'id' => $session->id,
+                'user_id' => $session->user_id,
+                'user_name' => $session->user_name ?? 'Unknown',
+                'email' => $session->email,
+                'role' => $roleLabels[$session->role] ?? 'Unknown',
+                'is_current' => $session->id === $currentSessionId,
+                'status' => $minutesInactive > config('session.lifetime', 120) ? 'expired' : 'active',
+                'device_type' => $session->device_type ?? 'Unknown',
+                'browser' => $session->browser ?? 'Unknown',
+                'platform' => $session->platform ?? 'Unknown',
+                'ip_address' => $session->ip_address ?? 'N/A',
+                'device_fingerprint' => $session->device_fingerprint
+                    ? Str::limit($session->device_fingerprint, 12, '...')
+                    : null,
+                'device_fingerprint_full' => $session->device_fingerprint,
+                'last_activity_formatted' => $session->last_activity_at
+                    ? \Carbon\Carbon::parse($session->last_activity_at)->diffForHumans()
+                    : $lastActivity->diffForHumans(),
+                'last_activity_date' => $lastActivity->format('M d, Y g:i A'),
+            ];
+        })->values();
+
+        return response()->json(['sessions' => $mapped]);
+    }
+
+    /**
+     * Poll user logs data for live updates.
+     *
+     * Returns JSON with the user logs for the given date so the admin
+     * logs table can refresh in real-time without a full page reload.
+     */
+    public function pollUserLogs(Request $request): \Illuminate\Http\JsonResponse
+    {
+        Gate::authorize('admin');
+
+        $query = UserLog::with('user')
+            ->orderByDesc('created_at');
+
+        if ($request->has('date') && $request->input('date')) {
+            $query->whereDate('created_at', $request->input('date'));
+        }
+
+        $logs = $query->get();
+
+        $eventColors = [
+            'login' => 'success',
+            'logout' => 'secondary',
+            'failed_login' => 'danger',
+            'session_revoked' => 'warning',
+            'all_sessions_revoked' => 'warning',
+            'bulk_sessions_revoked' => 'danger',
+        ];
+
+        $mapped = $logs->map(function ($log) use ($eventColors) {
+            return [
+                'id' => $log->id,
+                'user_name' => $log->user
+                    ? ($log->user->first_name . ' ' . $log->user->last_name)
+                    : null,
+                'user_email' => $log->user?->email,
+                'event_type' => str_replace('_', ' ', ucwords($log->event_type, '_')),
+                'event_type_raw' => $log->event_type,
+                'event_color' => $eventColors[$log->event_type] ?? 'info',
+                'ip_address' => $log->ip_address ?? 'N/A',
+                'browser' => $log->browser ?? 'N/A',
+                'device' => $log->device ?? 'N/A',
+                'platform' => $log->platform ?? 'N/A',
+                'date' => $log->created_at ? $log->created_at->format('M j, Y') : 'N/A',
+                'time' => $log->created_at ? $log->created_at->format('g:i A') : 'N/A',
+            ];
+        })->values();
+
+        return response()->json(['logs' => $mapped]);
     }
 
     /**

@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 @endpush
 
-<div class="container py-4">
+<div class="container py-4" x-data="sessionsLive()" x-init="init()">
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h4 text-dark fw-bold mb-0">
@@ -64,170 +64,92 @@
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
-                                    <tbody>
-                                @forelse($sessions as $session)
-                                <tr class="{{ $session->is_current ? 'current-session-row' : '' }}">
-                                    <td>
-                                        <div class="user-info">
-                                            <span class="user-name">{{ $session->user_name ?? 'Unknown' }}</span>
-                                            <small class="user-email">{{ $session->email }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="role-badge bg-secondary text-white">
-                                            @switch($session->role)
-                                                @case(0) Instructor @break
-                                                @case(1) Chairperson @break
-                                                @case(2) Dean @break
-                                                @case(3) Admin @break
-                                                @case(4) GE Coordinator @break
-                                                @case(5) VPAA @break
-                                                @default Unknown @break
-                                            @endswitch
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if($session->is_current)
-                                            <span class="session-status-badge session-status-current">
-                                                <i class="fas fa-star"></i> Current
-                                            </span>
-                                        @elseif($session->status === 'active')
-                                            <span class="session-status-badge session-status-active">
-                                                <i class="fas fa-circle"></i> Active
-                                            </span>
-                                        @else
-                                            <span class="session-status-badge session-status-expired">
-                                                <i class="fas fa-times-circle"></i> Expired
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="device-icon-wrapper">
-                                            <span class="device-icon">
-                                                @if($session->device_type === 'Desktop')
-                                                    <i class="fas fa-desktop"></i>
-                                                @elseif($session->device_type === 'Tablet')
-                                                    <i class="fas fa-tablet-alt"></i>
-                                                @elseif($session->device_type === 'Mobile')
-                                                    <i class="fas fa-mobile-alt"></i>
-                                                @else
-                                                    <i class="fas fa-question-circle"></i>
-                                                @endif
-                                            </span>
-                                            <span>{{ $session->device_type ?? 'Unknown' }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="browser-text">{{ $session->browser ?? 'Unknown' }}</td>
-                                    <td class="platform-text">{{ $session->platform ?? 'Unknown' }}</td>
-                                    <td>
-                                        <span class="ip-address">{{ $session->ip_address ?? 'N/A' }}</span>
-                                    </td>
-                                    <td>
-                                        @if($session->device_fingerprint)
-                                            <code class="text-muted text-xs" title="{{ $session->device_fingerprint }}">
-                                                {{ Str::limit($session->device_fingerprint, 12, '...') }}
-                                            </code>
-                                        @else
-                                            <span class="text-muted text-xs">N/A</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="activity-time">{{ $session->last_activity_formatted }}</div>
-                                        <small class="activity-date">{{ $session->last_activity_date }}</small>
-                                    </td>
-                                    <td class="text-center">
-                                        @if(!$session->is_current && $session->user_id && $session->user_name)
-                                            <button class="action-btn btn-revoke" 
-                                                    onclick="confirmRevoke('{{ $session->id }}', '{{ $session->user_name }}')"
-                                                    title="Revoke this session">
-                                                <i class="fas fa-user-slash"></i>
-                                            </button>
-                                        @elseif($session->is_current)
-                                            <span class="your-session-badge">
-                                                <i class="fas fa-circle-check"></i> Current Session
-                                            </span>
-                                        @else
-                                            <span class="text-muted text-xs">
-                                                <i class="fas fa-user-slash"></i> No user
-                                            </span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9" class="text-center text-muted fst-italic py-4">
-                                        <i class="fas fa-info-circle me-2"></i>No active sessions found.
-                                    </td>
-                                </tr>
-                            @endforelse
+                            <tbody>
+                                <template x-for="session in sessions" :key="session.id">
+                                    <tr :class="session.is_current ? 'current-session-row' : ''">
+                                        <td>
+                                            <div class="user-info">
+                                                <span class="user-name" x-text="session.user_name"></span>
+                                                <small class="user-email" x-text="session.email"></small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="role-badge bg-secondary text-white" x-text="session.role"></span>
+                                        </td>
+                                        <td>
+                                            <template x-if="session.is_current">
+                                                <span class="session-status-badge session-status-current">
+                                                    <i class="fas fa-star"></i> Current
+                                                </span>
+                                            </template>
+                                            <template x-if="!session.is_current && session.status === 'active'">
+                                                <span class="session-status-badge session-status-active">
+                                                    <i class="fas fa-circle"></i> Active
+                                                </span>
+                                            </template>
+                                            <template x-if="!session.is_current && session.status === 'expired'">
+                                                <span class="session-status-badge session-status-expired">
+                                                    <i class="fas fa-times-circle"></i> Expired
+                                                </span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <div class="device-icon-wrapper">
+                                                <span class="device-icon">
+                                                    <i :class="deviceIcon(session.device_type)"></i>
+                                                </span>
+                                                <span x-text="session.device_type"></span>
+                                            </div>
+                                        </td>
+                                        <td class="browser-text" x-text="session.browser"></td>
+                                        <td class="platform-text" x-text="session.platform"></td>
+                                        <td>
+                                            <span class="ip-address" x-text="session.ip_address"></span>
+                                        </td>
+                                        <td>
+                                            <template x-if="session.device_fingerprint">
+                                                <code class="text-muted text-xs" :title="session.device_fingerprint_full" x-text="session.device_fingerprint"></code>
+                                            </template>
+                                            <template x-if="!session.device_fingerprint">
+                                                <span class="text-muted text-xs">N/A</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <div class="activity-time" x-text="session.last_activity_formatted"></div>
+                                            <small class="activity-date" x-text="session.last_activity_date"></small>
+                                        </td>
+                                        <td class="text-center">
+                                            <template x-if="!session.is_current && session.user_id && session.user_name">
+                                                <button class="action-btn btn-revoke" 
+                                                        @click="confirmRevoke(session.id, session.user_name)"
+                                                        title="Revoke this session">
+                                                    <i class="fas fa-user-slash"></i>
+                                                </button>
+                                            </template>
+                                            <template x-if="session.is_current">
+                                                <span class="your-session-badge">
+                                                    <i class="fas fa-circle-check"></i> Current Session
+                                                </span>
+                                            </template>
+                                            <template x-if="!session.is_current && (!session.user_id || !session.user_name)">
+                                                <span class="text-muted text-xs">
+                                                    <i class="fas fa-user-slash"></i> No user
+                                                </span>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template x-if="sessions.length === 0">
+                                    <tr>
+                                        <td colspan="10" class="text-center text-muted fst-italic py-4">
+                                            <i class="fas fa-info-circle me-2"></i>No active sessions found.
+                                        </td>
+                                    </tr>
+                                </template>
                             </tbody>
                         </table>
                     </div>
                 </div>
-
-                {{-- Pagination --}}
-                @if($sessions->hasPages())
-                    <div class="card-footer bg-white border-top">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                            <div class="text-muted small">
-                                Showing <strong>{{ $sessions->firstItem() }}</strong> to <strong>{{ $sessions->lastItem() }}</strong> of <strong>{{ $sessions->total() }}</strong> sessions
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination pagination-sm mb-0">
-                                    {{-- Previous Page Link --}}
-                                    @if ($sessions->onFirstPage())
-                                        <li class="page-item disabled">
-                                            <span class="page-link">&laquo;</span>
-                                        </li>
-                                    @else
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $sessions->previousPageUrl() }}" rel="prev">&laquo;</a>
-                                        </li>
-                                    @endif
-
-                                    {{-- Page Number Links (show max 5 pages) --}}
-                                    @php
-                                        $currentPage = $sessions->currentPage();
-                                        $lastPage = $sessions->lastPage();
-                                        $startPage = max(1, $currentPage - 2);
-                                        $endPage = min($lastPage, $currentPage + 2);
-                                        
-                                        // Adjust if we're near the beginning or end
-                                        if ($currentPage <= 3) {
-                                            $endPage = min(5, $lastPage);
-                                        }
-                                        if ($currentPage >= $lastPage - 2) {
-                                            $startPage = max(1, $lastPage - 4);
-                                        }
-                                    @endphp
-
-                                    @for ($i = $startPage; $i <= $endPage; $i++)
-                                        @if ($i == $currentPage)
-                                            <li class="page-item active">
-                                                <span class="page-link">{{ $i }}</span>
-                                            </li>
-                                        @else
-                                            <li class="page-item">
-                                                <a class="page-link" href="{{ $sessions->url($i) }}">{{ $i }}</a>
-                                            </li>
-                                        @endif
-                                    @endfor
-
-                                    {{-- Next Page Link --}}
-                                    @if ($sessions->hasMorePages())
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $sessions->nextPageUrl() }}" rel="next">&raquo;</a>
-                                        </li>
-                                    @else
-                                        <li class="page-item disabled">
-                                            <span class="page-link">&raquo;</span>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                @endif
             </div>
         </div>
         {{-- End Active Sessions Tab --}}
@@ -236,16 +158,11 @@
         <div class="tab-pane fade" id="logs-pane" role="tabpanel" aria-labelledby="logs-tab">
             {{-- Date Filter --}}
             <div class="d-flex justify-content-end mb-3">
-                <form action="{{ route('admin.sessions') }}" method="GET" class="d-flex align-items-center gap-2">
-                    <input type="hidden" name="tab" value="logs">
-                    @if(request('logs_page'))
-                        <input type="hidden" name="logs_page" value="{{ request('logs_page') }}">
-                    @endif
+                <div class="d-flex align-items-center gap-2">
                     <label for="date" class="mb-0 small fw-semibold text-nowrap">Filter by Date:</label>
-                    <input type="date" name="date" id="date" value="{{ request('date', now()->format('Y-m-d')) }}" 
-                           class="form-control form-control-sm max-w-180" 
-                           onchange="this.form.submit()" />
-                </form>
+                    <input type="date" id="date" x-model="selectedDate" @change="onDateChange()"
+                           class="form-control form-control-sm max-w-180" />
+                </div>
             </div>
 
             {{-- Logs Table --}}
@@ -266,118 +183,43 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($userLogs as $log)
-                                <tr>
-                                    <td>
-                                        @if ($log->user)
-                                            <div class="user-info">
-                                                <span class="user-name">{{ $log->user->first_name }} {{ $log->user->last_name }}</span>
-                                                <small class="user-email">{{ $log->user->email }}</small>
-                                            </div>
-                                        @else
-                                            <em class="text-muted">Unknown</em>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @php
-                                            $eventColors = [
-                                                'login' => 'success',
-                                                'logout' => 'secondary',
-                                                'failed_login' => 'danger',
-                                                'session_revoked' => 'warning',
-                                                'all_sessions_revoked' => 'warning',
-                                                'bulk_sessions_revoked' => 'danger',
-                                            ];
-                                            $color = $eventColors[$log->event_type] ?? 'info';
-                                        @endphp
-                                        <span class="event-badge bg-{{ $color }} text-white">
-                                            {{ str_replace('_', ' ', ucwords($log->event_type, '_')) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="ip-address">{{ $log->ip_address ?? 'N/A' }}</span>
-                                    </td>
-                                    <td class="browser-text">{{ $log->browser ?? 'N/A' }}</td>
-                                    <td class="platform-text">{{ $log->device ?? 'N/A' }}</td>
-                                    <td class="platform-text">{{ $log->platform ?? 'N/A' }}</td>
-                                    <td>{{ $log->created_at ? $log->created_at->format('M j, Y') : 'N/A' }}</td>
-                                    <td>{{ $log->created_at ? $log->created_at->format('g:i A') : 'N/A' }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="8" class="text-center text-muted fst-italic py-4">
-                                        <i class="fas fa-info-circle me-2"></i>No logs found for the selected date.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
+                                <template x-for="log in userLogs" :key="log.id">
+                                    <tr>
+                                        <td>
+                                            <template x-if="log.user_name">
+                                                <div class="user-info">
+                                                    <span class="user-name" x-text="log.user_name"></span>
+                                                    <small class="user-email" x-text="log.user_email"></small>
+                                                </div>
+                                            </template>
+                                            <template x-if="!log.user_name">
+                                                <em class="text-muted">Unknown</em>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <span class="event-badge text-white" :class="'bg-' + log.event_color" x-text="log.event_type"></span>
+                                        </td>
+                                        <td>
+                                            <span class="ip-address" x-text="log.ip_address"></span>
+                                        </td>
+                                        <td class="browser-text" x-text="log.browser"></td>
+                                        <td class="platform-text" x-text="log.device"></td>
+                                        <td class="platform-text" x-text="log.platform"></td>
+                                        <td x-text="log.date"></td>
+                                        <td x-text="log.time"></td>
+                                    </tr>
+                                </template>
+                                <template x-if="userLogs.length === 0">
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted fst-italic py-4">
+                                            <i class="fas fa-info-circle me-2"></i>No logs found for the selected date.
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
                         </table>
                     </div>
                 </div>
-
-                {{-- Pagination --}}
-                @if($userLogs->hasPages())
-                    <div class="card-footer bg-white border-top">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                            <div class="text-muted small">
-                                Showing <strong>{{ $userLogs->firstItem() }}</strong> to <strong>{{ $userLogs->lastItem() }}</strong> of <strong>{{ $userLogs->total() }}</strong> logs
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination pagination-sm mb-0">
-                                    {{-- Previous Page Link --}}
-                                    @if ($userLogs->onFirstPage())
-                                        <li class="page-item disabled">
-                                            <span class="page-link">&laquo;</span>
-                                        </li>
-                                    @else
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $userLogs->previousPageUrl() }}" rel="prev">&laquo;</a>
-                                        </li>
-                                    @endif
-
-                                    {{-- Page Number Links (show max 5 pages) --}}
-                                    @php
-                                        $currentPage = $userLogs->currentPage();
-                                        $lastPage = $userLogs->lastPage();
-                                        $startPage = max(1, $currentPage - 2);
-                                        $endPage = min($lastPage, $currentPage + 2);
-                                        
-                                        // Adjust if we're near the beginning or end
-                                        if ($currentPage <= 3) {
-                                            $endPage = min(5, $lastPage);
-                                        }
-                                        if ($currentPage >= $lastPage - 2) {
-                                            $startPage = max(1, $lastPage - 4);
-                                        }
-                                    @endphp
-
-                                    @for ($i = $startPage; $i <= $endPage; $i++)
-                                        @if ($i == $currentPage)
-                                            <li class="page-item active">
-                                                <span class="page-link">{{ $i }}</span>
-                                            </li>
-                                        @else
-                                            <li class="page-item">
-                                                <a class="page-link" href="{{ $userLogs->url($i) }}">{{ $i }}</a>
-                                            </li>
-                                        @endif
-                                    @endfor
-
-                                    {{-- Next Page Link --}}
-                                    @if ($userLogs->hasMorePages())
-                                        <li class="page-item">
-                                            <a class="page-link" href="{{ $userLogs->nextPageUrl() }}" rel="next">&raquo;</a>
-                                        </li>
-                                    @else
-                                        <li class="page-item disabled">
-                                            <span class="page-link">&raquo;</span>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                @endif
             </div>
         </div>
         {{-- End User Logs Tab --}}
@@ -487,7 +329,18 @@
 </div>
 
 @push('scripts')
-    {{-- JavaScript moved to: resources/js/pages/admin/sessions.js --}}
+    {{-- Live polling config for Alpine.js --}}
+    <script>
+        window.sessionsPageConfig = {
+            sessions: @json($sessionsData),
+            userLogs: @json($userLogsData),
+            pollSessionsUrl: '{{ route("admin.sessions.poll") }}',
+            pollLogsUrl: '{{ route("admin.sessions.pollLogs") }}',
+            selectedDate: '{{ request("date", now()->format("Y-m-d")) }}'
+        };
+    </script>
+
+    {{-- JavaScript: resources/js/pages/admin/sessions.js + sessions-poll.js --}}
     
     @if(session('success'))
         <script>

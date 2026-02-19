@@ -366,7 +366,6 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::get('/grades-formula/department/{department}/formulas/create', [AdminController::class, 'createDepartmentFormula'])->name('gradesFormula.department.formulas.create');
     Route::get('/grades-formula/department/{department}/formulas/{formula}/edit', [AdminController::class, 'editDepartmentFormulaEntry'])->name('gradesFormula.department.formulas.edit');
     Route::delete('/grades-formula/department/{department}/formulas/{formula}', [AdminController::class, 'destroyDepartmentFormula'])->name('gradesFormula.department.formulas.destroy');
-    // REMOVED: Route::post('/grades-formula/department/bulk-apply') - Departments tab deprecated
     Route::post('/grades-formula/department/{department}/apply-template', [AdminController::class, 'applyDepartmentTemplate'])->name('gradesFormula.department.applyTemplate');
     Route::get('/grades-formula/department/{department}/course/{course}', [AdminController::class, 'gradesFormulaCourse'])->name('gradesFormula.course');
     Route::get('/grades-formula/department/{department}/course/{course}/edit', [AdminController::class, 'gradesFormulaEditCourse'])->name('gradesFormula.edit.course');
@@ -402,6 +401,8 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 
     // Session Management Routes
     Route::get('/sessions', [AdminController::class, 'sessions'])->name('sessions');
+    Route::get('/sessions/poll', [AdminController::class, 'pollSessions'])->name('sessions.poll');
+    Route::get('/sessions/poll-logs', [AdminController::class, 'pollUserLogs'])->name('sessions.pollLogs');
     Route::post('/sessions/revoke', [AdminController::class, 'revokeSession'])->name('sessions.revoke');
     Route::post('/sessions/reset-2fa', [AdminController::class, 'reset2FA'])->name('sessions.reset2fa');
     Route::post('/sessions/revoke-all', [AdminController::class, 'revokeAllSessions'])->name('sessions.revokeAll');
