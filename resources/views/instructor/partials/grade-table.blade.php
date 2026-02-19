@@ -58,6 +58,13 @@
                 <option value="asc" selected>A to Z</option>
                 <option value="desc">Z to A</option>
             </select>
+            <button type="button" 
+                    class="btn btn-outline-secondary shadow-sm" 
+                    @click="$store.gradeTable.toggleFullscreen()"
+                    x-data
+                    title="Toggle expanded view">
+                <i :class="$store.gradeTable.isFullscreen ? 'bi bi-fullscreen-exit' : 'bi bi-arrows-fullscreen'"></i>
+            </button>
         </div>
         <div class="text-muted small">
             <i class="bi bi-info-circle me-1"></i>
@@ -67,15 +74,30 @@
 
 @endif
 
-<div class="shadow-lg rounded-4 overflow-hidden border">
+<div class="shadow-lg rounded-4 overflow-hidden border" 
+     x-data 
+     :class="$store.gradeTable.isFullscreen ? 'grade-table-fullscreen' : ''">
+    
+    <!-- Fullscreen close button -->
+    <div x-show="$store.gradeTable.isFullscreen" 
+         x-transition
+         class="position-absolute top-0 end-0 p-3" 
+         style="z-index: 10;">
+        <button type="button" 
+                class="btn btn-dark btn-sm rounded-circle shadow" 
+                @click="$store.gradeTable.toggleFullscreen()"
+                title="Exit expanded view (Esc)">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
     @if ($hasData)
         <div class="table-responsive">
             <div style="max-height: 600px; overflow-y: auto;">
                 <table class="table table-bordered table-hover align-middle mb-0">
                     <thead>
                         <tr>
-                            <th style="min-width: 200px; width: 200px;">
-                                <div class="d-flex align-items-center">
+                            <th class="align-middle" style="min-width: 200px; width: 200px;">
+                                <div class="d-flex align-items-center justify-content-center">
                                     <i class="bi bi-person-badge me-2"></i>
                                     <span class="fw-semibold">Student</span>
                                 </div>
@@ -122,13 +144,13 @@
                                         @if($activity->courseOutcome && $activity->courseOutcome->is_deleted)
                                             <div class="mt-1 alert alert-warning py-1 px-2 mb-0 d-flex align-items-center" style="font-size: 0.75rem; border-radius: 4px;">
                                                 <i class="bi bi-exclamation-triangle-fill me-1" style="font-size: 0.8rem;"></i>
-                                                <div class="text-danger small fw-bold">⚠️ Selected course outcome has been deleted</div>
+                                                <div class="text-danger small fw-bold">Outcome deleted</div>
                                             </div>
                                         @endif
                                     </div>
                                 </th>
                             @endforeach
-                            <th class="text-center" style="min-width: 100px; width: 100px;">
+                            <th class="text-center align-middle" style="min-width: 100px; width: 100px;">
                                 <div class="fw-semibold">{{ ucfirst($term) }} Grade</div>
                             </th>
                         </tr>
@@ -242,6 +264,33 @@
 
 <!-- JavaScript for Client-Side Filtering -->
 <script>
+    // Initialize Alpine store for fullscreen mode
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('gradeTable', {
+            isFullscreen: false,
+            
+            toggleFullscreen() {
+                this.isFullscreen = !this.isFullscreen;
+                if (this.isFullscreen) {
+                    document.body.style.overflow = 'hidden';
+                    // Show notification about Esc key
+                    if (window.notify) {
+                        window.notify.info('Press "Esc" to close expand view');
+                    }
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+    });
+
+    // Escape key handler for fullscreen mode
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && Alpine.store('gradeTable')?.isFullscreen) {
+            Alpine.store('gradeTable').toggleFullscreen();
+        }
+    });
+
     // Student search functionality
     function initializeStudentSearch() {
         const studentSearch = document.getElementById('studentSearch');
@@ -273,3 +322,44 @@
     // Export for external use
     window.initializeStudentSearch = initializeStudentSearch;
 </script>
+
+<style>
+.grade-table-fullscreen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw !important;
+    height: 85vh !important;
+    z-index: 1050;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+    background: white;
+}
+
+.grade-table-fullscreen .table-responsive {
+    height: calc(100% - 20px);
+    padding: 10px;
+}
+
+.grade-table-fullscreen .table-responsive > div {
+    max-height: 100% !important;
+    height: 100% !important;
+}
+
+/* Backdrop overlay */
+.grade-table-fullscreen::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* Prevent body scroll when fullscreen is active */
+body:has(.grade-table-fullscreen) {
+    overflow: hidden;
+}
+</style>
