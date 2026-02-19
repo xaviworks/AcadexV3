@@ -17,6 +17,7 @@ import './admin/subjects.js';
 import './admin/departments.js';
 import './admin/courses.js';
 import './admin/structure-template-requests.js';
+import './admin/structure-template-requests-poll.js';
 import './admin/grades-formula-course.js';
 import './admin/grades-formula-edit-global.js';
 import './admin/grades-formula-department.js';
@@ -51,6 +52,7 @@ import './chairperson/assign-subjects.js';
 import './chairperson/reports/co-course-chooser.js';
 import './chairperson/view-grades.js';
 import './chairperson/structure-template-create.js';
+import './chairperson/structure-template-requests-poll.js';
 
 // GE Coordinator pages
 import './gecoordinator/manage-instructors.js';

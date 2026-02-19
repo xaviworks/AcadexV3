@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\FinalGrade;
 use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
+use App\Traits\ActivityManagementTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +19,7 @@ use Illuminate\Validation\Rules\Password;
 
 class ChairpersonController extends Controller
 {
+    use ActivityManagementTrait;
     public function __construct()
     {
         $this->middleware('auth');
@@ -276,6 +278,9 @@ class ChairpersonController extends Controller
             'updated_by' => Auth::id(),
         ]);
 
+        // Auto-align activities with the resolved formula for this subject
+        $this->alignSubjectActivities($subject);
+
         // Notify instructor about new subject assignment (Email + System)
         $academicPeriod = \App\Models\AcademicPeriod::find($academicPeriodId);
         $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
@@ -344,6 +349,9 @@ class ChairpersonController extends Controller
                 'instructor_id' => $instructor->id,
                 'updated_by' => Auth::id(),
             ]);
+
+            // Auto-align activities with the resolved formula for this subject
+            $this->alignSubjectActivities($subject);
 
             // Notify instructor about new subject assignment (Email + System)
             NotificationService::notifyCourseAssigned($instructor, $subject, $periodLabel);
@@ -554,6 +562,45 @@ class ChairpersonController extends Controller
             ->get();
 
         return view('chairperson.structure-template-requests', compact('requests'));
+    }
+
+    /**
+     * Poll endpoint for live-updating the chairperson's structure template requests.
+     * Returns JSON with the same data shape as the index page.
+     */
+    public function pollTemplateRequests(): \Illuminate\Http\JsonResponse
+    {
+        if (Auth::user()->role !== 1) {
+            abort(403);
+        }
+
+        $requests = \App\Models\StructureTemplateRequest::where('chairperson_id', Auth::id())
+            ->with('reviewer')
+            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'requests' => $requests->map(function ($r) {
+                return [
+                    'id' => $r->id,
+                    'label' => $r->label,
+                    'description' => $r->description,
+                    'structure_config' => $r->structure_config,
+                    'status' => $r->status,
+                    'admin_notes' => $r->admin_notes,
+                    'created_at_formatted' => $r->created_at->format('M d, Y'),
+                    'reviewed_at' => $r->reviewed_at?->format('M d, Y'),
+                    'show_url' => route('chairperson.structureTemplates.show', $r),
+                    'destroy_url' => route('chairperson.structureTemplates.destroy', $r),
+                ];
+            })->values(),
+            'counts' => [
+                'pending' => $requests->where('status', 'pending')->count(),
+                'approved' => $requests->where('status', 'approved')->count(),
+                'rejected' => $requests->where('status', 'rejected')->count(),
+            ],
+        ]);
     }
 
     /**

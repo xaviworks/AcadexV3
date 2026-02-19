@@ -176,6 +176,7 @@ Route::prefix('chairperson')
         
         // Structure Template Requests
         Route::get('/structure-templates', [ChairpersonController::class, 'indexTemplateRequests'])->name('structureTemplates.index');
+        Route::get('/structure-templates/poll', [ChairpersonController::class, 'pollTemplateRequests'])->name('structureTemplates.poll');
         Route::get('/structure-templates/create', [ChairpersonController::class, 'createTemplateRequest'])->name('structureTemplates.create');
         Route::post('/structure-templates', [ChairpersonController::class, 'storeTemplateRequest'])->name('structureTemplates.store');
         Route::get('/structure-templates/{request}', [ChairpersonController::class, 'showTemplateRequest'])->name('structureTemplates.show');
@@ -384,6 +385,7 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 
     // Structure Template Requests (from chairpersons)
     Route::get('/structure-template-requests', [AdminController::class, 'indexStructureTemplateRequests'])->name('structureTemplateRequests.index');
+    Route::get('/structure-template-requests/poll', [AdminController::class, 'pollStructureTemplateRequests'])->name('structureTemplateRequests.poll');
     Route::get('/structure-template-requests/{templateRequest}', [AdminController::class, 'showStructureTemplateRequest'])->name('structureTemplateRequests.show');
     Route::post('/structure-template-requests/{templateRequest}/approve', [AdminController::class, 'approveStructureTemplateRequest'])->name('structureTemplateRequests.approve');
     Route::post('/structure-template-requests/{templateRequest}/reject', [AdminController::class, 'rejectStructureTemplateRequest'])->name('structureTemplateRequests.reject');

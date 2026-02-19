@@ -1,7 +1,46 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+@php
+    // Prepare initial data for Alpine.js hydration (same shape as poll endpoint)
+    $requestsData = $requests->map(function ($r) {
+        return [
+            'id' => $r->id,
+            'label' => $r->label,
+            'description' => $r->description,
+            'structure_config' => $r->structure_config,
+            'status' => $r->status,
+            'admin_notes' => $r->admin_notes,
+            'created_at' => $r->created_at->toIso8601String(),
+            'created_at_formatted' => $r->created_at->format('M d, Y'),
+            'created_at_time' => $r->created_at->format('h:i A'),
+            'chairperson' => [
+                'first_name' => $r->chairperson->first_name,
+                'last_name' => $r->chairperson->last_name,
+                'email' => $r->chairperson->email,
+            ],
+            'reviewer' => $r->reviewer ? [
+                'first_name' => $r->reviewer->first_name,
+                'last_name' => $r->reviewer->last_name,
+            ] : null,
+            'reviewed_at' => $r->reviewed_at?->format('M d, Y'),
+            'approve_url' => route('admin.structureTemplateRequests.approve', $r),
+            'reject_url' => route('admin.structureTemplateRequests.reject', $r),
+            'show_url' => route('admin.structureTemplateRequests.show', $r),
+        ];
+    })->values();
+@endphp
+
+<script>
+    window.templateRequestsConfig = {
+        requests: @json($requestsData),
+        pendingCount: @json($pendingCount),
+        pollUrl: @json(route('admin.structureTemplateRequests.poll')),
+        status: @json($status),
+    };
+</script>
+
+<div class="container-fluid py-4" x-data="templateRequestsAdmin()" x-init="init()">
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -38,7 +77,7 @@
                 </a>
                 <a href="{{ route('admin.structureTemplateRequests.index', ['status' => 'pending']) }}" 
                    class="btn btn-sm {{ $status === 'pending' ? 'btn-warning text-dark' : 'btn-outline-warning' }}">
-                    Pending @if($pendingCount > 0)<span class="badge bg-dark ms-1">{{ $pendingCount }}</span>@endif
+                    Pending <span x-show="pendingCount > 0" class="badge bg-dark ms-1" x-text="pendingCount"></span>
                 </a>
                 <a href="{{ route('admin.structureTemplateRequests.index', ['status' => 'approved']) }}" 
                    class="btn btn-sm {{ $status === 'approved' ? 'btn-success' : 'btn-outline-success' }}">
@@ -52,7 +91,8 @@
         </div>
     </div>
 
-    @if ($requests->isEmpty())
+    {{-- Empty State --}}
+    <template x-if="requests.length === 0">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
                 <div class="mb-3">
@@ -72,7 +112,10 @@
                 </p>
             </div>
         </div>
-    @else
+    </template>
+
+    {{-- Table (rendered from Alpine data) --}}
+    <template x-if="requests.length > 0">
         <div class="table-responsive">
             <table class="table table-hover bg-white shadow-sm">
                 <thead class="table-success">
@@ -86,90 +129,76 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($requests as $request)
-                        @php
-                            $statusBadge = match ($request->status) {
-                                'pending' => ['class' => 'bg-warning text-dark', 'icon' => 'clock-history'],
-                                'approved' => ['class' => 'bg-success', 'icon' => 'check-circle'],
-                                'rejected' => ['class' => 'bg-danger', 'icon' => 'x-circle'],
-                                default => ['class' => 'bg-secondary', 'icon' => 'question-circle'],
-                            };
-                            
-                            $structureType = $request->structure_config['type'] ?? 'unknown';
-                            $structureLabel = match ($structureType) {
-                                'lecture_only' => 'Lecture Only',
-                                'lecture_lab' => 'Lecture + Lab',
-                                'custom' => 'Custom',
-                                default => 'Unknown',
-                            };
-                        @endphp
+                    <template x-for="req in requests" :key="req.id">
                         <tr>
                             <td>
-                                <div class="fw-bold">{{ $request->label }}</div>
-                                @if ($request->description)
-                                    <small class="text-muted">{{ Str::limit($request->description, 60) }}</small>
-                                @endif
+                                <div class="fw-bold" x-text="req.label"></div>
+                                <template x-if="req.description">
+                                    <small class="text-muted" x-text="truncate(req.description, 60)"></small>
+                                </template>
                             </td>
                             <td>
-                                <div>{{ $request->chairperson->first_name }} {{ $request->chairperson->last_name }}</div>
-                                <small class="text-muted">{{ $request->chairperson->email }}</small>
+                                <div x-text="req.chairperson.first_name + ' ' + req.chairperson.last_name"></div>
+                                <small class="text-muted" x-text="req.chairperson.email"></small>
                             </td>
                             <td>
-                                <span class="badge bg-info text-dark">{{ $structureLabel }}</span>
+                                <span class="badge bg-info text-dark" x-text="getStructureLabel(req.structure_config)"></span>
                             </td>
                             <td>
-                                <span class="badge {{ $statusBadge['class'] }}">
-                                    <i class="bi bi-{{ $statusBadge['icon'] }} me-1"></i>{{ ucfirst($request->status) }}
+                                <span class="badge" :class="getStatusBadgeClass(req.status)">
+                                    <i class="me-1" :class="getStatusIcon(req.status)"></i><span x-text="req.status.charAt(0).toUpperCase() + req.status.slice(1)"></span>
                                 </span>
                             </td>
                             <td>
-                                <div>{{ $request->created_at->format('M d, Y') }}</div>
-                                <small class="text-muted">{{ $request->created_at->format('h:i A') }}</small>
+                                <div x-text="req.created_at_formatted"></div>
+                                <small class="text-muted" x-text="req.created_at_time"></small>
                             </td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-sm btn-info" 
-                                            onclick="viewRequest(this)"
-                                            data-request-id="{{ $request->id }}"
-                                            data-label="{{ $request->label }}"
-                                            data-description="{{ $request->description }}"
-                                            data-structure='@json($request->structure_config)'
-                                            data-chairperson="{{ $request->chairperson->first_name }} {{ $request->chairperson->last_name }}"
-                                            data-status="{{ $request->status }}"
-                                            data-admin-notes="{{ $request->admin_notes }}"
-                                            data-bs-toggle="modal" 
+                                    <button type="button" class="btn btn-sm btn-info"
+                                            @click="viewRequest($event.currentTarget)"
+                                            :data-request-id="req.id"
+                                            :data-label="req.label"
+                                            :data-description="req.description || ''"
+                                            :data-structure="JSON.stringify(req.structure_config)"
+                                            :data-chairperson="req.chairperson.first_name + ' ' + req.chairperson.last_name"
+                                            :data-status="req.status"
+                                            :data-admin-notes="req.admin_notes || ''"
+                                            data-bs-toggle="modal"
                                             data-bs-target="#viewRequestModal"
                                             title="View Details">
                                         <i class="bi bi-eye me-1"></i>View
                                     </button>
-                                    @if ($request->status === 'pending')
-                                        <button type="button" class="btn btn-sm btn-success" 
-                                                onclick="approveRequest(this)"
-                                                data-template-name="{{ $request->label }}"
-                                                data-approve-url="{{ route('admin.structureTemplateRequests.approve', $request) }}"
-                                                data-bs-toggle="modal" 
+                                    <template x-if="req.status === 'pending'">
+                                        <button type="button" class="btn btn-sm btn-success"
+                                                @click="approveRequest($event.currentTarget)"
+                                                :data-template-name="req.label"
+                                                :data-approve-url="req.approve_url"
+                                                data-bs-toggle="modal"
                                                 data-bs-target="#approveModal"
                                                 title="Approve Request">
                                             <i class="bi bi-check-circle me-1"></i>Approve
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-danger" 
-                                                onclick="rejectRequest(this)"
-                                                data-template-name="{{ $request->label }}"
-                                                data-reject-url="{{ route('admin.structureTemplateRequests.reject', $request) }}"
-                                                data-bs-toggle="modal" 
+                                    </template>
+                                    <template x-if="req.status === 'pending'">
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                                @click="rejectRequest($event.currentTarget)"
+                                                :data-template-name="req.label"
+                                                :data-reject-url="req.reject_url"
+                                                data-bs-toggle="modal"
                                                 data-bs-target="#rejectModal"
                                                 title="Reject Request">
                                             <i class="bi bi-x-circle me-1"></i>Reject
                                         </button>
-                                    @endif
+                                    </template>
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    </template>
                 </tbody>
             </table>
         </div>
-    @endif
+    </template>
 </div>
 
 <!-- View Request Modal -->

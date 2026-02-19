@@ -7,6 +7,7 @@ use App\Models\Subject;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 trait ActivityManagementTrait
 {
@@ -34,28 +35,45 @@ trait ActivityManagementTrait
         $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
 
         if ($activities->isEmpty()) {
-            $defaultActivities = [];
+            // Use a transaction with an advisory lock to prevent concurrent
+            // requests from inserting duplicate default activities.
+            DB::transaction(function () use ($subjectId, $term, $types, $maxAssessments, $labels) {
+                // Re-check inside the transaction to avoid duplicates
+                $existsNow = Activity::where('subject_id', $subjectId)
+                    ->where('term', $term)
+                    ->where('is_deleted', false)
+                    ->lockForUpdate()
+                    ->exists();
 
-            foreach ($types as $type) {
-                $baseType = FormulaStructure::baseActivityType($type);
-                $maxPerComponent = (int) ($maxAssessments[$type] ?? $maxAssessments[$baseType] ?? ($baseType === 'exam' ? 1 : 3));
-                $defaultCount = $baseType === 'exam' ? 1 : min(3, $maxPerComponent);
-                $label = $labels[$type] ?? $labels[$baseType] ?? FormulaStructure::formatLabel($type);
-
-                for ($i = 1; $i <= max(1, $defaultCount); $i++) {
-                    $defaultActivities[] = [
-                        'subject_id' => $subjectId,
-                        'term' => $term,
-                        'type' => $type,
-                        'title' => trim($label . ' ' . $i),
-                        'number_of_items' => 100,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                if ($existsNow) {
+                    return;
                 }
-            }
 
-            Activity::insert($defaultActivities);
+                $defaultActivities = [];
+
+                foreach ($types as $type) {
+                    $baseType = FormulaStructure::baseActivityType($type);
+                    $maxPerComponent = (int) ($maxAssessments[$type] ?? $maxAssessments[$baseType] ?? ($baseType === 'exam' ? 1 : 3));
+                    $defaultCount = $baseType === 'exam' ? 1 : min(3, $maxPerComponent);
+                    $label = $labels[$type] ?? $labels[$baseType] ?? FormulaStructure::formatLabel($type);
+
+                    for ($i = 1; $i <= max(1, $defaultCount); $i++) {
+                        $defaultActivities[] = [
+                            'subject_id' => $subjectId,
+                            'term' => $term,
+                            'type' => $type,
+                            'title' => trim($label . ' ' . $i),
+                            'number_of_items' => 100,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+
+                if (! empty($defaultActivities)) {
+                    Activity::insert($defaultActivities);
+                }
+            });
 
             $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
         }
@@ -274,6 +292,27 @@ trait ActivityManagementTrait
         }
 
         return false;
+    }
+
+    /**
+     * Ensure a subject's activities exist and are aligned with its resolved formula.
+     *
+     * Creates default activities for any term that has none, then realigns all
+     * terms so that activity counts respect the formula's min/max constraints
+     * and orphan types are archived.
+     */
+    protected function alignSubjectActivities(Subject $subject, ?int $actingUserId = null): array
+    {
+        $terms = ['prelim', 'midterm', 'prefinal', 'final'];
+
+        // Step 1: Create default activities for any term that has none yet.
+        foreach ($terms as $term) {
+            $this->getOrCreateDefaultActivities($subject->id, $term);
+        }
+
+        // Step 2: Realign all terms to the current formula (archives excess
+        // and orphan-type activities, creates any missing ones).
+        return $this->realignActivitiesToFormula($subject, null, $actingUserId);
     }
 
     protected function getTermLabelMap(): array

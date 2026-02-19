@@ -3857,6 +3857,63 @@ class AdminController extends Controller
     }
 
     /**
+     * Poll endpoint for live-updating the structure template requests list.
+     * Returns JSON with the same data shape as the index page.
+     */
+    public function pollStructureTemplateRequests(Request $request): \Illuminate\Http\JsonResponse
+    {
+        Gate::authorize('admin');
+
+        $status = $request->query('status', 'all');
+
+        $query = \App\Models\StructureTemplateRequest::with(['chairperson', 'reviewer']);
+
+        if ($status === 'pending') {
+            $query->pending();
+        } elseif ($status === 'approved') {
+            $query->approved();
+        } elseif ($status === 'rejected') {
+            $query->rejected();
+        }
+
+        $requests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
+            ->orderByDesc('created_at')
+            ->get();
+
+        $pendingCount = \App\Models\StructureTemplateRequest::pending()->count();
+
+        return response()->json([
+            'requests' => $requests->map(function ($r) {
+                return [
+                    'id' => $r->id,
+                    'label' => $r->label,
+                    'description' => $r->description,
+                    'structure_config' => $r->structure_config,
+                    'status' => $r->status,
+                    'admin_notes' => $r->admin_notes,
+                    'created_at' => $r->created_at->toIso8601String(),
+                    'created_at_formatted' => $r->created_at->format('M d, Y'),
+                    'created_at_time' => $r->created_at->format('h:i A'),
+                    'chairperson' => [
+                        'first_name' => $r->chairperson->first_name,
+                        'last_name' => $r->chairperson->last_name,
+                        'email' => $r->chairperson->email,
+                    ],
+                    'reviewer' => $r->reviewer ? [
+                        'first_name' => $r->reviewer->first_name,
+                        'last_name' => $r->reviewer->last_name,
+                    ] : null,
+                    'reviewed_at' => $r->reviewed_at?->format('M d, Y'),
+                    'approve_url' => route('admin.structureTemplateRequests.approve', $r),
+                    'reject_url' => route('admin.structureTemplateRequests.reject', $r),
+                    'show_url' => route('admin.structureTemplateRequests.show', $r),
+                ];
+            })->values(),
+            'pendingCount' => $pendingCount,
+        ]);
+    }
+
+    /**
      * Display the specified structure template request.
      */
     public function showStructureTemplateRequest(\App\Models\StructureTemplateRequest $request)
