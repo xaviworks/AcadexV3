@@ -15,9 +15,7 @@
                     <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
                 </span>
             @endif
-            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
-            </a>
+
         </div>
     </div>
 
