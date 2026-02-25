@@ -36,7 +36,7 @@
                                     {{-- Footer badges --}}
                                     <div class="d-flex justify-content-between align-items-center mt-4 px-2">
                                         <span class="badge bg-light border text-secondary px-3 py-2 rounded-pill">
-                                            👥 {{ $subjectItem->students_count }} Students
+                                            <i class="bi bi-people-fill me-1"></i>{{ $subjectItem->students_count }} Students
                                         </span>
                                         <span class="badge px-3 py-2 fw-semibold text-uppercase rounded-pill
                                             @if($subjectItem->grade_status === 'completed') bg-success
@@ -44,11 +44,11 @@
                                             @else bg-secondary
                                             @endif">
                                             @if($subjectItem->grade_status === 'completed')
-                                                ✔ Completed
+                                                <i class="bi bi-check-circle-fill me-1"></i>Completed
                                             @elseif($subjectItem->grade_status === 'pending')
-                                                ⏳ Pending
+                                                <i class="bi bi-hourglass-split me-1"></i>Pending
                                             @else
-                                                ⭕ Not Started
+                                                <i class="bi bi-dash-circle me-1"></i>Not Started
                                             @endif
                                         </span>
                                     </div>
