@@ -8,20 +8,21 @@
     </h1>
 
     {{-- Breadcrumb Navigation --}}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item">
-                <a href="{{ route('dean.grades') }}" class="{{ empty(request('course_id')) ? 'active' : '' }}">Select Course</a>
-            </li>
-            @if (!empty(request('course_id')) && empty(request('instructor_id')))
-                <li class="breadcrumb-item active" aria-current="page">Select Instructor</li>
-            @elseif (!empty(request('instructor_id')) && empty(request('subject_id')))
-                <li class="breadcrumb-item active" aria-current="page">Select Subject</li>
-            @elseif (!empty(request('subject_id')))
-                <li class="breadcrumb-item active" aria-current="page">Students' Final Grades</li>
-            @endif
-        </ol>
-    </nav>
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Home', 'url' => '/'],
+            ['label' => 'Select Course', 'url' => route('dean.grades')]
+        ];
+
+        if (!empty(request('course_id')) && empty(request('instructor_id'))) {
+            $breadcrumbItems[] = ['label' => 'Select Instructor'];
+        } elseif (!empty(request('instructor_id')) && empty(request('subject_id'))) {
+            $breadcrumbItems[] = ['label' => 'Select Subject'];
+        } elseif (!empty(request('subject_id'))) {
+            $breadcrumbItems[] = ['label' => 'Students\' Final Grades'];
+        }
+    @endphp
+    <x-breadcrumbs :items="$breadcrumbItems" />
 
     {{-- Step 1: Course Selection --}}
     @if(empty(request('course_id')))
