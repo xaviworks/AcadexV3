@@ -8,9 +8,6 @@
             <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-calendar-week-fill text-success me-2"></i>Select Academic Period</h1>
             <p class="text-muted mb-0">Choose the period for Grade Formula Management</p>
         </div>
-        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
-        </a>
     </div>
 
     @php

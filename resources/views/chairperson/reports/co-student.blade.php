@@ -6,9 +6,7 @@
     @include('chairperson.partials.reports-header', [
         'title' => 'Student Outcomes Summary',
         'subtitle' => 'Individual student Course Outcome performance report',
-        'icon' => 'bi-person-lines-fill',
-        'backRoute' => route('chairperson.reports.co-student'),
-        'backLabel' => 'Choose Student'
+        'icon' => 'bi-person-lines-fill'
     ])
 
     {{-- Student & Subject Info Strip --}}
