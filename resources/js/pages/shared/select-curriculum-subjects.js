@@ -78,9 +78,13 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
               subjectsTableBody.innerHTML = '<div class="text-muted text-center">No subjects found.</div>';
             }
           }
+          if (noCurriculumSelected) noCurriculumSelected.classList.add('d-none');
           subjectsContainer.classList.remove('d-none');
           return;
         }
+
+        // Hide empty state when showing subjects
+        if (noCurriculumSelected) noCurriculumSelected.classList.add('d-none');
 
         const grouped = {};
         data.forEach((subj) => {
@@ -172,7 +176,7 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
                     <tr>
                         <th style="width: 80px;" class="text-center">
                             <div class="d-flex align-items-center justify-content-center m-0">
-                                <input type="checkbox" class="form-check-input m-0" id="selectAllBtn" data-selected="false" style="width: 20px; height: 20px; cursor: pointer; border: 2px solid #198754;" title="Select/Unselect All">
+                                <input type="checkbox" class="form-check-input m-0 select-all-btn" data-selected="false" style="width: 20px; height: 20px; cursor: pointer; border: 2px solid #198754;" title="Select/Unselect All">
                             </div>
                         </th>
                         <th style="width: 180px;">Course Code</th>
@@ -202,6 +206,12 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
         }
 
         subjectsContainer.classList.remove('d-none');
+
+        // Initialize select-all state for all tables
+        document.querySelectorAll('#subjectsTableBody table').forEach((table) => {
+          updateSelectAllState(table);
+        });
+
         updateSelectedCount();
       })
       .catch(() => {
@@ -217,6 +227,7 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
             subjectsTableBody.innerHTML = '<div class="text-danger text-center">Failed to load subjects.</div>';
           }
         }
+        if (noCurriculumSelected) noCurriculumSelected.classList.add('d-none');
         subjectsContainer.classList.remove('d-none');
       })
       .finally(() => {
@@ -228,13 +239,17 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
 
   // Select/Unselect All Handler
   document.addEventListener('change', function (e) {
-    if (e.target.id === 'selectAllBtn' && e.target.type === 'checkbox') {
+    if (e.target.classList.contains('select-all-btn') && e.target.type === 'checkbox') {
       const checkbox = e.target;
       const allSelected = checkbox.checked;
       checkbox.dataset.selected = allSelected;
 
-      // Only select enabled checkboxes
-      document.querySelectorAll('.subject-checkbox').forEach((cb) => {
+      // Find the table containing this checkbox
+      const table = checkbox.closest('table');
+      if (!table) return;
+
+      // Only select enabled checkboxes within this specific table
+      table.querySelectorAll('.subject-checkbox').forEach((cb) => {
         if (cb.disabled) {
           cb.checked = false; // Keep disabled checkboxes unchecked
         } else {
@@ -268,10 +283,55 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
     }
   }
 
+  // Helper function to update select-all checkbox state for a table
+  function updateSelectAllState(table) {
+    const selectAllBtn = table.querySelector('.select-all-btn');
+    if (!selectAllBtn) return;
+
+    const checkboxes = Array.from(table.querySelectorAll('.subject-checkbox:not(:disabled)'));
+    const checkedBoxes = checkboxes.filter((cb) => cb.checked);
+
+    if (checkboxes.length === 0) {
+      selectAllBtn.checked = false;
+      selectAllBtn.indeterminate = false;
+    } else if (checkedBoxes.length === 0) {
+      selectAllBtn.checked = false;
+      selectAllBtn.indeterminate = false;
+    } else if (checkedBoxes.length === checkboxes.length) {
+      selectAllBtn.checked = true;
+      selectAllBtn.indeterminate = false;
+    } else {
+      selectAllBtn.checked = false;
+      selectAllBtn.indeterminate = true;
+    }
+  }
+
   // Listen for checkbox changes
   document.addEventListener('change', function (e) {
     if (e.target.classList.contains('subject-checkbox')) {
       updateSelectedCount();
+
+      // Update the select-all checkbox state for this table
+      const table = e.target.closest('table');
+      if (table) {
+        updateSelectAllState(table);
+      }
+    }
+  });
+
+  // Handle tab changes - update select-all state when switching tabs
+  document.addEventListener('shown.bs.tab', function (e) {
+    if (e.target.matches('#yearTabs .nav-link')) {
+      const targetId = e.target.getAttribute('data-bs-target');
+      if (targetId) {
+        const tabPane = document.querySelector(targetId);
+        if (tabPane) {
+          const table = tabPane.querySelector('table');
+          if (table) {
+            updateSelectAllState(table);
+          }
+        }
+      }
     }
   });
 
