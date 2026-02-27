@@ -58,38 +58,46 @@
                 <option value="asc" selected>A to Z</option>
                 <option value="desc">Z to A</option>
             </select>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i>
+                <span id="studentCount">{{ count($students) }}</span> students
+            </div>
             <button type="button" 
-                    class="btn btn-outline-secondary shadow-sm" 
+                    class="btn btn-outline-secondary shadow-sm d-flex align-items-center gap-2" 
                     @click="$store.gradeTable.toggleFullscreen()"
                     x-data
                     title="Toggle expanded view">
                 <i :class="$store.gradeTable.isFullscreen ? 'bi bi-fullscreen-exit' : 'bi bi-arrows-fullscreen'"></i>
+                <span class="d-none d-md-inline">Expand</span>
             </button>
-        </div>
-        <div class="text-muted small">
-            <i class="bi bi-info-circle me-1"></i>
-            <span id="studentCount">{{ count($students) }}</span> students
         </div>
     </div>
 
 @endif
 
+{{-- Backdrop is injected directly onto <body> via JS to avoid parent overflow/transform issues --}}
+
 <div class="shadow-lg rounded-4 overflow-hidden border" 
      x-data 
+     @click.stop
      :class="$store.gradeTable.isFullscreen ? 'grade-table-fullscreen' : ''">
     
-    <!-- Fullscreen close button -->
-    <div x-show="$store.gradeTable.isFullscreen" 
-         x-transition
-         class="position-absolute top-0 end-0 p-3" 
-         style="z-index: 10;">
-        <button type="button" 
-                class="btn btn-dark btn-sm rounded-circle shadow" 
-                @click="$store.gradeTable.toggleFullscreen()"
-                title="Exit expanded view (Esc)">
-            <i class="bi bi-x-lg"></i>
-        </button>
-    </div>
+    <!-- Fullscreen close button (X button on top right) - only visible in fullscreen mode -->
+    <template x-if="$store.gradeTable.isFullscreen">
+        <div x-transition
+             class="position-fixed d-flex justify-content-end" 
+             style="top: 16px; right: 16px; z-index: 10000;">
+            <button type="button" 
+                    class="btn btn-light btn-lg shadow d-flex align-items-center justify-content-center" 
+                    @click="$store.gradeTable.toggleFullscreen()"
+                    title="Close expanded view (Esc)"
+                    style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid white;">
+                <i class="bi bi-x-lg" style="font-size: 1.5rem; color: #333;"></i>
+            </button>
+        </div>
+    </template>
     @if ($hasData)
         <div class="table-responsive">
             <div style="max-height: 600px; overflow-y: auto;">
@@ -264,24 +272,59 @@
 
 <!-- JavaScript for Client-Side Filtering -->
 <script>
-    // Initialize Alpine store for fullscreen mode
+    // Create and manage backdrop element directly on body
+    function createBackdrop() {
+        if (document.getElementById('grade-table-body-backdrop')) return;
+        const backdrop = document.createElement('div');
+        backdrop.id = 'grade-table-body-backdrop';
+        backdrop.style.cssText = [
+            'position: fixed',
+            'top: 0',
+            'left: 0',
+            'width: 100vw',
+            'height: 100vh',
+            'background: rgba(0, 0, 0, 0.4)',
+            'backdrop-filter: blur(12px)',
+            '-webkit-backdrop-filter: blur(12px)',
+            'z-index: 9998',
+            'pointer-events: auto',
+            'cursor: default',
+            'opacity: 0',
+            'transition: opacity 0.2s ease',
+        ].join(';');
+        document.body.appendChild(backdrop);
+        // Trigger transition
+        requestAnimationFrame(() => backdrop.style.opacity = '1');
+    }
+
+    function removeBackdrop() {
+        const backdrop = document.getElementById('grade-table-body-backdrop');
+        if (!backdrop) return;
+        backdrop.style.opacity = '0';
+        setTimeout(() => backdrop.remove(), 200);
+    }
+
+    // Initialize Alpine store for fullscreen mode (only once)
     document.addEventListener('alpine:init', () => {
-        Alpine.store('gradeTable', {
-            isFullscreen: false,
-            
-            toggleFullscreen() {
-                this.isFullscreen = !this.isFullscreen;
-                if (this.isFullscreen) {
-                    document.body.style.overflow = 'hidden';
-                    // Show notification about Esc key
-                    if (window.notify) {
-                        window.notify.info('Press "Esc" to close expand view');
+        if (!Alpine.store('gradeTable')) {
+            Alpine.store('gradeTable', {
+                isFullscreen: false,
+                
+                toggleFullscreen() {
+                    this.isFullscreen = !this.isFullscreen;
+                    if (this.isFullscreen) {
+                        document.body.style.overflow = 'hidden';
+                        createBackdrop();
+                        if (window.notify) {
+                            window.notify.info('Press "Esc" to close expand view');
+                        }
+                    } else {
+                        document.body.style.overflow = '';
+                        removeBackdrop();
                     }
-                } else {
-                    document.body.style.overflow = '';
                 }
-            }
-        });
+            });
+        }
     });
 
     // Escape key handler for fullscreen mode
@@ -329,11 +372,18 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90vw !important;
-    height: 85vh !important;
-    z-index: 1050;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
-    background: white;
+    width: 95vw !important;
+    max-width: 1800px !important;
+    height: 90vh !important;
+    max-height: 900px !important;
+    z-index: 9999;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 16px !important;
+    pointer-events: auto;
 }
 
 .grade-table-fullscreen .table-responsive {
@@ -346,20 +396,36 @@
     height: 100% !important;
 }
 
-/* Backdrop overlay */
-.grade-table-fullscreen::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
+/* Backdrop is injected directly on body via JS (#grade-table-body-backdrop) */
+#grade-table-body-backdrop {
+    pointer-events: auto !important;
 }
 
-/* Prevent body scroll when fullscreen is active */
+/* Prevent body scroll and block #app interaction when fullscreen is active */
 body:has(.grade-table-fullscreen) {
-    overflow: hidden;
+    overflow: hidden !important;
 }
-</style>
+
+body:has(.grade-table-fullscreen) #app {
+    pointer-events: none;
+}
+
+body:has(.grade-table-fullscreen) .grade-table-fullscreen {
+    pointer-events: auto !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+    .grade-table-fullscreen {
+        width: 98vw !important;
+        height: 92vh !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .grade-table-fullscreen {
+        width: 100vw !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+    }
+}</style>

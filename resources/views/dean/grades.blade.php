@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="container-fluid px-4 py-4">
     <h1 class="text-2xl font-bold mb-6">
         <i class="bi bi-card-checklist text-success me-2"></i>
         View Grades
     </h1>
 
     {{-- Breadcrumb Navigation --}}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-4">
+    <nav aria-label="breadcrumb" style="background: transparent;">
+        <ol class="breadcrumb mb-4" style="background: transparent; padding: 0.5rem 0;">
             <li class="breadcrumb-item">
                 <a href="{{ route('dean.grades') }}" class="{{ empty(request('course_id')) ? 'active' : '' }}">Select Course</a>
             </li>
