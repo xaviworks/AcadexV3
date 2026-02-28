@@ -104,6 +104,10 @@
 {{-- JavaScript: resources/js/pages/instructor/manage-grades.js --}}
 
 @push('scripts')
+<script>
+    window.pageData = window.pageData || {};
+    window.pageData.saveScoreUrl = "{{ route('instructor.grades.ajaxSaveScore') }}";
+</script>
 @include('instructor.partials.grade-script')
 
 <style>

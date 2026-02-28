@@ -160,6 +160,108 @@ export function bindGradeInputEvents() {
       }
     }
 
+    // --- Fullscreen auto-save logic ---
+    const saveScoreUrl =
+      (window.pageData && window.pageData.saveScoreUrl) || '/instructor/grades/ajax-save-score';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    /**
+     * Auto-save a single grade input when in fullscreen/expanded mode.
+     * Skips if not fullscreen or if the input is invalid or unchanged.
+     */
+    function autoSaveIfFullscreen(input) {
+      // Only auto-save when in fullscreen/expanded view
+      if (
+        typeof Alpine === 'undefined' ||
+        !Alpine.store('gradeTable') ||
+        !Alpine.store('gradeTable').isFullscreen
+      ) {
+        return;
+      }
+
+      // Skip if input is invalid
+      if (input.classList.contains('is-invalid')) {
+        return;
+      }
+
+      // Skip if value hasn't actually changed from the saved original
+      if (input.value === originalValues.get(input)) {
+        return;
+      }
+
+      const studentId = input.dataset.student;
+      const activityId = input.dataset.activity;
+      const subjectIdEl = document.querySelector('input[name="subject_id"]');
+      const termEl = document.querySelector('input[name="term"]');
+
+      if (!studentId || !activityId || !subjectIdEl || !termEl) {
+        return;
+      }
+
+      const score = input.value.trim() === '' ? null : input.value;
+
+      // Visual feedback: subtle saving indicator
+      input.style.transition = 'border-color 0.2s, box-shadow 0.2s';
+      input.style.borderColor = '#ffc107';
+      input.style.boxShadow = '0 0 0 0.15rem rgba(255, 193, 7, 0.35)';
+
+      fetch(saveScoreUrl, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify({
+          student_id: studentId,
+          activity_id: activityId,
+          subject_id: subjectIdEl.value,
+          term: termEl.value,
+          score: score,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error('Save failed');
+          return response.json();
+        })
+        .then((data) => {
+          if (data.status === 'success') {
+            // Update the original value so "unsaved changes" clears for this input
+            originalValues.set(input, input.value);
+            updateSaveButtonState();
+
+            // Mark that auto-saves happened so section refreshes on close
+            if (Alpine.store('gradeTable')) {
+              Alpine.store('gradeTable').markAutoSaved();
+            }
+
+            // Brief green flash to confirm save
+            input.style.borderColor = '#198754';
+            input.style.boxShadow = '0 0 0 0.15rem rgba(25, 135, 84, 0.3)';
+            setTimeout(() => {
+              input.style.borderColor = '';
+              input.style.boxShadow = '';
+            }, 800);
+          } else {
+            throw new Error(data?.message || 'Save failed');
+          }
+        })
+        .catch((error) => {
+          // Red flash to indicate failure
+          input.style.borderColor = '#dc3545';
+          input.style.boxShadow = '0 0 0 0.15rem rgba(220, 53, 69, 0.3)';
+          setTimeout(() => {
+            input.style.borderColor = '';
+            input.style.boxShadow = '';
+          }, 1500);
+
+          if (typeof window.notify !== 'undefined' && window.notify.error) {
+            window.notify.error('Failed to auto-save: ' + error.message);
+          }
+        });
+    }
+
     console.log('Found items inputs:', itemsInputs.length);
 
     // Initialize data structures
@@ -490,6 +592,11 @@ export function bindGradeInputEvents() {
         input.addEventListener('input', () => {
           validateInput(input);
           updateSaveButtonState();
+        });
+
+        // Auto-save on change (blur after edit) when in expanded/fullscreen view
+        input.addEventListener('change', () => {
+          autoSaveIfFullscreen(input);
         });
 
         // Handle keyboard input

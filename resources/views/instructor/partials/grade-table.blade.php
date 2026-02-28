@@ -309,18 +309,29 @@
         if (!Alpine.store('gradeTable')) {
             Alpine.store('gradeTable', {
                 isFullscreen: false,
+                _hadAutoSaves: false,
                 
+                markAutoSaved() {
+                    this._hadAutoSaves = true;
+                },
+
                 toggleFullscreen() {
                     this.isFullscreen = !this.isFullscreen;
                     if (this.isFullscreen) {
                         document.body.style.overflow = 'hidden';
                         createBackdrop();
+                        this._hadAutoSaves = false;
                         if (window.notify) {
                             window.notify.info('Press "Esc" to close expand view');
                         }
                     } else {
                         document.body.style.overflow = '';
                         removeBackdrop();
+                        // Refresh grade section to update computed term grades after auto-saves
+                        if (this._hadAutoSaves && typeof window.refreshGradeSection === 'function') {
+                            this._hadAutoSaves = false;
+                            window.refreshGradeSection();
+                        }
                     }
                 }
             });
