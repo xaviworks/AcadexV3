@@ -161,8 +161,7 @@ export function bindGradeInputEvents() {
     }
 
     // --- Fullscreen auto-save logic ---
-    const saveScoreUrl =
-      (window.pageData && window.pageData.saveScoreUrl) || '/instructor/grades/ajax-save-score';
+    const saveScoreUrl = (window.pageData && window.pageData.saveScoreUrl) || '/instructor/grades/ajax-save-score';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
     /**
@@ -171,11 +170,7 @@ export function bindGradeInputEvents() {
      */
     function autoSaveIfFullscreen(input) {
       // Only auto-save when in fullscreen/expanded view
-      if (
-        typeof Alpine === 'undefined' ||
-        !Alpine.store('gradeTable') ||
-        !Alpine.store('gradeTable').isFullscreen
-      ) {
+      if (typeof Alpine === 'undefined' || !Alpine.store('gradeTable') || !Alpine.store('gradeTable').isFullscreen) {
         return;
       }
 
