@@ -245,28 +245,28 @@
             :compact="true"
         />
     @endif
-</div>
 
-@if ($hasData)
-    <div class="text-end mt-4 d-flex justify-content-end align-items-center">
-        <!-- Alpine-powered unsaved changes indicator -->
-        <div x-data x-show="$store.grades.unsavedChanges" x-transition class="me-3">
-            <div class="alert alert-warning mb-0 py-2 px-3 d-flex align-items-center gap-2">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <span class="small fw-semibold">Unsaved changes</span>
+    @if ($hasData)
+        <div class="text-end mt-4 mb-4 me-4 d-flex justify-content-end align-items-center">
+            <!-- Alpine-powered unsaved changes indicator -->
+            <div x-data x-show="$store.grades.unsavedChanges" x-transition class="me-3">
+                <div class="alert alert-warning mb-0 py-2 px-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span class="small fw-semibold">Unsaved changes</span>
+                </div>
             </div>
+            <!-- Container for validation error messages only -->
+            <div id="unsavedNotificationContainer" class="me-3"></div>
+            <button type="submit" id="saveGradesBtn" class="btn btn-success px-4 py-2 d-flex align-items-center gap-2 position-relative" disabled x-data>
+                <i class="bi bi-save"></i>
+                <span x-text="$store.loading.isLoading('saveGrades') ? 'Saving...' : 'Save Grades'"></span>
+                <div x-show="$store.loading.isLoading('saveGrades')" x-transition class="spinner-border spinner-border-sm ms-1" role="status">
+                    <span class="visually-hidden">Saving...</span>
+                </div>
+            </button>
         </div>
-        <!-- Container for validation error messages only -->
-        <div id="unsavedNotificationContainer" class="me-3"></div>
-        <button type="submit" id="saveGradesBtn" class="btn btn-success px-4 py-2 d-flex align-items-center gap-2 position-relative" disabled x-data>
-            <i class="bi bi-save"></i>
-            <span x-text="$store.loading.isLoading('saveGrades') ? 'Saving...' : 'Save Grades'"></span>
-            <div x-show="$store.loading.isLoading('saveGrades')" x-transition class="spinner-border spinner-border-sm ms-1" role="status">
-                <span class="visually-hidden">Saving...</span>
-            </div>
-        </button>
-    </div>
-@endif
+    @endif
+</div>
 
 
 
