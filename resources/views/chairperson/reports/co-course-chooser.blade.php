@@ -8,9 +8,7 @@
         'subtitle' => 'Select a course to view detailed Course Outcome compliance',
         'icon' => 'bi-book',
         'academicYear' => $academicYear,
-        'semester' => $semester,
-        'backRoute' => route('dashboard'),
-        'backLabel' => 'Back to Dashboard'
+        'semester' => $semester
     ])
 
     <div class="row g-4 px-4 py-2">

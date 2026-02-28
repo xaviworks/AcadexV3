@@ -8,9 +8,7 @@
         'subtitle' => 'Select a course and student to view detailed Course Outcome performance',
         'icon' => 'bi-person-lines-fill',
         'academicYear' => $academicYear,
-        'semester' => $semester,
-        'backRoute' => route('dashboard'),
-        'backLabel' => 'Back to Dashboard'
+        'semester' => $semester
     ])
 
     {{-- Single Selection Card --}}
