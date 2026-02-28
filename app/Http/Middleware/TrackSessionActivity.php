@@ -22,14 +22,7 @@ class TrackSessionActivity
 
         // Only track for authenticated users
         if (Auth::check() && $request->session()->getId()) {
-            // Throttle updates to once per minute to reduce DB load
-            $lastUpdate = $request->session()->get('_last_activity_update', 0);
-            $now = now()->timestamp;
-            
-            if ($now - $lastUpdate > 60) { // Update only every 60 seconds
                 $this->updateSessionMetadata($request);
-                $request->session()->put('_last_activity_update', $now);
-            }
         }
 
         return $response;
