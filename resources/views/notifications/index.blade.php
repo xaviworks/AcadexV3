@@ -348,13 +348,13 @@ function notificationPageComponent(config) {
             // Listen for real-time notification events
             this.setupRealtimeListener();
             
-            // Start polling for live updates
-            this.startPolling();
+            // Start adaptive polling for live updates
+            this._schedulePoll();
         },
         
         destroy() {
             if (this.pollInterval) {
-                clearInterval(this.pollInterval);
+                clearTimeout(this.pollInterval);
             }
         },
 
@@ -369,11 +369,27 @@ function notificationPageComponent(config) {
         
         startPolling() {
             this.lastPollTimestamp = new Date().toISOString();
-            
-            // Poll every 10 seconds
-            this.pollInterval = setInterval(() => {
-                this.pollForNewNotifications();
-            }, 10000);
+            this._schedulePoll();
+        },
+
+        _pollDelay: 15000,
+        _idleStreak: 0,
+
+        _schedulePoll() {
+            if (!this.lastPollTimestamp) this.lastPollTimestamp = new Date().toISOString();
+            if (this.pollInterval) clearTimeout(this.pollInterval);
+            this.pollInterval = setTimeout(() => {
+                this.pollForNewNotifications().then(() => this._schedulePoll());
+            }, this._pollDelay);
+        },
+
+        _adaptDelay(hadNew) {
+            if (hadNew) { this._idleStreak = 0; this._pollDelay = 15000; }
+            else {
+                this._idleStreak++;
+                if (this._idleStreak >= 10) this._pollDelay = 60000;
+                else if (this._idleStreak >= 5) this._pollDelay = 30000;
+            }
         },
         
         async pollForNewNotifications() {
@@ -390,11 +406,13 @@ function notificationPageComponent(config) {
                 
                 this.unreadCount = data.count;
                 
+                let hadNew = false;
                 if (data.notifications && data.notifications.length > 0) {
                     data.notifications.forEach(notification => {
                         if (!this.seenNotificationIds.has(notification.id)) {
                             this.seenNotificationIds.add(notification.id);
                             this.handleNewNotification(notification);
+                            hadNew = true;
                         }
                     });
                     
@@ -402,6 +420,7 @@ function notificationPageComponent(config) {
                         this.lastPollTimestamp = data.latest_timestamp;
                     }
                 }
+                this._adaptDelay(hadNew);
             } catch (error) {
                 console.error('Error polling for notifications:', error);
             }

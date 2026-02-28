@@ -297,19 +297,12 @@ function geCoordinatorDashboard() {
         init() {
             this.polling = true;
             this.fetchData();
-            this.startPolling();
             document.addEventListener('visibilitychange', () => {
-                if (document.hidden) { clearInterval(this.pollInterval); }
-                else { this.fetchData(); this.startPolling(); }
+                if (!document.hidden) this.fetchData();
             });
+            window.addEventListener('dashboard:refresh', () => this.fetchData());
         },
-        destroy() {
-            if (this.pollInterval) clearInterval(this.pollInterval);
-        },
-        startPolling() {
-            if (this.pollInterval) clearInterval(this.pollInterval);
-            this.pollInterval = setInterval(() => this.fetchData(), 2000);
-        },
+        destroy() {},
         async fetchData() {
             try {
                 const r = await fetch('{{ route("dashboard.poll") }}', {

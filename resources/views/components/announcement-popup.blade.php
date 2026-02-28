@@ -131,21 +131,22 @@
 function announcementPopup() {
     // Keep last-seen JSON outside Alpine proxy for cheap diff
     let _lastJson = '';
-    let _pollTimer = null;
 
     return {
         announcements: [],
         currentIndex: 0,
-        polling: false,
 
         get currentAnnouncement() {
             return this.announcements[this.currentIndex] || null;
         },
 
-        /* ── Bootstrap: first fetch + start polling ── */
+        /* ── Bootstrap: fetch once, re-check on tab return only ── */
         async fetchAnnouncements() {
             await this._doFetch();
-            this._startPolling();
+            // Only re-fetch when user returns to the tab — no continuous polling
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) this._doFetch();
+            });
         },
 
         /* ── Core fetch logic (reused by init & poll) ── */
@@ -210,26 +211,6 @@ function announcementPopup() {
             }
         },
 
-        /* ── Polling engine (5s) + Page Visibility API ── */
-        _startPolling() {
-            this.polling = true;
-
-            // Poll every 5 seconds (announcements are less frequent than notifications)
-            _pollTimer = setInterval(() => this._doFetch(), 5000);
-
-            // Pause when tab is hidden, resume immediately when visible
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
-                } else {
-                    this._doFetch(); // instant fetch on return
-                    if (!_pollTimer) {
-                        _pollTimer = setInterval(() => this._doFetch(), 5000);
-                    }
-                }
-            });
-        },
-
         async dismissCurrentAnnouncement() {
             if (!this.currentAnnouncement) return;
 
@@ -284,7 +265,6 @@ function announcementPopup() {
 
         logout() {
             sessionStorage.removeItem('dismissedAnnouncements');
-            if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
 
             const form = document.createElement('form');
             form.method = 'POST';

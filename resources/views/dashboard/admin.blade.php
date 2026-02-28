@@ -225,19 +225,13 @@ function adminDashboard() {
         init() {
             this.polling = true;
             this.fetchData();
-            this.startPolling();
             document.addEventListener('visibilitychange', () => {
-                if (document.hidden) { clearInterval(this.pollInterval); }
-                else { this.fetchData(); this.startPolling(); }
+                if (!document.hidden) this.fetchData();
             });
+            // Refresh only when the notification system detects new data
+            window.addEventListener('dashboard:refresh', () => this.fetchData());
         },
-        destroy() {
-            if (this.pollInterval) clearInterval(this.pollInterval);
-        },
-        startPolling() {
-            if (this.pollInterval) clearInterval(this.pollInterval);
-            this.pollInterval = setInterval(() => this.fetchData(), 2000);
-        },
+        destroy() {},
         async fetchData() {
             try {
                 const params = new URLSearchParams(window.location.search);

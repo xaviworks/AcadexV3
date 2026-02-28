@@ -215,28 +215,40 @@ document.addEventListener('alpine:init', () => {
         lastPollTimestamp: null,
         pollInterval: null,
         seenNotificationIds: new Set(),
-        
+
+        // Adaptive polling: speeds up on activity, slows down when idle
+        _pollDelay: 10000,      // current delay (ms) — starts at 10s
+        _idleStreak: 0,         // consecutive polls with no new data
+        _POLL_MIN: 10000,       // 10s — fastest poll rate
+        _POLL_MID: 30000,       // 30s — after 5 idle polls
+        _POLL_MAX: 60000,       // 60s — after 10 idle polls
+        _IDLE_MID: 5,           // idle polls before switching to MID
+        _IDLE_MAX: 10,          // idle polls before switching to MAX
+
         init() {
             // Fetch unviewed count from server (persisted in database)
             this.fetchUnreadCount();
-            // Setup real-time listener if Echo is available, otherwise use polling
+            // Setup real-time listener if Echo is available
             this.setupRealtimeListener();
-            // Start polling for live updates
-            this.startPolling();
+            // Start adaptive polling for live updates
+            this._schedulePoll();
             // Pause when tab hidden, instant fetch when visible
             document.addEventListener('visibilitychange', () => {
-                if (document.hidden) { clearInterval(this.pollInterval); }
-                else { this.pollForNewNotifications(); this.startPolling(); }
+                if (document.hidden) {
+                    clearTimeout(this.pollInterval);
+                } else {
+                    this.pollForNewNotifications();
+                    this._schedulePoll();
+                }
             });
         },
-        
+
         destroy() {
-            // Clean up polling interval when component is destroyed
             if (this.pollInterval) {
-                clearInterval(this.pollInterval);
+                clearTimeout(this.pollInterval);
             }
         },
-        
+
         setupRealtimeListener() {
             if (typeof Echo !== 'undefined' && window.userId) {
                 Echo.private(`App.Models.User.${window.userId}`)
@@ -245,59 +257,77 @@ document.addEventListener('alpine:init', () => {
                     });
             }
         },
-        
-        startPolling() {
-            // Initialize with current timestamp to only get new notifications
-            this.lastPollTimestamp = new Date().toISOString();
-            
-            if (this.pollInterval) clearInterval(this.pollInterval);
-            this.pollInterval = setInterval(() => {
-                this.pollForNewNotifications();
-            }, 2000);
+
+        /** Schedule the next poll using adaptive delay (setTimeout, not setInterval) */
+        _schedulePoll() {
+            if (this.pollInterval) clearTimeout(this.pollInterval);
+            this.pollInterval = setTimeout(() => {
+                this.pollForNewNotifications().then(() => this._schedulePoll());
+            }, this._pollDelay);
         },
-        
+
+        /** Adjust delay based on activity */
+        _adaptDelay(hadNewData) {
+            if (hadNewData) {
+                this._idleStreak = 0;
+                this._pollDelay = this._POLL_MIN;
+            } else {
+                this._idleStreak++;
+                if (this._idleStreak >= this._IDLE_MAX) {
+                    this._pollDelay = this._POLL_MAX;
+                } else if (this._idleStreak >= this._IDLE_MID) {
+                    this._pollDelay = this._POLL_MID;
+                }
+            }
+        },
+
         async pollForNewNotifications() {
             try {
                 const url = new URL('{{ route("notifications.poll") }}', window.location.origin);
                 if (this.lastPollTimestamp) {
                     url.searchParams.set('since', this.lastPollTimestamp);
+                } else {
+                    this.lastPollTimestamp = new Date().toISOString();
                 }
-                
+
                 const response = await fetch(url.toString());
                 if (!response.ok) return;
-                
+
                 const data = await response.json();
-                
-                // Update badge count
+
+                // Update badge count from poll response (no extra request needed)
                 this.unreadCount = data.count;
-                
-                // Process new notifications
+
+                let hadNewData = false;
+
                 if (data.notifications && data.notifications.length > 0) {
                     data.notifications.forEach(notification => {
-                        // Only show toast for truly new notifications we haven't seen
                         if (!this.seenNotificationIds.has(notification.id)) {
                             this.seenNotificationIds.add(notification.id);
                             this.handleNewNotification(notification);
+                            hadNewData = true;
                         }
                     });
-                    
-                    // Update timestamp for next poll
+
                     if (data.latest_timestamp) {
                         this.lastPollTimestamp = data.latest_timestamp;
                     }
                 }
-                
-                // Signal dashboard to refresh in sync
-                window.dispatchEvent(new CustomEvent('dashboard:refresh'));
+
+                // Only signal dashboard when there is actual new data
+                if (hadNewData) {
+                    window.dispatchEvent(new CustomEvent('dashboard:refresh'));
+                }
+
+                this._adaptDelay(hadNewData);
             } catch (error) {
                 console.error('Error polling for notifications:', error);
             }
         },
-        
+
         handleNewNotification(notification) {
             // Add to top of list if dropdown is open
             if (this.showDropdown) {
-                // Check if notification already exists in the list
                 const exists = this.notifications.some(n => n.id === notification.id);
                 if (!exists) {
                     this.notifications.unshift({
@@ -312,11 +342,12 @@ document.addEventListener('alpine:init', () => {
                     });
                 }
             }
-            
-            // Update unread count badge
-            this.fetchUnreadCount();
+            // Count is already updated by the poll response — no extra fetch needed
+            // When triggered by Echo, reset to fast polling to pick up the count quickly
+            this._idleStreak = 0;
+            this._pollDelay = this._POLL_MIN;
         },
-        
+
         async fetchUnreadCount() {
             try {
                 const response = await fetch('{{ route("notifications.unread-count") }}');
@@ -436,27 +467,36 @@ document.addEventListener('alpine:init', () => {
         lastPollTimestamp: null,
         pollInterval: null,
         seenNotificationIds: new Set(),
-        
+
+        // Adaptive polling: speeds up on activity, slows down when idle
+        _pollDelay: 10000,
+        _idleStreak: 0,
+        _POLL_MIN: 10000,
+        _POLL_MID: 30000,
+        _POLL_MAX: 60000,
+        _IDLE_MID: 5,
+        _IDLE_MAX: 10,
+
         init() {
-            // Fetch unviewed count from server (persisted in database)
             this.fetchUnreadCount();
-            // Setup real-time listener if Echo is available
             this.setupRealtimeListener();
-            // Start polling for live updates
-            this.startPolling();
-            // Pause when tab hidden, instant fetch when visible
+            this._schedulePoll();
             document.addEventListener('visibilitychange', () => {
-                if (document.hidden) { clearInterval(this.pollInterval); }
-                else { this.pollForNewNotifications(); this.startPolling(); }
+                if (document.hidden) {
+                    clearTimeout(this.pollInterval);
+                } else {
+                    this.pollForNewNotifications();
+                    this._schedulePoll();
+                }
             });
         },
-        
+
         destroy() {
             if (this.pollInterval) {
-                clearInterval(this.pollInterval);
+                clearTimeout(this.pollInterval);
             }
         },
-        
+
         setupRealtimeListener() {
             if (typeof Echo !== 'undefined' && window.userId) {
                 Echo.private(`App.Models.User.${window.userId}`)
@@ -465,50 +505,70 @@ document.addEventListener('alpine:init', () => {
                     });
             }
         },
-        
-        startPolling() {
-            this.lastPollTimestamp = new Date().toISOString();
-            
-            if (this.pollInterval) clearInterval(this.pollInterval);
-            this.pollInterval = setInterval(() => {
-                this.pollForNewNotifications();
-            }, 2000);
+
+        _schedulePoll() {
+            if (this.pollInterval) clearTimeout(this.pollInterval);
+            this.pollInterval = setTimeout(() => {
+                this.pollForNewNotifications().then(() => this._schedulePoll());
+            }, this._pollDelay);
         },
-        
+
+        _adaptDelay(hadNewData) {
+            if (hadNewData) {
+                this._idleStreak = 0;
+                this._pollDelay = this._POLL_MIN;
+            } else {
+                this._idleStreak++;
+                if (this._idleStreak >= this._IDLE_MAX) {
+                    this._pollDelay = this._POLL_MAX;
+                } else if (this._idleStreak >= this._IDLE_MID) {
+                    this._pollDelay = this._POLL_MID;
+                }
+            }
+        },
+
         async pollForNewNotifications() {
             try {
                 const url = new URL('/notifications/poll', window.location.origin);
                 if (this.lastPollTimestamp) {
                     url.searchParams.set('since', this.lastPollTimestamp);
+                } else {
+                    this.lastPollTimestamp = new Date().toISOString();
                 }
-                
+
                 const response = await fetch(url.toString());
                 if (!response.ok) return;
-                
+
                 const data = await response.json();
-                
+
                 this.unreadCount = data.count;
-                
+
+                let hadNewData = false;
+
                 if (data.notifications && data.notifications.length > 0) {
                     data.notifications.forEach(notification => {
                         if (!this.seenNotificationIds.has(notification.id)) {
                             this.seenNotificationIds.add(notification.id);
                             this.handleNewNotification(notification);
+                            hadNewData = true;
                         }
                     });
-                    
+
                     if (data.latest_timestamp) {
                         this.lastPollTimestamp = data.latest_timestamp;
                     }
                 }
-                
-                // Signal dashboard to refresh in sync
-                window.dispatchEvent(new CustomEvent('dashboard:refresh'));
+
+                if (hadNewData) {
+                    window.dispatchEvent(new CustomEvent('dashboard:refresh'));
+                }
+
+                this._adaptDelay(hadNewData);
             } catch (error) {
                 console.error('Error polling for notifications:', error);
             }
         },
-        
+
         handleNewNotification(notification) {
             if (this.showDropdown) {
                 const exists = this.notifications.some(n => n.id === notification.id);
@@ -525,11 +585,10 @@ document.addEventListener('alpine:init', () => {
                     });
                 }
             }
-            
-            // Update unread count badge
-            this.fetchUnreadCount();
+            this._idleStreak = 0;
+            this._pollDelay = this._POLL_MIN;
         },
-        
+
         async fetchUnreadCount() {
             try {
                 const response = await fetch('/notifications/unread-count');

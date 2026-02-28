@@ -262,19 +262,13 @@
                 this.polling = true;
                 this.$nextTick(() => createChart());
                 this.fetchData();
-                this.startPolling();
                 document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) { clearInterval(this.pollInterval); }
-                    else { this.fetchData(); this.startPolling(); }
+                    if (!document.hidden) this.fetchData();
                 });
+                window.addEventListener('dashboard:refresh', () => this.fetchData());
             },
             destroy() {
-                if (this.pollInterval) clearInterval(this.pollInterval);
                 if (_chart) { try { _chart.destroy(); } catch(e) {} _chart = null; }
-            },
-            startPolling() {
-                if (this.pollInterval) clearInterval(this.pollInterval);
-                this.pollInterval = setInterval(() => this.fetchData(), 2000);
             },
             async fetchData() {
                 try {
