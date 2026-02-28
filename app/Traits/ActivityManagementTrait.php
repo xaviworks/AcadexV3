@@ -7,6 +7,7 @@ use App\Models\Subject;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 trait ActivityManagementTrait
 {
@@ -34,30 +35,91 @@ trait ActivityManagementTrait
         $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
 
         if ($activities->isEmpty()) {
-            $defaultActivities = [];
+            // Use a cache lock to prevent concurrent requests from creating duplicate
+            // activities for the same subject+term (race condition guard).
+            $lockKey = "activities:defaults:{$subjectId}:{$term}";
+            $lock = Cache::lock($lockKey, 10);
 
-            foreach ($types as $type) {
-                $baseType = FormulaStructure::baseActivityType($type);
-                $maxPerComponent = (int) ($maxAssessments[$type] ?? $maxAssessments[$baseType] ?? ($baseType === 'exam' ? 1 : 3));
-                $defaultCount = $baseType === 'exam' ? 1 : min(3, $maxPerComponent);
-                $label = $labels[$type] ?? $labels[$baseType] ?? FormulaStructure::formatLabel($type);
+            try {
+                $lock->block(5);
 
-                for ($i = 1; $i <= max(1, $defaultCount); $i++) {
-                    $defaultActivities[] = [
-                        'subject_id' => $subjectId,
-                        'term' => $term,
-                        'type' => $type,
-                        'title' => trim($label . ' ' . $i),
-                        'number_of_items' => 100,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
+                // Re-check inside lock — another request may have created them already.
+                $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
+                if ($activities->isNotEmpty()) {
+                    return $activities;
                 }
+
+                $defaultActivities = [];
+
+                foreach ($types as $type) {
+                    $baseType = FormulaStructure::baseActivityType($type);
+                    $maxPerComponent = (int) ($maxAssessments[$type] ?? $maxAssessments[$baseType] ?? ($baseType === 'exam' ? 1 : 3));
+                    $defaultCount = $baseType === 'exam' ? 1 : min(3, $maxPerComponent);
+                    $label = $labels[$type] ?? $labels[$baseType] ?? FormulaStructure::formatLabel($type);
+
+                    for ($i = 1; $i <= max(1, $defaultCount); $i++) {
+                        $defaultActivities[] = [
+                            'subject_id' => $subjectId,
+                            'term' => $term,
+                            'type' => $type,
+                            'title' => trim($label . ' ' . $i),
+                            'number_of_items' => 100,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+
+                Activity::insert($defaultActivities);
+            } catch (\Illuminate\Contracts\Cache\LockTimeoutException $e) {
+                // Lock timed out — another request likely created the activities.
+            } finally {
+                optional($lock)->release();
             }
 
-            Activity::insert($defaultActivities);
-
             $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
+        }
+
+        // Guard: trim duplicate activities that exceed formula limits (repairs prior
+        // race-condition data where multiple batches were inserted concurrently).
+        $activities = $this->trimExcessActivities($activities, $maxAssessments, $types);
+
+        return $activities;
+    }
+
+    /**
+     * Soft-delete duplicate activities that exceed formula max_assessments per type.
+     *
+     * This repairs data created by prior race conditions where concurrent requests
+     * each inserted a full batch of default activities for the same subject+term.
+     */
+    protected function trimExcessActivities(Collection $activities, array $maxAssessments, \Illuminate\Support\Collection $types): Collection
+    {
+        $grouped = $activities->groupBy(fn ($a) => mb_strtolower($a->type));
+        $excessIds = [];
+
+        foreach ($grouped as $type => $group) {
+            $baseType = FormulaStructure::baseActivityType($type);
+            $max = $maxAssessments[$type] ?? $maxAssessments[$baseType] ?? null;
+
+            if ($max === null || $group->count() <= (int) $max) {
+                continue;
+            }
+
+            // Keep the first $max activities (ordered by id/created_at), soft-delete the rest.
+            $excess = $group->sortBy('id')->slice((int) $max);
+            foreach ($excess as $activity) {
+                $excessIds[] = $activity->id;
+            }
+        }
+
+        if (! empty($excessIds)) {
+            Activity::whereIn('id', $excessIds)->update(['is_deleted' => true]);
+
+            // Return only the activities that were kept (preserve Eloquent Collection type).
+            $activities = new Collection(
+                $activities->reject(fn ($a) => in_array($a->id, $excessIds, true))->values()->all()
+            );
         }
 
         return $activities;
