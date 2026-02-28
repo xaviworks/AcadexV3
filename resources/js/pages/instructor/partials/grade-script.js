@@ -1133,6 +1133,8 @@ function setupLinkClickHandler() {
               // Clear unsaved changes in Alpine store
               const gs = getGradesStore();
               if (gs) gs.clearUnsaved();
+              // Show page loader for smooth transition
+              document.body.classList.remove('loaded');
               window.location.href = link.href;
             });
           } else {

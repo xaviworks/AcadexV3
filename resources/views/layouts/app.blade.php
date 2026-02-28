@@ -151,8 +151,12 @@
                 !link.getAttribute('href').startsWith('#') &&
                 !link.closest('.dropdown-menu')) {
                 
-                // Show loading screen for internal navigation
-                document.body.classList.remove('loaded');
+                // Defer to allow other handlers (e.g. unsaved changes) to preventDefault first
+                setTimeout(function() {
+                    if (!e.defaultPrevented) {
+                        document.body.classList.remove('loaded');
+                    }
+                }, 0);
             }
         });
 

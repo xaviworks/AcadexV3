@@ -83,6 +83,9 @@ window.showUnsavedChangesModal = function (onConfirm, onCancel = null) {
     modalElement = document.getElementById('unsavedChangesModal');
   }
 
+  // Ensure page loader is hidden when showing modal (navigation was intercepted)
+  document.body.classList.add('loaded');
+
   // Use Bootstrap Modal API
   const modalInstance = new bootstrap.Modal(modalElement);
   const confirmBtn = document.getElementById('confirmLeaveBtn');
