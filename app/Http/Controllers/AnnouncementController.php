@@ -21,13 +21,16 @@ class AnnouncementController extends Controller
     public function getActive()
     {
         $user = Auth::user();
-        
+
+        // Eager-load viewedBy scoped to this user so shouldShowToUser()
+        // can check the relation without firing a query per announcement.
         $announcements = Announcement::current()
             ->forRole($user->role)
             ->orderByPriority('desc')
             ->orderByDesc('created_at')
+            ->with(['viewedBy' => fn ($q) => $q->where('users.id', $user->id)])
             ->get()
-            ->filter(fn($announcement) => $announcement->shouldShowToUser($user))
+            ->filter(fn ($announcement) => $announcement->shouldShowToUser($user))
             ->values();
 
         return response()->json($announcements);

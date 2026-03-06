@@ -12,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Use raw SQL to modify column type to DATETIME to allow far future values
-        DB::statement("ALTER TABLE `users` MODIFY `disabled_until` DATETIME NULL;");
+        // Use raw SQL to modify column type to DATETIME to allow far future values (MySQL only)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `users` MODIFY `disabled_until` DATETIME NULL;");
+        }
     }
 
     /**
@@ -21,7 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert to TIMESTAMP if needed
-        DB::statement("ALTER TABLE `users` MODIFY `disabled_until` TIMESTAMP NULL;");
+        // Revert to TIMESTAMP if needed (MySQL only)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `users` MODIFY `disabled_until` TIMESTAMP NULL;");
+        }
     }
 };

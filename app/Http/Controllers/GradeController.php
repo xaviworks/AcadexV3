@@ -15,6 +15,7 @@ use App\Services\GradesFormulaService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
@@ -88,22 +89,30 @@ class GradeController extends Controller
         ->withCount('students')
         ->get();
     
+        // Bulk-load graded counts for ALL subjects × terms in a single query
+        // instead of 4 queries per subject (N*4 → 1).
+        $bulkGradedCounts = TermGrade::whereIn('subject_id', $subjects->pluck('id'))
+            ->select('subject_id', 'term_id', \Illuminate\Support\Facades\DB::raw('COUNT(DISTINCT student_id) as cnt'))
+            ->groupBy('subject_id', 'term_id')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(fn ($rows) => $rows->keyBy('term_id'));
+
         foreach ($subjects as $subject) {
             $total = $subject->students_count;
+            $subjectTermCounts = $bulkGradedCounts->get($subject->id, collect());
             $terms = ['prelim', 'midterm', 'prefinal', 'final'];
             $gradedCount = 0;
-    
+
             foreach ($terms as $t) {
-                $gradedTerms = TermGrade::where('subject_id', $subject->id)
-                    ->where('term_id', $this->getTermId($t))
-                    ->distinct('student_id')
-                    ->count('student_id');
-    
+                $termId = $this->getTermId($t);
+                $gradedTerms = $subjectTermCounts->get($termId)?->cnt ?? 0;
+
                 if ($gradedTerms === $total && $total > 0) {
                     $gradedCount++;
                 }
             }
-    
+
             $subject->grade_status = match (true) {
                 $total === 0 => 'not_started',
                 $gradedCount === 0 => 'pending',
@@ -162,11 +171,21 @@ class GradeController extends Controller
                     return isset($matches[1]) ? floatval($matches[1]) : $co->co_identifier;
                 });
                 
+            // Pre-fetch ALL scores for this subject/term in one query to avoid
+            // N+1 per student (both here and inside calculateActivityScores).
+            $activityIds = $activities->pluck('id')->all();
+            $studentIds  = $students->pluck('id')->all();
+            $allScores = Score::whereIn('student_id', $studentIds)
+                ->whereIn('activity_id', $activityIds)
+                ->get()
+                ->groupBy('student_id')
+                ->map(fn ($group) => $group->keyBy('activity_id'));
+
             foreach ($students as $student) {
-                $activityScores = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings);
+                $studentScores = $allScores->get($student->id, collect());
+                $activityScores = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings, $studentScores);
                 foreach ($activities as $activity) {
-                    $scoreRecord = $student->scores()->where('activity_id', $activity->id)->first();
-                    $scores[$student->id][$activity->id] = $scoreRecord?->score;
+                    $scores[$student->id][$activity->id] = $studentScores->get($activity->id)?->score;
                 }
                 if ($activityScores['allScored'] && $activityScores['grade'] !== null) {
                     $termGrades[$student->id] = round($activityScores['grade'], 2);
@@ -235,11 +254,20 @@ class GradeController extends Controller
             session('active_academic_period_id')
         );
     
-        // Update course_outcome_id for each activity if provided
+        // Update course_outcome_id for each activity if provided.
+        // Pre-fetch activities and valid CO ids in bulk to avoid N+1.
         if ($request->has('course_outcomes')) {
+            $coActivityIds = array_keys($request->course_outcomes);
+            $coIncomingIds = array_filter(array_values($request->course_outcomes), fn ($v) => $v !== null && $v !== '');
+
+            $activitiesForCO = Activity::whereIn('id', $coActivityIds)->get()->keyBy('id');
+            $validCoIds = $coIncomingIds
+                ? \App\Models\CourseOutcomes::whereIn('id', $coIncomingIds)->pluck('id')->flip()
+                : collect();
+
             foreach ($request->course_outcomes as $activityId => $coId) {
-                $activity = Activity::find($activityId);
-                if ($activity && ($coId === null || $coId === '' || \App\Models\CourseOutcomes::find($coId))) {
+                $activity = $activitiesForCO->get($activityId);
+                if ($activity && ($coId === null || $coId === '' || $validCoIds->has($coId))) {
                     $activity->course_outcome_id = $coId ?: null;
                     $activity->save();
                 }
@@ -247,18 +275,27 @@ class GradeController extends Controller
         }
 
         $studentsGraded = 0; // Track students who actually had grades saved
+
+        // Pre-fetch ALL existing scores for this entire request batch in one query
+        // instead of N*M individual SELECT queries inside the nested loops.
+        $batchStudentIds  = array_keys($request->scores);
+        $batchActivityIds = $activities->pluck('id')->all();
+        $existingScoresMap = Score::whereIn('student_id', $batchStudentIds)
+            ->whereIn('activity_id', $batchActivityIds)
+            ->get()
+            ->groupBy('student_id')
+            ->map(fn ($group) => $group->keyBy('activity_id'));
+
         foreach ($request->scores as $studentId => $activityScores) {
             $hasNewOrChangedScores = false; // Track if this student has any new or changed scores
-            
+
             // Save individual scores
             foreach ($activityScores as $activityId => $score) {
                 // Only process if score is not null, not empty string, and not just whitespace
                 if ($score !== null && $score !== '' && trim($score) !== '') {
-                    // Check if this is a new score or a changed score
-                    $existingScore = Score::where('student_id', $studentId)
-                        ->where('activity_id', $activityId)
-                        ->first();
-                    
+                    // Use pre-loaded scores map instead of per-row SELECT.
+                    $existingScore = $existingScoresMap[$studentId][$activityId] ?? null;
+
                     // If no existing score, or if the score changed, mark as having changes
                     if (!$existingScore || $existingScore->score != $score) {
                         Score::updateOrCreate(
@@ -268,11 +305,9 @@ class GradeController extends Controller
                         $hasNewOrChangedScores = true;
                     }
                 } elseif ($score === '' || $score === null) {
-                    // Check if we need to delete an existing score (user cleared it)
-                    $existingScore = Score::where('student_id', $studentId)
-                        ->where('activity_id', $activityId)
-                        ->first();
-                    
+                    // Use pre-loaded map to check for existence before deleting.
+                    $existingScore = $existingScoresMap[$studentId][$activityId] ?? null;
+
                     if ($existingScore) {
                         $existingScore->delete();
                         $hasNewOrChangedScores = true;
@@ -436,15 +471,24 @@ class GradeController extends Controller
         $scores = [];
         $termGrades = [];
 
+        // Pre-fetch ALL scores in one query (same pattern as index()).
+        $activityIds = $activities->pluck('id')->all();
+        $studentIds  = $students->pluck('id')->all();
+        $allScores = Score::whereIn('student_id', $studentIds)
+            ->whereIn('activity_id', $activityIds)
+            ->get()
+            ->groupBy('student_id')
+            ->map(fn ($group) => $group->keyBy('activity_id'));
+
         foreach ($students as $student) {
-            $activityScores = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings);
+            $studentScores = $allScores->get($student->id, collect());
+            $activityScores = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings, $studentScores);
             $weights = $activityScores['weights'];
-            
+
             foreach ($activities as $activity) {
-                $scoreRecord = $student->scores()->where('activity_id', $activity->id)->first();
-                $scores[$student->id][$activity->id] = $scoreRecord?->score;
+                $scores[$student->id][$activity->id] = $studentScores->get($activity->id)?->score;
             }
-            
+
             if ($activityScores['allScored'] && $activityScores['grade'] !== null) {
                 $termGrades[$student->id] = round($activityScores['grade'], 2);
             } else {

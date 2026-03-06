@@ -17,7 +17,7 @@ class DisableUserTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($admin)
-            ->postJson(route('users.disable', ['user' => $user->id]), ['duration' => '1_week'])
+            ->postJson(route('admin.users.disable', ['user' => $user->id]), ['duration' => '1_week'])
             ->assertStatus(200)
             ->assertJson(['success' => true]);
 

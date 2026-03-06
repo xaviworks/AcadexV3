@@ -25,7 +25,14 @@ trait GradeCalculationTrait
         );
     }
 
-    protected function calculateActivityScores(Collection $activities, int $studentId, ?Subject $subject = null, ?array $formulaSettings = null): array
+    /**
+     * @param  \Illuminate\Support\Collection|null  $preloadedScores
+     *   When provided, must be a Collection already keyed by activity_id
+     *   (i.e. Score records for this specific student). Passing this avoids
+     *   an extra DB query per student when the caller has pre-fetched scores
+     *   for the whole student list in one bulk query.
+     */
+    protected function calculateActivityScores(Collection $activities, int $studentId, ?Subject $subject = null, ?array $formulaSettings = null, ?Collection $preloadedScores = null): array
     {
         $formula = $formulaSettings
             ?? $this->getGradesFormulaSettings(
@@ -42,7 +49,8 @@ trait GradeCalculationTrait
         $activitiesByType = $activities
             ->groupBy(fn ($activity) => mb_strtolower($activity->type));
 
-        $scores = Score::where('student_id', $studentId)
+        // Use caller-supplied pre-loaded scores when available to avoid N+1.
+        $scores = $preloadedScores ?? Score::where('student_id', $studentId)
             ->whereIn('activity_id', $activities->pluck('id')->all())
             ->get()
             ->keyBy('activity_id');

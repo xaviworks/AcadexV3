@@ -1,17 +1,22 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE activities MODIFY type VARCHAR(191) NOT NULL");
+        Schema::table('activities', function (Blueprint $table) {
+            $table->string('type', 191)->nullable(false)->change();
+        });
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE activities MODIFY type ENUM('quiz','ocr','exam') NOT NULL");
+        Schema::table('activities', function (Blueprint $table) {
+            $table->enum('type', ['quiz', 'ocr', 'exam'])->nullable(false)->change();
+        });
     }
 };

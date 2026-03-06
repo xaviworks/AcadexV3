@@ -43,84 +43,88 @@ class GradesFormulaService
         ]);
 
         if (! array_key_exists($cacheKey, self::$cache)) {
-            $resolved = self::resolveFormula($subjectId, $courseId, $departmentId, $semester, $academicPeriodId);
+            // Wrap the expensive formula resolution in a persistent cache so the
+            // DB is only hit once per hour per unique subject/course/dept/semester
+            // combination instead of on every request.
+            self::$cache[$cacheKey] = \Illuminate\Support\Facades\Cache::remember(
+                'grades_formula:' . $cacheKey,
+                3600,
+                static function () use ($subjectId, $courseId, $departmentId, $semester, $academicPeriodId): array {
+                    $resolved = self::resolveFormula($subjectId, $courseId, $departmentId, $semester, $academicPeriodId);
 
-            $structure = $resolved['formula']->structure_config;
-            if (! is_array($structure) || empty($structure)) {
-                $structure = FormulaStructure::default($resolved['formula']->structure_type ?? 'lecture_only');
-            } else {
-                $structure = FormulaStructure::normalize($structure);
-            }
+                    $structure = $resolved['formula']->structure_config;
+                    if (! is_array($structure) || empty($structure)) {
+                        $structure = FormulaStructure::default($resolved['formula']->structure_type ?? 'lecture_only');
+                    } else {
+                        $structure = FormulaStructure::normalize($structure);
+                    }
 
-            $flattened = FormulaStructure::flattenWeights($structure);
-            $weights = collect($flattened)
-                ->pluck('weight', 'activity_type')
-                ->map(fn ($weight) => (float) $weight)
-                ->toArray();
-            $relativeWeights = collect($flattened)
-                ->pluck('relative_weight', 'activity_type')
-                ->map(fn ($weight) => (float) $weight)
-                ->toArray();
+                    $flattened = FormulaStructure::flattenWeights($structure);
+                    $weights = collect($flattened)
+                        ->pluck('weight', 'activity_type')
+                        ->map(fn ($weight) => (float) $weight)
+                        ->toArray();
+                    $relativeWeights = collect($flattened)
+                        ->pluck('relative_weight', 'activity_type')
+                        ->map(fn ($weight) => (float) $weight)
+                        ->toArray();
 
-            if (empty($weights)) {
-                $fallbackStructure = FormulaStructure::default('lecture_only');
-                $structure = $fallbackStructure;
-                $flattened = FormulaStructure::flattenWeights($fallbackStructure);
-                $weights = collect($flattened)
-                    ->pluck('weight', 'activity_type')
-                    ->map(fn ($weight) => (float) $weight)
-                    ->toArray();
-                $relativeWeights = collect($flattened)
-                    ->pluck('relative_weight', 'activity_type')
-                    ->map(fn ($weight) => (float) $weight)
-                    ->toArray();
-            }
+                    if (empty($weights)) {
+                        $fallbackStructure = FormulaStructure::default('lecture_only');
+                        $structure = $fallbackStructure;
+                        $flattened = FormulaStructure::flattenWeights($fallbackStructure);
+                        $weights = collect($flattened)
+                            ->pluck('weight', 'activity_type')
+                            ->map(fn ($weight) => (float) $weight)
+                            ->toArray();
+                        $relativeWeights = collect($flattened)
+                            ->pluck('relative_weight', 'activity_type')
+                            ->map(fn ($weight) => (float) $weight)
+                            ->toArray();
+                    }
 
-            $meta = $resolved['meta'];
-            $meta['weights'] = collect($flattened)
-                ->mapWithKeys(fn ($entry) => [
-                    $entry['activity_type'] => round($entry['weight'] * 100, 2),
-                ])
-                ->all();
-            $meta['relative_weights'] = collect($flattened)
-                ->mapWithKeys(fn ($entry) => [
-                    $entry['activity_type'] => round($entry['relative_weight'] * 100, 2),
-                ])
-                ->all();
-            $meta['weight_details'] = collect($flattened)
-                ->map(fn ($entry) => [
-                    'activity_type' => $entry['activity_type'],
-                    'label' => $entry['label'] ?? FormulaStructure::formatLabel($entry['activity_type']),
-                    'weight_percent' => round($entry['weight'] * 100, 2),
-                    'relative_weight_percent' => round(($entry['relative_weight'] ?? $entry['weight']) * 100, 2),
-                    'max_assessments' => $entry['max_assessments'] ?? null,
-                ])
-                ->values()
-                ->all();
-            $meta['structure'] = $structure;
-            $meta['structure_type'] = $resolved['formula']->structure_type ?? 'lecture_only';
-            $meta['activity_labels'] = FormulaStructure::activityLabelMap($structure);
-            $meta['max_assessments'] = FormulaStructure::leafMaxAssessmentMap($structure);
-            $meta['base_score'] = (float) $resolved['formula']->base_score;
-            $meta['scale_multiplier'] = (float) $resolved['formula']->scale_multiplier;
-            $meta['passing_grade'] = (float) $resolved['formula']->passing_grade;
-            $meta['academic_period_id'] = $resolved['formula']->academic_period_id;
+                    $meta = $resolved['meta'];
+                    $meta['weights'] = collect($flattened)
+                        ->mapWithKeys(fn ($entry) => [
+                            $entry['activity_type'] => round($entry['weight'] * 100, 2),
+                        ])
+                        ->all();
+                    $meta['relative_weights'] = collect($flattened)
+                        ->mapWithKeys(fn ($entry) => [
+                            $entry['activity_type'] => round($entry['relative_weight'] * 100, 2),
+                        ])
+                        ->all();
+                    $meta['weight_details'] = collect($flattened)
+                        ->map(fn ($entry) => [
+                            'activity_type' => $entry['activity_type'],
+                            'label' => $entry['label'] ?? FormulaStructure::formatLabel($entry['activity_type']),
+                            'weight_percent' => round($entry['weight'] * 100, 2),
+                            'relative_weight_percent' => round(($entry['relative_weight'] ?? $entry['weight']) * 100, 2),
+                            'max_assessments' => $entry['max_assessments'] ?? null,
+                        ])
+                        ->values()
+                        ->all();
+                    $meta['structure'] = $structure;
+                    $meta['structure_type'] = $resolved['formula']->structure_type ?? 'lecture_only';
+                    $meta['activity_labels'] = FormulaStructure::activityLabelMap($structure);
+                    $meta['max_assessments'] = FormulaStructure::leafMaxAssessmentMap($structure);
+                    $meta['base_score'] = (float) $resolved['formula']->base_score;
+                    $meta['scale_multiplier'] = (float) $resolved['formula']->scale_multiplier;
+                    $meta['passing_grade'] = (float) $resolved['formula']->passing_grade;
+                    $meta['academic_period_id'] = $resolved['formula']->academic_period_id;
 
-            self::$cache[$cacheKey] = [
-                'id' => $resolved['formula']->id,
-                'base_score' => (float) $resolved['formula']->base_score,
-                'scale_multiplier' => (float) $resolved['formula']->scale_multiplier,
-                'passing_grade' => (float) $resolved['formula']->passing_grade,
-                'weights' => $weights,
-                'relative_weights' => $relativeWeights,
-                'structure' => $structure,
-                'meta' => $meta,
-            ];
-        } elseif (! isset(self::$cache[$cacheKey]['relative_weights'])
-            || ! isset(self::$cache[$cacheKey]['meta']['relative_weights'])
-            || ! isset(self::$cache[$cacheKey]['meta']['weight_details'][0]['relative_weight_percent'])) {
-            unset(self::$cache[$cacheKey]);
-            return self::getSettings($subjectId, $courseId, $departmentId, $semester, $academicPeriodId);
+                    return [
+                        'id'               => $resolved['formula']->id,
+                        'base_score'       => (float) $resolved['formula']->base_score,
+                        'scale_multiplier' => (float) $resolved['formula']->scale_multiplier,
+                        'passing_grade'    => (float) $resolved['formula']->passing_grade,
+                        'weights'          => $weights,
+                        'relative_weights' => $relativeWeights,
+                        'structure'        => $structure,
+                        'meta'             => $meta,
+                    ];
+                }
+            );
         }
 
         return self::$cache[$cacheKey];
@@ -148,10 +152,18 @@ class GradesFormulaService
 
     /**
      * Flush the in-memory cache (useful for tests or after admin updates).
+     *
+     * Pass a specific $cacheKey to also invalidate that entry in the
+     * persistent cache (e.g. after saving a formula in the admin panel).
+     * Without a key, only the per-request static array is cleared;
+     * persistent entries will expire naturally via their 1-hour TTL.
      */
-    public static function flushCache(): void
+    public static function flushCache(?string $specificCacheKey = null): void
     {
         self::$cache = [];
+        if ($specificCacheKey !== null) {
+            \Illuminate\Support\Facades\Cache::forget('grades_formula:' . $specificCacheKey);
+        }
     }
 
     /**

@@ -17,8 +17,10 @@ return new class extends Migration
             $table->text('user_agent')->nullable()->after('ip_address');
         });
 
-        // Modify the event_type enum to include new session events
-        DB::statement("ALTER TABLE `user_logs` MODIFY COLUMN `event_type` ENUM('login', 'logout', 'failed_login', 'session_revoked', 'all_sessions_revoked', 'bulk_sessions_revoked') NOT NULL");
+        // Modify the event_type enum to include new session events (MySQL only)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `user_logs` MODIFY COLUMN `event_type` ENUM('login', 'logout', 'failed_login', 'session_revoked', 'all_sessions_revoked', 'bulk_sessions_revoked') NOT NULL");
+        }
     }
 
     /**
@@ -30,7 +32,9 @@ return new class extends Migration
             $table->dropColumn(['ip_address', 'user_agent']);
         });
 
-        // Revert event_type enum to original values
-        DB::statement("ALTER TABLE `user_logs` MODIFY COLUMN `event_type` ENUM('login', 'logout', 'failed_login') NOT NULL");
+        // Revert event_type enum to original values (MySQL only)
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `user_logs` MODIFY COLUMN `event_type` ENUM('login', 'logout', 'failed_login') NOT NULL");
+        }
     }
 };

@@ -83,13 +83,21 @@ class ProfileTest extends TestCase
 
         Notification::fake();
 
-        $response = $this
-            ->actingAs($user)
+        // Step 1: update profile info via PATCH /profile
+        $this->actingAs($user)
             ->patch('/profile', [
                 'first_name' => 'Updated',
                 'middle_name' => null,
                 'last_name' => 'User',
                 'email' => 'updated@example.com',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        // Step 2: update password via PUT /profile/password (separate endpoint)
+        $response = $this
+            ->actingAs($user)
+            ->put('/profile/password', [
                 'current_password' => 'password',
                 'password' => 'new-secure-password',
                 'password_confirmation' => 'new-secure-password',

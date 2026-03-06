@@ -86,9 +86,16 @@ class Announcement extends Model
             return false;
         }
 
-        // Check if user has already viewed it (for show_once announcements)
-        if ($this->show_once && $this->viewedBy()->where('user_id', $user->id)->exists()) {
-            return false;
+        // Check if user has already viewed it (for show_once announcements).
+        // Use the pre-loaded relation when available to avoid a query per announcement.
+        if ($this->show_once) {
+            $hasViewed = $this->relationLoaded('viewedBy')
+                ? $this->viewedBy->isNotEmpty()
+                : $this->viewedBy()->where('users.id', $user->id)->exists();
+
+            if ($hasViewed) {
+                return false;
+            }
         }
 
         // Check role targeting
@@ -104,7 +111,11 @@ class Announcement extends Model
      */
     public function markAsViewedBy(User $user): void
     {
-        if (!$this->viewedBy()->where('user_id', $user->id)->exists()) {
+        $alreadyViewed = $this->relationLoaded('viewedBy')
+            ? $this->viewedBy->isNotEmpty()
+            : $this->viewedBy()->where('users.id', $user->id)->exists();
+
+        if (!$alreadyViewed) {
             $this->viewedBy()->attach($user->id, ['viewed_at' => now()]);
         }
     }

@@ -27,7 +27,9 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        // After login the app redirects to the academic-period selector when
+        // no active period has been set in the session.
+        $response->assertRedirect(route('select.academicPeriod', absolute: false));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void

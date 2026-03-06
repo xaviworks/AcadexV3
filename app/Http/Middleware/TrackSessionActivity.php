@@ -31,12 +31,23 @@ class TrackSessionActivity
     /**
      * Update session metadata with device information.
      *
+     * Rate-limited to one DB write per minute using a session key so that
+     * high-frequency AJAX endpoints (notifications, announcements, session-check)
+     * do not hammer the sessions table on every request.
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return void
      */
     protected function updateSessionMetadata(Request $request): void
     {
         try {
+            // Only write to the DB at most once per 60 seconds per session.
+            $lastTracked = $request->session()->get('_session_tracked_at', 0);
+            if (time() - $lastTracked < 60) {
+                return;
+            }
+            $request->session()->put('_session_tracked_at', time());
+
             $agent = new Agent();
             $agent->setUserAgent($request->userAgent());
 

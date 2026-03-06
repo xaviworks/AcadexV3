@@ -63,8 +63,18 @@ class DashboardController extends Controller
         $instructorId = Auth::id();
 
         $subjects = $this->getInstructorSubjects($instructorId, $academicPeriodId);
-        $dashboardData = $this->getInstructorDashboardData($subjects, $academicPeriodId);
-        $subjectCharts = $this->generateSubjectCharts($subjects);
+
+        // Pre-fetch all term-grade counts for every subject × term in ONE query
+        // instead of 4 queries per subject × 2 call-sites (8N → 1).
+        $termGradeCounts = TermGrade::whereIn('subject_id', $subjects->pluck('id'))
+            ->select('subject_id', 'term_id', DB::raw('COUNT(DISTINCT student_id) as cnt'))
+            ->groupBy('subject_id', 'term_id')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(fn ($rows) => $rows->keyBy('term_id'));
+
+        $dashboardData = $this->getInstructorDashboardData($subjects, $academicPeriodId, $termGradeCounts);
+        $subjectCharts = $this->generateSubjectCharts($subjects, $termGradeCounts);
 
         return view('dashboard.instructor', $dashboardData + ['subjectCharts' => $subjectCharts]);
     }
@@ -78,14 +88,14 @@ class DashboardController extends Controller
                   });
         })
         ->where('academic_period_id', $academicPeriodId)
-        ->with('students')
+        // Filter is_deleted server-side so the loaded collection is already clean.
+        ->with(['students' => fn ($q) => $q->where('students.is_deleted', false)])
         ->get();
     }
 
-    private function getInstructorDashboardData($subjects, $academicPeriodId)
+    private function getInstructorDashboardData($subjects, $academicPeriodId, $termGradeCounts)
     {
         $instructorStudents = $subjects->flatMap->students
-            ->where('is_deleted', false)
             ->unique('id')
             ->count();
 
@@ -99,7 +109,7 @@ class DashboardController extends Controller
         $totalPassedStudents = $finalGrades->where('remarks', 'Passed')->count();
         $totalFailedStudents = $finalGrades->where('remarks', 'Failed')->count();
 
-        $termCompletions = $this->calculateTermCompletions($subjects);
+        $termCompletions = $this->calculateTermCompletions($subjects, $termGradeCounts);
 
         return compact(
             'instructorStudents',
@@ -110,7 +120,7 @@ class DashboardController extends Controller
         );
     }
 
-    private function calculateTermCompletions($subjects)
+    private function calculateTermCompletions($subjects, $termGradeCounts)
     {
         $terms = ['prelim', 'midterm', 'prefinal', 'final'];
         $termCompletions = [];
@@ -121,26 +131,24 @@ class DashboardController extends Controller
             $graded = 0;
 
             foreach ($subjects as $subject) {
-                $studentCount = $subject->students->where('is_deleted', false)->count();
-                $gradedCount = TermGrade::where('subject_id', $subject->id)
-                    ->where('term_id', $termId)
-                    ->distinct('student_id')
-                    ->count('student_id');
+                // students relation already filtered to is_deleted=false by the eager load.
+                $studentCount = $subject->students->count();
+                $gradedCount  = $termGradeCounts->get($subject->id)?->get($termId)?->cnt ?? 0;
 
-                $total += $studentCount;
+                $total  += $studentCount;
                 $graded += $gradedCount;
             }
 
             $termCompletions[$term] = [
                 'graded' => $graded,
-                'total' => $total,
+                'total'  => $total,
             ];
         }
 
         return $termCompletions;
     }
 
-    private function generateSubjectCharts($subjects)
+    private function generateSubjectCharts($subjects, $termGradeCounts)
     {
         $terms = ['prelim', 'midterm', 'prefinal', 'final'];
         $subjectCharts = [];
@@ -148,20 +156,16 @@ class DashboardController extends Controller
         foreach ($subjects as $subject) {
             $termsData = [];
             $termPercentages = [];
+            $studentCount = $subject->students->count(); // already filtered to is_deleted=false
 
             foreach ($terms as $term) {
-                $termId = $this->getTermId($term);
-                $studentCount = $subject->students->where('is_deleted', false)->count();
-                $gradedCount = TermGrade::where('subject_id', $subject->id)
-                    ->where('term_id', $termId)
-                    ->distinct('student_id')
-                    ->count('student_id');
-
-                $percentage = $studentCount > 0 ? round(($gradedCount / $studentCount) * 100, 2) : 0;
+                $termId      = $this->getTermId($term);
+                $gradedCount = $termGradeCounts->get($subject->id)?->get($termId)?->cnt ?? 0;
+                $percentage  = $studentCount > 0 ? round(($gradedCount / $studentCount) * 100, 2) : 0;
 
                 $termsData[$term] = [
-                    'graded' => $gradedCount,
-                    'total' => $studentCount,
+                    'graded'     => $gradedCount,
+                    'total'      => $studentCount,
                     'percentage' => $percentage,
                 ];
 
@@ -169,9 +173,9 @@ class DashboardController extends Controller
             }
 
             $subjectCharts[] = [
-                'code' => $subject->subject_code,
-                'description' => $subject->subject_description,
-                'terms' => $termsData,
+                'code'            => $subject->subject_code,
+                'description'     => $subject->subject_description,
+                'terms'           => $termsData,
                 'termPercentages' => $termPercentages,
             ];
         }
@@ -306,7 +310,7 @@ class DashboardController extends Controller
 
         return view('dashboard.dean', [
             'studentsPerDepartment' => $studentsPerDepartment,
-            'totalInstructors' => User::where('role', 'instructor')->count(),
+            'totalInstructors' => User::where('role', 0)->count(), // 0 = instructor
             'studentsPerCourse' => $studentsPerCourse
         ]);
     }
