@@ -78,36 +78,46 @@ class GradeController extends Controller
         $term = $request->term ?? 'prelim';
         $termLabels = $this->getTermLabelMap();
     
-        $subjects = Subject::where(function($query) use ($academicPeriodId) {
-            $query->where('instructor_id', Auth::id())
-                  ->orWhereHas('instructors', function($q) {
-                      $q->where('instructor_id', Auth::id());
-                  });
-        })
-        ->when($academicPeriodId, fn($q) => $q->where('academic_period_id', $academicPeriodId))
-        ->withCount('students')
-        ->get();
-    
+        // Avoid slow orWhereHas EXISTS subquery — use two indexed lookups merged in memory
+        $instructorId = Auth::id();
+        $directIds = Subject::where('instructor_id', $instructorId)
+            ->when($academicPeriodId, fn($q) => $q->where('academic_period_id', $academicPeriodId))
+            ->where('is_deleted', false)
+            ->pluck('id');
+        $pivotIds = \Illuminate\Support\Facades\DB::table('instructor_subject')
+            ->where('instructor_id', $instructorId)
+            ->pluck('subject_id');
+        $subjectIds = $directIds->merge($pivotIds)->unique()->values();
+
+        $subjects = Subject::whereIn('id', $subjectIds)
+            ->withCount('students')
+            ->get();
+
+        // One GROUP BY query instead of N subjects × 4 terms individual COUNT queries
+        $termMap = ['prelim' => 1, 'midterm' => 2, 'prefinal' => 3, 'final' => 4];
+        $gradedCounts = \Illuminate\Support\Facades\DB::table('term_grades')
+            ->whereIn('subject_id', $subjectIds)
+            ->select('subject_id', 'term_id', \Illuminate\Support\Facades\DB::raw('COUNT(DISTINCT student_id) as graded_count'))
+            ->groupBy('subject_id', 'term_id')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(fn($rows) => $rows->pluck('graded_count', 'term_id'));
+
         foreach ($subjects as $subject) {
             $total = $subject->students_count;
-            $terms = ['prelim', 'midterm', 'prefinal', 'final'];
+            $subjectGraded = $gradedCounts->get($subject->id, collect());
             $gradedCount = 0;
-    
-            foreach ($terms as $t) {
-                $gradedTerms = TermGrade::where('subject_id', $subject->id)
-                    ->where('term_id', $this->getTermId($t))
-                    ->distinct('student_id')
-                    ->count('student_id');
-    
-                if ($gradedTerms === $total && $total > 0) {
+
+            foreach ($termMap as $termName => $termId) {
+                if (($subjectGraded->get($termId, 0) >= $total) && $total > 0) {
                     $gradedCount++;
                 }
             }
-    
+
             $subject->grade_status = match (true) {
                 $total === 0 => 'not_started',
                 $gradedCount === 0 => 'pending',
-                $gradedCount < count($terms) => 'pending',
+                $gradedCount < count($termMap) => 'pending',
                 default => 'completed',
             };
         }
@@ -162,14 +172,21 @@ class GradeController extends Controller
                     return isset($matches[1]) ? floatval($matches[1]) : $co->co_identifier;
                 });
                 
+            // Pre-fetch ALL scores for these activities in one query, keyed by student → activity
+            $activityIds = $activities->pluck('id');
+            $allScoresGrouped = Score::whereIn('activity_id', $activityIds)
+                ->get()
+                ->groupBy('student_id');
+
             foreach ($students as $student) {
-                $activityScores = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings);
+                $studentScores = $allScoresGrouped->get($student->id, collect());
+                $activityScoresResult = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings, $studentScores);
+                $keyedScores = $studentScores->keyBy('activity_id');
                 foreach ($activities as $activity) {
-                    $scoreRecord = $student->scores()->where('activity_id', $activity->id)->first();
-                    $scores[$student->id][$activity->id] = $scoreRecord?->score;
+                    $scores[$student->id][$activity->id] = $keyedScores->get($activity->id)?->score;
                 }
-                if ($activityScores['allScored'] && $activityScores['grade'] !== null) {
-                    $termGrades[$student->id] = round($activityScores['grade'], 2);
+                if ($activityScoresResult['allScored'] && $activityScoresResult['grade'] !== null) {
+                    $termGrades[$student->id] = round($activityScoresResult['grade'], 2);
                 } else {
                     $termGrades[$student->id] = null;
                 }

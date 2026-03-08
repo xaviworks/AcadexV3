@@ -209,40 +209,47 @@ class DashboardController extends Controller
 
         $departmentId = Auth::user()->department_id;
         $academicPeriodId = session('active_academic_period_id');
-
-        // Get the chairperson's course ID
         $chairpersonCourseId = Auth::user()->course_id;
-        
-        $data = [
-            "countInstructors" => User::where("role", 0)
-                ->where("department_id", $departmentId)
-                ->where("course_id", $chairpersonCourseId) // Only count instructors in the same course
-                ->where("is_active", true)
-                ->count(),
-            "countStudents" => Student::where("department_id", $departmentId)
-                ->where("is_deleted", false)
-                ->whereHas('subjects', function($query) use ($academicPeriodId) {
-                    $query->where('academic_period_id', $academicPeriodId);
-                })
-                ->count(),
-            "countCourses" => Subject::where('department_id', $departmentId)
-                ->where('academic_period_id', $academicPeriodId)
-                ->where('is_deleted', false)
-                ->distinct('course_id')
-                ->count('course_id'),
-            "countActiveInstructors" => User::where("is_active", 1)
-                ->where("role", 0)
-                ->where("department_id", $departmentId)
-                ->where("course_id", $chairpersonCourseId) // Only count active instructors in the same course
-                ->count(),
-            "countInactiveInstructors" => User::where("is_active", 0)
-                ->where("role", 0)
-                ->where("department_id", $departmentId)
-                ->where("course_id", $chairpersonCourseId) // Only count inactive instructors in the same course
-                ->count(),
-            "countUnverifiedInstructors" => UnverifiedUser::where("department_id", $departmentId)
-                ->count(),
-        ];
+
+        // One aggregated query instead of 3 separate User COUNT queries
+        $instructorStats = User::where("role", 0)
+            ->where("department_id", $departmentId)
+            ->where("course_id", $chairpersonCourseId)
+            ->selectRaw('
+                SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_count,
+                SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive_count
+            ')
+            ->first();
+
+        $countActiveInstructors   = (int) ($instructorStats->active_count ?? 0);
+        $countInactiveInstructors = (int) ($instructorStats->inactive_count ?? 0);
+        $countInstructors         = $countActiveInstructors;
+
+        // JOIN instead of costly EXISTS subquery (whereHas)
+        $countStudents = Student::join('student_subjects', 'students.id', '=', 'student_subjects.student_id')
+            ->join('subjects', 'student_subjects.subject_id', '=', 'subjects.id')
+            ->where('students.department_id', $departmentId)
+            ->where('students.is_deleted', false)
+            ->where('subjects.academic_period_id', $academicPeriodId)
+            ->distinct('students.id')
+            ->count('students.id');
+
+        $countCourses = Subject::where('department_id', $departmentId)
+            ->where('academic_period_id', $academicPeriodId)
+            ->where('is_deleted', false)
+            ->distinct('course_id')
+            ->count('course_id');
+
+        $countUnverifiedInstructors = UnverifiedUser::where("department_id", $departmentId)->count();
+
+        $data = compact(
+            'countInstructors',
+            'countStudents',
+            'countCourses',
+            'countActiveInstructors',
+            'countInactiveInstructors',
+            'countUnverifiedInstructors'
+        );
 
         return view('dashboard.chairperson', $data);
     }
@@ -485,36 +492,34 @@ class DashboardController extends Controller
         $academicPeriodId = session('active_academic_period_id');
         $chairpersonCourseId = Auth::user()->course_id;
 
-        $countInstructors = User::where("role", 0)
+        // One aggregated query instead of 3 separate User COUNT queries
+        $instructorStats = User::where("role", 0)
             ->where("department_id", $departmentId)
             ->where("course_id", $chairpersonCourseId)
-            ->where("is_active", true)
-            ->count();
+            ->selectRaw('
+                SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_count,
+                SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive_count
+            ')
+            ->first();
 
-        $countStudents = Student::where("department_id", $departmentId)
-            ->where("is_deleted", false)
-            ->whereHas('subjects', function($query) use ($academicPeriodId) {
-                $query->where('academic_period_id', $academicPeriodId);
-            })
-            ->count();
+        $countActiveInstructors   = (int) ($instructorStats->active_count ?? 0);
+        $countInactiveInstructors = (int) ($instructorStats->inactive_count ?? 0);
+        $countInstructors         = $countActiveInstructors;
+
+        // JOIN instead of costly EXISTS subquery (whereHas)
+        $countStudents = Student::join('student_subjects', 'students.id', '=', 'student_subjects.student_id')
+            ->join('subjects', 'student_subjects.subject_id', '=', 'subjects.id')
+            ->where('students.department_id', $departmentId)
+            ->where('students.is_deleted', false)
+            ->where('subjects.academic_period_id', $academicPeriodId)
+            ->distinct('students.id')
+            ->count('students.id');
 
         $countCourses = Subject::where('department_id', $departmentId)
             ->where('academic_period_id', $academicPeriodId)
             ->where('is_deleted', false)
             ->distinct('course_id')
             ->count('course_id');
-
-        $countActiveInstructors = User::where("is_active", 1)
-            ->where("role", 0)
-            ->where("department_id", $departmentId)
-            ->where("course_id", $chairpersonCourseId)
-            ->count();
-
-        $countInactiveInstructors = User::where("is_active", 0)
-            ->where("role", 0)
-            ->where("department_id", $departmentId)
-            ->where("course_id", $chairpersonCourseId)
-            ->count();
 
         $countUnverifiedInstructors = UnverifiedUser::where("department_id", $departmentId)->count();
 
