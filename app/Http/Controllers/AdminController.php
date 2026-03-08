@@ -2857,28 +2857,62 @@ class AdminController extends Controller
         $semesterForInsert = $selectedSemester;
         $periodForInsert = $selectedAcademicPeriodId;
 
-        $fallback = DB::transaction(function () use ($department, $label, $fallbackName, $semesterForInsert, $periodForInsert) {
-            $formula = GradesFormula::create([
-                'name' => $fallbackName,
-                'label' => $label,
-                'scope_level' => 'department',
-                'department_id' => $department->id,
-                'semester' => $semesterForInsert,
-                'academic_period_id' => $periodForInsert,
-                'base_score' => 40,
-                'scale_multiplier' => 60,
-                'passing_grade' => 75,
-                'is_department_fallback' => true,
-            ]);
+        // Guard: a row with this generated name may already exist but was missed by
+        // the context-filtered queries above (e.g. is_department_fallback = false,
+        // wrong scope_level, or non-null semester/period on an older record).
+        // Promote and return it rather than attempting a duplicate insert.
+        $existingByName = GradesFormula::with('weights')->where('name', $fallbackName)->first();
+        if ($existingByName) {
+            if (! $existingByName->is_department_fallback || $existingByName->scope_level !== 'department') {
+                $existingByName->update([
+                    'is_department_fallback' => true,
+                    'scope_level'            => 'department',
+                    'department_id'          => $department->id,
+                ]);
+                $existingByName->refresh();
+            }
+            GradesFormulaService::flushCache();
 
-            $formula->weights()->createMany([
-                ['activity_type' => 'quiz', 'weight' => 0.40],
-                ['activity_type' => 'ocr', 'weight' => 0.20],
-                ['activity_type' => 'exam', 'weight' => 0.40],
-            ]);
+            return $existingByName->loadMissing('weights');
+        }
 
-            return $formula;
-        });
+        try {
+            $fallback = DB::transaction(function () use ($department, $label, $fallbackName, $semesterForInsert, $periodForInsert) {
+                $formula = GradesFormula::create([
+                    'name' => $fallbackName,
+                    'label' => $label,
+                    'scope_level' => 'department',
+                    'department_id' => $department->id,
+                    'semester' => $semesterForInsert,
+                    'academic_period_id' => $periodForInsert,
+                    'base_score' => 40,
+                    'scale_multiplier' => 60,
+                    'passing_grade' => 75,
+                    'is_department_fallback' => true,
+                ]);
+
+                $formula->weights()->createMany([
+                    ['activity_type' => 'quiz', 'weight' => 0.40],
+                    ['activity_type' => 'ocr', 'weight' => 0.20],
+                    ['activity_type' => 'exam', 'weight' => 0.40],
+                ]);
+
+                return $formula;
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Race-condition safety net: if a duplicate-key error occurs after the
+            // name-based guard above (two concurrent requests), return the row that
+            // won the insert race instead of surfacing a 500.
+            if (str_contains($e->getMessage(), '1062') || str_contains($e->getMessage(), 'Duplicate entry')) {
+                $fallback = GradesFormula::with('weights')->where('name', $fallbackName)->first();
+                if ($fallback) {
+                    GradesFormulaService::flushCache();
+
+                    return $fallback;
+                }
+            }
+            throw $e;
+        }
 
         GradesFormulaService::flushCache();
 
