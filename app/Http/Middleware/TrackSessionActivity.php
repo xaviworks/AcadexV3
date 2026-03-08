@@ -67,9 +67,21 @@ class TrackSessionActivity
                 $updateData['device_fingerprint'] = $request->input('device_fingerprint');
             }
 
-            DB::table('sessions')
-                ->where('id', $request->session()->getId())
-                ->update($updateData);
+            // Use upsert so the row is created even when SESSION_DRIVER=file
+            // (file driver never inserts into the sessions table itself).
+            DB::table('sessions')->upsert(
+                [array_merge([
+                    'id'            => $request->session()->getId(),
+                    'user_id'       => Auth::id(),
+                    'ip_address'    => $request->ip(),
+                    'user_agent'    => substr((string) $request->userAgent(), 0, 500),
+                    'payload'       => '',
+                    'last_activity' => time(),
+                ], $updateData)],
+                ['id'],
+                ['user_id', 'ip_address', 'user_agent', 'last_activity',
+                 'last_activity_at', 'device_type', 'browser', 'platform', 'device_fingerprint']
+            );
         } catch (\Exception $e) {
             // Silently fail to avoid disrupting the request
             \Log::error('Failed to update session metadata: ' . $e->getMessage());

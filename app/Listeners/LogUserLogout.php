@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Services\UserLogRecorder;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\DB;
 use Jenssegers\Agent\Agent;
 
 class LogUserLogout
@@ -34,5 +35,16 @@ class LogUserLogout
             'platform' => $platform,
             'device' => $device,
         ]);
+
+        // Remove the session tracking row so the admin monitor
+        // doesn't show stale entries after logout (works with both
+        // database and file session drivers).
+        try {
+            DB::table('sessions')
+                ->where('id', session()->getId())
+                ->delete();
+        } catch (\Exception $e) {
+            // non-critical
+        }
     }
 }
