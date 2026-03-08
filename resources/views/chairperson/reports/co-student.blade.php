@@ -6,9 +6,7 @@
     @include('chairperson.partials.reports-header', [
         'title' => 'Student Outcomes Summary',
         'subtitle' => 'Individual student Course Outcome performance report',
-        'icon' => 'bi-person-lines-fill',
-        'backRoute' => route('chairperson.reports.co-student'),
-        'backLabel' => 'Choose Student'
+        'icon' => 'bi-person-lines-fill'
     ])
 
     {{-- Student & Subject Info Strip --}}
@@ -40,19 +38,7 @@
                         </div>
                     </div>
                 </div>
-                {{-- Period --}}
-                <div class="col-md-4">
-                    <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-warning-subtle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
-                            <i class="bi bi-calendar3 text-warning fs-5"></i>
-                        </div>
-                        <div class="ms-3">
-                            <small class="text-muted text-uppercase fw-medium" style="font-size: 0.7rem; letter-spacing: 0.5px;">Academic Period</small>
-                            <div class="fw-semibold text-dark">{{ $selectedSubject->academicPeriod->academic_year ?? 'N/A' }}</div>
-                            <small class="text-muted">{{ $selectedSubject->academicPeriod->semester ?? '' }}</small>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>

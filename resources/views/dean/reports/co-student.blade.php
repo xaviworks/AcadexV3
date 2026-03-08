@@ -43,18 +43,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <div class="rounded-3 p-2 bg-success-subtle me-3">
-                            <i class="bi bi-calendar3 text-success fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-muted mb-0">Period</h6>
-                            <h5 class="fw-semibold mb-0">{{ $selectedSubject->academicPeriod->semester ?? 'N/A' }}</h5>
-                            <small class="text-muted">{{ $selectedSubject->academicPeriod->academic_year ?? '' }}</small>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>

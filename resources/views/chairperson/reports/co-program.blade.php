@@ -8,9 +8,7 @@
         'subtitle' => 'Course Outcome compliance across all courses in ' . ($department->department_description ?? 'your department'),
         'icon' => 'bi-diagram-3',
         'academicYear' => $academicYear,
-        'semester' => $semester,
-        'backRoute' => route('dashboard'),
-        'backLabel' => 'Back to Dashboard'
+        'semester' => $semester
     ])
 
     @if(!$department)

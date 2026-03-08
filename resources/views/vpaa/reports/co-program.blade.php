@@ -11,8 +11,8 @@
         </div>
         <div class="d-flex align-items-center gap-2">
             @if(request('department_id'))
-                <a href="{{ route('vpaa.reports.co-program') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
-                    <i class="bi bi-arrow-left me-2"></i>Back
+                <a href="{{ route('vpaa.reports.co-program') }}" class="btn btn-outline-secondary rounded-pill">
+                    <i class="bi bi-arrow-left me-1"></i>Choose Department
                 </a>
             @endif
             @if($academicYear && $semester)
@@ -32,34 +32,53 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
             <div class="table-responsive">
-                <table class="table table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-start" style="width: 30%;">
-                                <i class="bi bi-journal-text text-primary me-2"></i>Course
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="table-light border-bottom border-2">
+                            <th style="width: 30%;" class="ps-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-2 p-2 bg-primary-subtle me-2">
+                                        <i class="bi bi-journal-text text-primary"></i>
+                                    </div>
+                                    <span class="fw-bold">Course</span>
+                                </div>
                             </th>
                             @for($i=1; $i<=6; $i++)
-                                <th class="text-center">CO{{ $i }}</th>
+                                <th class="text-center fw-bold">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="bi bi-mortarboard-fill text-success mb-1"></i>
+                                        <span>CO{{ $i }}</span>
+                                    </div>
+                                </th>
                             @endfor
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($byCourse as $courseId => $row)
-                            <tr class="hover:bg-light">
-                                <td class="text-start">
-                                    <div class="fw-semibold">{{ $row['course']->course_code ?? 'N/A' }}</div>
-                                    <small class="text-muted">{{ $row['course']->course_description ?? '' }}</small>
+                            <tr class="border-bottom">
+                                <td class="ps-3">
+                                    <div class="d-flex align-items-center py-2">
+                                        <div class="rounded-2 p-2 bg-light me-3">
+                                            <i class="bi bi-journal-code text-primary fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-dark">{{ $row['course']->course_code ?? 'N/A' }}</div>
+                                            <small class="text-muted">{{ $row['course']->course_description ?? '' }}</small>
+                                        </div>
+                                    </div>
                                 </td>
                                 @for($i=1; $i<=6; $i++)
                                     @php($val = $row['co'][$i] ?? null)
-                                    <td class="text-center">
+                                    <td class="text-center py-3">
                                         @if($val)
-                                            <span class="badge {{ $val['percent'] >= 75 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3 py-2 rounded-pill">
-                                                {{ number_format($val['percent'], 2) }}%
-                                            </span>
-                                            <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }}</small></div>
+                                            <div class="d-flex flex-column align-items-center">
+                                                <span class="badge {{ $val['percent'] >= 75 ? 'bg-success text-white' : 'bg-danger text-white' }} px-3 py-2 rounded-pill mb-1 fs-6">
+                                                    {{ number_format($val['percent'], 1) }}%
+                                                </span>
+                                                <small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }}</small>
+                                            </div>
                                         @else
-                                            <span class="text-muted">—</span>
+                                            <span class="text-muted fs-5">—</span>
                                         @endif
                                     </td>
                                 @endfor
@@ -75,6 +94,35 @@
                     </tbody>
                 </table>
             </div>
+
+            @if(!empty($byCourse))
+                {{-- Legend --}}
+                <div class="mt-4 p-3 bg-light rounded-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-2">
+                                <i class="bi bi-info-circle text-primary me-2"></i>Performance Legend
+                            </h6>
+                            <div class="d-flex gap-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success text-white px-2 py-1 me-2">75%+</span>
+                                    <small class="text-muted">Meeting Standards</small>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-danger text-white px-2 py-1 me-2">&lt;75%</span>
+                                    <small class="text-muted">Below Standards</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                            <small class="text-muted">
+                                <i class="bi bi-calculator me-1"></i>
+                                Showing {{ count($byCourse) }} course{{ count($byCourse) != 1 ? 's' : '' }} with Course Outcome data
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </div>

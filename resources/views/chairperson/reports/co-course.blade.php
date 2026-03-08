@@ -8,9 +8,7 @@
         'subtitle' => $course->course_description,
         'icon' => 'bi-book',
         'academicYear' => $academicYear,
-        'semester' => $semester,
-        'backRoute' => route('chairperson.reports.co-course'),
-        'backLabel' => 'Choose Course'
+        'semester' => $semester
     ])
 
     {{-- CO Results Table --}}

@@ -9,13 +9,6 @@
             </h2>
             <p class="text-muted mb-0">Course Outcome compliance for GE subjects across all programs</p>
         </div>
-        <div>
-            @if($academicYear && $semester)
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">
-                    <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
-                </span>
-            @endif
-        </div>
     </div>
 
 

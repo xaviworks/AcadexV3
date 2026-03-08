@@ -22,7 +22,7 @@ class TrackSessionActivity
 
         // Only track for authenticated users
         if (Auth::check() && $request->session()->getId()) {
-            $this->updateSessionMetadata($request);
+                $this->updateSessionMetadata($request);
         }
 
         return $response;
