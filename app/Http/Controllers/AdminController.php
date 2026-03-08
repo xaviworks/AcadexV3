@@ -3732,6 +3732,8 @@ class AdminController extends Controller
                 DB::table('sessions')
                     ->where('user_id', $user->id)
                     ->delete();
+                // Invalidate remember_token so "remember me" cookie cannot silently recreate the session
+                $user->forceFill(['remember_token' => null])->save();
             } else {
                 // Log a note for maintainers if this isn't possible
                 \Illuminate\Support\Facades\Log::warning("Skipping session deletion for user {$user->id}. Session driver: {$driver}");
@@ -3811,6 +3813,8 @@ class AdminController extends Controller
                 DB::table('sessions')
                     ->where('user_id', $user->id)
                     ->delete();
+                // Invalidate remember_token so "remember me" cookie cannot silently recreate the session
+                $user->forceFill(['remember_token' => null])->save();
             } else {
                 \Illuminate\Support\Facades\Log::warning("Skipping session deletion for user {$user->id} (session driver: {$driver}).");
             }
@@ -4372,6 +4376,9 @@ class AdminController extends Controller
             ->where('id', '!=', $currentSessionId)
             ->whereNotNull('user_id')
             ->delete();
+
+        // Invalidate remember_token for all affected users so "remember me" cookies cannot recreate sessions
+        User::where('id', '!=', Auth::id())->update(['remember_token' => null]);
 
         // Log the bulk revocation
         DB::table('user_logs')->insert([
