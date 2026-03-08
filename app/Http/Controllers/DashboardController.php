@@ -71,35 +71,51 @@ class DashboardController extends Controller
 
     private function getInstructorSubjects($instructorId, $academicPeriodId)
     {
-        return Subject::where(function($query) use ($instructorId) {
-            $query->where('instructor_id', $instructorId)
-                  ->orWhereHas('instructors', function($q) use ($instructorId) {
-                      $q->where('instructor_id', $instructorId);
-                  });
-        })
-        ->where('academic_period_id', $academicPeriodId)
-        ->with('students')
-        ->get();
+        // Use a JOIN instead of orWhereHas (avoids slow EXISTS subquery)
+        $primaryIds = Subject::where('instructor_id', $instructorId)
+            ->where('academic_period_id', $academicPeriodId)
+            ->where('is_deleted', false)
+            ->pluck('id');
+
+        $pivotIds = DB::table('instructor_subject')
+            ->join('subjects', 'subjects.id', '=', 'instructor_subject.subject_id')
+            ->where('instructor_subject.instructor_id', $instructorId)
+            ->where('subjects.academic_period_id', $academicPeriodId)
+            ->where('subjects.is_deleted', false)
+            ->pluck('instructor_subject.subject_id');
+
+        $allIds = $primaryIds->merge($pivotIds)->unique();
+
+        return Subject::whereIn('id', $allIds)
+            ->where('is_deleted', false)
+            ->withCount(['students' => fn($q) => $q->where('students.is_deleted', false)])
+            ->get();
     }
 
     private function getInstructorDashboardData($subjects, $academicPeriodId)
     {
-        $instructorStudents = $subjects->flatMap->students
-            ->where('is_deleted', false)
-            ->unique('id')
-            ->count();
-
         $enrolledSubjectsCount = $subjects->count();
-
         $subjectIds = $subjects->pluck('id');
-        $finalGrades = FinalGrade::whereIn('subject_id', $subjectIds)
+
+        // Single query for student count across all subjects
+        $instructorStudents = DB::table('student_subjects')
+            ->join('students', 'students.id', '=', 'student_subjects.student_id')
+            ->whereIn('student_subjects.subject_id', $subjectIds)
+            ->where('students.is_deleted', false)
+            ->distinct('students.id')
+            ->count('students.id');
+
+        // Single query for pass/fail counts
+        $finalGradeCounts = FinalGrade::whereIn('subject_id', $subjectIds)
             ->where('academic_period_id', $academicPeriodId)
-            ->get();
+            ->selectRaw('remarks, COUNT(*) as count')
+            ->groupBy('remarks')
+            ->pluck('count', 'remarks');
 
-        $totalPassedStudents = $finalGrades->where('remarks', 'Passed')->count();
-        $totalFailedStudents = $finalGrades->where('remarks', 'Failed')->count();
+        $totalPassedStudents = $finalGradeCounts['Passed'] ?? 0;
+        $totalFailedStudents = $finalGradeCounts['Failed'] ?? 0;
 
-        $termCompletions = $this->calculateTermCompletions($subjects);
+        $termCompletions = $this->calculateTermCompletions($subjects, $subjectIds);
 
         return compact(
             'instructorStudents',
@@ -110,30 +126,30 @@ class DashboardController extends Controller
         );
     }
 
-    private function calculateTermCompletions($subjects)
+    private function calculateTermCompletions($subjects, $subjectIds = null)
     {
         $terms = ['prelim', 'midterm', 'prefinal', 'final'];
-        $termCompletions = [];
+        $subjectIds = $subjectIds ?? $subjects->pluck('id');
 
+        // Single batched query instead of N×4 individual queries
+        $gradedBySubjectTerm = TermGrade::whereIn('subject_id', $subjectIds)
+            ->selectRaw('subject_id, term_id, COUNT(DISTINCT student_id) as graded_count')
+            ->groupBy('subject_id', 'term_id')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(fn($rows) => $rows->pluck('graded_count', 'term_id'));
+
+        $studentCounts = $subjects->pluck('students_count', 'id');
+
+        $termCompletions = [];
         foreach ($terms as $term) {
             $termId = $this->getTermId($term);
-            $total = 0;
-            $graded = 0;
-
-            foreach ($subjects as $subject) {
-                $studentCount = $subject->students->where('is_deleted', false)->count();
-                $gradedCount = TermGrade::where('subject_id', $subject->id)
-                    ->where('term_id', $termId)
-                    ->distinct('student_id')
-                    ->count('student_id');
-
-                $total += $studentCount;
-                $graded += $gradedCount;
-            }
+            $total = $studentCounts->sum();
+            $graded = $gradedBySubjectTerm->map(fn($termRows) => $termRows->get($termId, 0))->sum();
 
             $termCompletions[$term] = [
                 'graded' => $graded,
-                'total' => $total,
+                'total'  => $total,
             ];
         }
 
@@ -143,35 +159,41 @@ class DashboardController extends Controller
     private function generateSubjectCharts($subjects)
     {
         $terms = ['prelim', 'midterm', 'prefinal', 'final'];
+        $subjectIds = $subjects->pluck('id');
+
+        // Single batched query instead of N×4 individual queries
+        $gradedBySubjectTerm = TermGrade::whereIn('subject_id', $subjectIds)
+            ->selectRaw('subject_id, term_id, COUNT(DISTINCT student_id) as graded_count')
+            ->groupBy('subject_id', 'term_id')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(fn($rows) => $rows->pluck('graded_count', 'term_id'));
+
         $subjectCharts = [];
 
         foreach ($subjects as $subject) {
             $termsData = [];
             $termPercentages = [];
+            $subjectGraded = $gradedBySubjectTerm->get($subject->id, collect());
+            $studentCount  = $subject->students_count;
 
             foreach ($terms as $term) {
-                $termId = $this->getTermId($term);
-                $studentCount = $subject->students->where('is_deleted', false)->count();
-                $gradedCount = TermGrade::where('subject_id', $subject->id)
-                    ->where('term_id', $termId)
-                    ->distinct('student_id')
-                    ->count('student_id');
-
-                $percentage = $studentCount > 0 ? round(($gradedCount / $studentCount) * 100, 2) : 0;
+                $termId    = $this->getTermId($term);
+                $gradedCount = $subjectGraded->get($termId, 0);
+                $percentage  = $studentCount > 0 ? round(($gradedCount / $studentCount) * 100, 2) : 0;
 
                 $termsData[$term] = [
-                    'graded' => $gradedCount,
-                    'total' => $studentCount,
+                    'graded'     => $gradedCount,
+                    'total'      => $studentCount,
                     'percentage' => $percentage,
                 ];
-
                 $termPercentages[] = $percentage;
             }
 
             $subjectCharts[] = [
-                'code' => $subject->subject_code,
-                'description' => $subject->subject_description,
-                'terms' => $termsData,
+                'code'         => $subject->subject_code,
+                'description'  => $subject->subject_description,
+                'terms'        => $termsData,
                 'termPercentages' => $termPercentages,
             ];
         }
