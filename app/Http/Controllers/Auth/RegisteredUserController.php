@@ -82,10 +82,11 @@ class RegisteredUserController extends Controller
         } catch (\Exception $e) {
             // Mail failure must not prevent registration — user can resend later
             $emailSent = false;
-            Log::warning('Registration verification email failed', [
-                'user_id' => $unverifiedUser->id,
-                'email'   => $unverifiedUser->email,
-                'error'   => $e->getMessage(),
+            Log::error('Registration verification email failed', [
+                'user_id'   => $unverifiedUser->id,
+                'email'     => $unverifiedUser->email,
+                'error'     => $e->getMessage(),
+                'exception' => get_class($e),
             ]);
         }
 
