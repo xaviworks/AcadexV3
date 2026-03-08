@@ -4150,31 +4150,42 @@ class AdminController extends Controller
             ->where('sessions.id', $sessionId)
             ->first();
 
-        // Delete the session
-        $deleted = DB::table('sessions')->where('id', $sessionId)->delete();
-
-        if ($deleted && $sessionInfo) {
-            // Log the session revocation
-            DB::table('user_logs')->insert([
-                'user_id' => $sessionInfo->user_id,
-                'event_type' => 'session_revoked',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'browser' => (new \Jenssegers\Agent\Agent())->browser(),
-                'device' => (new \Jenssegers\Agent\Agent())->device(),
-                'platform' => (new \Jenssegers\Agent\Agent())->platform(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            return redirect()
-                ->route('admin.sessions')
-                ->with('success', "Session for {$sessionInfo->user_name} has been revoked successfully.");
+        if (!$sessionInfo) {
+            return back()
+                ->withErrors(['session_id' => 'Session not found or already terminated.'])
+                ->withInput();
         }
 
-        return back()
-            ->withErrors(['session_id' => 'Session not found or already terminated.'])
-            ->withInput();
+        // Destroy the session in the actual session store (file, database, redis, etc.)
+        // This is critical: deleting from the DB tracking table alone does NOT invalidate
+        // file-based sessions, leaving the user still authenticated.
+        app('session')->driver()->getHandler()->destroy($sessionId);
+
+        // Also remove the tracking row (needed when session driver != database,
+        // since the handler above only touches the driver's own store)
+        DB::table('sessions')->where('id', $sessionId)->delete();
+
+        // Invalidate remember_token so "remember me" cookie cannot silently recreate the session
+        if ($sessionInfo->user_id) {
+            User::where('id', $sessionInfo->user_id)->update(['remember_token' => null]);
+        }
+
+        // Log the session revocation
+        DB::table('user_logs')->insert([
+            'user_id' => $sessionInfo->user_id,
+            'event_type' => 'session_revoked',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'browser' => (new \Jenssegers\Agent\Agent())->browser(),
+            'device' => (new \Jenssegers\Agent\Agent())->device(),
+            'platform' => (new \Jenssegers\Agent\Agent())->platform(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('admin.sessions')
+            ->with('success', "Session for {$sessionInfo->user_name} has been revoked successfully.");
     }
 
     /**
@@ -4211,10 +4222,21 @@ class AdminController extends Controller
         // Get user info
         $user = User::findOrFail($userId);
 
-        // Delete all sessions for the user
-        $deleted = DB::table('sessions')
+        // Collect session IDs before deletion so we can destroy through the session handler
+        $sessionIds = DB::table('sessions')
             ->where('user_id', $userId)
-            ->delete();
+            ->pluck('id');
+
+        $deleted = $sessionIds->count();
+
+        // Destroy each session in the actual session store (file, database, redis, etc.)
+        $handler = app('session')->driver()->getHandler();
+        foreach ($sessionIds as $id) {
+            $handler->destroy($id);
+        }
+
+        // Also remove tracking rows (needed when session driver != database)
+        DB::table('sessions')->where('user_id', $userId)->delete();
 
         if ($deleted > 0) {
             // Log the bulk session revocation
@@ -4331,8 +4353,22 @@ class AdminController extends Controller
 
         $currentSessionId = session()->getId();
 
-        // Delete all sessions except current admin session
-        $deleted = DB::table('sessions')
+        // Collect session IDs before deletion so we can destroy through the session handler
+        $sessionIds = DB::table('sessions')
+            ->where('id', '!=', $currentSessionId)
+            ->whereNotNull('user_id')
+            ->pluck('id');
+
+        $deleted = $sessionIds->count();
+
+        // Destroy each session in the actual session store (file, database, redis, etc.)
+        $handler = app('session')->driver()->getHandler();
+        foreach ($sessionIds as $id) {
+            $handler->destroy($id);
+        }
+
+        // Also remove tracking rows (needed when session driver != database)
+        DB::table('sessions')
             ->where('id', '!=', $currentSessionId)
             ->whereNotNull('user_id')
             ->delete();
