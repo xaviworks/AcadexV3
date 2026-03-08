@@ -255,7 +255,7 @@ document.addEventListener('alpine:init', () => {
             if (this.pollInterval) clearInterval(this.pollInterval);
             this.pollInterval = setInterval(() => {
                 this.pollForNewNotifications();
-            }, 30000);
+            }, 60000);
         },
         
         async pollForNewNotifications() {
@@ -482,7 +482,7 @@ document.addEventListener('alpine:init', () => {
             if (this.pollInterval) clearInterval(this.pollInterval);
             this.pollInterval = setInterval(() => {
                 this.pollForNewNotifications();
-            }, 30000);
+            }, 60000);
         },
         
         async pollForNewNotifications() {
