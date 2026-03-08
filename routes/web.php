@@ -52,6 +52,11 @@ Route::get('/session/check', function () {
     if (!Auth::check()) {
         return response()->json(['authenticated' => false], 401);
     }
+    // Also treat revoked / disabled accounts as unauthenticated so that the
+    // JS poller detects the revocation and forces a page redirect to login.
+    if (!Auth::user()->is_active) {
+        return response()->json(['authenticated' => false, 'reason' => 'account_disabled'], 401);
+    }
     return response()->json(['authenticated' => true, 'user_id' => Auth::id()]);
 })->name('session.check');
 

@@ -21,7 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(\App\Http\Middleware\BlockMobileDevices::class);
 
         // Register global middleware to track session activity
+        // CheckUserIsActive must come before TrackSessionActivity so that revoked
+        // users are logged out before any session metadata is written.
         $middleware->web(append: [
+            \App\Http\Middleware\CheckUserIsActive::class,
             \App\Http\Middleware\TrackSessionActivity::class,
         ]);
 
