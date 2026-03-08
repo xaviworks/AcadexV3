@@ -26,6 +26,9 @@ fi
 
 php artisan storage:link 2>/dev/null || true
 
+echo ">>> Discovering packages..."
+php artisan package:discover --ansi
+
 echo ">>> Caching config, routes, views, events..."
 php artisan config:cache
 php artisan route:cache
