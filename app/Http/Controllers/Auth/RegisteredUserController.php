@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -75,11 +76,31 @@ class RegisteredUserController extends Controller
         ]);
 
         // Fire the Registered event to send verification email
-        event(new Registered($unverifiedUser));
+        $emailSent = true;
+        try {
+            event(new Registered($unverifiedUser));
+        } catch (\Exception $e) {
+            // Mail failure must not prevent registration — user can resend later
+            $emailSent = false;
+            Log::warning('Registration verification email failed', [
+                'user_id' => $unverifiedUser->id,
+                'email'   => $unverifiedUser->email,
+                'error'   => $e->getMessage(),
+            ]);
+        }
 
         // Log in the unverified user using the 'unverified' guard
         Auth::guard('unverified')->login($unverifiedUser);
 
-        return redirect()->route('unverified.verification.notice');
+        $redirect = redirect()->route('unverified.verification.notice');
+
+        if (! $emailSent) {
+            $redirect = $redirect->with(
+                'warning',
+                'Your account was created but the verification email could not be sent. Please use the resend button on the next page.'
+            );
+        }
+
+        return $redirect;
     }
 }
