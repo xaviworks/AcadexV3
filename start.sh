@@ -10,7 +10,13 @@ echo ">>> Running migrations..."
 php artisan migrate --force
 
 # Only seed if the database is empty (first deploy)
-USER_COUNT=$(php artisan tinker --execute="echo \App\Models\User::count();" 2>/dev/null || echo "0")
+# Use a direct PHP script — avoids booting PsySH/tinker (~2-3s startup cost)
+USER_COUNT=$(php -r "
+require '/app/vendor/autoload.php';
+\$app = require '/app/bootstrap/app.php';
+\$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+echo \App\Models\User::count();
+" 2>/dev/null || echo "0")
 if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
     echo ">>> First deploy detected — running seeders..."
     php artisan db:seed --force
@@ -20,10 +26,11 @@ fi
 
 php artisan storage:link 2>/dev/null || true
 
-echo ">>> Caching config, routes, views..."
+echo ">>> Caching config, routes, views, events..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan event:cache
 
 echo ">>> Starting Apache on port ${PORT:-8080}..."
 exec apache2-foreground

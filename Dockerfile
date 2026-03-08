@@ -67,6 +67,8 @@ ENV DB_DATABASE=placeholder
 # Use file-based sessions/cache to avoid DB queries on every request
 ENV SESSION_DRIVER=file
 ENV CACHE_STORE=file
+# Ensure debug tools never activate in production
+ENV DEBUGBAR_ENABLED=false
 RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction
 
 # Copy package files and install

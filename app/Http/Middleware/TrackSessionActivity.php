@@ -16,13 +16,24 @@ class TrackSessionActivity
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+    /**
+     * How often (in seconds) to write session metadata to the DB.
+     * Prevents a DB UPDATE on every single request.
+     */
+    private const UPDATE_INTERVAL_SECONDS = 60;
+
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
 
         // Only track for authenticated users
         if (Auth::check() && $request->session()->getId()) {
+            $lastTracked = $request->session()->get('_session_tracked_at', 0);
+
+            if ((time() - $lastTracked) >= self::UPDATE_INTERVAL_SECONDS) {
                 $this->updateSessionMetadata($request);
+                $request->session()->put('_session_tracked_at', time());
+            }
         }
 
         return $response;
