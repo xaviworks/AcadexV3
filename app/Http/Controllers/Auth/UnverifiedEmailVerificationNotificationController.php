@@ -28,6 +28,12 @@ class UnverifiedEmailVerificationNotificationController extends Controller
         try {
             $user->sendEmailVerificationNotification();
         } catch (\Exception $e) {
+            $msg = '[Acadex] Resend verification email failed'
+                . ' | user_id=' . $user->id
+                . ' | email=' . $user->email
+                . ' | exception=' . get_class($e)
+                . ' | error=' . $e->getMessage();
+            error_log($msg);
             Log::error('Resend verification email failed', [
                 'user_id'   => $user->id,
                 'email'     => $user->email,
