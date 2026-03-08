@@ -165,51 +165,52 @@
             }
         });
 
-        // Session validity check on page visibility change (handles browser back button)
+        // -----------------------------------------------------------------------
+        // Session validity checking
+        // The /session/check endpoint has no auth middleware so it always returns
+        // a real 401 (instead of a 302→200 redirect) when the session is revoked.
+        // -----------------------------------------------------------------------
+        var SESSION_CHECK_URL  = '{{ route("session.check") }}';
+        var LOGIN_URL          = '{{ route("login") }}';
+        var SESSION_POLL_MS    = 30000; // check every 30 seconds
+
+        function checkSessionValid() {
+            fetch(SESSION_CHECK_URL, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(function(response) {
+                // 401 = session revoked/expired, 419 = CSRF token mismatch
+                // response.redirected means the auth middleware redirected us to
+                // the login page (should not happen now, but kept as a safety net)
+                if (response.status === 401 || response.status === 419 || response.redirected) {
+                    clearInterval(window._sessionPollInterval);
+                    window.location.href = LOGIN_URL;
+                }
+            })
+            .catch(function() {
+                // Network error – don't redirect, just wait for next poll
+            });
+        }
+
+        // Periodic polling: kicks users out within SESSION_POLL_MS after revocation
+        window._sessionPollInterval = setInterval(checkSessionValid, SESSION_POLL_MS);
+
+        // Immediate check on tab focus restore (handles browser back button)
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'visible') {
-                // Quick session check via lightweight endpoint
-                fetch('{{ route("session.check") }}', {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                })
-                .then(response => {
-                    if (response.status === 401 || response.status === 419) {
-                        // Session expired or CSRF mismatch - redirect to login
-                        window.location.href = '{{ route("login") }}';
-                    }
-                })
-                .catch(() => {
-                    // Network error - may indicate session issue, reload page
-                    window.location.reload();
-                });
+                checkSessionValid();
             }
         });
 
-        // Also check on pageshow for bfcache restoration
+        // Immediate check on bfcache page restore
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
-                // Page was restored from bfcache - verify session
-                fetch('{{ route("session.check") }}', {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                })
-                .then(response => {
-                    if (response.status === 401 || response.status === 419) {
-                        window.location.href = '{{ route("login") }}';
-                    }
-                })
-                .catch(() => {
-                    window.location.reload();
-                });
+                checkSessionValid();
             }
         });
     </script>
