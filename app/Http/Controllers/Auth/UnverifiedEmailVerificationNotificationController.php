@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UnverifiedEmailVerificationNotificationController extends Controller
 {
@@ -24,7 +25,17 @@ class UnverifiedEmailVerificationNotificationController extends Controller
             return redirect()->intended(route('verification.notice', absolute: false));
         }
 
-        $user->sendEmailVerificationNotification();
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Exception $e) {
+            Log::error('Resend verification email failed', [
+                'user_id'   => $user->id,
+                'email'     => $user->email,
+                'error'     => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+            return back()->with('warning', 'Could not send the verification email. Please try again later.');
+        }
 
         return back()->with('status', 'verification-link-sent');
     }

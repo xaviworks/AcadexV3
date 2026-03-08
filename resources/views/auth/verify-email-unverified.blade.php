@@ -24,6 +24,18 @@
             </p>
         </div>
 
+        <!-- Warning Message -->
+        @if (session('warning'))
+            <div class="mb-4 p-4 rounded-lg bg-yellow-700/20 border border-yellow-500/30">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle text-yellow-400 mr-3 mt-0.5"></i>
+                    <p class="text-sm text-yellow-400 font-medium">
+                        {{ session('warning') }}
+                    </p>
+                </div>
+            </div>
+        @endif
+
         <!-- Success Message -->
         @if (session('status') == 'verification-link-sent')
             <div class="mb-4 p-4 rounded-lg bg-green-700/20 border border-green-500/30">
