@@ -43,13 +43,17 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-// Session check endpoint for AJAX validation (prevents back button to cached pages)
+// Session check endpoint for AJAX validation (prevents back button to cached pages).
+// Intentionally no ->middleware('auth') here: the auth middleware would redirect (302) to
+// the login page, which fetch() follows and returns 200, masking the "logged out" signal.
+// We check Auth::check() manually so the endpoint always returns a real 401 when the
+// session has been revoked, allowing the JS poller to detect and force a page redirect.
 Route::get('/session/check', function () {
     if (!Auth::check()) {
         return response()->json(['authenticated' => false], 401);
     }
-    return response()->json(['authenticated' => true]);
-})->middleware('auth')->name('session.check');
+    return response()->json(['authenticated' => true, 'user_id' => Auth::id()]);
+})->name('session.check');
 
 // Announcement Routes (for all authenticated users)
 Route::middleware('auth')->group(function () {
