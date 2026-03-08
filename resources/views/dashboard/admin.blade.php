@@ -238,7 +238,7 @@ function adminDashboard() {
             // TEMPORARILY DISABLED — testing without polling
             return;
             if (this.pollInterval) clearInterval(this.pollInterval);
-            this.pollInterval = setInterval(() => this.fetchData(), 10000);
+            this.pollInterval = setInterval(() => this.fetchData(), 60000);
         },
         async fetchData() {
             try {

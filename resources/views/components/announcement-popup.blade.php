@@ -222,8 +222,8 @@ function announcementPopup() {
         _startPolling() {
             this.polling = true;
 
-            // Poll every 30 seconds (announcements are infrequent)
-            _pollTimer = setInterval(() => this._doFetch(), 30000);
+            // Poll every 120 seconds (announcements are infrequent)
+            _pollTimer = setInterval(() => this._doFetch(), 120000);
 
             // Pause when tab is hidden, resume immediately when visible
             document.addEventListener('visibilitychange', () => {
@@ -232,7 +232,7 @@ function announcementPopup() {
                 } else {
                     this._doFetch(); // instant fetch on return
                     if (!_pollTimer) {
-                        _pollTimer = setInterval(() => this._doFetch(), 30000);
+                        _pollTimer = setInterval(() => this._doFetch(), 120000);
                     }
                 }
             });
