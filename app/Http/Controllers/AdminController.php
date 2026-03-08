@@ -2890,6 +2890,39 @@ class AdminController extends Controller
                     'passing_grade' => 75,
                     'is_department_fallback' => true,
                 ]);
+        // Guard: a row with this generated name may already exist but was missed by
+        // the context-filtered queries above (e.g. is_department_fallback = false,
+        // wrong scope_level, or non-null semester/period on an older record).
+        // Promote and return it rather than attempting a duplicate insert.
+        $existingByName = GradesFormula::with('weights')->where('name', $fallbackName)->first();
+        if ($existingByName) {
+            if (! $existingByName->is_department_fallback || $existingByName->scope_level !== 'department') {
+                $existingByName->update([
+                    'is_department_fallback' => true,
+                    'scope_level'            => 'department',
+                    'department_id'          => $department->id,
+                ]);
+                $existingByName->refresh();
+            }
+            GradesFormulaService::flushCache();
+
+            return $existingByName->loadMissing('weights');
+        }
+
+        try {
+            $fallback = DB::transaction(function () use ($department, $label, $fallbackName, $semesterForInsert, $periodForInsert) {
+                $formula = GradesFormula::create([
+                    'name' => $fallbackName,
+                    'label' => $label,
+                    'scope_level' => 'department',
+                    'department_id' => $department->id,
+                    'semester' => $semesterForInsert,
+                    'academic_period_id' => $periodForInsert,
+                    'base_score' => 40,
+                    'scale_multiplier' => 60,
+                    'passing_grade' => 75,
+                    'is_department_fallback' => true,
+                ]);
 
                 $formula->weights()->createMany([
                     ['activity_type' => 'quiz', 'weight' => 0.40],
@@ -2897,6 +2930,22 @@ class AdminController extends Controller
                     ['activity_type' => 'exam', 'weight' => 0.40],
                 ]);
 
+                return $formula;
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Race-condition safety net: if a duplicate-key error occurs after the
+            // name-based guard above (two concurrent requests), return the row that
+            // won the insert race instead of surfacing a 500.
+            if (str_contains($e->getMessage(), '1062') || str_contains($e->getMessage(), 'Duplicate entry')) {
+                $fallback = GradesFormula::with('weights')->where('name', $fallbackName)->first();
+                if ($fallback) {
+                    GradesFormulaService::flushCache();
+
+                    return $fallback;
+                }
+            }
+            throw $e;
+        }
                 return $formula;
             });
         } catch (\Illuminate\Database\QueryException $e) {
@@ -3732,6 +3781,8 @@ class AdminController extends Controller
                 DB::table('sessions')
                     ->where('user_id', $user->id)
                     ->delete();
+                // Invalidate remember_token so "remember me" cookie cannot silently recreate the session
+                $user->forceFill(['remember_token' => null])->save();
             } else {
                 // Log a note for maintainers if this isn't possible
                 \Illuminate\Support\Facades\Log::warning("Skipping session deletion for user {$user->id}. Session driver: {$driver}");
@@ -3811,6 +3862,8 @@ class AdminController extends Controller
                 DB::table('sessions')
                     ->where('user_id', $user->id)
                     ->delete();
+                // Invalidate remember_token so "remember me" cookie cannot silently recreate the session
+                $user->forceFill(['remember_token' => null])->save();
             } else {
                 \Illuminate\Support\Facades\Log::warning("Skipping session deletion for user {$user->id} (session driver: {$driver}).");
             }
@@ -4225,18 +4278,7 @@ class AdminController extends Controller
         // Collect session IDs before deletion so we can destroy through the session handler
         $sessionIds = DB::table('sessions')
             ->where('user_id', $userId)
-            ->pluck('id');
-
-        $deleted = $sessionIds->count();
-
-        // Destroy each session in the actual session store (file, database, redis, etc.)
-        $handler = app('session')->driver()->getHandler();
-        foreach ($sessionIds as $id) {
-            $handler->destroy($id);
-        }
-
-        // Also remove tracking rows (needed when session driver != database)
-        DB::table('sessions')->where('user_id', $userId)->delete();
+            ->delete();
 
         if ($deleted > 0) {
             // Log the bulk session revocation
@@ -4372,6 +4414,9 @@ class AdminController extends Controller
             ->where('id', '!=', $currentSessionId)
             ->whereNotNull('user_id')
             ->delete();
+
+        // Invalidate remember_token for all affected users so "remember me" cookies cannot recreate sessions
+        User::where('id', '!=', Auth::id())->update(['remember_token' => null]);
 
         // Log the bulk revocation
         DB::table('user_logs')->insert([
