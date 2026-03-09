@@ -46,5 +46,11 @@ php artisan route:cache
 php artisan view:cache
 php artisan event:cache
 
+echo ">>> Starting Laravel scheduler in background..."
+php artisan schedule:work >> storage/logs/scheduler.log 2>&1 &
+
+echo ">>> Starting Laravel queue worker in background..."
+php artisan queue:work --sleep=3 --tries=3 --max-time=3600 >> storage/logs/queue.log 2>&1 &
+
 echo ">>> Starting Apache on port ${PORT:-8080}..."
 exec apache2-foreground
