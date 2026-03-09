@@ -14,6 +14,7 @@ mkdir -p storage/framework/views \
          storage/app/public \
          storage/app/private \
          storage/logs
+chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
 echo ">>> Running migrations..."
