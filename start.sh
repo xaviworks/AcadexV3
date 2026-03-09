@@ -6,6 +6,16 @@ rm -f /etc/apache2/mods-enabled/mpm_*
 ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load
 ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf
 
+# Ensure required storage directories exist (critical when a fresh volume is mounted)
+echo ">>> Ensuring storage directory structure..."
+mkdir -p storage/framework/views \
+         storage/framework/cache/data \
+         storage/framework/sessions \
+         storage/app/public \
+         storage/app/private \
+         storage/logs
+chmod -R 775 storage bootstrap/cache
+
 echo ">>> Running migrations..."
 php artisan migrate --force
 
