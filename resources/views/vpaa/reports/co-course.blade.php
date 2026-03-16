@@ -2,33 +2,32 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-book text-success me-2"></i>{{ $course->course_code }} – Course CO Summary
-            </h2>
-            <p class="text-muted mb-0">{{ $course->course_description }}</p>
-        </div>
-        <div>
-            @if($academicYear && $semester)
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">
-                    <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
-                </span>
-            @endif
-            <a href="{{ route('vpaa.reports.co-course') }}" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i>Choose Course
-            </a>
-        </div>
-    </div>
+    {{-- Page Header --}}
+    @include('chairperson.partials.reports-header', [
+        'title' => $course->course_code . ' – Course Outcomes Summary',
+        'subtitle' => $course->course_description,
+        'icon' => 'bi-book',
+        'academicYear' => $academicYear ?? null,
+        'semester' => $semester ?? null
+    ])
+
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Course Outcomes Reports', 'url' => route('vpaa.reports.co-course')],
+        ['label' => $course->course_code]
+    ]" />
 
     {{-- CO Results Table --}}
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
             @if(empty($subjectCOs))
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
-                    <p class="text-muted mb-0">No subjects found for this course in the selected academic period.</p>
-                </div>
+                <x-empty-state
+                    :compact="true"
+                    icon="bi-journal-x"
+                    title="No Subjects Found"
+                    message="No subjects found for this course in the selected academic period."
+                />
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">

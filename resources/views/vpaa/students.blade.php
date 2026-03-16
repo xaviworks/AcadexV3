@@ -3,24 +3,24 @@
 @section('content')
 <div class="container-fluid px-4 py-4">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-mortarboard me-2"></i>Students Overview
-                @if(isset($department))
-                    <span class="text-muted fs-5">• {{ $department->department_description ?? '' }}</span>
-                @endif
-            </h2>
-            <p class="text-muted mb-0">View and manage students across departments and courses</p>
-        </div>
-        @if(isset($department))
-        <div>
-            <a href="{{ route('vpaa.students') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
-                <i class="bi bi-arrow-left me-2"></i>Back
-            </a>
-        </div>
-        @endif
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-mortarboard me-2"></i>Students Overview
+            @if(isset($department))
+                <span class="text-muted fs-5">• {{ $department->department_description ?? '' }}</span>
+            @endif
+        </h2>
+        <p class="text-muted mb-0">View and manage students across departments and courses</p>
     </div>
+
+    @if(isset($department))
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Students', 'url' => route('vpaa.students')],
+        ['label' => $department->department_code ?? 'Department']
+    ]" />
+    @endif
 
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
