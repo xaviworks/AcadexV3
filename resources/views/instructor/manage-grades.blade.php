@@ -4,13 +4,13 @@
 <div class="container-fluid px-0">
     <div id="grade-section">
         @if (!$subject)
+            <div class="px-4 pt-4 pb-2">
+                <h1 class="h4 fw-bold mb-0 d-flex align-items-center">
+                    <i class="bi bi-card-checklist text-success me-2" style="font-size: 1.5rem;"></i>
+                    <span>Manage Grades</span>
+                </h1>
+            </div>
             @if(count($subjects))
-                <div class="px-4 pt-4 pb-2">
-                    <h1 class="h4 fw-bold mb-0 d-flex align-items-center">
-                        <i class="bi bi-card-checklist text-success me-2" style="font-size: 1.5rem;"></i>
-                        <span>Manage Grades</span>
-                    </h1>
-                </div>
                 <div class="row g-4 px-4 py-4" id="subject-selection">
                     @foreach($subjects as $subjectItem)
                         <div class="col-md-4">
@@ -58,11 +58,13 @@
                     @endforeach
                 </div>
             @else
-                <x-empty-state
-                    icon="bi-journal-x"
-                    title="No Assigned Subjects"
-                    message="No subjects have been assigned to you yet."
-                />
+                <div class="px-4 py-4">
+                    <x-empty-state
+                        icon="bi-journal-x"
+                        title="No Assigned Subjects"
+                        message="No subjects have been assigned to you yet."
+                    />
+                </div>
             @endif
         @else
             @include('instructor.partials.term-stepper')
