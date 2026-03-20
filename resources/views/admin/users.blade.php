@@ -313,8 +313,8 @@
                             </label>
                         </div>
 
-                        <div class="row disable-options-row row-cols-1 row-cols-md-2 row-cols-lg-4">
-                            <div class="col mb-3">
+                        <div class="d-flex gap-3 disable-options-row flex-wrap">
+                            <div class="flex-fill">
                                 <div class="disable-option-card active" data-value="1_week" role="button" tabindex="0">
                                     <span class="check-mark"><i class="bi bi-check-lg"></i></span>
                                     <div class="icon bg-primary bg-opacity-10 text-primary">
@@ -328,7 +328,7 @@
                                 </div>
                             </div>
 
-                            <div class="col mb-3">
+                            <div class="flex-fill">
                                 <div class="disable-option-card" data-value="1_month" role="button" tabindex="0">
                                     <span class="check-mark"><i class="bi bi-check-lg"></i></span>
                                     <div class="icon bg-info bg-opacity-10 text-info">
@@ -342,7 +342,7 @@
                                 </div>
                             </div>
 
-                            <div class="col mb-3">
+                            <div class="flex-fill">
                                 <div class="disable-option-card" data-value="indefinite" role="button" tabindex="0">
                                     <span class="check-mark"><i class="bi bi-check-lg"></i></span>
                                     <div class="icon bg-danger bg-opacity-10 text-danger">
@@ -356,7 +356,7 @@
                                 </div>
                             </div>
 
-                            <div class="col mb-3">
+                            <div class="flex-fill">
                                 <div class="disable-option-card" data-value="custom" role="button" tabindex="0">
                                     <span class="check-mark"><i class="bi bi-check-lg"></i></span>
                                     <div class="icon bg-warning bg-opacity-10 text-warning">
@@ -391,13 +391,11 @@
                     </div>
                     <div class="modal-footer disable-modal-footer">
                         <input type="hidden" name="duration" id="chooseDisableDuration" value="1_week">
-                        <button type="submit" class="btn btn-danger px-4" x-data>
-                            <span x-show="!$store.loading.isLoading('disableUser')">
-                                <i class="bi bi-person-slash me-2"></i>Disable Account
-                            </span>
-                            <span x-show="$store.loading.isLoading('disableUser')" x-cloak>
-                                <span class="spinner-border spinner-border-sm me-2"></span>Disabling...
-                            </span>
+                        <button type="submit" class="btn btn-danger px-4" id="disableAccountSubmitBtn">
+                            <i class="bi bi-person-slash me-2"></i>Disable Account
+                        </button>
+                        <button type="button" class="btn btn-secondary px-4" @click="modal.close()">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
                         </button>
                     </div>
                 </form>
@@ -532,8 +530,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                     <button type="button" class="btn btn-success" onclick="openConfirmModal()">Add User</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                 </div>
             </form>
         </div>
@@ -565,6 +563,9 @@
                                placeholder="Re-enter your password">
                     </div>
                 </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Confirm</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
                 </div>
             </form>
         </div>
@@ -602,10 +603,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-warning">
                         <i class="fas fa-shield-halved me-1"></i>Reset 2FA
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -1035,13 +1036,13 @@
         window.confirmReset2FAUser = function(userId, userName) {
             const modalEl = document.getElementById('reset2FAUserModal');
             if (!modalEl) return;
-            
+
             document.getElementById('reset-2fa-user-user-id').value = userId;
             document.getElementById('reset-2fa-user-user-name').textContent = userName;
-            
+
             const bsModal = new bootstrap.Modal(modalEl);
             bsModal.show();
-            
+
             // Focus on password input after modal opens
             setTimeout(() => {
                 const passwordInput = document.getElementById('reset-2fa-user-password');

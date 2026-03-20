@@ -340,11 +340,11 @@
             </div>
 
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
                     <i class="bi bi-check2-all"></i>
                     <span>Confirm Import</span>
                 </button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
             </div>
         </form>
     </div>

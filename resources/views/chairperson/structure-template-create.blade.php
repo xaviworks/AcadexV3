@@ -88,12 +88,12 @@
 
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body d-flex justify-content-between align-items-center">
-                <a href="{{ route('chairperson.structureTemplates.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Cancel
-                </a>
                 <button type="submit" class="btn btn-success px-4" id="submit-btn" disabled>
                     <i class="bi bi-send me-1"></i>Submit Request
                 </button>
+                <a href="{{ route('chairperson.structureTemplates.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Cancel
+                </a>
             </div>
         </div>
     </form>

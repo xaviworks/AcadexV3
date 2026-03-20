@@ -780,10 +780,10 @@
                     <div id="create-formula-error" class="text-danger small d-none" role="alert"></div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success" id="create-formula-submit">
                         <i class="bi bi-check-circle me-1"></i>Create Formula
                     </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -824,10 +824,10 @@
                     <div id="delete-formula-error" class="text-danger small d-none" role="alert"></div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger" id="delete-formula-submit">
                         <i class="bi bi-trash me-1"></i>Delete Formula
                     </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -868,10 +868,10 @@
                     <div id="delete-global-formula-error" class="text-danger small d-none" role="alert"></div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger" id="delete-global-formula-submit">
                         <i class="bi bi-trash me-1"></i>Delete Global Formula
                     </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -909,10 +909,10 @@
                         </div>
                     </div>
                     <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger" id="delete-template-confirm">
                             <i class="bi bi-trash me-1"></i>Delete Template
                         </button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -996,10 +996,10 @@
                     <div id="template-error" class="text-danger small d-none" role="alert"></div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="create-template-submit">
                         <i class="bi bi-check-circle me-1"></i>Create Template
                     </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -1025,10 +1025,10 @@
                 <div id="template-password-modal-error" class="text-danger small d-none" role="alert" aria-live="assertive"></div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="template-password-confirm">
                     <i class="bi bi-check-circle me-1"></i>Confirm and Create
                 </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>

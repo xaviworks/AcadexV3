@@ -155,7 +155,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="text-center text-muted fst-italic py-4">
+                                    <td colspan="10" class="text-center text-muted fst-italic py-4">
                                         <i class="fas fa-info-circle me-2"></i>No active sessions found.
                                     </td>
                                 </tr>
@@ -408,44 +408,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Revoke Session</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- Reset 2FA Modal --}}
-<div class="modal fade" id="reset2FAModal" tabindex="-1" aria-labelledby="reset2FAModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="reset2FAModalLabel">Reset Two-Factor Authentication</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="reset-2fa-form" action="{{ route('admin.sessions.reset2fa') }}" method="POST">
-                @csrf
-                <input type="hidden" name="user_id" id="reset-2fa-user-id">
-                <div class="modal-body">
-                    <p>You are about to <strong>disable two-factor authentication</strong> for <strong id="reset-2fa-user-name"></strong>.</p>
-                    <p class="text-warning mb-3">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        This will remove their 2FA protection. They will need to re-enable and configure 2FA again if needed.
-                    </p>
-                    <div class="alert alert-info mb-3">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Use this when a user has lost access to their authenticator app or device.
-                    </div>
-                    <div class="mt-3">
-                        <label class="form-label fw-bold">Confirm Your Password</label>
-                        <input type="password" name="password" id="reset-2fa-password" class="form-control" required 
-                               placeholder="Enter your admin password" autofocus>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">Reset 2FA</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>                
                 </div>
             </form>
         </div>
@@ -478,8 +442,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Revoke All Sessions</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -487,7 +451,7 @@
 </div>
 
 @push('scripts')
-    {{-- JavaScript moved to: resources/js/pages/admin/sessions.js --}}
+    {{-- Modal handlers are in: resources/js/pages/admin/sessions.js --}}
     
     @if(session('success'))
         <script>

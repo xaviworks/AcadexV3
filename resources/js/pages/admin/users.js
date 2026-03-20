@@ -297,80 +297,133 @@ function initAdminUsersPage() {
 
   // Disable form AJAX submission
   const chooseDisableForm = document.getElementById('chooseDisableForm');
-  if (chooseDisableForm) {
-    chooseDisableForm.addEventListener('submit', function (e) {
-      e.preventDefault();
+  if (chooseDisableForm && chooseDisableForm.dataset.disableHandlerBound !== '1') {
+    chooseDisableForm.dataset.disableHandlerBound = '1';
+    chooseDisableForm.addEventListener(
+      'submit',
+      async function (e) {
+        e.preventDefault();
+        // Prevent duplicate submit handlers from mutating button state.
+        e.stopImmediatePropagation();
 
-      const form = e.target;
-      const selected = document.querySelector('input[name="duration_option"]:checked');
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const defaultSubmitBtnHtml = submitBtn?.dataset.defaultHtml || submitBtn?.innerHTML || '';
 
-      if (!selected) {
-        alert('Please select a duration.');
-        return;
-      }
+        // Reset button state in case a previous request was interrupted.
+        if (submitBtn) {
+          submitBtn.dataset.defaultHtml = defaultSubmitBtnHtml;
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = defaultSubmitBtnHtml;
+        }
 
-      const duration = selected.value;
-      const formData = new FormData();
-      formData.append('duration', duration);
+        const selected = document.querySelector('input[name="duration_option"]:checked');
 
-      const tokenInput = document.querySelector('input[name="_token"]');
-      if (tokenInput) formData.append('_token', tokenInput.value);
-
-      // Start loading state
-      loading.start('disableUser');
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) submitBtn.disabled = true;
-
-      if (duration === 'custom') {
-        const customVal = document.getElementById('customDisableDatetime')?.value;
-        if (!customVal) {
-          notify.warning('Please select a custom date and time.');
-          loading.stop('disableUser');
-          if (submitBtn) submitBtn.disabled = false;
+        if (!selected) {
+          notify.warning('Please select a duration.');
           return;
         }
-        formData.append('custom_disable_datetime', customVal);
-      }
 
-      fetch(form.action, {
-        method: 'POST',
-        body: formData,
-      })
-        .then(async (response) => {
+        const duration = selected.value;
+
+        // Get duration display text for confirmation
+        let durationText = '';
+        switch (duration) {
+          case '1_week':
+            durationText = '1 week';
+            break;
+          case '1_month':
+            durationText = '1 month';
+            break;
+          case 'indefinite':
+            durationText = 'indefinitely';
+            break;
+          case 'custom':
+            const customDateCheck = document.getElementById('customDisableDatetime')?.value;
+            if (customDateCheck) {
+              const date = new Date(customDateCheck);
+              durationText = `until ${date.toLocaleString()}`;
+            } else {
+              notify.warning('Please select a custom date and time.');
+              return;
+            }
+            break;
+        }
+
+        try {
+          // Show confirmation dialog
+          const confirmed = await window.confirm.ask({
+            title: 'Disable User Account?',
+            message: `Are you sure you want to disable this account for ${durationText}? The user will be logged out immediately and won't be able to access the system.`,
+            confirmText: 'Yes, Disable Account',
+            cancelText: 'Cancel',
+            type: 'danger',
+          });
+
+          if (!confirmed) return;
+
+          const formData = new FormData();
+          formData.append('duration', duration);
+
+          const tokenInput = document.querySelector('input[name="_token"]');
+          if (tokenInput) formData.append('_token', tokenInput.value);
+
+          // Start loading indicator only after user confirms.
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Disabling...';
+          }
+
+          if (duration === 'custom') {
+            const customVal = document.getElementById('customDisableDatetime')?.value;
+            if (!customVal) {
+              notify.warning('Please select a custom date and time.');
+              return;
+            }
+            formData.append('custom_disable_datetime', customVal);
+          }
+
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+          });
+
           let parsed = null;
           const contentType = response.headers.get('content-type') || '';
           if (contentType.includes('application/json')) {
             parsed = await response.json();
           }
+
           if (!response.ok) {
             const errMsg =
               parsed?.message || parsed || (await response.text().catch(() => null)) || response.statusText;
             throw errMsg;
           }
-          return parsed;
-        })
-        .then((data) => {
-          if (data && data.success) {
+
+          if (parsed && parsed.success) {
             modal.close();
             // Store message in sessionStorage to show after reload
-            sessionStorage.setItem('userActionMessage', data.message);
+            sessionStorage.setItem('userActionMessage', parsed.message);
             sessionStorage.setItem('userActionType', 'success');
             location.reload();
-          } else {
-            throw data?.message || 'Failed to disable user.';
+            return;
           }
-        })
-        .catch((error) => {
+
+          throw parsed?.message || 'Failed to disable user.';
+        } catch (error) {
           console.error('Error:', error);
           const message =
             typeof error === 'string' ? error : error?.message || 'An error occurred while disabling the user.';
           notify.error(message);
-        })
-        .finally(() => {
-          loading.stop('disableUser');
-          if (submitBtn) submitBtn.disabled = false;
-        });
-    });
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = submitBtn.dataset.defaultHtml || '<i class="bi bi-person-slash me-2"></i>Disable Account';
+          }
+        }
+      },
+      { capture: true }
+    );
   }
 
   // Role change handler for user form

@@ -1,7 +1,12 @@
 {{-- Alpine Confirmation Dialog Component --}}
-<div x-data 
-    x-show="$store.confirm.show" 
-    x-transition.opacity 
+<div x-data
+    x-show="$store.confirm.show"
+    x-transition:enter="transition ease-out duration-150"
+    x-transition:enter-start="opacity-0 scale-95"
+    x-transition:enter-end="opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-100"
+    x-transition:leave-start="opacity-100 scale-100"
+    x-transition:leave-end="opacity-0 scale-95"
     class="modal"
     :class="{ 'show d-block': $store.confirm.show }"
     :style="$store.confirm.show ? 'z-index: 1055;' : ''"
@@ -40,10 +45,6 @@
             {{-- Footer --}}
             <div class="modal-footer border-0 bg-light">
                 <button type="button" 
-                        class="btn btn-secondary" 
-                        @click="$store.confirm.cancel()"
-                        x-text="$store.confirm.cancelText"></button>
-                <button type="button" 
                         class="btn"
                         :class="{
                             'btn-warning': $store.confirm.type === 'warning',
@@ -52,15 +53,24 @@
                         }"
                         @click="$store.confirm.confirm()"
                         x-text="$store.confirm.confirmText"></button>
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        @click="$store.confirm.cancel()"
+                        x-text="$store.confirm.cancelText"></button>
             </div>
         </div>
     </div>
 </div>
 
 {{-- Confirmation dialog backdrop --}}
-<div x-data 
-    x-show="$store.confirm.show" 
-    x-transition.opacity 
-    class="position-fixed top-0 start-0 w-100 h-100" 
+<div x-data
+    x-show="$store.confirm.show"
+    x-transition:enter="transition ease-out duration-150"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-100"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="position-fixed top-0 start-0 w-100 h-100"
     style="z-index: 1054; background: rgba(0, 0, 0, 0.08);"
     @click="$store.confirm.cancel()"></div>

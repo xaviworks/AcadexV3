@@ -229,10 +229,6 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>
-                    Cancel
-                </button>
                 <button type="button" class="btn btn-success" id="saveNotesBtn" x-data>
                     <span x-show="!$store.loading.isLoading('saveNotes')">
                         <i class="bi bi-check-circle me-1"></i>
@@ -243,6 +239,7 @@
                         Saving...
                     </span>
                 </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
