@@ -418,7 +418,8 @@ function initAdminUsersPage() {
         } finally {
           if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = submitBtn.dataset.defaultHtml || '<i class="bi bi-person-slash me-2"></i>Disable Account';
+            submitBtn.innerHTML =
+              submitBtn.dataset.defaultHtml || '<i class="bi bi-person-slash me-2"></i>Disable Account';
           }
         }
       },

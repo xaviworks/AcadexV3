@@ -235,9 +235,8 @@ class VPAAController extends Controller
 
     public function viewDepartments()
     {
-        // Get all non-deleted departments except GE (General Education) with optimized eager loading
+        // Get all non-deleted departments with optimized eager loading
         $departments = Department::where('is_deleted', false)
-            ->where('department_code', '!=', 'GE') // Exclude GE department
             ->select('id', 'department_code', 'department_description')
             ->withCount([
                 'users as instructor_count' => function ($query) {
