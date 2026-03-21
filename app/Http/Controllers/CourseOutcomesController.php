@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class CourseOutcomesController extends Controller
 {
@@ -380,6 +381,7 @@ class CourseOutcomesController extends Controller
         $overriddenCount = 0;
         $totalCOsDeleted = 0;
         $limitReachedCount = 0;
+        $hasTargetPercentageColumn = Schema::hasColumn('course_outcomes', 'target_percentage');
 
         foreach ($subjects as $subject) {
             $existingCOs = $subject->courseOutcomes()->get();
@@ -443,17 +445,22 @@ class CourseOutcomesController extends Controller
 
             // Generate course outcomes for missing numbers
             foreach ($cosToGenerate as $coNumber) {
-                CourseOutcomes::create([
+                $courseOutcomePayload = [
                     'subject_id' => $subject->id,
                     'academic_period_id' => $academicPeriodId,
                     'co_code' => 'CO' . $coNumber,
                     'co_identifier' => $subject->subject_code . '.' . $coNumber,
                     'description' => 'Students have achieved 75% of the course outcomes',
-                    'target_percentage' => 75,
                     'is_deleted' => false,
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
-                ]);
+                ];
+
+                if ($hasTargetPercentageColumn) {
+                    $courseOutcomePayload['target_percentage'] = 75;
+                }
+
+                CourseOutcomes::create($courseOutcomePayload);
             }
 
             $generatedCount++;

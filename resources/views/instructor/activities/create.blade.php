@@ -116,7 +116,7 @@
         <div class="col-md-4 text-end">
             @if ($isAligned)
                 <span class="badge bg-success px-3 py-2 me-2" style="font-size: 0.9rem;">
-                    <i class="bi bi-check-circle me-1"></i>Perfectly Aligned
+                    <i class="bi bi-check-circle me-1"></i> Aligned
                 </span>
             @else
                 <span class="badge bg-warning px-3 py-2 me-2" style="font-size: 0.9rem;">
@@ -368,12 +368,14 @@
                                                 $badgeClass = match ($status) {
                                                     'ok' => 'bg-success',
                                                     'exceeds' => 'bg-danger',
-                                                    default => 'bg-warning text-dark',
+                                                    'missing' => 'bg-warning text-dark',
+                                                    default => 'bg-secondary',
                                                 };
                                                 $badgeIcon = match ($status) {
                                                     'ok' => 'check-circle',
                                                     'exceeds' => 'x-circle',
-                                                    default => 'exclamation-circle',
+                                                    'missing' => 'exclamation-circle',
+                                                    default => 'dash-circle',
                                                 };
                                             @endphp
                                             <td class="text-center">
@@ -518,9 +520,7 @@
               <button type="submit" class="btn btn-danger shadow-sm">
                 <i class="bi bi-trash me-1"></i>Delete Activity
               </button>
-                <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Cancel  
-                </button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
           </div>
         </form>
@@ -664,9 +664,7 @@
             <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;">
               <i class="bi bi-check-circle me-1"></i>Save Activity
             </button>
-            <button type="button" class="btn btn-light shadow-sm" data-bs-dismiss="modal">
-              <i class="bi bi-x-circle me-1"></i>Cancel
-            </button>            
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>            
           </div>
         </form>
       </div>

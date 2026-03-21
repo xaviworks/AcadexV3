@@ -333,9 +333,7 @@
                 <button type="button" class="btn btn-success rounded-pill fw-semibold" onclick="submitGenerateForm()" id="generateSubmitBtn">
                     <i class="bi bi-magic me-1"></i>Generate Course Outcomes
                 </button>
-                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Cancel
-                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>

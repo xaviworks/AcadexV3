@@ -17,7 +17,8 @@ class InstructorDashboardTest extends TestCase
     public function test_instructor_is_redirected_to_dashboard_route(): void
     {
         // Use a non-persisted user instance to avoid running migrations in this test
-        $user = User::factory()->make(['role' => 0]);
+        /** @var User $user */
+        $user = User::factory()->makeOne(['role' => 0]);
 
         $response = $this->actingAs($user)->get('/instructor/dashboard');
 

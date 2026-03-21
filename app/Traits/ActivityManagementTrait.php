@@ -276,6 +276,46 @@ trait ActivityManagementTrait
         return false;
     }
 
+    protected function determineMinimumRequiredAssessments(array $component): int
+    {
+        $activityType = (string) ($component['activity_type'] ?? '');
+        $baseType = (string) ($component['base_type'] ?? FormulaStructure::baseActivityType($activityType));
+        $relativeWeight = (float) ($component['relative_weight_percent'] ?? 0);
+        $maxAllowed = array_key_exists('max_assessments', $component) && $component['max_assessments'] !== null
+            ? (int) $component['max_assessments']
+            : null;
+
+        $minRequired = $relativeWeight > 0 ? 1 : 0;
+
+        if ($baseType === 'exam') {
+            $minRequired = max(1, $minRequired);
+        }
+
+        if ($this->activityTypeHasKeyword($activityType, ['quiz', 'ocr'])
+            || $this->activityTypeHasKeyword($baseType, ['quiz', 'ocr'])) {
+            $minRequired = max(3, $minRequired);
+        }
+
+        if ($maxAllowed !== null) {
+            $minRequired = min($minRequired, $maxAllowed);
+        }
+
+        return $minRequired;
+    }
+
+    protected function determineAlignmentStatus(int $actualCount, int $minRequired, ?int $maxAllowed): string
+    {
+        if ($maxAllowed !== null && $actualCount > $maxAllowed) {
+            return 'exceeds';
+        }
+
+        if ($minRequired > 0 && $actualCount < $minRequired) {
+            return 'missing';
+        }
+
+        return 'ok';
+    }
+
     protected function getTermLabelMap(): array
     {
         return [
@@ -343,23 +383,17 @@ trait ActivityManagementTrait
                 $match = $termCounts->firstWhere('type', $component['activity_type']);
                 $actualCount = $match ? (int) $match->total : 0;
 
-                $minRequired = $component['relative_weight_percent'] > 0 ? 1 : 0;
-                if ($component['base_type'] === 'exam') {
-                    $minRequired = max(1, $minRequired);
-                }
-
+                $minRequired = $this->determineMinimumRequiredAssessments($component);
                 $maxAllowed = $component['max_assessments'];
                 $availableSlots = $maxAllowed !== null
                     ? max(0, (int) $maxAllowed - $actualCount)
                     : null;
 
-                $isMissing = $minRequired > 0 && $actualCount < $minRequired;
-                $exceeds = $maxAllowed !== null && $actualCount > $maxAllowed;
-                $status = $isMissing ? 'missing' : ($availableSlots === 0 && $maxAllowed !== null ? 'full' : 'ok');
+                $status = $this->determineAlignmentStatus($actualCount, $minRequired, $maxAllowed);
 
-                if ($isMissing) {
+                if ($status === 'missing') {
                     $alignmentSummary['missing']++;
-                } elseif ($exceeds) {
+                } elseif ($status === 'exceeds') {
                     $alignmentSummary['exceeds']++;
                 }
 
