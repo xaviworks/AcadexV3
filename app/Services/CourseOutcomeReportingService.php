@@ -16,7 +16,7 @@ use App\Traits\CourseOutcomeTrait;
  *
  * Contract
  * - Inputs: subject IDs, course ID, or department ID with active academic period
- * - Output: associative arrays keyed by CO code number (1..6) with raw, max, percent
+ * - Output: associative arrays keyed by CO code number (1..6) with raw, max, percent, target_percentage
  * - Missing scores count as 0 while the max still counts (consistent with computeCoAttainment)
  */
 class CourseOutcomeReportingService
@@ -104,7 +104,7 @@ class CourseOutcomeReportingService
         }
 
         // Transform coResults to use CO codes instead of IDs
-        // Structure: [term][coCode] => ['raw' => int, 'max' => int, 'percent' => float]
+        // Structure: [term][coCode] => ['raw' => int, 'max' => int, 'percent' => float, 'target_percentage' => int]
         $coResultsByCode = [];
         foreach ($terms as $term) {
             foreach ($finalCOs as $coId) {
@@ -129,6 +129,7 @@ class CourseOutcomeReportingService
                             'raw' => $rawScore,
                             'max' => $maxScore,
                             'percent' => $percent,
+                            'target_percentage' => (int) ($coDetails[$coId]->target_percentage ?? 75),
                         ];
                     }
                 }
@@ -144,6 +145,7 @@ class CourseOutcomeReportingService
                     'raw' => $coAttainment['semester_raw'][$coId] ?? 0,
                     'max' => $coAttainment['semester_max'][$coId] ?? 0,
                     'percent' => $coAttainment['semester_total'][$coId] ?? 0,
+                    'target_percentage' => (int) ($coDetails[$coId]->target_percentage ?? 75),
                 ];
             }
         }
@@ -158,7 +160,7 @@ class CourseOutcomeReportingService
     }
     /**
      * Compute aggregated CO attainment for a single subject across all enrolled students and terms.
-     * Returns: [co_code_number => ['raw' => int, 'max' => int, 'percent' => float]]
+    * Returns: [co_code_number => ['raw' => int, 'max' => int, 'percent' => float, 'target_percentage' => int]]
      */
     public function aggregateSubject(int $subjectId): array
     {
@@ -175,6 +177,7 @@ class CourseOutcomeReportingService
         }
 
         $coTotals = [];
+        $coTargets = [];
 
         // Get all activities for this subject mapped to COs
         $activities = Activity::where('subject_id', $subjectId)
@@ -210,6 +213,10 @@ class CourseOutcomeReportingService
                 $coTotals[$coNum] = ['raw' => 0, 'max' => 0];
             }
 
+            if (!isset($coTargets[$coNum])) {
+                $coTargets[$coNum] = (int) ($co->target_percentage ?? 75);
+            }
+
             // For each enrolled student, add score (0 if missing) and add max (number_of_items)
             foreach ($students as $student) {
                 $key = $activity->id.'::'.$student->id;
@@ -227,6 +234,7 @@ class CourseOutcomeReportingService
                 'raw' => $totals['raw'],
                 'max' => $totals['max'],
                 'percent' => $percent,
+                'target_percentage' => $coTargets[$num] ?? 75,
             ];
         }
 
@@ -269,6 +277,7 @@ class CourseOutcomeReportingService
         }
 
         $merged = [];
+        $coTargets = [];
 
         // Optimized: Batch fetch all data needed for all subjects at once
         // Get all activities with their course outcomes
@@ -276,7 +285,7 @@ class CourseOutcomeReportingService
             ->where('is_deleted', false)
             ->whereNotNull('course_outcome_id')
             ->with(['courseOutcome' => function ($query) {
-                $query->select('id', 'co_code', 'is_deleted');
+                $query->select('id', 'co_code', 'is_deleted', 'target_percentage');
             }])
             ->select('id', 'subject_id', 'course_outcome_id', 'number_of_items')
             ->get();
@@ -324,6 +333,10 @@ class CourseOutcomeReportingService
                 $merged[$coNum] = ['raw' => 0, 'max' => 0];
             }
 
+            if (!isset($coTargets[$coNum])) {
+                $coTargets[$coNum] = (int) ($co->target_percentage ?? 75);
+            }
+
             // For each student, add score and max
             foreach ($students as $student) {
                 $key = $activity->id.'::'.$student->id;
@@ -340,6 +353,7 @@ class CourseOutcomeReportingService
                 'raw' => $totals['raw'],
                 'max' => $totals['max'],
                 'percent' => $percent,
+                'target_percentage' => $coTargets[$num] ?? 75,
             ];
         }
 
