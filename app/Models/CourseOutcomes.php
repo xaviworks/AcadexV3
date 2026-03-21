@@ -18,9 +18,15 @@ class CourseOutcomes extends Model
         'co_code',
         'co_identifier',
         'description',
+        'target_percentage',
         'created_by',
         'updated_by',
         'is_deleted',
+    ];
+
+    protected $casts = [
+        'target_percentage' => 'integer',
+        'is_deleted' => 'boolean',
     ];
 
     /**

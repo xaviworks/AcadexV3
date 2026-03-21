@@ -373,7 +373,7 @@ function notificationPageComponent(config) {
             // Poll every 10 seconds
             this.pollInterval = setInterval(() => {
                 this.pollForNewNotifications();
-            }, 10000);
+            }, 60000);
         },
         
         async pollForNewNotifications() {

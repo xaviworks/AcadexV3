@@ -66,11 +66,12 @@
                                     @php($val = $row['co'][$i] ?? null)
                                     <td class="text-center py-3">
                                         @if($val)
+                                            @php($threshold = (int) ($val['target_percentage'] ?? 75))
                                             <div class="d-flex flex-column align-items-center">
-                                                <span class="badge {{ $val['percent'] >= 75 ? 'bg-success text-white' : 'bg-danger text-white' }} px-3 py-2 rounded-pill mb-1 fs-6">
+                                                <span class="badge {{ $val['percent'] >= $threshold ? 'bg-success text-white' : 'bg-danger text-white' }} px-3 py-2 rounded-pill mb-1 fs-6">
                                                     {{ number_format($val['percent'], 1) }}%
                                                 </span>
-                                                <small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }}</small>
+                                                <small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }} | target {{ $threshold }}%</small>
                                             </div>
                                         @else
                                             <span class="text-muted fs-5">—</span>
@@ -100,12 +101,12 @@
                             </h6>
                             <div class="d-flex gap-3">
                                 <div class="d-flex align-items-center">
-                                    <span class="badge bg-success text-white px-2 py-1 me-2">75%+</span>
-                                    <small class="text-muted">Meeting Standards</small>
+                                    <span class="badge bg-success text-white px-2 py-1 me-2">>= target</span>
+                                    <small class="text-muted">Meeting configured target</small>
                                 </div>
                                 <div class="d-flex align-items-center">
-                                    <span class="badge bg-danger text-white px-2 py-1 me-2">&lt;75%</span>
-                                    <small class="text-muted">Below Standards</small>
+                                    <span class="badge bg-danger text-white px-2 py-1 me-2">&lt; target</span>
+                                    <small class="text-muted">Below configured target</small>
                                 </div>
                             </div>
                         </div>

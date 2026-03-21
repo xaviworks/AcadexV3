@@ -44,6 +44,7 @@ class CourseOutcomesController extends Controller
                 'id' => $co->id,
                 'code' => $co->co_code,
                 'name' => $co->co_identifier,
+                'target_percentage' => $co->target_percentage,
             ];
         });
         return response()->json($result);
@@ -154,6 +155,7 @@ class CourseOutcomesController extends Controller
             'co_code' => 'required|string|max:255',
             'co_identifier' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'target_percentage' => 'required|integer|min:0|max:100',
         ]);
 
         // Get the academic period from the subject
@@ -229,6 +231,7 @@ class CourseOutcomesController extends Controller
             'co_code' => 'required|string|max:255',
             'co_identifier' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'target_percentage' => 'required|integer|min:0|max:100',
         ]);
 
         // Validate CO code format (must be CO1-CO6)
@@ -446,6 +449,7 @@ class CourseOutcomesController extends Controller
                     'co_code' => 'CO' . $coNumber,
                     'co_identifier' => $subject->subject_code . '.' . $coNumber,
                     'description' => 'Students have achieved 75% of the course outcomes',
+                    'target_percentage' => 75,
                     'is_deleted' => false,
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),

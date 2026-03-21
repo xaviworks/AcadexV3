@@ -25,7 +25,7 @@ trait GradeCalculationTrait
         );
     }
 
-    protected function calculateActivityScores(Collection $activities, int $studentId, ?Subject $subject = null, ?array $formulaSettings = null): array
+    protected function calculateActivityScores(Collection $activities, int $studentId, ?Subject $subject = null, ?array $formulaSettings = null, ?Collection $preloadedStudentScores = null): array
     {
         $formula = $formulaSettings
             ?? $this->getGradesFormulaSettings(
@@ -42,10 +42,12 @@ trait GradeCalculationTrait
         $activitiesByType = $activities
             ->groupBy(fn ($activity) => mb_strtolower($activity->type));
 
-        $scores = Score::where('student_id', $studentId)
-            ->whereIn('activity_id', $activities->pluck('id')->all())
-            ->get()
-            ->keyBy('activity_id');
+        $scores = $preloadedStudentScores !== null
+            ? $preloadedStudentScores->keyBy('activity_id')
+            : Score::where('student_id', $studentId)
+                ->whereIn('activity_id', $activities->pluck('id')->all())
+                ->get()
+                ->keyBy('activity_id');
 
         $details = [
             'activities' => [],

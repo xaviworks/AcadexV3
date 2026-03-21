@@ -58,7 +58,7 @@
                                     {{ $coCount }}/6 COs
                                 </div>
                                 <div class="text-muted small mt-1">
-                                    {{ $isLimitReached ? 'Limit Reached' : 'Available Slots' }}
+                                    {{ $isLimitReached ? 'Limit Reached' : '' }}
                                 </div>
                             </div>
                             
@@ -190,13 +190,13 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
-                                                    <span class="badge bg-success fs-6 px-3 py-2">75%</span>
+                                                    <span class="badge bg-success fs-6 px-3 py-2">{{ (int) $co->target_percentage }}%</span>
                                                 </td>
                                                 @if(Auth::user()->isChairperson() || Auth::user()->isGECoordinator())
                                                     <td class="text-center px-4">
                                                         <div class="btn-group" role="group">
                                                             <button type="button" class="btn btn-outline-success btn-sm" 
-                                                                    onclick="openEditModal({{ $co->id }}, '{{ $co->co_code }}', '{{ $co->co_identifier }}', '{{ addslashes($co->description) }}')"
+                                                                    onclick="openEditModal({{ $co->id }}, '{{ $co->co_code }}', '{{ $co->co_identifier }}', '{{ addslashes($co->description) }}', {{ (int) $co->target_percentage }})"
                                                                     title="Edit Course Outcome">
                                                                 <i class="bi bi-pencil-square"></i>
                                                             </button>
@@ -347,6 +347,13 @@
                         <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
                         <textarea name="description" class="form-control" rows="4" placeholder="Enter the course outcome description..." required></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target % <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" name="target_percentage" class="form-control" min="0" max="100" step="1" value="75" required>
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
                     <input type="hidden" name="subject_id" value="{{ $selectedSubject->id ?? request('subject_id') }}">
                 </div>
                 <div class="modal-footer bg-light">
@@ -392,6 +399,13 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
                         <textarea name="description" id="edit_description" class="form-control" rows="4" placeholder="Enter the course outcome description..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target % <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" name="target_percentage" id="edit_target_percentage" class="form-control" min="0" max="100" step="1" required>
+                            <span class="input-group-text">%</span>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
@@ -452,7 +466,8 @@
 @if(isset($selectedSubject))
     window.pageData = {
         subjectCode: '{{ $selectedSubject->subject_code }}',
-        userCanEdit: {{ (Auth::user()->isChairperson() || Auth::user()->isGECoordinator()) ? 'true' : 'false' }}
+        userCanEdit: {{ (Auth::user()->isChairperson() || Auth::user()->isGECoordinator()) ? 'true' : 'false' }},
+        routePrefix: '{{ $routePrefix }}'
     };
 @endif
 </script>

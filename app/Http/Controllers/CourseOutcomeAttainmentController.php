@@ -179,7 +179,7 @@ class CourseOutcomeAttainmentController extends Controller
         foreach ($finalCOs as $coId) {
             $attempted = 0;
             $passed = 0;
-            $threshold = 75;
+            $threshold = (int) (optional($coDetails->get($coId))->target_percentage ?? 75);
             
             foreach ($students as $student) {
                 $raw = $coResults[$student->id]['semester_raw'][$coId] ?? null;
@@ -188,7 +188,7 @@ class CourseOutcomeAttainmentController extends Controller
                 
                 if ($percent !== null) {
                     $attempted++;
-                    if ($percent > $threshold) {
+                    if ($percent >= $threshold) {
                         $passed++;
                     }
                 }
@@ -209,7 +209,7 @@ class CourseOutcomeAttainmentController extends Controller
             foreach ($coColumnsByTerm[$term] ?? [] as $coId) {
                 $attempted = 0;
                 $passed = 0;
-                $threshold = 75;
+                $threshold = (int) (optional($coDetails->get($coId))->target_percentage ?? 75);
                 
                 foreach ($students as $student) {
                     $data = $studentTermCoScores[$student->id][$term][$coId] ?? null;
