@@ -191,12 +191,12 @@
 
                         <!-- Actions -->
                         <div class="d-flex gap-2 justify-content-end">
-                            <a href="{{ $backRoute }}" class="btn btn-outline-secondary">
-                                Cancel
-                            </a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-save me-2"></i>Update Formula
                             </button>
+                            <a href="{{ $backRoute }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
                         </div>
                     </form>
                 </div>

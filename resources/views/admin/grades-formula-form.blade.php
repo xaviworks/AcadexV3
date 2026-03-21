@@ -401,8 +401,8 @@ This subject already has a custom formula. Applying a structure template will re
                                     <div class="alert alert-danger d-none" id="formulaPasswordServerError"></div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                                     <button type="button" class="btn btn-success" id="confirmFormulaPasswordBtn">Confirm &amp; Save</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                                 </div>
                             </div>
                         </div>

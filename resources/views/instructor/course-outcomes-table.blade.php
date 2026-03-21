@@ -350,10 +350,10 @@
                     <input type="hidden" name="subject_id" value="{{ $selectedSubject->id ?? request('subject_id') }}">
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success">
                         <i class="bi bi-plus-circle me-2"></i>Add Outcome
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -395,12 +395,10 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-2"></i>Cancel
-                    </button>
                     <button type="submit" class="btn btn-success">
                         <i class="bi bi-check-circle me-2"></i>Update Outcome
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -436,12 +434,10 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-2"></i>Cancel
-                    </button>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Delete Permanently
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>

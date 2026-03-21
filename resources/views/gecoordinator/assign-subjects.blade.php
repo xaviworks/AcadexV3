@@ -246,10 +246,10 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-success" id="confirmBulkAssignBtn">
                     <i class="bi bi-check-circle me-1"></i> Confirm Assign
                 </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
@@ -531,10 +531,10 @@
                         </select>
                     </div>
                     <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" id="assignSubjectSubmit" class="btn btn-success">
                             <i class="bi bi-check-lg me-1"></i> Assign
                         </button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -574,10 +574,10 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-danger" id="confirmUnassignBtn">
                     <i class="bi bi-trash me-1"></i> Confirm Unassign
                 </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>

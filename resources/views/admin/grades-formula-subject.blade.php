@@ -354,8 +354,8 @@ This subject already has a custom formula. Applying a structure template will re
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                                         <button type="button" class="btn btn-success" id="subjectFormulaPasswordConfirmBtn">Confirm &amp; Apply</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                                     </div>
                                 </div>
                             </div>
@@ -373,7 +373,6 @@ This subject already has a custom formula. Applying a structure template will re
                                         <p class="mb-0">Removing the custom formula will restore {{ $subjectName }} to {{ $departmentName }}’s baseline. You can always create a new subject formula afterward.</p>
                                     </div>
                                     <div class="modal-footer border-0 d-flex justify-content-between">
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                                         <form method="POST" action="{{ $buildRoute('admin.gradesFormula.subject.remove', ['subject' => $subject->id]) }}" class="d-inline">
                                             @csrf
                                             @method('DELETE')
@@ -381,6 +380,7 @@ This subject already has a custom formula. Applying a structure template will re
                                                 <i class="bi bi-trash me-1"></i>Remove Formula
                                             </button>
                                         </form>
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                                     </div>
                                 </div>
                             </div>

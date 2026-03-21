@@ -33,8 +33,8 @@
                     @endif
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn {{ $confirmClass ?? 'btn-primary' }}">{{ $confirmText ?? 'Confirm' }}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>

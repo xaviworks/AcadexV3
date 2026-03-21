@@ -515,12 +515,12 @@
               </p>
             </div>
             <div class="modal-footer border-0">
-              <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                <i class="bi bi-x-circle me-1"></i>Cancel
-              </button>
               <button type="submit" class="btn btn-danger shadow-sm">
                 <i class="bi bi-trash me-1"></i>Delete Activity
               </button>
+                <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cancel  
+                </button>
             </div>
           </div>
         </form>
@@ -661,12 +661,12 @@
             </div>
           </div>
           <div class="modal-footer border-0 bg-light">
-            <button type="button" class="btn btn-light shadow-sm" data-bs-dismiss="modal">
-              <i class="bi bi-x-circle me-1"></i>Cancel
-            </button>
             <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;">
               <i class="bi bi-check-circle me-1"></i>Save Activity
             </button>
+            <button type="button" class="btn btn-light shadow-sm" data-bs-dismiss="modal">
+              <i class="bi bi-x-circle me-1"></i>Cancel
+            </button>            
           </div>
         </form>
       </div>
