@@ -6,6 +6,7 @@ use App\Models\AcademicPeriod;
 use App\Models\Course;
 use App\Models\GradesFormula;
 use App\Models\Subject;
+use App\Support\Grades\FormulaDefaults;
 use App\Support\Grades\FormulaStructure;
 
 class GradesFormulaService
@@ -241,7 +242,7 @@ class GradesFormulaService
 
         $meta = [
             'scope' => $resolvedScope,
-            'label' => $formula->label ?? 'ASBME Default',
+            'label' => $formula->label ?? FormulaDefaults::GLOBAL_FALLBACK_LABEL,
             'source_formula_id' => $formula->id,
             'department' => $formula->department?->department_description ?? $resolvedDepartment?->department_description,
             'course' => $formula->course?->course_description ?? $resolvedCourse?->course_description,
@@ -331,7 +332,7 @@ class GradesFormulaService
                 'base_score' => 40,
                 'scale_multiplier' => 60,
                 'passing_grade' => 75,
-                'label' => 'ASBME Default',
+                'label' => FormulaDefaults::GLOBAL_FALLBACK_LABEL,
                 'scope_level' => 'global',
             ]);
             $formula->setRelation('weights', collect());

@@ -76,7 +76,7 @@
 
     $pageTitle = 'Grades Formula';
     if ($context === 'default') {
-        $pageTitle = 'System Default Formula';
+        $pageTitle = 'Institution Fallback Formula';
     } elseif ($context === 'department' && isset($department)) {
         $pageTitle = trim(($department->department_code ? $department->department_code . ' - ' : '') . ($department->department_description ?? 'Department'));
     } elseif ($context === 'course' && isset($course)) {
@@ -87,11 +87,11 @@
 
     $pageSubtitle = null;
     if ($context === 'default') {
-        $pageSubtitle = 'Baseline scaling applied when no specific formula exists.';
+        $pageSubtitle = 'Emergency fallback scaling applied only when no subject, course, or department formula exists.';
     } elseif ($context === 'department') {
         $pageSubtitle = $hasFormula
             ? 'Update the custom department formula to reflect current activities.'
-            : 'Create a department formula to replace the system default.';
+            : 'Create a department formula to replace the institution fallback.';
     } elseif ($context === 'course') {
         $pageSubtitle = $hasFormula
             ? 'Update this course formula to fine-tune department guidance.'

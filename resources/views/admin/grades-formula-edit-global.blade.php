@@ -34,8 +34,8 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-sliders-fill text-success me-2"></i>Edit Global Formula</h1>
-            <p class="text-muted mb-0">Modify the global grading formula structure</p>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-sliders-fill text-success me-2"></i>Edit Institution Fallback Formula</h1>
+            <p class="text-muted mb-0">Modify the emergency fallback used when scoped formulas are missing</p>
         </div>
         <a href="{{ $backRoute }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Back to Formulas
@@ -47,9 +47,9 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom py-3">
                     <h4 class="mb-0 fw-semibold">
-                        <i class="bi bi-globe2 me-2 text-info"></i>Edit Global Formula
+                        <i class="bi bi-shield-exclamation me-2 text-info"></i>Edit Institution Fallback Formula
                     </h4>
-                    <p class="text-muted small mb-0 mt-1">Update this department-independent formula</p>
+                    <p class="text-muted small mb-0 mt-1">Update this system-wide fallback safety net</p>
                 </div>
 
                 <div class="card-body p-4">
@@ -80,8 +80,8 @@
                                    class="form-control @error('label') is-invalid @enderror" 
                                    id="formula-label" 
                                    name="label" 
-                                   value="{{ old('label', $formula->label ?? 'Custom Global Formula') }}"
-                                   placeholder="e.g., ASBME Default, Engineering Standard">
+                                value="{{ old('label', $formula->label ?? 'Institution Fallback Formula') }}"
+                                placeholder="e.g., Institution Fallback - 2026, Emergency Baseline">
                             @error('label')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

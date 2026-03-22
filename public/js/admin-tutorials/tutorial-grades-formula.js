@@ -20,13 +20,13 @@
             {
                 target: '#academic-period-select',
                 title: 'Select Academic Period',
-                content: 'Choose which academic period to manage formulas for. Options include: "All Academic Periods" (global formulas), or specific periods like "2025-2026 - 1st Semester".',
+                content: 'Choose which academic period to manage formulas for. Options include: "All Academic Periods" (institution fallback formulas), or specific periods like "2025-2026 - 1st Semester".',
                 position: 'bottom'
             },
             {
                 target: 'option[value="all"]',
                 title: 'All Periods Option',
-                content: 'Select "All Academic Periods" to manage global baseline formulas that apply across all periods unless overridden.',
+                content: 'Select "All Academic Periods" to manage institution fallback formulas used when no subject, course, or department formula matches.',
                 position: 'bottom',
                 optional: true
             },
@@ -49,18 +49,18 @@
     // Register the grades formula main tutorial
     window.AdminTutorial.registerTutorial('admin-grades-formula', {
         title: 'Grades Formula Management',
-        description: 'Learn how to configure grading scales, structure templates, global formulas, and department baselines',
+        description: 'Learn how to configure grading scales, structure templates, institution fallback formulas, and department baselines',
         steps: [
             {
                 target: '.container-fluid h1, .h3.text-dark.fw-bold',
                 title: 'Grades Formula Management',
-                content: 'Welcome to the Grades Formula Management system! This is the central hub for configuring how student grades are calculated across the entire institution. You can set up structure templates, global formulas, and department-specific baselines.',
+                content: 'Welcome to the Grades Formula Management system. This is the central hub for configuring how student grades are calculated across the institution. Prioritize department baselines; institution fallback formulas are emergency safety nets.',
                 position: 'bottom'
             },
             {
                 target: 'select[name="academic_period_id"]',
                 title: 'Academic Period Filter',
-                content: 'Filter formulas by academic period. Select "All Periods" to view global formulas that apply across all semesters, or choose a specific period to see period-specific configurations.',
+                content: 'Filter formulas by academic period. Select "All Periods" to manage institution fallback settings, or choose a specific period to configure scoped formulas.',
                 position: 'bottom'
             },
             {
@@ -78,7 +78,7 @@
             {
                 target: '.wildcard-section-btn[data-section-target="formulas"]',
                 title: 'Formulas Tab',
-                content: 'The Formulas tab is where you manage: 1) Structure Templates (reusable grading blueprints), 2) Global Formulas (department-independent formulas), and 3) Department Baselines. This is your primary configuration workspace.',
+                content: 'The Formulas tab is where you manage: 1) Structure Templates, 2) Department Baselines, and 3) Institution Fallback Formulas. Department baselines should be your primary configuration path.',
                 position: 'bottom'
             },
             {
@@ -98,7 +98,7 @@
             {
                 target: '.badge.bg-success.text-white.px-3',
                 title: 'Baseline Status Badge',
-                content: 'This badge shows the current baseline formula being used. When departments don\'t have custom formulas, they inherit from the global baseline, ensuring all courses have a valid grading configuration.',
+                content: 'This badge shows the current baseline formula being used. When departments do not have custom formulas, they inherit from the institution fallback to keep grade computation safe.',
                 position: 'left',
                 optional: true
             },
@@ -121,8 +121,8 @@
 
     // Register the grades formula formulas section tutorial
     window.AdminTutorial.registerTutorial('admin-grades-formula-formulas', {
-        title: 'Formula Templates & Global Formulas',
-        description: 'Learn how to create and manage structure templates, global formulas, and department baselines',
+        title: 'Formula Templates & Institution Fallback',
+        description: 'Learn how to create and manage structure templates, institution fallback formulas, and department baselines',
         steps: [
             {
                 target: '#open-create-template',
@@ -132,8 +132,8 @@
             },
             {
                 target: 'button[data-bs-target="#create-formula-modal"]',
-                title: 'Create Global Formula',
-                content: 'Global Formulas are department-independent configurations that can be applied across the entire institution. They use a structure template as their base and can be period-specific or apply to all periods.',
+                title: 'Create Institution Fallback Formula',
+                content: 'Institution Fallback Formulas are emergency configurations used only when subject, course, and department formulas are missing. They can be period-specific or apply to all periods.',
                 position: 'left'
             },
             {
@@ -173,22 +173,22 @@
             },
             {
                 target: '.formula-card.border-info:first-of-type, .card:has(.bi-globe2)',
-                title: 'Global Formula Card',
-                content: 'Global Formula cards show: Formula name, scope (which periods it applies to), and hierarchical weight badges. These formulas can be applied to any course regardless of department.',
+                title: 'Institution Fallback Card',
+                content: 'Institution fallback cards show formula name, period scope, and weight structure. These formulas are used only as safety-net fallbacks when no scoped formula is available.',
                 position: 'bottom',
                 optional: true
             },
             {
                 target: '.badge.bg-info-subtle.text-info',
-                title: 'Department-Independent Badge',
-                content: 'This badge indicates the formula is global and not tied to any specific department. It can be used by any instructor when configuring their subject grades.',
+                title: 'Emergency Coverage Badge',
+                content: 'This badge indicates an institution-level fallback formula that is not tied to a specific department.',
                 position: 'bottom',
                 optional: true
             },
             {
                 target: '.formula-card[data-department-id], .card:has(.badge.bg-success.fw-semibold)',
                 title: 'Department Baseline Card',
-                content: 'Department Baseline cards show each department\'s default formula configuration. If a department has a custom baseline (green border), courses in that department inherit it. Otherwise, they use the global formula.',
+                content: 'Department Baseline cards show each department\'s default formula configuration. If a department has a custom baseline (green border), courses inherit it. Otherwise, they use the institution fallback.',
                 position: 'bottom',
                 optional: true
             },
@@ -210,7 +210,7 @@
             {
                 target: 'a[href*="edit.department"], .btn-success:first-of-type',
                 title: 'Edit/Create Department Formula',
-                content: 'Create or edit the department\'s fallback formula. This becomes the baseline for ALL courses and subjects in this department unless overridden.',
+                content: 'Create or edit the department baseline formula. This becomes the baseline for ALL courses and subjects in this department unless overridden.',
                 position: 'left'
             },
             {
@@ -246,8 +246,8 @@
             },
             {
                 target: '.wildcard-filter-btn[data-filter="custom"]',
-                title: 'View Catalog Formulas',
-                content: 'Show only the department formula catalog - reusable formula templates instructors can apply.',
+                title: 'View Courses With Formulas',
+                content: 'Show only courses that already have custom course formulas configured.',
                 position: 'bottom'
             },
             {
@@ -257,16 +257,9 @@
                 position: 'bottom'
             },
             {
-                target: 'a[href*="formulas.create"]',
-                title: 'Create Catalog Formula',
-                content: 'Add a new formula to the department catalog. These templates can be selected by instructors when setting up their subjects.',
-                position: 'left',
-                optional: true
-            },
-            {
-                target: '.formula-card, .wildcard-card[data-status="catalog"]',
-                title: 'Catalog Formula Card',
-                content: 'Each catalog formula shows: Label, weight distribution (Quiz %, Exam %, etc.), base score, scale multiplier, and passing grade. Click to edit.',
+                target: 'a[href*="edit.department"], .btn-outline-success[href*="edit.department"]',
+                title: 'Edit Department Baseline',
+                content: 'Open the department baseline editor to update default weights for courses in this department.',
                 position: 'bottom',
                 optional: true
             },
@@ -279,8 +272,8 @@
             },
             {
                 target: 'form[onsubmit*="confirm"], button[type="submit"].btn-outline-danger',
-                title: 'Delete Formula',
-                content: 'Remove a catalog formula. The fallback formula cannot be deleted. Requires confirmation.',
+                title: 'Formula Removal Actions',
+                content: 'Delete actions are available in lower-level formula management screens when applicable.',
                 position: 'left',
                 optional: true
             }
@@ -319,7 +312,7 @@
             {
                 target: '.bg-gradient-green-card, .card.bg-success',
                 title: 'Subject Overview Summary',
-                content: 'Shows: Total subjects in this course, how many have custom formulas, how many use the course/department fallback, and which fallback is active.',
+                content: 'Shows: Total subjects in this course, how many have custom formulas, how many use the course/department baseline, and which baseline is active.',
                 position: 'bottom'
             },
             {
@@ -357,7 +350,7 @@
             {
                 target: '.alert-info',
                 title: 'No Course Formula Notice',
-                content: 'This alert appears when no course formula exists. Subjects will inherit from department baseline or system default.',
+                content: 'This alert appears when no course formula exists. Subjects will inherit from department baseline or institution fallback.',
                 position: 'bottom',
                 optional: true
             }

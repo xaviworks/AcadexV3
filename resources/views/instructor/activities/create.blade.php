@@ -398,7 +398,7 @@
             @if ($meta)
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h6 class="fw-bold mb-3" style="color: #198754;">{{ $meta['label'] ?? 'ASBME Default' }}</h6>
+                        <h6 class="fw-bold mb-3" style="color: #198754;">{{ $meta['label'] ?? 'Institution Baseline Formula' }}</h6>
                         
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             <span class="badge bg-light text-dark border px-3 py-2">

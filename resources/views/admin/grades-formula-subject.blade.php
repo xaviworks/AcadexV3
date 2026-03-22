@@ -94,12 +94,12 @@
             $departmentName = 'this department';
         }
 
-        $activeLabel = $activeMeta['label'] ?? ($subjectFormula?->label ?? 'ASBME Default');
+        $activeLabel = $activeMeta['label'] ?? ($subjectFormula?->label ?? 'Institution Fallback');
         $activeScopeLabel = match ($activeScope ?? 'default') {
             'subject' => 'Subject Custom Formula',
             'course' => 'Inherits Course Formula',
             'department' => 'Inherits Department Formula',
-            default => 'System Default Formula',
+            default => 'Institution Fallback Formula',
         };
 
         $activeWeights = collect($activeMeta['relative_weights'] ?? $activeMeta['weights'] ?? [])

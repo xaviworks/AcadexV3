@@ -62,8 +62,8 @@
         $totalSubjects = $subjectSummaries->count();
         $customSubjects = $subjectSummaries->filter(fn ($summary) => $summary['has_formula'])->count();
         $defaultSubjects = max($totalSubjects - $customSubjects, 0);
-    $fallbackScope = $courseFormula ? 'Course Formula' : ($departmentFallback ? 'Department Baseline' : 'System Default Formula');
-    $fallbackLabel = $courseFormula->label ?? $departmentFallback->label ?? $globalFormula->label ?? 'Default Formula';
+    $fallbackScope = $courseFormula ? 'Course Formula' : ($departmentFallback ? 'Department Baseline' : 'Institution Fallback Formula');
+    $fallbackLabel = $courseFormula->label ?? $departmentFallback->label ?? $globalFormula->label ?? 'Institution Fallback';
     @endphp
 
     <div class="card border-0 shadow-sm mb-3 bg-gradient-green-card">
@@ -116,7 +116,7 @@
 
     @if($needsCourseFormula)
         <div class="alert alert-info shadow-sm">
-            <i class="bi bi-info-circle me-2"></i>No custom course formula yet. Subjects will inherit the {{ $departmentFallback ? 'department baseline' : 'system default' }} unless a course or subject formula is created.
+            <i class="bi bi-info-circle me-2"></i>No custom course formula yet. Subjects will inherit the {{ $departmentFallback ? 'department baseline' : 'institution fallback' }} unless a course or subject formula is created.
         </div>
     @endif
 

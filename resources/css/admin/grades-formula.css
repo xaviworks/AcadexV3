@@ -697,14 +697,6 @@
   font-size: 0.85rem;
 }
 
-.js-delete-formula {
-  transition: all 0.2s ease;
-}
-
-.js-delete-formula:hover {
-  transform: scale(1.05);
-}
-
 /* Ensure long badge/text content wraps */
 .card-body .badge,
 .formula-card .badge,
