@@ -15,11 +15,20 @@ export function initVpaaCourseOutcomeResultsWildcardsPage() {
   const grid = document.getElementById('subject-selection');
   if (!grid) return;
 
+  // Run pagination/filter behavior only on VPAA subject grids that explicitly opt in.
+  if (!grid.hasAttribute('data-paginated')) {
+    return;
+  }
+
   const cards = Array.from(grid.querySelectorAll('.col-md-4'));
   const searchInput = document.getElementById('subject-search');
   const perPageSelect = document.getElementById('items-per-page');
   const pagination = document.getElementById('subjects-pagination');
   const countEl = document.getElementById('subjects-count');
+
+  if (!searchInput || !perPageSelect || !pagination || !countEl) {
+    return;
+  }
 
   let filtered = cards.slice();
   let currentPage = 1;

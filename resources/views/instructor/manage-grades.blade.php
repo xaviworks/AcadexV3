@@ -11,7 +11,7 @@
                 </h1>
             </div>
             @if(count($subjects))
-                <div class="row g-4 px-4 py-4" id="subject-selection">
+                <div class="row g-4 px-4 py-4" id="instructor-subject-selection">
                     @foreach($subjects as $subjectItem)
                         <div class="col-md-4">
                             <div
