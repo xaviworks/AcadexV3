@@ -7,6 +7,7 @@ use App\Models\Subject;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 trait ActivityManagementTrait
 {
@@ -31,23 +32,39 @@ trait ActivityManagementTrait
             ->unique()
             ->values();
 
-        $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
+        DB::transaction(function () use ($subjectId, $term, $types, $maxAssessments, $labels): void {
+            Subject::whereKey($subjectId)->lockForUpdate()->first();
 
-        if ($activities->isEmpty()) {
+            $countsByType = Activity::selectRaw('LOWER(type) as type, COUNT(*) as total')
+                ->where('subject_id', $subjectId)
+                ->where('term', $term)
+                ->where('is_deleted', false)
+                ->groupBy('type')
+                ->pluck('total', 'type')
+                ->map(fn ($total) => (int) $total)
+                ->all();
+
             $defaultActivities = [];
 
             foreach ($types as $type) {
                 $baseType = FormulaStructure::baseActivityType($type);
                 $maxPerComponent = (int) ($maxAssessments[$type] ?? $maxAssessments[$baseType] ?? ($baseType === 'exam' ? 1 : 3));
-                $defaultCount = $baseType === 'exam' ? 1 : min(3, $maxPerComponent);
+                $defaultCount = max(1, $baseType === 'exam' ? 1 : min(3, $maxPerComponent));
                 $label = $labels[$type] ?? $labels[$baseType] ?? FormulaStructure::formatLabel($type);
 
-                for ($i = 1; $i <= max(1, $defaultCount); $i++) {
+                $existingCount = $countsByType[$type] ?? 0;
+                if ($existingCount >= $defaultCount) {
+                    continue;
+                }
+
+                $toCreate = $defaultCount - $existingCount;
+                for ($offset = 1; $offset <= $toCreate; $offset++) {
+                    $sequence = $existingCount + $offset;
                     $defaultActivities[] = [
                         'subject_id' => $subjectId,
                         'term' => $term,
                         'type' => $type,
-                        'title' => trim($label . ' ' . $i),
+                        'title' => trim($label . ' ' . $sequence),
                         'number_of_items' => 100,
                         'created_at' => now(),
                         'updated_at' => now(),
@@ -55,12 +72,12 @@ trait ActivityManagementTrait
                 }
             }
 
-            Activity::insert($defaultActivities);
+            if (! empty($defaultActivities)) {
+                Activity::insert($defaultActivities);
+            }
+        });
 
-            $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
-        }
-
-        return $activities;
+        return $this->orderedActivityQuery($subjectId, $term, $types)->get();
     }
 
     protected function orderedActivityQuery(int $subjectId, string $term, \Illuminate\Support\Collection $typeOrder)
