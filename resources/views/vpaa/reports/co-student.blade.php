@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-5">
     {{-- Page Header --}}
     @include('chairperson.partials.reports-header', [
         'title' => 'Student Outcomes Summary',
@@ -134,3 +134,4 @@
     </div>
 </div>
 @endsection
+

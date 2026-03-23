@@ -11,6 +11,12 @@
         'semester' => $semester ?? null
     ])
 
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Program Outcomes Reports']
+    ]" />
+
     <div class="row g-4 px-4 py-2">
         @forelse($departments as $dept)
             <div class="col-md-4">

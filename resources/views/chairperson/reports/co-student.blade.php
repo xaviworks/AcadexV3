@@ -9,6 +9,13 @@
         'icon' => 'bi-person-lines-fill'
     ])
 
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Student Outcomes Reports', 'url' => route('chairperson.reports.co-student')],
+        ['label' => $student->last_name . ', ' . $student->first_name]
+    ]" />
+
     {{-- Student & Subject Info Strip --}}
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body px-4 py-3">

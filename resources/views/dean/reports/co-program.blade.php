@@ -7,9 +7,15 @@
         'title' => 'Program Outcomes Summary',
         'subtitle' => 'Course Outcome compliance across all courses in ' . ($department->department_description ?? 'your department'),
         'icon' => 'bi-diagram-3',
-        'academicYear' => $academicYear ?? null,
-        'semester' => $semester ?? null
+        'academicYear' => $academicYear,
+        'semester' => $semester
     ])
+
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Program Outcomes Reports']
+    ]" />
 
     @if(!$department)
         <x-inline-alert type="warning" message="Your account has no department assigned. Please contact admin." />
@@ -66,3 +72,4 @@
     </div>
 </div>
 @endsection
+

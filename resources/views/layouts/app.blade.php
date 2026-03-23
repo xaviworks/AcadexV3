@@ -458,15 +458,15 @@
                 
                 {{-- Footer with action buttons --}}
                 <div class="modal-footer border-0 bg-light" style="padding: 1.5rem 2rem;">
-                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal" style="font-weight: 600;">
-                        <i class="bi bi-x-circle me-2"></i>Cancel
-                    </button>
                     <form method="POST" action="{{ route('logout') }}" id="logoutForm" class="d-inline" onsubmit="clearAnnouncementSession()">
                         @csrf
                         <button type="submit" class="btn btn-danger px-4 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);">
                             <i class="bi bi-box-arrow-right me-2"></i>Yes, Sign Out
                         </button>
                     </form>
+                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal" style="font-weight: 600;">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </button>
                 </div>
             </div>
         </div>

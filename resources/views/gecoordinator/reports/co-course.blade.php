@@ -2,28 +2,32 @@
 
 @section('content')
 <div class="container-fluid px-4 py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-book text-success me-2"></i>{{ $course->course_code }} – Course Outcomes Summary (GE Courses)
-            </h2>
-            <p class="text-muted mb-0">{{ $course->course_description }} - GE Subjects Only</p>
-        </div>
-        <div>
-            <a href="{{ route('gecoordinator.reports.co-course') }}" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i>Choose Course
-            </a>
-        </div>
-    </div>
+    {{-- Page Header --}}
+    @include('chairperson.partials.reports-header', [
+        'title' => $course->course_code . ' – Course Outcomes Summary',
+        'subtitle' => $course->course_description,
+        'icon' => 'bi-book',
+        'academicYear' => $academicYear,
+        'semester' => $semester
+    ])
+
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Course Outcomes Reports', 'url' => route('gecoordinator.reports.co-course')],
+        ['label' => $course->course_code]
+    ]" />
 
     {{-- CO Results Table --}}
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
             @if(empty($subjectCOs))
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
-                    <p class="text-muted mb-0">No GE subjects found for this course in the selected academic period.</p>
-                </div>
+                <x-empty-state
+                    :compact="true"
+                    icon="bi-journal-x"
+                    title="No Courses Found"
+                    message="No GE subjects found for this course in the selected academic period."
+                />
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
@@ -34,7 +38,7 @@
                                         <div class="rounded-2 p-2 bg-primary-subtle me-2">
                                             <i class="bi bi-book-half text-primary"></i>
                                         </div>
-                                        <span class="fw-bold">Subject</span>
+                                        <span class="fw-bold">Course</span>
                                     </div>
                                 </th>
                                 @for($i=1; $i<=6; $i++)
@@ -116,3 +120,5 @@
     </div>
 </div>
 @endsection
+
+

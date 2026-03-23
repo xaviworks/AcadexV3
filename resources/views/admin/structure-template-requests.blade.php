@@ -31,7 +31,7 @@
 
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body py-3">
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 flex-wrap justify-content-center">
                 <a href="{{ route('admin.structureTemplateRequests.index', ['status' => 'all']) }}" 
                    class="btn btn-sm {{ $status === 'all' ? 'btn-success' : 'btn-outline-success' }}">
                     All Requests

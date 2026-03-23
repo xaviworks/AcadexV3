@@ -7,8 +7,8 @@
         'title' => $course->course_code . ' – Course Outcomes Summary',
         'subtitle' => $course->course_description,
         'icon' => 'bi-book',
-        'academicYear' => $academicYear ?? null,
-        'semester' => $semester ?? null
+        'academicYear' => $academicYear,
+        'semester' => $semester
     ])
 
     {{-- Breadcrumbs --}}
@@ -25,8 +25,8 @@
                 <x-empty-state
                     :compact="true"
                     icon="bi-journal-x"
-                    title="No Subjects Found"
-                    message="No subjects found for this course in the selected academic period."
+                    title="No Courses Found"
+                    message="No Courses found for this course in the selected academic period."
                 />
             @else
                 <div class="table-responsive">
@@ -38,7 +38,7 @@
                                         <div class="rounded-2 p-2 bg-primary-subtle me-2">
                                             <i class="bi bi-book-half text-primary"></i>
                                         </div>
-                                        <span class="fw-bold">Subject</span>
+                                        <span class="fw-bold">Course</span>
                                     </div>
                                 </th>
                                 @for($i=1; $i<=6; $i++)
@@ -120,3 +120,4 @@
     </div>
 </div>
 @endsection
+

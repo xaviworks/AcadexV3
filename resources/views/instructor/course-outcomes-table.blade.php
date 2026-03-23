@@ -52,16 +52,6 @@
                                 $isLimitReached = $coCount >= 6;
                             @endphp
                             
-                            {{-- CO Count Badge --}}
-                            <div class="text-center">
-                                <div class="badge {{ $isLimitReached ? 'bg-warning' : 'bg-info' }} fs-6 px-3 py-2">
-                                    {{ $coCount }}/6 COs
-                                </div>
-                                <div class="text-muted small mt-1">
-                                    {{ $isLimitReached ? 'Limit Reached' : '' }}
-                                </div>
-                            </div>
-                            
                             {{-- Add Button --}}
                             <div>
                                 @if(Auth::user()->isChairperson())

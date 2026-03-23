@@ -1,15 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-5">
     {{-- Page Header --}}
     @include('chairperson.partials.reports-header', [
         'title' => 'Course Outcomes Summary',
         'subtitle' => 'Select a course to view detailed Course Outcome compliance',
         'icon' => 'bi-book',
-        'academicYear' => $academicYear ?? null,
-        'semester' => $semester ?? null
+        'academicYear' => $academicYear,
+        'semester' => $semester
     ])
+
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Course Outcomes Reports']
+    ]" />
 
     <div class="row g-4 px-4 py-2">
         @forelse($courses as $c)
@@ -46,7 +52,7 @@
         @endforelse
     </div>
 </div>
-
 {{-- Styles: resources/css/vpaa/reports.css --}}
 {{-- JavaScript: resources/js/pages/vpaa/reports/co-course-chooser.js --}}
 @endsection
+

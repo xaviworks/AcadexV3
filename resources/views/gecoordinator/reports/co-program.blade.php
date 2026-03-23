@@ -2,16 +2,24 @@
 
 @section('content')
 <div class="container-fluid px-4 py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-diagram-3 text-success me-2"></i>Program Outcomes Summary (GE Courses)
-            </h2>
-            <p class="text-muted mb-0">Course Outcome compliance for GE subjects across all programs</p>
-        </div>
-    </div>
+    {{-- Page Header --}}
+    @include('chairperson.partials.reports-header', [
+        'title' => 'Program Outcomes Summary (GE Courses)',
+        'subtitle' => 'Course Outcome compliance across all courses in ' . ($department->department_description ?? 'your department'),
+        'icon' => 'bi-diagram-3',
+        'academicYear' => $academicYear,
+        'semester' => $semester
+    ])
 
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Program Outcomes Reports']
+    ]" />
 
+    @if(!$department)
+        <x-inline-alert type="warning" message="Your account has no department assigned. Please contact admin." />
+    @endif
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
@@ -33,7 +41,6 @@
                                 <td class="text-start">
                                     <div class="fw-semibold">{{ $row['course']->course_code ?? 'N/A' }}</div>
                                     <small class="text-muted">{{ $row['course']->course_description ?? '' }}</small>
-                                    <br><small class="text-primary fst-italic">GE Subjects Only</small>
                                 </td>
                                 @for($i=1; $i<=6; $i++)
                                     @php($val = $row['co'][$i] ?? null)
@@ -65,3 +72,5 @@
     </div>
 </div>
 @endsection
+
+
