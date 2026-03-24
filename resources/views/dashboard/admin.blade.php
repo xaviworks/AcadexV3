@@ -161,7 +161,7 @@
                 <div class="card-body p-4 d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="fw-semibold mb-0">
-                            <i class="bi bi-calendar-check me-2"></i>Monthly Overview
+                            <i class="bi bi-calendar-check me-2"></i>Monthly Login Overview
                         </h5>
                         <form action="{{ route('dashboard') }}" method="GET" class="d-flex align-items-center">
                             <select class="form-select form-select-sm shadow-none border-success-subtle" name="year" onchange="this.form.submit()">

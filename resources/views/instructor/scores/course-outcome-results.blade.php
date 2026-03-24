@@ -798,12 +798,12 @@
                                             $raw = $coResults[$student->id]['semester_raw'][$coId] ?? 0;
                                             $max = $coResults[$student->id]['semester_max'][$coId] ?? 0;
                                             $percent = ($max > 0) ? ($raw / $max) * 100 : 0;
-                                            $threshold = 75; // Fixed threshold
+                                            $threshold = (int) ($coDetails[$coId]->target_percentage ?? 75);
                                         @endphp
                                         <td class="fw-bold text-{{ $percent >= $threshold ? 'success' : 'danger' }}">
                                             {{ $percent >= $threshold ? 'Passed' : 'Failed' }}
                                             <br>
-                                            <small>({{ ceil($percent) }}%)</small>
+                                            <small>({{ ceil($percent) }}% / target {{ $threshold }}%)</small>
                                         </td>
                                     @endif
                                 @endforeach
@@ -840,12 +840,12 @@
                                                 // Use pre-computed data instead of database queries
                                                 $termData = $studentTermCoScores[$student->id][$term][$coId] ?? null;
                                                 $percent = $termData['percent'] ?? 0;
-                                                $threshold = 75;
+                                                $threshold = (int) ($coDetails[$coId]->target_percentage ?? 75);
                                             @endphp
                                             <td class="fw-bold text-{{ $percent >= $threshold ? 'success' : 'danger' }}">
                                                 {{ $percent >= $threshold ? 'Passed' : 'Failed' }}
                                                 <br>
-                                                <small>({{ $percent }}%)</small>
+                                                <small>({{ $percent }}% / target {{ $threshold }}%)</small>
                                             </td>
                                         @endforeach
                                     </tr>

@@ -16,6 +16,7 @@ use App\Models\StructureTemplate;
 use App\Models\TermGrade;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
+use App\Support\Grades\FormulaDefaults;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -811,24 +812,6 @@ class AdminController extends Controller
         $fallbackFormula = $this->ensureDepartmentFallback($department, $periodContext);
         $fallbackFormula->loadMissing('weights');
 
-        $departmentFormulas = $this->applyPeriodFilters(
-            GradesFormula::with('weights')
-                ->where('department_id', $department->id)
-                ->where('scope_level', 'department'),
-            $selectedSemester,
-            $selectedAcademicPeriodId
-        )
-            ->orderByDesc('is_department_fallback')
-            ->orderBy('label')
-            ->get();
-
-        if ($departmentFormulas->isEmpty()) {
-            $departmentFormulas = collect([$fallbackFormula]);
-        }
-
-        $catalogFormulas = $departmentFormulas->filter(fn ($formula) => ! $formula->is_department_fallback);
-        $catalogCount = $catalogFormulas->count();
-
         $globalFormula = $this->getGlobalFormula();
 
         $courseFormulas = $this->applyPeriodFilters(
@@ -870,10 +853,10 @@ class AdminController extends Controller
                 $status = 'default';
                 $scopeText = 'Using department baseline formula.';
             } else {
-                $formulaScope = 'System Default Formula';
+                $formulaScope = 'Institution Fallback Formula';
                 $formulaLabel = $globalFormula->label;
                 $status = 'default';
-                $scopeText = 'Using system default.';
+                $scopeText = 'Using institution fallback formula.';
             }
 
             return [
@@ -890,13 +873,8 @@ class AdminController extends Controller
         return view('admin.grades-formula-department', [
             'department' => $department,
             'departmentFallback' => $fallbackFormula,
-            'departmentFormulas' => $departmentFormulas,
-            'catalogFormulas' => $catalogFormulas,
             'globalFormula' => $globalFormula,
             'courseSummaries' => $courseSummaries,
-            'needsDepartmentFormula' => $catalogCount === 0,
-            'catalogCount' => $catalogCount,
-            'catalogTotal' => $departmentFormulas->count(),
             'semester' => $selectedSemester,
             'academicPeriods' => $academicPeriods,
             'academicYears' => $academicYears,
@@ -966,7 +944,7 @@ class AdminController extends Controller
 
             $meta = $settings['meta'] ?? [];
             $scope = $meta['scope'] ?? 'global';
-            $label = $meta['label'] ?? ($globalFormula->label ?? 'System Default');
+            $label = $meta['label'] ?? ($globalFormula->label ?? 'Institution Fallback');
 
             switch ($scope) {
                 case 'subject':
@@ -986,8 +964,8 @@ class AdminController extends Controller
                     break;
                 default:
                     $status = 'default';
-                    $formulaScope = 'System Default Formula';
-                    $scopeText = 'Using system default.';
+                    $formulaScope = 'Institution Fallback Formula';
+                    $scopeText = 'Using institution fallback formula.';
                     break;
             }
 
@@ -1150,147 +1128,6 @@ class AdminController extends Controller
         ]);
     }
 
-    public function createDepartmentFormula(Request $request, Department $department)
-    {
-        Gate::authorize('admin');
-
-        if ($department->is_deleted) {
-            abort(404);
-        }
-
-        $periodContext = $this->resolveFormulaPeriodContext();
-        $selectedSemester = $periodContext['semester'];
-        $selectedAcademicPeriodId = $periodContext['academic_period_id'];
-        $selectedAcademicYear = $periodContext['academic_year'];
-        $academicPeriods = $periodContext['academic_periods'];
-        $academicYears = $periodContext['academic_years'];
-
-        $fallbackFormula = $this->ensureDepartmentFallback($department, $periodContext);
-        $fallbackFormula->loadMissing('weights');
-
-        $structurePayload = $this->prepareStructurePayload($fallbackFormula);
-
-        if (Str::startsWith($request->old('form_context'), 'department') && $request->old('structure_config')) {
-            $structurePayload = $this->prepareStructurePayloadFromOldInput(
-                $request->old('structure_type'),
-                $request->old('structure_config')
-            );
-        }
-
-        return view('admin.grades-formula-form', [
-            'context' => 'department',
-            'department' => $department,
-            'course' => null,
-            'subject' => null,
-            'formula' => null,
-            'fallbackFormula' => $fallbackFormula,
-            'structurePayload' => $structurePayload,
-            'structureCatalog' => $this->getStructureCatalog(),
-            'defaultFormula' => $this->getGlobalFormula(),
-            'formMode' => 'create-department',
-            'semester' => $selectedSemester,
-            'academicPeriods' => $academicPeriods,
-            'academicYears' => $academicYears,
-            'selectedAcademicYear' => $selectedAcademicYear,
-            'selectedAcademicPeriodId' => $selectedAcademicPeriodId,
-            'availableSemesters' => $periodContext['available_semesters'],
-        ]);
-    }
-
-    public function editDepartmentFormulaEntry(Request $request, Department $department, GradesFormula $formula)
-    {
-        Gate::authorize('admin');
-
-        if ($department->is_deleted || $formula->department_id !== $department->id || $formula->scope_level !== 'department') {
-            abort(404);
-        }
-
-        $periodContext = $this->resolveFormulaPeriodContext();
-        $selectedSemester = $periodContext['semester'];
-        $selectedAcademicPeriodId = $periodContext['academic_period_id'];
-        $selectedAcademicYear = $periodContext['academic_year'];
-        $academicPeriods = $periodContext['academic_periods'];
-        $academicYears = $periodContext['academic_years'];
-
-        $formula->loadMissing('weights');
-        $fallbackFormula = $this->ensureDepartmentFallback($department, $periodContext);
-        $fallbackFormula->loadMissing('weights');
-
-        $structurePayload = $this->prepareStructurePayload($formula);
-
-        if (Str::startsWith($request->old('form_context'), 'department') && $request->old('structure_config')) {
-            $structurePayload = $this->prepareStructurePayloadFromOldInput(
-                $request->old('structure_type'),
-                $request->old('structure_config')
-            );
-        }
-
-        return view('admin.grades-formula-form', [
-            'context' => 'department',
-            'department' => $department,
-            'course' => null,
-            'subject' => null,
-            'formula' => $formula,
-            'fallbackFormula' => $fallbackFormula,
-            'structurePayload' => $structurePayload,
-            'structureCatalog' => $this->getStructureCatalog(),
-            'defaultFormula' => $this->getGlobalFormula(),
-            'formMode' => 'edit-department',
-            'semester' => $selectedSemester,
-            'academicPeriods' => $academicPeriods,
-            'academicYears' => $academicYears,
-            'selectedAcademicYear' => $selectedAcademicYear,
-            'selectedAcademicPeriodId' => $selectedAcademicPeriodId,
-            'availableSemesters' => $periodContext['available_semesters'],
-        ]);
-    }
-
-    public function destroyDepartmentFormula(Department $department, GradesFormula $formula, Request $request)
-    {
-        Gate::authorize('admin');
-
-        // Validate password first
-        $request->validate([
-            'password' => ['required', 'string'],
-        ]);
-
-        // Verify the password matches the authenticated user
-        if (!Hash::check($request->input('password'), Auth::user()->password)) {
-            return back()
-                ->withErrors(['password' => 'The provided password is incorrect.'])
-                ->withInput()
-                ->with('reopen_structure_template_modal', true)
-                ->with('structure_template_error', true);
-        }
-
-        if (
-            $department->is_deleted
-            || $formula->department_id !== $department->id
-            || $formula->scope_level !== 'department'
-        ) {
-            abort(404);
-        }
-
-        if ($formula->is_department_fallback) {
-            return back()->withErrors([
-                'formula' => 'The department fallback formula cannot be deleted.',
-            ]);
-        }
-
-        DB::transaction(function () use ($formula) {
-            $formula->weights()->delete();
-            $formula->delete();
-        });
-
-        GradesFormulaService::flushCache();
-
-        return redirect()
-            ->route('admin.gradesFormula.department', array_merge([
-                'department' => $department->id,
-            ], $this->formulaQueryParams()))
-            ->with('success', 'Formula deleted successfully.');
-    }
-
     public function destroyGlobalFormula(GradesFormula $formula, Request $request)
     {
         Gate::authorize('admin');
@@ -1320,7 +1157,7 @@ class AdminController extends Controller
 
         return redirect()
             ->route('admin.gradesFormula', array_merge($this->formulaQueryParams(), ['view' => 'formulas']))
-            ->with('success', 'Global formula deleted successfully.');
+            ->with('success', 'Institution fallback formula deleted successfully.');
     }
 
     public function storeStructureTemplate(Request $request)
@@ -2315,7 +2152,7 @@ class AdminController extends Controller
         }
 
         $label = $validated['label'] ?? match ($scope) {
-            'global' => 'Custom Global Formula',
+            'global' => 'Institution Fallback Formula',
             'department' => ($department?->department_description ?? 'Department') . ' Formula',
             'course' => ($course?->course_code ? $course->course_code . ' · ' : '') . ($course?->course_description ?? 'Course') . ' Formula',
             'subject' => ($subject?->subject_code ? $subject->subject_code . ' · ' : '') . ($subject?->subject_description ?? 'Subject') . ' Formula',
@@ -2380,7 +2217,7 @@ class AdminController extends Controller
         if ($scope === 'global') {
             return redirect()
                 ->route('admin.gradesFormula', array_merge($this->formulaQueryParams(), ['view' => 'formulas']))
-                ->with('success', 'Global formula saved successfully.');
+                ->with('success', 'Institution fallback formula saved successfully.');
         }
 
         $redirectRoute = match ($scope) {
@@ -2565,7 +2402,7 @@ class AdminController extends Controller
         if ($scope === 'global') {
             return redirect()
                 ->route('admin.gradesFormula', array_merge($queryParams, ['view' => 'formulas']))
-                ->with('success', 'Global formula updated successfully.');
+                ->with('success', 'Institution fallback formula updated successfully.');
         }
 
         $redirectRoute = match ($scope) {
@@ -3224,7 +3061,7 @@ class AdminController extends Controller
 
         if (! $formula) {
             $formula = new GradesFormula([
-                'label' => 'ASBME Default',
+                'label' => FormulaDefaults::GLOBAL_FALLBACK_LABEL,
                 'scope_level' => 'global',
                 'base_score' => 40,
                 'scale_multiplier' => 60,

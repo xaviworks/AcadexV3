@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-5">
     {{-- Page Header --}}
     @include('chairperson.partials.reports-header', [
         'title' => 'Student Outcomes Summary',
@@ -78,10 +78,11 @@
                                     @php($val = $coResults[$term][$coCode] ?? null)
                                     <td class="text-center">
                                         @if($val)
-                                            <span class="badge {{ $val['percent'] >= 75 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3 py-2 rounded-pill fw-semibold">
+                                            @php($threshold = (int) ($val['target_percentage'] ?? 75))
+                                            <span class="badge {{ $val['percent'] >= $threshold ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3 py-2 rounded-pill fw-semibold">
                                                 {{ number_format($val['percent'], 2) }}%
                                             </span>
-                                            <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }}</small></div>
+                                            <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }} | target {{ $threshold }}%</small></div>
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif
@@ -99,10 +100,11 @@
                                 @php($val = $finalCOs[$coCode] ?? null)
                                 <td class="text-center">
                                     @if($val)
-                                        <span class="badge {{ $val['percent'] >= 75 ? 'bg-success' : 'bg-danger' }} px-3 py-2 rounded-pill text-white fw-bold">
+                                        @php($threshold = (int) ($val['target_percentage'] ?? 75))
+                                        <span class="badge {{ $val['percent'] >= $threshold ? 'bg-success' : 'bg-danger' }} px-3 py-2 rounded-pill text-white fw-bold">
                                             {{ number_format($val['percent'], 2) }}%
                                         </span>
-                                        <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }}</small></div>
+                                        <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }} | target {{ $threshold }}%</small></div>
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
@@ -118,12 +120,12 @@
     {{-- Legend --}}
     <div class="mt-3 d-flex align-items-center gap-4 px-1">
         <div class="d-flex align-items-center">
-            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">75%+</span>
-            <small class="text-muted">Passing</small>
+            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">>= target</span>
+            <small class="text-muted">Meeting configured target</small>
         </div>
         <div class="d-flex align-items-center">
-            <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill me-2">&lt;75%</span>
-            <small class="text-muted">Below Standard</small>
+            <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill me-2">&lt; target</span>
+            <small class="text-muted">Below configured target</small>
         </div>
         <div class="d-flex align-items-center">
             <span class="text-muted me-2">—</span>
@@ -132,3 +134,4 @@
     </div>
 </div>
 @endsection
+

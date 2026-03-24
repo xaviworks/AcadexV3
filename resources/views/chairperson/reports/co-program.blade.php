@@ -11,6 +11,12 @@
         'semester' => $semester
     ])
 
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Program Outcomes Reports']
+    ]" />
+
     @if(!$department)
         <x-inline-alert type="warning" message="Your account has no department assigned. Please contact admin." />
     @endif
@@ -40,10 +46,11 @@
                                     @php($val = $row['co'][$i] ?? null)
                                     <td class="text-center">
                                         @if($val)
-                                            <span class="badge {{ $val['percent'] >= 75 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3 py-2 rounded-pill">
+                                            @php($threshold = (int) ($val['target_percentage'] ?? 75))
+                                            <span class="badge {{ $val['percent'] >= $threshold ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3 py-2 rounded-pill">
                                                 {{ number_format($val['percent'], 2) }}%
                                             </span>
-                                            <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }}</small></div>
+                                            <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }} | target {{ $threshold }}%</small></div>
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif

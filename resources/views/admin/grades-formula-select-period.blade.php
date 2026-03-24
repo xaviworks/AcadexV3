@@ -44,7 +44,7 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-0 py-3">
                         <h6 class="mb-0 fw-semibold text-success">
-                            <i class="bi bi-globe me-2"></i>Global Formulas
+                            <i class="bi bi-shield-exclamation me-2"></i>Institution Fallback Settings
                         </h6>
                     </div>
                     <div class="card-body">
@@ -60,7 +60,7 @@
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <div class="fw-semibold">All Academic Periods</div>
-                                    <small class="text-muted">Manage global baseline formulas that apply across all periods</small>
+                                    <small class="text-muted">Manage institution fallback formulas used only when no scoped formulas are configured</small>
                                 </div>
                                 <div class="period-check">
                                     <i class="bi bi-check-circle-fill text-primary"></i>

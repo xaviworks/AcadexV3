@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $showDepartmentColumn = !request('department_id');
+@endphp
 <div class="container-fluid px-4 py-4">
     <!-- Page Header -->
     <div class="mb-4">
@@ -51,7 +54,9 @@
                     <tr>
                         <th scope="col" class="px-4 py-3 fw-semibold">Name</th>
                         <th scope="col" class="px-4 py-3 fw-semibold">Role</th>
-                        <th scope="col" class="px-4 py-3 fw-semibold">Department</th>
+                        @if($showDepartmentColumn)
+                            <th scope="col" class="px-4 py-3 fw-semibold">Department</th>
+                        @endif
                         <th scope="col" class="px-4 py-3 fw-semibold">Email</th>
                         <th scope="col" class="px-4 py-3 fw-semibold">Status</th>
                     </tr>
@@ -89,9 +94,11 @@
                                     @endif
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
-                                <span class="text-muted">{{ $instructor->department->department_description ?? 'N/A' }}</span>
-                            </td>
+                            @if($showDepartmentColumn)
+                                <td class="px-4 py-3">
+                                    <span class="text-muted">{{ $instructor->department->department_description ?? 'N/A' }}</span>
+                                </td>
+                            @endif
                             <td class="px-4 py-3">
                                 <span class="text-muted">{{ $instructor->email }}</span>
                             </td>
@@ -103,7 +110,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">
+                            <td colspan="{{ $showDepartmentColumn ? 5 : 4 }}" class="text-center py-5">
                                 <div class="text-muted mb-3">
                                     <i class="bi bi-people-x fs-1 opacity-50"></i>
                                 </div>

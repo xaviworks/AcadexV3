@@ -96,8 +96,8 @@
                 Are you sure you want to confirm and save the selected subjects for this curriculum?
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" id="submitConfirmBtn" class="btn btn-success">Yes, Confirm</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Cancel</button>
             </div>
         </div>
     </div>

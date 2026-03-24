@@ -118,7 +118,6 @@
                             <th class="text-center">Final</th>
                             <th class="text-center text-success">Final Average</th>
                             <th class="text-center">Remarks</th>
-                            <th class="text-center" style="min-width: 200px;">Notes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,11 +134,6 @@
                                 $average = $hasAll ? round(($prelim + $midterm + $prefinal + $final) / 4) : null;
 
                                 $remarks = $average !== null ? ($average >= 75 ? 'Passed' : 'Failed') : null;
-                                
-                                // Get final grade record for notes
-                                $finalGradeRecord = $student->finalGrades->first();
-                                $notes = $finalGradeRecord->notes ?? '';
-                                $finalGradeId = $finalGradeRecord->id ?? null;
                             @endphp
                             <tr class="hover:bg-light">
                                 <td>{{ $student->last_name }}, {{ $student->first_name }}</td>
@@ -159,26 +153,6 @@
                                         <span class="text-muted">–</span>
                                     @endif
                                 </td>
-                                <td class="text-center">
-                                    @if($finalGradeId)
-                                        <button 
-                                            class="btn btn-sm btn-outline-primary open-notes-modal"
-                                            data-final-grade-id="{{ $finalGradeId }}"
-                                            data-student-name="{{ $student->last_name }}, {{ $student->first_name }}"
-                                            data-notes="{{ $notes }}"
-                                            title="View/Edit notes"
-                                        >
-                                            <i class="bi bi-sticky"></i>
-                                            @if($notes)
-                                                <span class="badge bg-success ms-1">Has Notes</span>
-                                            @else
-                                                Add Notes
-                                            @endif
-                                        </button>
-                                    @else
-                                        <span class="text-muted fst-italic">No final grade yet</span>
-                                    @endif
-                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -192,70 +166,5 @@
             />
         @endif
     @endif
-</div>
-
-{{-- Notes Modal --}}
-<div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="notesModalLabel">
-                    <i class="bi bi-sticky me-2"></i>
-                    Student Notes
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Student Name:</label>
-                    <p class="text-muted" id="studentNameDisplay"></p>
-                </div>
-                <div class="mb-3">
-                    <label for="notesTextarea" class="form-label fw-semibold">Notes/Remarks:</label>
-                    <textarea 
-                        class="form-control" 
-                        id="notesTextarea" 
-                        rows="6" 
-                        maxlength="1000"
-                        placeholder="Enter notes or remarks for this student..."
-                    ></textarea>
-                    <div class="form-text">
-                        <span id="charCount">0</span> / 1000 characters
-                    </div>
-                </div>
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Note:</strong> The "Passed/Failed" remarks are automatically calculated based on grades and will not be affected by these notes.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>
-                    Cancel
-                </button>
-                <button type="button" class="btn btn-success" id="saveNotesBtn" x-data>
-                    <span x-show="!$store.loading.isLoading('saveNotes')">
-                        <i class="bi bi-check-circle me-1"></i>
-                        Save Notes
-                    </span>
-                    <span x-show="$store.loading.isLoading('saveNotes')" x-cloak>
-                        <span class="spinner-border spinner-border-sm me-1"></span>
-                        Saving...
-                    </span>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@push('scripts')
-{{-- Page data for external JS: resources/js/pages/chairperson/view-grades.js --}}
-<script>
-    window.pageData = {
-        saveGradeNotesUrl: '{{ route('chairperson.saveGradeNotes') }}',
-        csrfToken: '{{ csrf_token() }}'
-    };
-</script>
-@endpush
 </div>
 @endsection

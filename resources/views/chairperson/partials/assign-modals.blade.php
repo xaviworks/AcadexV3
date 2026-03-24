@@ -23,10 +23,10 @@
                     @csrf
                     <input type="hidden" name="subject_id" id="unassign_subject_id">
                     <input type="hidden" name="instructor_id" value="">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-x-circle me-1"></i> Unassign
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </form>
             </div>
         </div>
@@ -59,10 +59,10 @@
                         </select>
                     </div>
                     <div class="text-end">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-check-circle me-1"></i> Assign
                         </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>

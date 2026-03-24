@@ -318,7 +318,7 @@ class ActivityController extends Controller
             ? sprintf('%d %s activities created successfully.', $createCount, $typeLabel)
             : 'Activity created successfully.';
 
-        return redirect()->route('instructor.grades.index', [
+        return redirect()->route('instructor.activities.create', [
             'subject_id' => $subject->id,
             'term' => $request->term,
         ])->with('success', $message);

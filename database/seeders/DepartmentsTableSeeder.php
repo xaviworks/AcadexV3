@@ -12,11 +12,11 @@ class DepartmentsTableSeeder extends Seeder
         $departments = [
             [
                 'department_code' => 'GE',
-                'department_description' => 'General Education',
+                'department_description' => 'School of General Education',
             ],
             [
                 'department_code' => 'ASE',
-                'department_description' => 'Arts, Science, and Education',
+                'department_description' => 'School of Arts and Science and Education',
             ],
             [
                 'department_code' => 'SBISM',
@@ -32,7 +32,7 @@ class DepartmentsTableSeeder extends Seeder
             ],
             [
                 'department_code' => 'ALLIED',
-                'department_description' => 'Allied Health',
+                'department_description' => 'School of Allied Health',
             ],
         ];
 

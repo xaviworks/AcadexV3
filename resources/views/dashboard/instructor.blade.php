@@ -110,7 +110,7 @@
                         <h5 class="fw-semibold mb-0">
                             <i class="bi bi-graph-up-arrow me-2"></i>Grading Progress
                         </h5>
-                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Current Term</span>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Current Period</span>
                     </div>
 
                     <template x-for="term in ['prelim', 'midterm', 'prefinal', 'final']" :key="term">
@@ -205,11 +205,16 @@
         function buildDatasets(subjects) {
             return (subjects || []).map((s, i) => ({
                 label: s.code,
-                data: Array.isArray(s.termPercentages) ? [...s.termPercentages] : [],
+                data: Array.isArray(s.termPercentages)
+                    ? [
+                        s.termPercentages[3] ?? 0, // Final
+                        s.termPercentages[2] ?? 0, // Prefinal
+                        s.termPercentages[1] ?? 0, // Midterm
+                        s.termPercentages[0] ?? 0, // Prelim
+                    ]
+                    : [],
                 borderColor: COLORS[i % COLORS.length],
                 backgroundColor: COLORS[i % COLORS.length] + '20',
-                tension: 0.3,
-                fill: true,
             }));
         }
 
@@ -222,18 +227,19 @@
             if (_chart) { try { _chart.destroy(); } catch(e) {} _chart = null; }
 
             _chart = new Chart(canvas.getContext('2d'), {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: ['Prelim', 'Midterm', 'Prefinal', 'Final'],
+                    labels: ['Final', 'Prefinal', 'Midterm', 'Prelim'],
                     datasets: buildDatasets(_rawSubjectCharts),
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true, maintainAspectRatio: false,
                     animation: false,
                     plugins: { legend: { position: 'bottom' } },
                     scales: {
-                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Completion (%)' } },
-                        x: { title: { display: true, text: 'Term' } }
+                        x: { beginAtZero: true, max: 100, title: { display: true, text: 'Completion (%)' } },
+                        y: { title: { display: true, text: 'Period' } }
                     }
                 }
             });

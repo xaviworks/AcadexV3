@@ -27,29 +27,6 @@ window.confirmRevoke = function (sessionId, userName) {
 };
 
 /**
- * Confirm 2FA reset for a user
- */
-window.confirmReset2FA = function (userId, userName) {
-  const modalEl = document.getElementById('reset2FAModal');
-  if (!modalEl) return;
-
-  document.getElementById('reset-2fa-user-id').value = userId;
-  document.getElementById('reset-2fa-user-name').textContent = userName;
-
-  const bsModal = new bootstrap.Modal(modalEl);
-  bsModal.show();
-
-  // Focus on password input after modal opens
-  setTimeout(() => {
-    const passwordInput = document.getElementById('reset-2fa-password');
-    if (passwordInput) {
-      passwordInput.value = '';
-      passwordInput.focus();
-    }
-  }, 100);
-};
-
-/**
  * Confirm revocation of all sessions
  */
 window.confirmRevokeAll = function () {

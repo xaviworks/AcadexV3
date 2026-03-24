@@ -122,26 +122,8 @@
                 Are you sure you want to confirm and save the selected subjects for this curriculum?
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" id="submitConfirmBtn" class="btn btn-success">Yes, Confirm</button>
-            </div>
-        </div>
-    </div>
-</div>
-{{-- Confirmation Modal --}}
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="confirmModalLabel">Confirm Submission</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to confirm and save the selected subjects for this curriculum?
-            </div>
-            <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" id="submitConfirmBtn" class="btn btn-success">Yes, Confirm</button>
             </div>
         </div>
     </div>

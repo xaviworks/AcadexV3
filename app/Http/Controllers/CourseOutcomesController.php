@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class CourseOutcomesController extends Controller
 {
@@ -44,6 +45,7 @@ class CourseOutcomesController extends Controller
                 'id' => $co->id,
                 'code' => $co->co_code,
                 'name' => $co->co_identifier,
+                'target_percentage' => $co->target_percentage,
             ];
         });
         return response()->json($result);
@@ -154,6 +156,7 @@ class CourseOutcomesController extends Controller
             'co_code' => 'required|string|max:255',
             'co_identifier' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'target_percentage' => 'required|integer|min:0|max:100',
         ]);
 
         // Get the academic period from the subject
@@ -229,6 +232,7 @@ class CourseOutcomesController extends Controller
             'co_code' => 'required|string|max:255',
             'co_identifier' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'target_percentage' => 'required|integer|min:0|max:100',
         ]);
 
         // Validate CO code format (must be CO1-CO6)
@@ -377,6 +381,7 @@ class CourseOutcomesController extends Controller
         $overriddenCount = 0;
         $totalCOsDeleted = 0;
         $limitReachedCount = 0;
+        $hasTargetPercentageColumn = Schema::hasColumn('course_outcomes', 'target_percentage');
 
         foreach ($subjects as $subject) {
             $existingCOs = $subject->courseOutcomes()->get();
@@ -440,7 +445,7 @@ class CourseOutcomesController extends Controller
 
             // Generate course outcomes for missing numbers
             foreach ($cosToGenerate as $coNumber) {
-                CourseOutcomes::create([
+                $courseOutcomePayload = [
                     'subject_id' => $subject->id,
                     'academic_period_id' => $academicPeriodId,
                     'co_code' => 'CO' . $coNumber,
@@ -449,7 +454,13 @@ class CourseOutcomesController extends Controller
                     'is_deleted' => false,
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
-                ]);
+                ];
+
+                if ($hasTargetPercentageColumn) {
+                    $courseOutcomePayload['target_percentage'] = 75;
+                }
+
+                CourseOutcomes::create($courseOutcomePayload);
             }
 
             $generatedCount++;
