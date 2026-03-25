@@ -23,8 +23,8 @@
         </div>
         
         <x-breadcrumbs :items="[
-            ['label' => 'Home', 'url' => '/'],
-            ['label' => 'Course Outcomes']
+            ['label' => 'Dashboard', 'url' => route($routePrefix . '.dashboard')],
+            ['label' => 'View Outcomes']
         ]" />
     </div>
 

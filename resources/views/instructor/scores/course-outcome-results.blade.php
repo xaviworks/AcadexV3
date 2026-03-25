@@ -53,6 +53,33 @@
     border-color: #a3cfbb !important;
 }
 
+.inline-svg-icon {
+    width: 1rem;
+    height: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: text-bottom;
+}
+
+.inline-svg-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.display-type-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.display-type-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
 /* Compact Circular Term Navigation Styles */
 .compact-stepper {
     display: flex;
@@ -229,9 +256,13 @@
 <div class="container-fluid px-4 py-4" data-page="instructor.course-outcome-results">
     {{-- Breadcrumbs --}}
     @php
+        $resultsHomeRoute = $resultsHomeRoute ?? '/';
+        $resultsIndexRoute = $resultsIndexRoute ?? route('instructor.course-outcome-attainments.index');
+        $resultsIndexLabel = $resultsIndexLabel ?? 'Course Outcome Attainment Results';
+
         $breadcrumbItems = [
-            ['label' => 'Home', 'url' => '/'],
-            ['label' => 'Course Outcome Attainment Results', 'url' => route('instructor.course-outcome-attainments.index')]
+            ['label' => 'Home', 'url' => $resultsHomeRoute],
+            ['label' => $resultsIndexLabel, 'url' => $resultsIndexRoute]
         ];
         
         if(isset($selectedSubject)) {
@@ -264,7 +295,7 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-3 no-print">
-                            <a href="{{ route('instructor.course-outcome-attainments.index') }}" class="btn btn-outline-secondary">
+                            <a href="{{ $resultsIndexRoute }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-2"></i>Back to Subjects
                             </a>
                             @if(isset($incompleteCOs) && is_array($incompleteCOs) && count($incompleteCOs) > 0)
@@ -292,31 +323,61 @@
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="dropdown">
                                             <button class="btn btn-outline-success btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" id="displayTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 150px;">
-                                                <span id="currentIcon">📊</span>
+                                                <span id="currentIcon" class="display-type-icon" aria-hidden="true">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M4 20h16"></path>
+                                                        <path d="M7 16v-5"></path>
+                                                        <path d="M12 16V8"></path>
+                                                        <path d="M17 16v-3"></path>
+                                                    </svg>
+                                                </span>
                                                 <span id="currentText">Percentage</span>
                                             </button>
                                             <ul class="dropdown-menu shadow-sm" aria-labelledby="displayTypeDropdown" style="min-width: 200px;">
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('score', '📝', 'Scores'); return false;">
-                                                        <span>📝</span>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('score', 'score', 'Scores'); return false;">
+                                                        <span class="display-type-icon" aria-hidden="true">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M9 3h6l1 2h3a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h3l1-2z"></path>
+                                                                <path d="M9 10h6"></path>
+                                                                <path d="M9 14h6"></path>
+                                                            </svg>
+                                                        </span>
                                                         <span>Raw Scores</span>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2 active" href="#" onclick="setDisplayType('percentage', '📊', 'Percentage'); return false;">
-                                                        <span>📊</span>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2 active" href="#" onclick="setDisplayType('percentage', 'percentage', 'Percentage'); return false;">
+                                                        <span class="display-type-icon" aria-hidden="true">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M4 20h16"></path>
+                                                                <path d="M7 16v-5"></path>
+                                                                <path d="M12 16V8"></path>
+                                                                <path d="M17 16v-3"></path>
+                                                            </svg>
+                                                        </span>
                                                         <span>Percentage View</span>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('passfail', '✅', 'Pass/Fail'); return false;">
-                                                        <span>✅</span>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('passfail', 'passfail', 'Pass/Fail'); return false;">
+                                                        <span class="display-type-icon" aria-hidden="true">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                <circle cx="12" cy="12" r="9"></circle>
+                                                                <path d="m9 12 2 2 4-4"></path>
+                                                            </svg>
+                                                        </span>
                                                         <span>Pass/Fail Analysis</span>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('copasssummary', '📈', 'Summary'); return false;">
-                                                        <span>📈</span>
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#" onclick="setDisplayType('copasssummary', 'copasssummary', 'Summary'); return false;">
+                                                        <span class="display-type-icon" aria-hidden="true">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M4 20h16"></path>
+                                                                <path d="m6 15 4-4 3 3 5-6"></path>
+                                                            </svg>
+                                                        </span>
                                                         <span>Summary Dashboard</span>
                                                     </a>
                                                 </li>
@@ -397,7 +458,15 @@
                     <table class="table co-table table-bordered align-middle mb-0 text-center">
                         <thead>
                             <tr>
-                                <th class="text-start">📋 Analysis Metrics</th>
+                                <th class="text-start">
+                                    <span class="inline-svg-icon me-2 text-secondary" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M9 3h6l1 2h3a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h3l1-2z"></path>
+                                            <path d="M9 10h6"></path>
+                                            <path d="M9 14h6"></path>
+                                        </svg>
+                                    </span>Analysis Metrics
+                                </th>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         <th>{{ $coDetails[$coId]['co_code'] ?? '' }}</th>
@@ -407,7 +476,16 @@
                         </thead>
                         <tbody>
                             <tr style="background:#f8f9fa;">
-                                <td class="fw-bold text-dark text-start">👥 Students Attempted</td>
+                                <td class="fw-bold text-dark text-start">
+                                    <span class="inline-svg-icon me-2 text-primary" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="3"></circle>
+                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a3 3 0 0 1 0 5.74"></path>
+                                        </svg>
+                                    </span>Students Attempted
+                                </td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
@@ -418,7 +496,14 @@
                                 @endforeach
                             </tr>
                             <tr style="background:#fff;">
-                                <td class="fw-bold text-dark text-start">✅ Students Passed</td>
+                                <td class="fw-bold text-dark text-start">
+                                    <span class="inline-svg-icon me-2 text-success" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="9"></circle>
+                                            <path d="m9 12 2 2 4-4"></path>
+                                        </svg>
+                                    </span>Students Passed
+                                </td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
@@ -429,7 +514,16 @@
                                 @endforeach
                             </tr>
                             <tr style="background:#f8f9fa;">
-                                <td class="fw-bold text-dark text-start">📊 Pass Percentage</td>
+                                <td class="fw-bold text-dark text-start">
+                                    <span class="inline-svg-icon me-2 text-success" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 20h16"></path>
+                                            <path d="M7 16v-5"></path>
+                                            <path d="M12 16V8"></path>
+                                            <path d="M17 16v-3"></path>
+                                        </svg>
+                                    </span>Pass Percentage
+                                </td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
@@ -442,7 +536,15 @@
                                 @endforeach
                             </tr>
                             <tr style="background:#fff;">
-                                <td class="fw-bold text-dark text-start">❌ Failed Percentage</td>
+                                <td class="fw-bold text-dark text-start">
+                                    <span class="inline-svg-icon me-2 text-danger" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="9"></circle>
+                                            <path d="m9 9 6 6"></path>
+                                            <path d="m15 9-6 6"></path>
+                                        </svg>
+                                    </span>Failed Percentage
+                                </td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
@@ -875,7 +977,15 @@
                         <table class="table co-table table-bordered align-middle mb-0 text-center">
                             <thead>
                                 <tr>
-                                    <th class="text-start">📋 Analysis Metrics</th>
+                                    <th class="text-start">
+                                        <span class="inline-svg-icon me-2 text-secondary" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M9 3h6l1 2h3a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h3l1-2z"></path>
+                                                <path d="M9 10h6"></path>
+                                                <path d="M9 14h6"></path>
+                                            </svg>
+                                        </span>Analysis Metrics
+                                    </th>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         <th>{{ $coDetails[$coId]->co_code ?? 'CO'.$coId }}</th>
                                     @endforeach
@@ -883,7 +993,16 @@
                             </thead>
                             <tbody>
                                 <tr style="background:#f8f9fa;">
-                                    <td class="fw-bold text-dark text-start">👥 Students Attempted</td>
+                                    <td class="fw-bold text-dark text-start">
+                                        <span class="inline-svg-icon me-2 text-primary" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="9" cy="7" r="3"></circle>
+                                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                <path d="M16 3.13a3 3 0 0 1 0 5.74"></path>
+                                            </svg>
+                                        </span>Students Attempted
+                                    </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
                                             $stats = $termCoSummaryStats[$term][$coId] ?? ['attempted' => 0];
@@ -892,7 +1011,14 @@
                                     @endforeach
                                 </tr>
                                 <tr style="background:#fff;">
-                                    <td class="fw-bold text-dark text-start">✅ Students Passed</td>
+                                    <td class="fw-bold text-dark text-start">
+                                        <span class="inline-svg-icon me-2 text-success" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="9"></circle>
+                                                <path d="m9 12 2 2 4-4"></path>
+                                            </svg>
+                                        </span>Students Passed
+                                    </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
                                             $stats = $termCoSummaryStats[$term][$coId] ?? ['passed' => 0];
@@ -901,7 +1027,16 @@
                                     @endforeach
                                 </tr>
                                 <tr style="background:#f8f9fa;">
-                                    <td class="fw-bold text-dark text-start">📊 Pass Percentage</td>
+                                    <td class="fw-bold text-dark text-start">
+                                        <span class="inline-svg-icon me-2 text-success" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 20h16"></path>
+                                                <path d="M7 16v-5"></path>
+                                                <path d="M12 16V8"></path>
+                                                <path d="M17 16v-3"></path>
+                                            </svg>
+                                        </span>Pass Percentage
+                                    </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
                                             $stats = $termCoSummaryStats[$term][$coId] ?? ['pass_percentage' => 0];
@@ -912,7 +1047,15 @@
                                     @endforeach
                                 </tr>
                                 <tr style="background:#fff;">
-                                    <td class="fw-bold text-dark text-start">❌ Failed Percentage</td>
+                                    <td class="fw-bold text-dark text-start">
+                                        <span class="inline-svg-icon me-2 text-danger" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="9"></circle>
+                                                <path d="m9 9 6 6"></path>
+                                                <path d="m15 9-6 6"></path>
+                                            </svg>
+                                        </span>Failed Percentage
+                                    </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
                                             $stats = $termCoSummaryStats[$term][$coId] ?? ['fail_percentage' => 0];
@@ -960,10 +1103,44 @@
                         What You Need to Do:
                     </h6>
                     <ul class="text-start mb-0">
-                        <li>🎯 Define course outcomes that align with learning objectives</li>
-                        <li>📝 Create assessment activities linked to course outcomes</li>
-                        <li>👥 Input student scores for each activity</li>
-                        <li>📊 Then return here to view comprehensive results</li>
+                        <li>
+                            <span class="inline-svg-icon me-2 text-success" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="9"></circle>
+                                    <circle cx="12" cy="12" r="4"></circle>
+                                    <circle cx="12" cy="12" r="1"></circle>
+                                </svg>
+                            </span>Define course outcomes that align with learning objectives
+                        </li>
+                        <li>
+                            <span class="inline-svg-icon me-2 text-primary" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 3h6l1 2h3a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h3l1-2z"></path>
+                                    <path d="M9 10h6"></path>
+                                    <path d="M9 14h6"></path>
+                                </svg>
+                            </span>Create assessment activities linked to course outcomes
+                        </li>
+                        <li>
+                            <span class="inline-svg-icon me-2 text-info" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="3"></circle>
+                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a3 3 0 0 1 0 5.74"></path>
+                                </svg>
+                            </span>Input student scores for each activity
+                        </li>
+                        <li>
+                            <span class="inline-svg-icon me-2 text-success" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 20h16"></path>
+                                    <path d="M7 16v-5"></path>
+                                    <path d="M12 16V8"></path>
+                                    <path d="M17 16v-3"></path>
+                                </svg>
+                            </span>Then return here to view comprehensive results
+                        </li>
                     </ul>
                 </div>
 
@@ -971,7 +1148,7 @@
                     <a href="{{ route('instructor.course_outcomes.index') }}" class="btn btn-success">
                         <i class="bi bi-plus-circle me-2"></i>Set Up Course Outcomes
                     </a>
-                    <a href="{{ route('instructor.course-outcome-attainments.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ $resultsIndexRoute }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Back to Subjects
                     </a>
                 </x-slot:actions>

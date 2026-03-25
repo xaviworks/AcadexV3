@@ -4,7 +4,7 @@
 <div class="container-fluid px-4 py-4">
     {{-- Breadcrumbs --}}
     <x-breadcrumbs :items="[
-        ['label' => 'Home', 'url' => '/'],
+        ['label' => 'Home', 'url' => route('instructor.dashboard')],
         ['label' => 'Course Outcome Attainment Results']
     ]" />
 

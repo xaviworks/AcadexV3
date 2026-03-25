@@ -17,8 +17,8 @@
     {{-- Breadcrumbs --}}
     @php
         $breadcrumbItems = [
-            ['label' => 'Home', 'url' => '/'],
-            ['label' => 'Course Outcomes', 'url' => route($routePrefix . '.course_outcomes.index')]
+            ['label' => 'Dashboard', 'url' => route($routePrefix . '.dashboard')],
+            ['label' => 'View Outcomes', 'url' => route($routePrefix . '.course_outcomes.index')]
         ];
         if(isset($selectedSubject)) {
             $breadcrumbItems[] = ['label' => $selectedSubject->subject_code . ' - ' . $selectedSubject->subject_description];

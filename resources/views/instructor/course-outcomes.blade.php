@@ -12,8 +12,8 @@
     {{-- Breadcrumbs --}}
     @php
         $breadcrumbItems = [
-            ['label' => 'Home', 'url' => '/'],
-            ['label' => 'Course Outcomes']
+            ['label' => 'Dashboard', 'url' => route($routePrefix . '.dashboard')],
+            ['label' => 'View Outcomes']
         ];
         
         if(request('subject_id') && isset($subjects)) {
