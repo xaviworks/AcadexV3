@@ -116,15 +116,15 @@
                 <x-empty-state
                     icon="bi-journal-x"
                     title="No Course Outcomes Found"
-                    message="No course outcomes found for this subject."
+                    message="No course outcomes found for this course."
                     :compact="true"
                 />
             @endif
         @else
             <x-empty-state
                 icon="bi-hand-index"
-                title="Select a Subject"
-                message="Please select a subject to view its course outcomes."
+                title="Select a Course"
+                message="Please select a course to view its course outcomes."
                 :compact="true"
             />
         @endif

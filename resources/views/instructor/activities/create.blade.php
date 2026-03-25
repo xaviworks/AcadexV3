@@ -27,12 +27,12 @@
   @if ($subjects->isEmpty())
     <x-empty-state
         icon="bi-clipboard-x"
-        title="No Assigned Subjects Found"
-        message="You don't have any subjects assigned for the current academic period."
+                title="No Assigned Courses Found"
+                message="You don't have any courses assigned for the current academic period."
     >
         <p class="small text-muted mb-0">
           <i class="bi bi-info-circle me-1"></i>
-          Contact your chairperson to get subjects assigned so you can start managing activities.
+                    Contact your chairperson to get courses assigned so you can start managing activities.
         </p>
     </x-empty-state>
   @else

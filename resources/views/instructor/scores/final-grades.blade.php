@@ -50,8 +50,8 @@
         @else
             <x-empty-state
                 icon="bi-journal-x"
-                title="No Assigned Subjects"
-                message="No subjects have been assigned to you yet."
+                title="No Assigned Courses"
+                message="No courses have been assigned to you yet."
             />
         @endif
     @else

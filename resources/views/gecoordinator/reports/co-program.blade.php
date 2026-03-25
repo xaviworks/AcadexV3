@@ -61,7 +61,7 @@
                             <tr>
                                 <td colspan="7" class="text-center py-5">
                                     <i class="bi bi-inbox text-muted fs-1 d-block mb-2"></i>
-                                    <p class="text-muted mb-0">No programs with GE subjects or assessed COs found.</p>
+                                    <p class="text-muted mb-0">No programs with GE courses or assessed COs found.</p>
                                 </td>
                             </tr>
                         @endforelse

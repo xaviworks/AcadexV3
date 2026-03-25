@@ -8,9 +8,9 @@
         <div class="mb-2">
             <h4 class="fw-bold mb-0" style="color: #2c3e50;">
                 <i class="bi bi-bullseye me-2" style="color: #198754;"></i>
-                Subject: {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
+                Course: {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
             </h4>
-            <p class="text-muted mb-0 mt-1">Define and manage course outcomes for this subject</p>
+            <p class="text-muted mb-0 mt-1">Define and manage course outcomes for this course</p>
         </div>
     @endif
 
@@ -39,7 +39,7 @@
                             <div>
                                 <h5 class="fw-bold mb-1">Course Outcomes Management</h5>
                                 <p class="text-muted mb-0">
-                                    Subject: {{ $selectedSubject->subject_code ?? 'N/A' }} - {{ $selectedSubject->subject_description ?? 'N/A' }}
+                                    Course: {{ $selectedSubject->subject_code ?? 'N/A' }} - {{ $selectedSubject->subject_description ?? 'N/A' }}
                                     @if($currentPeriod)
                                         | {{ $currentPeriod->academic_year }} - {{ $currentPeriod->semester }}
                                     @endif
@@ -80,7 +80,7 @@
                 <x-empty-state
                     icon="bi-file-earmark-x"
                     title="No Course Outcome Data Available"
-                    :message="'No course outcomes have been set for ' . e($selectedSubject->subject_code ?? 'this subject') . ' yet.'"
+                    :message="'No course outcomes have been set for ' . e($selectedSubject->subject_code ?? 'this course') . ' yet.'"
                 >
                     <x-slot:actions>
                         @if(Auth::user()->isChairperson())
@@ -232,7 +232,7 @@
                             <x-empty-state
                                 icon="bi-mortarboard"
                                 title="No Course Outcomes Found"
-                                message="Get started by creating your first course outcome for this subject."
+                                message="Get started by creating your first course outcome for this course."
                                 :compact="true"
                             >
                                 <x-slot:actions>

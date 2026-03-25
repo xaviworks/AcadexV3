@@ -9,7 +9,7 @@
         <i class="bi bi-bar-chart-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
         <span>Students' Final Grades</span>
     </h1>
-    <p class="text-muted mb-4">Select an instructor and subject to view students's final grades</p>
+    <p class="text-muted mb-4">Select an instructor and course to view students's final grades</p>
 
     {{-- Breadcrumb Navigation --}}
     @php
@@ -19,7 +19,7 @@
         ];
         
         if (!empty($selectedInstructorId) && empty($selectedSubjectId)) {
-            $breadcrumbItems[] = ['label' => 'Select Subject'];
+            $breadcrumbItems[] = ['label' => 'Select Course'];
         } elseif (!empty($selectedInstructorId) && !empty($selectedSubjectId)) {
             $breadcrumbItems[] = ['label' => 'Students\' Final Grades'];
         }
@@ -68,7 +68,7 @@
             />
         @endif
     @elseif (empty($selectedSubjectId))
-        {{-- Step 2: Subject Selection --}}
+        {{-- Step 2: Course Selection --}}
         @if (count($subjects) > 0)
             <div class="row g-4 px-4 py-4" id="subject-selection">
                 @foreach($subjects as $subjectItem)
@@ -99,8 +99,8 @@
         @else
             <x-empty-state
                 icon="bi-journal-x"
-                title="No Subjects Found"
-                message="This instructor has no subjects assigned for the current academic period."
+                title="No Courses Found"
+                message="This instructor has no courses assigned for the current academic period."
             />
         @endif
     @else
@@ -162,7 +162,7 @@
             <x-empty-state
                 icon="bi-person-x"
                 title="No Students Found"
-                message="No students are enrolled in this subject."
+                message="No students are enrolled in this course."
             />
         @endif
     @endif

@@ -85,14 +85,14 @@
                 <div class="text-muted mb-3">
                     <i class="bi bi-folder-x fs-1 opacity-50"></i>
                 </div>
-                <h5 class="text-muted mb-2">No Subjects Found</h5>
+                <h5 class="text-muted mb-2">No Courses Found</h5>
                 <p class="text-muted mb-4">
                     @if($academicYear && $semester)
-                        No subjects found for the current academic period.
+                        No courses found for the current academic period.
                         <br><strong>Academic Year:</strong> {{ $academicYear }}
                         <br><strong>Semester:</strong> {{ $semester }}
                     @else
-                        No subjects found. You can still browse by subject when available.
+                        No courses found. You can still browse by course when available.
                     @endif
                 </p>
                 <div class="d-flex justify-content-center gap-3">

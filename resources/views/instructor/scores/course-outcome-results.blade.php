@@ -942,7 +942,7 @@
                 title="No Course Outcome Results Available"
                 :message="isset($selectedSubject)
                     ? 'for <strong>' . e($selectedSubject->subject_code) . ' - ' . e($selectedSubject->subject_description) . '</strong>'
-                    : 'for this subject'"
+                    : 'for this course'"
             >
                 <div class="alert alert-info bg-info-subtle text-dark border-0 text-start">
                     <h6 class="alert-heading">
@@ -950,7 +950,7 @@
                         No Course Outcomes Found
                     </h6>
                     <p class="mb-3">
-                        Before viewing course outcome results, course outcomes must be created for this subject. 
+                        Before viewing course outcome results, course outcomes must be created for this course. 
                         Course outcomes define the specific learning objectives and competencies that students 
                         should achieve by the end of the course.
                     </p>
