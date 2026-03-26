@@ -205,6 +205,7 @@
             @csrf
             <input type="hidden" name="subject_id" value="{{ $subject->id }}">
             <input type="hidden" name="term" value="{{ $term }}">
+            <input type="hidden" name="return_to" value="grades">
             {{-- When adding an activity from the Manage Grades quick-add modal, we should only create a single activity by default --}}
             <input type="hidden" name="create_single" value="1">
 
