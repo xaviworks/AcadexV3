@@ -178,7 +178,7 @@ class CourseOutcomeAttainmentController extends Controller
         $coSummaryStats = [];
         foreach ($finalCOs as $coId) {
             $attempted = 0;
-            $passed = 0;
+            $metTargetCount = 0;
             $threshold = (int) (optional($coDetails->get($coId))->target_percentage ?? 75);
             
             foreach ($students as $student) {
@@ -189,17 +189,16 @@ class CourseOutcomeAttainmentController extends Controller
                 if ($percent !== null) {
                     $attempted++;
                     if ($percent >= $threshold) {
-                        $passed++;
+                        $metTargetCount++;
                     }
                 }
             }
             
             $coSummaryStats[$coId] = [
                 'attempted' => $attempted,
-                'passed' => $passed,
-                'failed' => $attempted - $passed,
-                'pass_percentage' => $attempted > 0 ? round(($passed / $attempted) * 100, 2) : 0,
-                'fail_percentage' => $attempted > 0 ? round((($attempted - $passed) / $attempted) * 100, 1) : 0,
+                'met_target_count' => $metTargetCount,
+                'met_target_percentage' => $attempted > 0 ? round(($metTargetCount / $attempted) * 100, 1) : 0,
+                'target_percentage' => $threshold,
             ];
         }
         
@@ -208,7 +207,7 @@ class CourseOutcomeAttainmentController extends Controller
         foreach ($terms as $term) {
             foreach ($coColumnsByTerm[$term] ?? [] as $coId) {
                 $attempted = 0;
-                $passed = 0;
+                $metTargetCount = 0;
                 $threshold = (int) (optional($coDetails->get($coId))->target_percentage ?? 75);
                 
                 foreach ($students as $student) {
@@ -216,17 +215,16 @@ class CourseOutcomeAttainmentController extends Controller
                     if ($data && $data['max'] > 0) {
                         $attempted++;
                         if ($data['percent'] >= $threshold) {
-                            $passed++;
+                            $metTargetCount++;
                         }
                     }
                 }
                 
                 $termCoSummaryStats[$term][$coId] = [
                     'attempted' => $attempted,
-                    'passed' => $passed,
-                    'failed' => $attempted - $passed,
-                    'pass_percentage' => $attempted > 0 ? round(($passed / $attempted) * 100, 1) : 0,
-                    'fail_percentage' => $attempted > 0 ? round((($attempted - $passed) / $attempted) * 100, 1) : 0,
+                    'met_target_count' => $metTargetCount,
+                    'met_target_percentage' => $attempted > 0 ? round(($metTargetCount / $attempted) * 100, 1) : 0,
+                    'target_percentage' => $threshold,
                 ];
             }
         }

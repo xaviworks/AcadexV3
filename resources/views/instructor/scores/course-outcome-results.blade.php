@@ -469,7 +469,13 @@
                                 </th>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
-                                        <th>{{ $coDetails[$coId]['co_code'] ?? '' }}</th>
+                                        @php
+                                            $targetPercentage = (int) ($coSummaryStats[$coId]['target_percentage'] ?? ($coDetails[$coId]->target_percentage ?? 75));
+                                        @endphp
+                                        <th>
+                                            <div class="fw-semibold">{{ $coDetails[$coId]['co_code'] ?? '' }}</div>
+                                            <small class="text-muted">Target {{ $targetPercentage }}%</small>
+                                        </th>
                                     @endif
                                 @endforeach
                             </tr>
@@ -484,7 +490,7 @@
                                             <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
                                             <path d="M16 3.13a3 3 0 0 1 0 5.74"></path>
                                         </svg>
-                                    </span>Students Attempted
+                                    </span>Number of Students Attempted
                                 </td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
@@ -502,14 +508,14 @@
                                             <circle cx="12" cy="12" r="9"></circle>
                                             <path d="m9 12 2 2 4-4"></path>
                                         </svg>
-                                    </span>Students Passed
+                                    </span>Number of Students Meeting Target
                                 </td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
-                                            $stats = $coSummaryStats[$coId] ?? ['passed' => 0];
+                                            $stats = $coSummaryStats[$coId] ?? ['met_target_count' => 0];
                                         @endphp
-                                        <td class="fw-bold text-success">{{ $stats['passed'] }}</td>
+                                        <td class="fw-bold text-success">{{ $stats['met_target_count'] }}</td>
                                     @endif
                                 @endforeach
                             </tr>
@@ -522,41 +528,16 @@
                                             <path d="M12 16V8"></path>
                                             <path d="M17 16v-3"></path>
                                         </svg>
-                                    </span>Pass Percentage
+                                    </span>Percentage of Students Meeting Target
                                 </td>
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
-                                            $stats = $coSummaryStats[$coId] ?? ['pass_percentage' => 0];
-                                            $percentPassed = $stats['pass_percentage'];
-                                            $textClass = $percentPassed >= 75 ? 'text-success' : 'text-danger';
+                                            $stats = $coSummaryStats[$coId] ?? ['met_target_percentage' => 0];
+                                            $metTargetPercentage = $stats['met_target_percentage'];
+                                            $textClass = $metTargetPercentage >= 75 ? 'text-success' : 'text-danger';
                                         @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $percentPassed }}%</td>
-                                    @endif
-                                @endforeach
-                            </tr>
-                            <tr style="background:#fff;">
-                                <td class="fw-bold text-dark text-start">
-                                    <span class="inline-svg-icon me-2 text-danger" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="9"></circle>
-                                            <path d="m9 9 6 6"></path>
-                                            <path d="m15 9-6 6"></path>
-                                        </svg>
-                                    </span>Failed Percentage
-                                </td>
-                                @foreach($finalCOs as $coId)
-                                    @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
-                                        @php
-                                            $stats = $coSummaryStats[$coId] ?? ['fail_percentage' => 0];
-                                            $failedPercentage = $stats['fail_percentage'];
-                                            $textClass = $failedPercentage >= 75 ? 'text-danger' : 'text-success';
-                                        @endphp
-                                        <td>
-                                            <span class="fw-bold {{ $textClass }}">
-                                                {{ $failedPercentage }}%
-                                            </span>
-                                        </td>
+                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage }}%</td>
                                     @endif
                                 @endforeach
                             </tr>
@@ -987,7 +968,13 @@
                                         </span>Analysis Metrics
                                     </th>
                                     @foreach($coColumnsByTerm[$term] as $coId)
-                                        <th>{{ $coDetails[$coId]->co_code ?? 'CO'.$coId }}</th>
+                                        @php
+                                            $targetPercentage = (int) ($termCoSummaryStats[$term][$coId]['target_percentage'] ?? ($coDetails[$coId]->target_percentage ?? 75));
+                                        @endphp
+                                        <th>
+                                            <div class="fw-semibold">{{ $coDetails[$coId]->co_code ?? 'CO'.$coId }}</div>
+                                            <small class="text-muted">Target {{ $targetPercentage }}%</small>
+                                        </th>
                                     @endforeach
                                 </tr>
                             </thead>
@@ -1001,7 +988,7 @@
                                                 <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
                                                 <path d="M16 3.13a3 3 0 0 1 0 5.74"></path>
                                             </svg>
-                                        </span>Students Attempted
+                                        </span>Number of Students Attempted
                                     </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
@@ -1017,13 +1004,13 @@
                                                 <circle cx="12" cy="12" r="9"></circle>
                                                 <path d="m9 12 2 2 4-4"></path>
                                             </svg>
-                                        </span>Students Passed
+                                        </span>Number of Students Meeting Target
                                     </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
-                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['passed' => 0];
+                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['met_target_count' => 0];
                                         @endphp
-                                        <td class="fw-bold text-success">{{ $stats['passed'] }}</td>
+                                        <td class="fw-bold text-success">{{ $stats['met_target_count'] }}</td>
                                     @endforeach
                                 </tr>
                                 <tr style="background:#f8f9fa;">
@@ -1035,34 +1022,15 @@
                                                 <path d="M12 16V8"></path>
                                                 <path d="M17 16v-3"></path>
                                             </svg>
-                                        </span>Pass Percentage
+                                        </span>Percentage of Students Meeting Target
                                     </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
-                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['pass_percentage' => 0];
-                                            $percentPassed = $stats['pass_percentage'];
-                                            $textClass = $percentPassed >= 75 ? 'text-success' : 'text-danger';
+                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['met_target_percentage' => 0];
+                                            $metTargetPercentage = $stats['met_target_percentage'];
+                                            $textClass = $metTargetPercentage >= 75 ? 'text-success' : 'text-danger';
                                         @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $percentPassed }}%</td>
-                                    @endforeach
-                                </tr>
-                                <tr style="background:#fff;">
-                                    <td class="fw-bold text-dark text-start">
-                                        <span class="inline-svg-icon me-2 text-danger" aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <circle cx="12" cy="12" r="9"></circle>
-                                                <path d="m9 9 6 6"></path>
-                                                <path d="m15 9-6 6"></path>
-                                            </svg>
-                                        </span>Failed Percentage
-                                    </td>
-                                    @foreach($coColumnsByTerm[$term] as $coId)
-                                        @php
-                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['fail_percentage' => 0];
-                                            $failedPercentage = $stats['fail_percentage'];
-                                            $textClass = $failedPercentage >= 75 ? 'text-danger' : 'text-success';
-                                        @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $failedPercentage }}%</td>
+                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage }}%</td>
                                     @endforeach
                                 </tr>
                             </tbody>
