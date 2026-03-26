@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Schema;
 |
 */
 
-if (Schema::hasTable('settings')) {
-    try {
+try {
+    if (Schema::hasTable('settings')) {
         $scheduleSetting = Setting::where('key', 'backup_schedule')->value('value');
         
         if ($scheduleSetting) {
@@ -43,7 +43,8 @@ if (Schema::hasTable('settings')) {
                 };
             }
         }
-    } catch (\Throwable $e) {
-        // Fail silently if DB connection fails during schedule run
     }
+} catch (\Throwable $e) {
+    // Skip dynamic schedule registration when the database is unavailable
+    // so bootstrapping commands like composer package:discover can still run.
 }
