@@ -129,11 +129,16 @@ function setDisplayType(type, iconKey, text) {
 function toggleScoreTypeWithValue(type) {
   const passfailTable = document.getElementById('passfail-table');
   const copasssummaryTable = document.getElementById('copasssummary-table');
+  const summaryTargetLevelControls = document.getElementById('summary-target-level-controls');
   const mainTables = document.querySelectorAll('.main-table');
   const termTables = document.querySelectorAll('.term-table');
   const summaryLabel = document.getElementById('summaryLabel');
   const termSummaryLabels = document.querySelectorAll('.term-summary-label');
   const termStepperContainer = document.getElementById('term-navigation-container');
+
+  if (summaryTargetLevelControls) {
+    summaryTargetLevelControls.style.display = type === 'copasssummary' ? 'block' : 'none';
+  }
 
   if (type === 'passfail') {
     if (passfailTable) passfailTable.style.display = 'block';
@@ -676,8 +681,18 @@ export function initCourseOutcomeResultsPage() {
     });
   });
 
-  // Default to percentage view on load
-  setDisplayType('percentage', 'percentage', 'Percentage');
+  const viewQuery = new URLSearchParams(window.location.search).get('view');
+  const validViews = ['score', 'percentage', 'passfail', 'copasssummary'];
+  const requestedView = validViews.includes(viewQuery) ? viewQuery : 'percentage';
+
+  const viewLabelMap = {
+    score: 'Scores',
+    percentage: 'Percentage',
+    passfail: 'Pass/Fail',
+    copasssummary: 'Summary',
+  };
+
+  setDisplayType(requestedView, requestedView, viewLabelMap[requestedView]);
 }
 
 document.addEventListener('DOMContentLoaded', initCourseOutcomeResultsPage);

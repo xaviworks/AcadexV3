@@ -72,6 +72,10 @@ class Subject extends Model
         return $this->hasMany(\App\Models\CourseOutcomes::class, 'subject_id')->where('is_deleted', false);
     }
 
+    public function attainmentLevel()
+    {
+        return $this->hasOne(SubjectAttainmentLevel::class, 'subject_id');
+    }
 
 
 

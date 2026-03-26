@@ -334,6 +334,7 @@ Route::prefix('instructor')
         // Course Outcome Attainments
         Route::get('/course-outcome-attainments', [CourseOutcomeAttainmentController::class,    'index'])->name('course-outcome-attainments.index');
         Route::get('/course-outcome-attainments/subject/{subject}', [CourseOutcomeAttainmentController::class, 'subject'])->name('course-outcome-attainments.subject');
+        Route::put('/course-outcome-attainments/subject/{subject}/target-levels', [CourseOutcomeAttainmentController::class, 'updateTargetLevels'])->name('course-outcome-attainments.target-levels.update');
         Route::post('/course-outcome-attainments', [CourseOutcomeAttainmentController::class,   'store'])->name('course-outcome-attainments.store');
         Route::get('/course-outcome-attainments/{id}',  [CourseOutcomeAttainmentController::class, 'show'])->name('course-outcome-attainments.show');
         Route::put('/course-outcome-attainments/{id}',  [CourseOutcomeAttainmentController::class, 'update'])->name('course-outcome-attainments. update');

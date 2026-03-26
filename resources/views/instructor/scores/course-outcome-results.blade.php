@@ -222,6 +222,65 @@
     height: auto !important;
 }
 
+/* Excel-style target level editor (summary mode) */
+.target-level-grid {
+    border: 1px solid #d6e2dc;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.target-level-grid th,
+.target-level-grid td {
+    border-color: #d6e2dc !important;
+    vertical-align: middle;
+}
+
+.target-level-grid .target-level-block {
+    background: #f5f8f6;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #23453a;
+    min-width: 170px;
+}
+
+.target-level-grid .target-level-label {
+    width: 110px;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.target-level-grid .target-level-label.level-3 {
+    background: linear-gradient(135deg, #198754 0%, #0f5132 100%);
+}
+
+.target-level-grid .target-level-label.level-2 {
+    background: linear-gradient(135deg, #2f9f4f 0%, #1f7a3a 100%);
+}
+
+.target-level-grid .target-level-label.level-1 {
+    background: linear-gradient(135deg, #59b76f 0%, #2f8d48 100%);
+}
+
+.target-level-grid .target-level-input-cell {
+    min-width: 150px;
+    background: #ffffff;
+}
+
+.target-level-grid .target-level-help-cell {
+    min-width: 320px;
+    color: #4d5f58;
+    background: #f8fbf9;
+    font-weight: 500;
+}
+
+.target-level-grid .form-control.form-control-sm {
+    min-width: 90px;
+    text-align: center;
+    font-weight: 600;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .compact-stepper {
@@ -247,6 +306,10 @@
     .compact-all-btn {
         width: 28px !important;
         height: 28px !important;
+    }
+
+    .target-level-grid .target-level-block {
+        min-width: 130px;
     }
 }
 </style>
@@ -427,6 +490,96 @@
                                 </div>
                             </div>
                         </div>
+
+                        @php
+                            $thresholdInputs = $targetLevelThresholds ?? [
+                                'level_3' => 75,
+                                'level_2' => 50,
+                                'level_1' => 25,
+                            ];
+                        @endphp
+                        <div id="summary-target-level-controls" class="border-top pt-3 mt-3 no-print" style="display: {{ request('view') === 'copasssummary' ? 'block' : 'none' }};">
+                            <form action="{{ route('instructor.course-outcome-attainments.target-levels.update', ['subject' => $subjectId]) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="table-responsive target-level-grid mb-2">
+                                    <table class="table table-sm table-bordered align-middle mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <th rowspan="3" class="target-level-block text-center">TARGET LEVEL</th>
+                                                <th class="target-level-label level-3">LEVEL 3</th>
+                                                <td class="target-level-input-cell">
+                                                    <label for="target-level-3" class="visually-hidden">Level 3 Threshold (%)</label>
+                                                    <input
+                                                        id="target-level-3"
+                                                        type="number"
+                                                        class="form-control form-control-sm @error('level_3') is-invalid @enderror"
+                                                        name="level_3"
+                                                        min="0"
+                                                        max="100"
+                                                        step="0.1"
+                                                        value="{{ old('level_3', $thresholdInputs['level_3']) }}"
+                                                        readonly
+                                                        required
+                                                    >
+                                                </td>
+                                                <td class="target-level-help-cell">Percent of students to get the desired mark.</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="target-level-label level-2">LEVEL 2</th>
+                                                <td class="target-level-input-cell">
+                                                    <label for="target-level-2" class="visually-hidden">Level 2 Threshold (%)</label>
+                                                    <input
+                                                        id="target-level-2"
+                                                        type="number"
+                                                        class="form-control form-control-sm @error('level_2') is-invalid @enderror"
+                                                        name="level_2"
+                                                        min="0"
+                                                        max="100"
+                                                        step="0.1"
+                                                        value="{{ old('level_2', $thresholdInputs['level_2']) }}"
+                                                        readonly
+                                                        required
+                                                    >
+                                                </td>
+                                                <td class="target-level-help-cell">Percent of students to get the desired mark.</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="target-level-label level-1">LEVEL 1</th>
+                                                <td class="target-level-input-cell">
+                                                    <label for="target-level-1" class="visually-hidden">Level 1 Threshold (%)</label>
+                                                    <input
+                                                        id="target-level-1"
+                                                        type="number"
+                                                        class="form-control form-control-sm @error('level_1') is-invalid @enderror"
+                                                        name="level_1"
+                                                        min="0"
+                                                        max="100"
+                                                        step="0.1"
+                                                        value="{{ old('level_1', $thresholdInputs['level_1']) }}"
+                                                        readonly
+                                                        required
+                                                    >
+                                                </td>
+                                                <td class="target-level-help-cell">Percent of students to get the desired mark.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        Used by <strong>Target Level Achieved</strong> in summary mode. "Percent of students to get the desired mark." is based on dynamic CO target (%) from each summary column header. Rule: Level 3 &gt;= Level 2 &gt;= Level 1.
+                                    </small>
+                                </div>
+
+                                @if($errors->has('level_3') || $errors->has('level_2') || $errors->has('level_1'))
+                                    <div class="alert alert-danger py-2 mb-0 mt-2">
+                                        {{ $errors->first('level_3') ?? $errors->first('level_2') ?? $errors->first('level_1') }}
+                                    </div>
+                                @endif
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -533,11 +686,47 @@
                                 @foreach($finalCOs as $coId)
                                     @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                         @php
-                                            $stats = $coSummaryStats[$coId] ?? ['met_target_percentage' => 0];
+                                            $stats = $coSummaryStats[$coId] ?? ['met_target_percentage' => null];
                                             $metTargetPercentage = $stats['met_target_percentage'];
-                                            $textClass = $metTargetPercentage >= 75 ? 'text-success' : 'text-danger';
+                                            $textClass = $metTargetPercentage === null
+                                                ? 'text-muted'
+                                                : ($metTargetPercentage >= 75 ? 'text-success' : 'text-danger');
                                         @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage }}%</td>
+                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? $metTargetPercentage . '%' : '--' }}</td>
+                                    @endif
+                                @endforeach
+                            </tr>
+                            <tr style="background:#fff;">
+                                <td class="fw-bold text-dark text-start">
+                                    <span class="inline-svg-icon me-2 text-primary" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 2 15 8l7 .5-5 4 1.5 7L12 16l-6.5 3.5L7 12.5l-5-4L9 8z"></path>
+                                        </svg>
+                                    </span>Target Level Achieved
+                                </td>
+                                @foreach($finalCOs as $coId)
+                                    @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
+                                        @php
+                                            $stats = $coSummaryStats[$coId] ?? ['target_level_achieved' => null];
+                                            $targetLevel = $stats['target_level_achieved'];
+                                            if ($targetLevel === null) {
+                                                $targetLevelText = '--';
+                                                $targetLevelClass = 'text-muted';
+                                            } elseif ($targetLevel >= 3.0) {
+                                                $targetLevelText = number_format((float) $targetLevel, 1);
+                                                $targetLevelClass = 'text-success';
+                                            } elseif ($targetLevel >= 2.0) {
+                                                $targetLevelText = number_format((float) $targetLevel, 1);
+                                                $targetLevelClass = 'text-primary';
+                                            } elseif ($targetLevel >= 1.0) {
+                                                $targetLevelText = number_format((float) $targetLevel, 1);
+                                                $targetLevelClass = 'text-warning';
+                                            } else {
+                                                $targetLevelText = number_format((float) $targetLevel, 1);
+                                                $targetLevelClass = 'text-danger';
+                                            }
+                                        @endphp
+                                        <td class="fw-bold {{ $targetLevelClass }}">{{ $targetLevelText }}</td>
                                     @endif
                                 @endforeach
                             </tr>
@@ -1026,11 +1215,45 @@
                                     </td>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         @php
-                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['met_target_percentage' => 0];
+                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['met_target_percentage' => null];
                                             $metTargetPercentage = $stats['met_target_percentage'];
-                                            $textClass = $metTargetPercentage >= 75 ? 'text-success' : 'text-danger';
+                                            $textClass = $metTargetPercentage === null
+                                                ? 'text-muted'
+                                                : ($metTargetPercentage >= 75 ? 'text-success' : 'text-danger');
                                         @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage }}%</td>
+                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? $metTargetPercentage . '%' : '--' }}</td>
+                                    @endforeach
+                                </tr>
+                                <tr style="background:#fff;">
+                                    <td class="fw-bold text-dark text-start">
+                                        <span class="inline-svg-icon me-2 text-primary" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 2 15 8l7 .5-5 4 1.5 7L12 16l-6.5 3.5L7 12.5l-5-4L9 8z"></path>
+                                            </svg>
+                                        </span>Target Level Achieved
+                                    </td>
+                                    @foreach($coColumnsByTerm[$term] as $coId)
+                                        @php
+                                            $stats = $termCoSummaryStats[$term][$coId] ?? ['target_level_achieved' => null];
+                                            $targetLevel = $stats['target_level_achieved'];
+                                            if ($targetLevel === null) {
+                                                $targetLevelText = '--';
+                                                $targetLevelClass = 'text-muted';
+                                            } elseif ($targetLevel >= 3.0) {
+                                                $targetLevelText = number_format((float) $targetLevel, 1);
+                                                $targetLevelClass = 'text-success';
+                                            } elseif ($targetLevel >= 2.0) {
+                                                $targetLevelText = number_format((float) $targetLevel, 1);
+                                                $targetLevelClass = 'text-primary';
+                                            } elseif ($targetLevel >= 1.0) {
+                                                $targetLevelText = number_format((float) $targetLevel, 1);
+                                                $targetLevelClass = 'text-warning';
+                                            } else {
+                                                $targetLevelText = number_format((float) $targetLevel, 1);
+                                                $targetLevelClass = 'text-danger';
+                                            }
+                                        @endphp
+                                        <td class="fw-bold {{ $targetLevelClass }}">{{ $targetLevelText }}</td>
                                     @endforeach
                                 </tr>
                             </tbody>
