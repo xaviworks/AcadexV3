@@ -11,6 +11,7 @@ use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -250,7 +251,9 @@ class GECoordinatorController extends Controller
         
         $academicPeriodId = session('active_academic_period_id');
         if (!$academicPeriodId) {
-            $academicPeriodId = 1; // Default to 1 if not set
+            $academicPeriodId = \App\Models\AcademicPeriod::where('is_deleted', false)
+                ->latest('id')
+                ->value('id') ?? 1;
         }
 
         // Get subjects (GE, PD, NSTP, RS, PE, and universal subjects) for the current academic period
@@ -380,7 +383,7 @@ class GECoordinatorController extends Controller
             ->count();
 
         // Get student enrollment statistics
-        $totalEnrollments = \DB::table('student_subjects')
+        $totalEnrollments = DB::table('student_subjects')
             ->join('subjects', 'student_subjects.subject_id', '=', 'subjects.id')
             ->where('subjects.academic_period_id', $academicPeriodId)
             ->where('subjects.course_id', 1)
@@ -390,7 +393,7 @@ class GECoordinatorController extends Controller
         // Get subjects by year level
         $subjectsByYear = Subject::where('academic_period_id', $academicPeriodId)
             ->where('course_id', 1)
-            ->select('year_level', \DB::raw('count(*) as count'))
+            ->select('year_level', DB::raw('count(*) as count'))
             ->groupBy('year_level')
             ->get()
             ->pluck('count', 'year_level')
@@ -489,9 +492,11 @@ class GECoordinatorController extends Controller
         
         $academicPeriodId = session('active_academic_period_id');
         
-        // If no academic period is set, use academic period 1 as default
+        // If no active academic period is set in session, use the latest non-deleted period
         if (!$academicPeriodId) {
-            $academicPeriodId = 1;
+            $academicPeriodId = \App\Models\AcademicPeriod::where('is_deleted', false)
+                ->latest('id')
+                ->value('id') ?? 1;
         }
         
         // Fetch all active instructors who are either:
@@ -519,14 +524,16 @@ class GECoordinatorController extends Controller
             $selectedSubjectId = null;
         }
 
-        // Subjects are loaded only when an instructor is selected
+        // Courses are loaded only when an instructor is selected
         $subjects = [];
         if ($selectedInstructorId) {
-            $subjects = Subject::where([
-                ['course_id', 1], // Only GE subjects
-                ['academic_period_id', $academicPeriodId],
-                ['is_deleted', false],
-            ])
+            $subjects = Subject::where('academic_period_id', $academicPeriodId)
+            ->where('is_deleted', false)
+            ->where(function ($query) {
+                // Match assignment rules: GE course or universal GE-eligible course
+                $query->where('course_id', 1)
+                    ->orWhere('is_universal', true);
+            })
             ->whereHas('instructors', function($query) use ($selectedInstructorId) {
                 $query->where('users.id', $selectedInstructorId);
             })

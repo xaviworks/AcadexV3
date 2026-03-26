@@ -26,7 +26,7 @@
                     :compact="true"
                     icon="bi-journal-x"
                     title="No Courses Found"
-                    message="No GE subjects found for this course in the selected academic period."
+                    message="No GE courses found for this course in the selected academic period."
                 />
             @else
                 <div class="table-responsive">
@@ -110,7 +110,7 @@
                         <div class="col-md-6 text-md-end mt-3 mt-md-0">
                             <small class="text-muted">
                                 <i class="bi bi-calculator me-1"></i>
-                                Showing {{ count($subjectCOs) }} subject{{ count($subjectCOs) != 1 ? 's' : '' }} with Course Outcome data
+                                Showing {{ count($subjectCOs) }} course{{ count($subjectCOs) != 1 ? 's' : '' }} with Course Outcome data
                             </small>
                         </div>
                     </div>

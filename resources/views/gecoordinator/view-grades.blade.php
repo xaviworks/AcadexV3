@@ -9,7 +9,7 @@
         <i class="bi bi-bar-chart-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
         <span>Students' Final Grades</span>
     </h1>
-    <p class="text-muted mb-4">View and monitor students' final grades by instructor and subject</p>
+    <p class="text-muted mb-4">View and monitor students' final grades by instructor and course</p>
 
     {{-- Breadcrumb Navigation --}}
     @php
@@ -19,7 +19,7 @@
         ];
         
         if (!empty($selectedInstructorId) && empty($selectedSubjectId)) {
-            $breadcrumbItems[] = ['label' => 'Select Subject'];
+            $breadcrumbItems[] = ['label' => 'Select Course'];
         } elseif (!empty($selectedInstructorId) && !empty($selectedSubjectId)) {
             $breadcrumbItems[] = ['label' => 'Students\' Final Grades'];
         }
@@ -32,7 +32,7 @@
             <div class="text-center py-5">
                 <i class="bi bi-inbox fs-1 text-muted mb-3 d-block" style="font-size: 4rem;"></i>
                 <h5 class="text-muted mb-2">No Data Available</h5>
-                <p class="text-muted">There are currently no instructors with assigned subjects.</p>
+                <p class="text-muted">There are currently no instructors with assigned courses.</p>
             </div>
         @else
         <div class="row g-4 px-4 py-4">
@@ -69,8 +69,8 @@
         </div>
         @endif
     @elseif (empty($selectedSubjectId))
-        {{-- Step 2: Subject Selection --}}
-        @if (!empty($subjects))
+        {{-- Step 2: Course Selection --}}
+        @if (collect($subjects)->isNotEmpty())
             <div class="row g-4 px-4 py-4" id="subject-selection">
                 @foreach($subjects as $subjectItem)
                     <div class="col-md-4">
@@ -100,7 +100,7 @@
             </div>
         @else
             <div class="text-center text-muted mt-8 bg-warning bg-opacity-25 border border-warning px-6 py-4 rounded-4">
-                No subjects found for this instructor.
+                No courses found for this instructor.
             </div>
         @endif
     @else
@@ -160,7 +160,7 @@
             </div>
         @elseif(!empty($selectedSubjectId))
             <div class="text-center text-muted mt-8 bg-warning bg-opacity-25 border border-warning px-6 py-4 rounded-4">
-                No students found for this subject.
+                No students found for this course.
             </div>
         @endif
     @endif

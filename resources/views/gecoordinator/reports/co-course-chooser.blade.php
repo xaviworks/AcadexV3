@@ -5,7 +5,7 @@
     {{-- Page Header --}}
     @include('chairperson.partials.reports-header', [
         'title' => 'Course Outcomes Summary (GE Courses)',
-        'subtitle' => 'Select a program to view GE subject Course Outcome compliance',
+        'subtitle' => 'Select a program to view GE course Course Outcome compliance',
         'icon' => 'bi-book',
         'academicYear' => $academicYear,
         'semester' => $semester

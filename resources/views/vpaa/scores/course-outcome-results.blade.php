@@ -29,6 +29,9 @@
         'terms' => $terms,
         'subjectId' => $subjectId,
         'selectedSubject' => $selectedSubject,
+        'resultsHomeRoute' => route('vpaa.dashboard'),
+        'resultsIndexRoute' => route('vpaa.course-outcome-attainment'),
+        'resultsIndexLabel' => 'Course Outcome Attainment',
     ])
     </div>
 </div>

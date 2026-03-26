@@ -26,7 +26,7 @@
                 <i class="bi bi-eye me-1"></i>View Mode:
             </label>
             <select id="viewMode" class="form-select form-select-sm w-auto" onchange="toggleViewMode()"
-                    data-bs-toggle="tooltip" title="Year View: See subjects by year level. Full View: See all subjects at once.">
+                    data-bs-toggle="tooltip" title="Year View: See courses by year level. Full View: See all courses at once.">
                 <option value="year" selected>Year View</option>
                 <option value="full">Full View</option>
             </select>
@@ -133,7 +133,7 @@
                             </div>
                         @else
                             <div class="alert alert-warning shadow-sm rounded">
-                                No subjects available for {{ ordinalSuffix($level) }} Year.
+                                No courses available for {{ ordinalSuffix($level) }} Year.
                             </div>
                         @endif
                 </div>
@@ -156,7 +156,7 @@
                                     {{ ordinalSuffix($level) }} Year
                                 </h5>
                                 <span class="badge bg-success-subtle text-success ms-3">
-                                    {{ $subjectsByYear->count() }} {{ Str::plural('subject', $subjectsByYear->count()) }}
+                                    {{ $subjectsByYear->count() }} {{ Str::plural('course', $subjectsByYear->count()) }}
                                 </span>
                             </div>
                         </div>
@@ -206,7 +206,7 @@
                                     <div class="text-muted mb-3">
                                         <i class="bi bi-journal-x display-6"></i>
                                     </div>
-                                    <p class="text-muted mb-0">No subjects available for {{ ordinalSuffix($level) }} Year.</p>
+                                    <p class="text-muted mb-0">No courses available for {{ ordinalSuffix($level) }} Year.</p>
                                 </div>
                             @endif
                         </div>
@@ -230,7 +230,7 @@
             </div>
             <div class="modal-body pt-0">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-1">Target Subject</label>
+                    <label class="form-label fw-semibold text-muted small mb-1">Target Course</label>
                     <div class="fw-semibold" id="assignTargetSubject">Loading...</div>
                 </div>
                 
@@ -268,7 +268,7 @@
             </div>
             <div class="modal-body pt-0">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-1">Subject</label>
+                    <label class="form-label fw-semibold text-muted small mb-1">Course</label>
                     <div class="fw-semibold" id="viewSubjectName">Loading...</div>
                 </div>
                 
@@ -558,7 +558,7 @@
             </div>
             <div class="modal-body pt-0">
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-1">Target Subject</label>
+                    <label class="form-label fw-semibold text-muted small mb-1">Target Course</label>
                     <div class="fw-semibold" id="unassignTargetSubject">Loading...</div>
                 </div>
                 

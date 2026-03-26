@@ -9,25 +9,17 @@
  */
 
 // Make togglePasswordVisibility globally available
-window.togglePasswordVisibility = function (inputId) {
+window.togglePasswordVisibility = function (button, inputId) {
   const input = document.getElementById(inputId);
-  const button =
-    inputId === 'password'
-      ? document.getElementById('togglePassword')
-      : document.getElementById('togglePasswordConfirmation');
   const icon = button?.querySelector('i');
 
-  if (!input || !icon) return;
+  if (!input || !button || !icon) return;
 
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.classList.remove('fa-eye', 'bi-eye');
-    icon.classList.add('fa-eye-slash', 'bi-eye-slash');
-  } else {
-    input.type = 'password';
-    icon.classList.remove('fa-eye-slash', 'bi-eye-slash');
-    icon.classList.add('fa-eye', 'bi-eye');
-  }
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  icon.className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+  button.setAttribute('aria-pressed', String(isHidden));
+  button.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
 };
 
 /**
@@ -216,6 +208,30 @@ window.closeConfirmModal = function () {
 };
 
 /**
+ * Open reset 2FA modal and focus admin password field
+ */
+window.confirmReset2FAUser = function (userId, userName) {
+  const modalEl = document.getElementById('reset2FAUserModal');
+  if (!modalEl) return;
+
+  const userIdInput = document.getElementById('reset-2fa-user-user-id');
+  const userNameLabel = document.getElementById('reset-2fa-user-user-name');
+  if (userIdInput) userIdInput.value = userId;
+  if (userNameLabel) userNameLabel.textContent = userName;
+
+  const bsModal = new bootstrap.Modal(modalEl);
+  bsModal.show();
+
+  setTimeout(() => {
+    const passwordInput = document.getElementById('reset-2fa-user-password');
+    if (passwordInput) {
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  }, 100);
+};
+
+/**
  * Check password requirements and update UI
  */
 window.checkPassword = function (password) {
@@ -257,6 +273,22 @@ window.submitUserForm = function () {
  * Initialize admin users page functionality
  */
 function initAdminUsersPage() {
+  // Delegated handler for reset-2FA buttons (works with DataTables-rendered rows).
+  document.addEventListener('click', function (e) {
+    const resetBtn = e.target.closest('[data-action="reset-2fa-user"]');
+    if (!resetBtn) return;
+
+    const userId = Number(resetBtn.dataset.userId);
+    const userName = resetBtn.dataset.userName || 'this user';
+
+    if (!Number.isFinite(userId) || userId <= 0) {
+      notify.error('Unable to reset 2FA: missing user information.');
+      return;
+    }
+
+    window.confirmReset2FAUser(userId, userName);
+  });
+
   // Duration option handlers for disable modal
   document.addEventListener('change', function (e) {
     if (e.target && e.target.name === 'duration_option') {
@@ -542,31 +574,13 @@ function initAdminUsersPage() {
 
   if (togglePassword && passwordField) {
     togglePassword.addEventListener('click', function () {
-      const icon = this.querySelector('i');
-      if (passwordField.type === 'password') {
-        passwordField.type = 'text';
-        icon?.classList.remove('bi-eye');
-        icon?.classList.add('bi-eye-slash');
-      } else {
-        passwordField.type = 'password';
-        icon?.classList.remove('bi-eye-slash');
-        icon?.classList.add('bi-eye');
-      }
+      window.togglePasswordVisibility(this, 'password');
     });
   }
 
   if (togglePasswordConfirmation && confirmPasswordField) {
     togglePasswordConfirmation.addEventListener('click', function () {
-      const icon = this.querySelector('i');
-      if (confirmPasswordField.type === 'password') {
-        confirmPasswordField.type = 'text';
-        icon?.classList.remove('bi-eye');
-        icon?.classList.add('bi-eye-slash');
-      } else {
-        confirmPasswordField.type = 'password';
-        icon?.classList.remove('bi-eye-slash');
-        icon?.classList.add('bi-eye');
-      }
+      window.togglePasswordVisibility(this, 'password_confirmation');
     });
   }
 

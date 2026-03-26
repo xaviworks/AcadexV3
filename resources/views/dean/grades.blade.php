@@ -17,7 +17,7 @@
         if (!empty(request('course_id')) && empty(request('instructor_id'))) {
             $breadcrumbItems[] = ['label' => 'Select Instructor'];
         } elseif (!empty(request('instructor_id')) && empty(request('subject_id'))) {
-            $breadcrumbItems[] = ['label' => 'Select Subject'];
+            $breadcrumbItems[] = ['label' => 'Select Course'];
         } elseif (!empty(request('subject_id'))) {
             $breadcrumbItems[] = ['label' => 'Students\' Final Grades'];
         }
@@ -87,11 +87,11 @@
             </div>
         @endif
 
-    {{-- Step 3: Subject Selection --}}
+    {{-- Step 3: Course Selection --}}
     @elseif(empty(request('subject_id')))
         @if($subjects->isEmpty())
             <div class="alert alert-warning text-center rounded-4 mt-5">
-                No subjects found for this instructor.
+                No courses found for this instructor.
             </div>
         @else
             <div class="row g-4 px-4 py-4">
@@ -168,7 +168,7 @@
             </div>
         @else
             <div class="alert alert-warning text-center rounded-4 mt-5">
-                No students or grades found for the selected subject.
+                No students or grades found for the selected course.
             </div>
         @endif
     @endif

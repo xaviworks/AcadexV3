@@ -26,15 +26,15 @@
 
         @if(count($subjects))
             <div class="px-4 py-4">
-            {{-- Subject Selection Form --}}
+            {{-- Course Selection Form --}}
             <form method="GET" action="{{ route('instructor.activities.index') }}" class="mb-4">
                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                     <div class="card-body px-4 py-3">
                         <div class="d-flex align-items-center gap-3">
                             <div class="flex-grow-1">
-                                <label class="form-label small fw-medium mb-1">Select Subject:</label>
+                                <label class="form-label small fw-medium mb-1">Select Course:</label>
                                 <select name="subject_id" class="form-select" onchange="this.form.submit()">
-                                    <option value="">-- Choose Subject --</option>
+                                    <option value="">-- Choose Course --</option>
                                     @foreach($subjects as $subject)
                                         <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
                                             {{ $subject->subject_code }} - {{ $subject->subject_description }}
@@ -47,7 +47,7 @@
                 </div>
             </form>
 
-            {{-- If a subject is selected --}}
+            {{-- If a course is selected --}}
             @if(request('subject_id'))
         <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body px-4 py-3">
@@ -136,7 +136,7 @@
                     <x-empty-state
                         icon="bi-clipboard-x"
                         title="No Activities Found"
-                        message="No activities found for this subject."
+                        message="No activities found for this course."
                         :compact="true"
                     />
                 @endif
@@ -147,8 +147,8 @@
                     <div class="card-body px-4 py-4">
                         <x-empty-state
                             icon="bi-clipboard-x"
-                            title="No Subject Selected"
-                            message="Please select a subject above to manage its activities."
+                            title="No Course Selected"
+                            message="Please select a course above to manage its activities."
                         />
                     </div>
                 </div>
@@ -160,8 +160,8 @@
                     <div class="card-body px-4 py-4">
                         <x-empty-state
                             icon="bi-journal-x"
-                            title="No Assigned Subjects"
-                            message="No subjects have been assigned to you yet."
+                            title="No Assigned Courses"
+                            message="No courses have been assigned to you yet."
                         />
                     </div>
                 </div>

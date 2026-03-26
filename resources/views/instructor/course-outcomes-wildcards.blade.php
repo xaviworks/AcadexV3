@@ -23,8 +23,8 @@
         </div>
         
         <x-breadcrumbs :items="[
-            ['label' => 'Home', 'url' => '/'],
-            ['label' => 'Course Outcomes']
+            ['label' => 'Dashboard', 'url' => route($routePrefix . '.dashboard')],
+            ['label' => 'View Outcomes']
         ]" />
     </div>
 
@@ -97,12 +97,12 @@
         {{-- Enhanced Empty State --}}
         @php
             $emptyMessage = (Auth::user()->role === 1 || Auth::user()->role === 4)
-                ? 'No subjects are currently available for your program <strong style="color: #198754;">' . e(Auth::user()->course->course_code ?? 'Unknown') . '</strong> in the current academic period.'
-                : 'No subjects have been assigned to you for the current academic period.';
+                ? 'No courses are currently available for your program <strong style="color: #198754;">' . e(Auth::user()->course->course_code ?? 'Unknown') . '</strong> in the current academic period.'
+                : 'No courses have been assigned to you for the current academic period.';
         @endphp
         <x-empty-state
             icon="bi-folder-x"
-            title="No Subjects Found"
+            title="No Courses Found"
             :message="$emptyMessage"
         >
             @if(Auth::user()->role === 1 || Auth::user()->role === 4)
@@ -112,8 +112,8 @@
                         <div>
                             <strong>What to do:</strong>
                             <ul class="mb-0 mt-2">
-                                <li>Contact the administrator to assign subjects to your program</li>
-                                <li>Ensure subjects are properly configured for this academic period</li>
+                                <li>Contact the administrator to assign courses to your program</li>
+                                <li>Ensure courses are properly configured for this academic period</li>
                                 <li>Check if the academic period is correctly set</li>
                             </ul>
                         </div>
@@ -123,7 +123,7 @@
                 <div class="alert alert-light border border-success">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-info-circle text-success me-2"></i>
-                        <span>Please contact your department chairperson for subject assignments.</span>
+                        <span>Please contact your department chairperson for course assignments.</span>
                     </div>
                 </div>
             @endif

@@ -9,7 +9,7 @@
         <i class="bi bi-person-plus-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
         <span>Add New Instructor</span>
     </h1>
-    <p class="text-muted mb-4">Create a new instructor account for GE subjects</p>
+    <p class="text-muted mb-4">Create a new instructor account for GE courses</p>
 
     <div class="row justify-content-center">
         <div class="col-lg-8">

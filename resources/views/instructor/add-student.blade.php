@@ -66,11 +66,11 @@
             @enderror
         </div>
 
-        {{-- Assign Subject --}}
+        {{-- Assign Course --}}
         <div>
-            <label class="block text-gray-700 font-medium mb-1">Assign Subject <span class="text-red-500">*</span></label>
+            <label class="block text-gray-700 font-medium mb-1">Assign Course <span class="text-red-500">*</span></label>
             <select name="subject_id" class="w-full border px-3 py-2 rounded" required>
-                <option value="">-- Select Subject --</option>
+                <option value="">-- Select Course --</option>
                 @foreach($subjects as $subject)
                     <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
                         {{ $subject->subject_code }} - {{ $subject->subject_description }}
