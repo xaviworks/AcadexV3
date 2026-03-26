@@ -220,20 +220,48 @@
                 }
             @endphp
 
-            <div class="modal-content rounded-4 shadow-lg overflow-hidden">
-                <!-- Modal Header -->
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="addActivityModalLabel"><i class="bi bi-plus-circle me-2"></i>Add New Activity</h5>
+            <div class="modal-content border-0 shadow-lg overflow-hidden">
+                <div class="modal-header bg-success border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-white" id="addActivityModalLabel">
+                        <i class="bi bi-plus-circle me-2"></i>Create New Activity
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <!-- Modal Body -->
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Activity Type <span class="text-danger">*</span></label>
-                            <select name="type" class="form-select" required>
-                                <option value="">-- Select Type --</option>
+                            <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
+                                <i class="bi bi-book me-1"></i>Subject
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control shadow-sm"
+                                style="border: 2px solid #e9ecef;"
+                                value="{{ $subject->subject_code }} — {{ $subject->subject_description }}"
+                                readonly
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
+                                <i class="bi bi-calendar3 me-1"></i>Term
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control shadow-sm"
+                                style="border: 2px solid #e9ecef;"
+                                value="{{ ucfirst($term) }}"
+                                readonly
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
+                                <i class="bi bi-diagram-3 me-1"></i>Component Type
+                            </label>
+                            <select name="type" class="form-select shadow-sm" required style="border: 2px solid #e9ecef;">
+                                <option value="">Select Component</option>
                                 @forelse($componentOptions as $option)
                                     @php
                                         $isDisabled = $option['max'] !== null && $option['available'] === 0;
@@ -260,27 +288,67 @@
                                     @endforeach
                                 @endforelse
                             </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Title <span class="text-danger">*</span></label>
-                            <input type="text" name="title" class="form-control" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Number of Items <span class="text-danger">*</span></label>
-                               <input type="number" name="number_of_items" class="form-control" required min="1" value="{{ old('number_of_items', 100) }}">
-                        </div>
-                        <div class="col-12">
-                            <div class="small text-muted d-none" data-component-notice></div>
-                            <div class="alert alert-warning d-none mt-3" data-component-empty>
+                            <div class="small text-muted d-none mt-2" data-component-notice></div>
+                            <div class="alert alert-warning d-none mt-2 mb-0 py-2" data-component-empty>
                                 All components for this term are at capacity. Please manage activities to free up slots.
                             </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
+                                <i class="bi bi-pencil me-1"></i>Activity Title
+                            </label>
+                            <input
+                                type="text"
+                                name="title"
+                                class="form-control shadow-sm"
+                                placeholder="e.g., Quiz on Chapters 1-3"
+                                required
+                                style="border: 2px solid #e9ecef;"
+                                value="{{ old('title') }}"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
+                                <i class="bi bi-hash me-1"></i>Number of Items
+                            </label>
+                            <input
+                                type="number"
+                                name="number_of_items"
+                                class="form-control shadow-sm"
+                                min="1"
+                                max="500"
+                                required
+                                style="border: 2px solid #e9ecef;"
+                                placeholder="Enter total items"
+                                value="{{ old('number_of_items', 100) }}"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
+                                <i class="bi bi-target me-1"></i>Course Outcome (Optional)
+                            </label>
+                            <select name="course_outcome_id" class="form-select shadow-sm" style="border: 2px solid #e9ecef;">
+                                <option value="">No specific outcome</option>
+                                @foreach (($courseOutcomes ?? collect()) as $outcome)
+                                    <option value="{{ $outcome->id }}" {{ (string) old('course_outcome_id') === (string) $outcome->id ? 'selected' : '' }}>
+                                        {{ $outcome->co_code ?? 'Outcome' }} — {{ \Illuminate\Support\Str::limit($outcome->description ?? 'No description provided', 60) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>Link to a course outcome for attainment tracking.
+                            </small>
                         </div>
                     </div>
                 </div>
 
-                <!-- Modal Footer -->
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success" data-component-save>Save Activity</button>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;" data-component-save>
+                        <i class="bi bi-check-circle me-1"></i>Save Activity
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
