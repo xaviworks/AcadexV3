@@ -17,8 +17,9 @@ class ChairpersonStudentSuggestionSelectionTest extends TestCase
 
     public function test_chairperson_can_resolve_selected_student_by_student_id_even_with_formatted_query(): void
     {
-        $geDepartment = Department::create([
+        Department::firstOrCreate([
             'department_code' => 'GE',
+        ], [
             'department_description' => 'General Education',
             'is_deleted' => false,
         ]);

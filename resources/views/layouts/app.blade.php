@@ -16,6 +16,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-refresh-url" content="{{ route('csrf.refresh') }}">
     <meta name="color-scheme" content="light">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
@@ -203,6 +204,11 @@
                 // Network error – don't redirect, just wait for next poll
             });
         }
+
+        window.addEventListener('auth:session-expired', function() {
+            clearInterval(window._sessionPollInterval);
+            window.location.href = LOGIN_URL;
+        });
 
         // Periodic polling: kicks users out within SESSION_POLL_MS after revocation
         window._sessionPollInterval = setInterval(checkSessionValid, SESSION_POLL_MS);

@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
@@ -17,8 +21,15 @@ class GoogleAuthController extends Controller
      *
      * @return RedirectResponse
      */
-    public function redirectToGoogle(): RedirectResponse
+    public function redirectToGoogle(Request $request): RedirectResponse
     {
+        if ($request->filled('device_fingerprint')) {
+            $request->session()->put(
+                'auth.google.device_fingerprint',
+                (string) $request->string('device_fingerprint')
+            );
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
@@ -27,18 +38,20 @@ class GoogleAuthController extends Controller
      *
      * @return RedirectResponse
      */
-    public function handleGoogleCallback(): RedirectResponse
+    public function handleGoogleCallback(Request $request): RedirectResponse
     {
         try {
+            $deviceFingerprint = $this->resolveDeviceFingerprint($request);
+
             // Log the incoming request for debugging
             Log::info('Google OAuth Callback Received', [
-                'has_state' => request()->has('state'),
-                'has_code' => request()->has('code'),
-                'session_id' => session()->getId(),
+                'has_state' => $request->has('state'),
+                'has_code' => $request->has('code'),
+                'session_id' => $request->session()->getId(),
+                'has_device_fingerprint' => filled($deviceFingerprint),
             ]);
 
-            // Use stateless mode to avoid session state mismatch issues
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')->user();
             
             $email = $googleUser->getEmail();
             $googleId = $googleUser->getId();
@@ -76,7 +89,6 @@ class GoogleAuthController extends Controller
 
             // Check if user already has an active session on another device (skip for admins)
             if ($user->role !== 3) { // 3 = admin role
-                $deviceFingerprint = request()->input('device_fingerprint');
                 if ($this->hasActiveSession($user->id, $deviceFingerprint)) {
                     return redirect()->route('login')->withErrors([
                         'email' => 'This account is already logged in on another device. Please logout from the other device first or contact your administrator.',
@@ -84,52 +96,53 @@ class GoogleAuthController extends Controller
                 }
             }
 
-            // 2FA Check for Google Login
-            $deviceFingerprint = request()->input('device_fingerprint');
-            if ($user->two_factor_secret && $user->two_factor_confirmed_at) {
-                $isKnownDevice = $user->devices()->where('device_fingerprint', $deviceFingerprint)->exists();
-                
-                if (!$isKnownDevice) {
-                    // Store user info and redirect to 2FA challenge
-                    session()->put('auth.2fa.id', $user->id);
-                    session()->put('auth.2fa.fingerprint', $deviceFingerprint);
-                    
+            // Mirror the standard login controller: require a challenge when
+            // 2FA is configured but not yet confirmed, or when the device is new.
+            if ($user->two_factor_secret) {
+                $requireChallenge = ! $user->two_factor_confirmed_at;
+
+                if (! $requireChallenge) {
+                    $isKnownDevice = $user->devices()->where('device_fingerprint', $deviceFingerprint)->exists();
+                    $requireChallenge = ! $isKnownDevice;
+                }
+
+                if ($requireChallenge) {
+                    $request->session()->put('auth.2fa.id', $user->id);
+                    $request->session()->put('auth.2fa.fingerprint', $deviceFingerprint);
+
                     return redirect()->route('two-factor.login');
                 }
-                
-                // Update last used for known device
+
                 $user->devices()->where('device_fingerprint', $deviceFingerprint)->update([
                     'last_used_at' => now(),
-                    'ip_address' => request()->ip(),
+                    'ip_address' => $request->ip(),
                 ]);
             }
 
             // Log the user in
             Auth::login($user, true);
 
+            $this->sanitizeIntendedUrl($request, $user);
+
             // Store device fingerprint in session data
-            $deviceFingerprint = request()->input('device_fingerprint');
             if ($deviceFingerprint) {
-                session()->put('device_fingerprint', $deviceFingerprint);
+                $request->session()->put('device_fingerprint', $deviceFingerprint);
                 
                 // Also update the database immediately
                 DB::table('sessions')
-                    ->where('user_id', $user->id)
-                    ->where('id', session()->getId())
+                    ->where('id', $request->session()->getId())
                     ->update(['device_fingerprint' => $deviceFingerprint]);
             }
 
-            // Fire login event for user_logs tracking
-            event(new \Illuminate\Auth\Events\Login('web', $user, true));
+            Session::forget('active_academic_period_id');
 
-            // Redirect to dashboard
-            return redirect()->intended(route('dashboard'));
+            return $this->redirectAfterLogin($request, $user);
 
         } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
             Log::error('Google OAuth Invalid State: ' . $e->getMessage());
             
             return redirect()->route('login')
-                ->withErrors(['email' => 'Invalid OAuth state. Please try again.']);
+                ->withErrors(['email' => 'Your Google sign-in session expired. Please try again.']);
                 
         } catch (\Exception $e) {
             Log::error('Google OAuth Error: ' . $e->getMessage(), [
@@ -139,6 +152,85 @@ class GoogleAuthController extends Controller
             return redirect()->route('login')
                 ->withErrors(['email' => 'Unable to login with Google. Please try again.']);
         }
+    }
+
+    private function resolveDeviceFingerprint(Request $request): ?string
+    {
+        $fingerprint = $request->input('device_fingerprint');
+
+        if ($fingerprint) {
+            return (string) $fingerprint;
+        }
+
+        $storedFingerprint = $request->session()->pull('auth.google.device_fingerprint');
+
+        return $storedFingerprint ? (string) $storedFingerprint : null;
+    }
+
+    private function redirectAfterLogin(Request $request, User $user): RedirectResponse
+    {
+        if (in_array($user->role, [0, 2], true)) {
+            return redirect()->route('select.academicPeriod');
+        }
+
+        if ($user->isVPAA()) {
+            return redirect()->intended(route('vpaa.dashboard'));
+        }
+
+        return redirect()->intended(route('dashboard', absolute: false));
+    }
+
+    private function sanitizeIntendedUrl(Request $request, User $user): void
+    {
+        $intended = $request->session()->get('url.intended');
+
+        if (!$intended) {
+            return;
+        }
+
+        if ($this->pointsToAdminArea($intended) && !Gate::forUser($user)->allows('admin')) {
+            $request->session()->forget('url.intended');
+            return;
+        }
+
+        if ($this->pointsToApiOrBackgroundEndpoint($intended)) {
+            $request->session()->forget('url.intended');
+        }
+    }
+
+    private function pointsToAdminArea(string $url): bool
+    {
+        $path = ltrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
+
+        if ($path === '') {
+            return false;
+        }
+
+        return Str::startsWith($path, 'admin');
+    }
+
+    private function pointsToApiOrBackgroundEndpoint(string $url): bool
+    {
+        $path = ltrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
+
+        if ($path === '') {
+            return false;
+        }
+
+        $blockedPatterns = [
+            'api/',
+            'notifications/poll',
+            'notifications/unread-count',
+            'notifications/paginate',
+        ];
+
+        foreach ($blockedPatterns as $pattern) {
+            if (Str::startsWith($path, $pattern) || Str::contains($path, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -60,6 +60,16 @@ Route::get('/session/check', function () {
     return response()->json(['authenticated' => true, 'user_id' => Auth::id()]);
 })->name('session.check');
 
+// Refresh the current CSRF token so stale tabs can retry mutating requests
+// without falling straight through to the default 419 page.
+Route::get('/csrf-token', function (Request $request) {
+    $request->session()->regenerateToken();
+
+    return response()->json([
+        'token' => csrf_token(),
+    ]);
+})->name('csrf.refresh');
+
 // Announcement Routes (for all authenticated users)
 Route::middleware('auth')->group(function () {
     Route::get('/announcements/active', [AnnouncementController::class, 'getActive'])->name('announcements.active');

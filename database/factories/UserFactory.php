@@ -36,7 +36,6 @@ class UserFactory extends Factory
             'can_teach_ge' => false,
             'department_id' => null,
             'course_id' => null,
-            'is_universal' => false,
         ];
     }
 

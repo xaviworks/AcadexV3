@@ -120,7 +120,10 @@
 
     <!-- Google Sign In Button -->
     <div class="w-full max-w-sm mx-auto">
-        <a href="{{ route('auth.google') }}" 
+        <a href="{{ route('auth.google') }}"
+           data-base-href="{{ route('auth.google') }}"
+           data-device-fingerprint-link
+           id="google-login-link"
            class="flex items-center justify-center w-full px-4 py-2.5 bg-white hover:bg-gray-100 text-gray-700 font-medium rounded-md shadow-md transition-colors duration-200">
             <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
