@@ -55,17 +55,5 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Alpine.js for interactivity (optional) -->
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('passwordToggle', () => ({
-                showPassword: false,
-                togglePassword() {
-                    this.showPassword = !this.showPassword;
-                }
-            }));
-        });
-    </script>
-
 </body>
 </html>
