@@ -55,11 +55,11 @@
             <x-input-error :messages="$errors->get('department_id')" class="mt-2 text-red-400" />
         </div>
 
-        {{-- Course --}}
+        {{-- Program --}}
         <div class="hidden transition-opacity duration-300" id="course-wrapper">
-            <x-input-label for="course_id" :value="__('Select Course')" class="text-white" />
+            <x-input-label for="course_id" :value="__('Select Program')" class="text-white" />
             <select id="course_id" name="course_id" class="w-full mt-1 border-gray-300 rounded-md shadow-sm bg-gray-400 text-white" required>
-                <option value="">-- Choose Course --</option>
+                <option value="">-- Choose Program --</option>
             </select>
             <x-input-error :messages="$errors->get('course_id')" class="mt-2 text-red-400" />
         </div>
@@ -67,7 +67,7 @@
         {{-- GE Notice --}}
         <div id="ge-notice" class="hidden p-4 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 text-white mt-2">
             <strong class="font-semibold">General Education Instructor:</strong>
-            <span class="block sm:inline">You will be able to teach GE subjects across all courses and will be managed by the GE Coordinator.</span>
+            <span class="block sm:inline">You will be able to teach GE subjects across all programs and will be managed by the GE Coordinator.</span>
         </div>
 
         {{-- Password --}}
@@ -195,7 +195,7 @@
             
             if (!deptId) {
                 courseWrapper.classList.add('hidden');
-                courseSelect.innerHTML = '<option value="">-- Choose Course --</option>';
+                courseSelect.innerHTML = '<option value="">-- Choose Program --</option>';
                 geNotice.classList.add('hidden');
                 return;
             }
@@ -217,7 +217,7 @@
                             courseSelect.innerHTML = `<option value="${data[0].id}" selected>${data[0].name}</option>`;
                             courseWrapper.classList.add('hidden');
                         } else {
-                            courseSelect.innerHTML = '<option value="">-- Choose Course --</option>';
+                            courseSelect.innerHTML = '<option value="">-- Choose Program --</option>';
                             data.forEach(course => {
                                 courseSelect.innerHTML += `<option value="${course.id}">${course.name}</option>`;
                             });

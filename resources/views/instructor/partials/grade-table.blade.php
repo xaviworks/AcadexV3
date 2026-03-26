@@ -145,7 +145,7 @@
                                                     @else
                                                         style="color: #000;"
                                                     @endif>
-                                                    {{ $co->co_code }} - {{ $co->co_identifier }}
+                                                    {{ $co->co_code }}
                                                 </option>
                                             @endforeach
                                         </select>
