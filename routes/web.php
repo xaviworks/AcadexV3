@@ -172,6 +172,10 @@ Route::prefix('chairperson')
 
     // Reports - Program-level CO compliance for chairperson's department
     Route::get('/reports/co-program', [\App\Http\Controllers\ProgramReportsController::class, 'chairProgram'])->name('reports.co-program');
+    Route::post('/reports/co-program/plos', [\App\Http\Controllers\ProgramReportsController::class, 'saveChairProgramPlos'])
+        ->name('reports.co-program.plos.save');
+    Route::post('/reports/co-program/plos/mappings', [\App\Http\Controllers\ProgramReportsController::class, 'saveChairProgramPloMappings'])
+        ->name('reports.co-program.plos.mappings.save');
         // Reports - Per-course and Per-student CO compliance
         Route::get('/reports/co-course', [CourseOutcomeReportsController::class, 'chairCourse'])->name('reports.co-course');
         Route::get('/reports/co-student', [CourseOutcomeReportsController::class, 'chairStudent'])->name('reports.co-student');
