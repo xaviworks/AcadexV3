@@ -168,7 +168,7 @@ class CourseOutcomeAttainmentController extends Controller
                     $studentTermCoScores[$student->id][$term][$coId] = [
                         'raw' => $rawScore,
                         'max' => $maxScore,
-                        'percent' => ceil($percent),
+                        'percent' => (int) round($percent, 0),
                     ];
                 }
             }

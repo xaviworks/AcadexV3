@@ -788,7 +788,7 @@
                                         $percent = ($max > 0 && $raw !== '') ? ($raw / $max) * 100 : 0;
                                     @endphp
                                     <td class="bg-light">
-                                        <span class="score-value fw-bold" data-score="{{ $raw !== '' ? $raw : '-' }}" data-percentage="{{ $raw !== '' ? ceil($percent) : '-' }}">
+                                        <span class="score-value fw-bold" data-score="{{ $raw !== '' ? $raw : '-' }}" data-percentage="{{ $raw !== '' ? (int) round($percent, 0) : '-' }}">
                                             {{ $raw !== '' ? $raw : '-' }}
                                         </span>
                                     </td>
@@ -905,7 +905,7 @@
                                         <td class="fw-bold text-{{ $percent >= $threshold ? 'success' : 'danger' }}">
                                             {{ $percent >= $threshold ? 'Passed' : 'Failed' }}
                                             <br>
-                                            <small>({{ ceil($percent) }}% / target {{ $threshold }}%)</small>
+                                            <small>({{ (int) round($percent, 0) }}% / target {{ $threshold }}%)</small>
                                         </td>
                                     @endif
                                 @endforeach
