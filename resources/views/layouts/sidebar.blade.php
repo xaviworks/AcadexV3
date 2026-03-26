@@ -515,6 +515,13 @@
                 <h6 class="px-3 mb-2 sidebar-heading">Reports</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
+                        <a href="{{ route('vpaa.reports.attainment') }}"
+                           class="nav-link {{ request()->routeIs('vpaa.reports.attainment*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-award me-3"></i>
+                            <span>Attainment Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('vpaa.reports.co-program') }}" 
                            class="nav-link {{ request()->routeIs('vpaa.reports.co-program') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-diagram-3 me-3"></i>

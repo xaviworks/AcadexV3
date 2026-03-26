@@ -18,12 +18,12 @@
     </div>
 
     @if(isset($departments) && count($departments))
-        <div class="row">
+        <div class="row" id="department-selection">
             @foreach($departments as $dept)
                 <div class="col-md-4">
                     <div
                         class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden transform transition hover:scale-105 hover:shadow-xl"
-                        data-url="{{ route('vpaa.course-outcome-attainment') }}?department_id={{ $dept->id }}"
+                        data-url="{{ route('vpaa.reports.attainment') }}?department_id={{ $dept->id }}"
                         style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;"
                     >
                         <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
@@ -37,7 +37,7 @@
                                 {{ $dept->department_description }}
                             </h6>
                             <div class="mt-3">
-                                <a class="btn btn-success" href="{{ route('vpaa.course-outcome-attainment') }}?department_id={{ $dept->id }}">
+                                <a class="btn btn-success" href="{{ route('vpaa.reports.attainment') }}?department_id={{ $dept->id }}">
                                     <i class="bi bi-arrow-right-circle me-1"></i> View Subjects
                                 </a>
                             </div>

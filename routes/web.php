@@ -468,12 +468,11 @@ Route::prefix('vpaa')
     ->middleware(['auth', 'academic.period.set'])
     ->name('vpaa.')
     ->group(function () {
-        // Course Outcome Attainment
-        Route::get('/course-outcome-attainment', [VPAAController::class, 'viewCourseOutcomeAttainment'])
-            ->name('course-outcome-attainment');
-        Route::get('/course-outcome-attainment/subject/{subject}', [VPAAController::class, 'subject'])
-            ->name('course-outcome-attainment.subject');
         // CO Reports
+        Route::get('/reports/attainment', [VPAAController::class, 'viewCourseOutcomeAttainment'])
+            ->name('reports.attainment');
+        Route::get('/reports/attainment/subject/{subject}', [VPAAController::class, 'subject'])
+            ->name('reports.attainment.subject');
         Route::get('/reports/co-student', [CourseOutcomeReportsController::class, 'vpaaStudent'])
             ->name('reports.co-student');
         Route::get('/reports/co-course', [CourseOutcomeReportsController::class, 'vpaaCourse'])
