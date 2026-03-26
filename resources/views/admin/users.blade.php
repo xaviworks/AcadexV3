@@ -393,11 +393,11 @@
                                    placeholder="Min. 8 characters" autocomplete="new-password"
                                    oninput="checkPassword(this.value)" id="password">
                             <button type="button" id="togglePassword" 
-                                    class="btn btn-sm"
+                                    class="btn btn-outline-secondary border-start-0 text-dark card-header-light"
                                     aria-label="Toggle password visibility"
                                     aria-pressed="false"
                                     title="Show password">
-                                <i class="fa-solid fa-eye"></i>
+                                <i class="bi bi-eye"></i>
                             </button>
                         </div>
                         
@@ -434,11 +434,11 @@
                         <div class="input-group">
                             <input type="password" name="password_confirmation" class="form-control" required id="password_confirmation">
                             <button type="button" id="togglePasswordConfirmation" 
-                                    class="btn btn-sm"
+                                    class="btn btn-outline-secondary border-start-0 text-dark card-header-light"
                                     aria-label="Toggle confirm password visibility"
                                     aria-pressed="false"
                                     title="Show password">
-                                <i class="fa-solid fa-eye"></i>
+                                <i class="bi bi-eye"></i>
                             </button>
                         </div>
                     </div>

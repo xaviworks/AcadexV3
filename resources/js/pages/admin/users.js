@@ -17,7 +17,7 @@ window.togglePasswordVisibility = function (button, inputId) {
 
   const isHidden = input.type === 'password';
   input.type = isHidden ? 'text' : 'password';
-  icon.className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+  icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
   button.setAttribute('aria-pressed', String(isHidden));
   button.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
 };
