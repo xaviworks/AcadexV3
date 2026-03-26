@@ -57,6 +57,7 @@ import './gecoordinator/students-by-year.js';
 import './gecoordinator/assign-subjects.js';
 
 // Shared pages
+import './shared/guest-password-toggles.js';
 import './shared/select-curriculum-subjects.js';
 
 // VPAA pages

@@ -55,12 +55,11 @@
         <!-- Password -->
         <div class="mb-4">
             <x-input-label for="password" :value="__('Password')" class="text-white" />
-            <div class="relative">
+            <div class="relative" data-password-toggle-group>
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-white z-10">
                     <i class="fas fa-lock"></i>
                 </span>
                 
-                <!-- Password input (hidden) -->
                 <input
                     id="password"
                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm pl-10 pr-12 mt-1 w-full border border-gray-300 shadow-sm bg-transparent text-white placeholder-white focus:ring-green-500 focus:border-green-500"
@@ -69,24 +68,18 @@
                     required
                     autocomplete="current-password"
                     placeholder="Enter your password"
+                    data-password-toggle-input
                 />
-                
-                <!-- Text input (visible) - hidden by default -->
-                <input
-                    id="password-visible"
-                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm pl-10 pr-12 mt-1 w-full border border-gray-300 shadow-sm bg-transparent text-white placeholder-white focus:ring-green-500 focus:border-green-500"
-                    type="text"
-                    style="display: none; position: absolute; top: 0; left: 0; width: 100%;"
-                    placeholder="Enter your password"
-                    tabindex="-1"
-                />
-                
+
                 <button
                     type="button"
                     id="togglePassword"
                     class="absolute inset-y-0 right-0 flex items-center pr-3 mt-1 text-white/80 hover:text-white focus:outline-none transition-colors duration-200 z-10 hidden"
+                    data-password-toggle-button
+                    aria-label="Show password"
+                    title="Show password"
                 >
-                    <i class="fas fa-eye-slash" id="toggleIcon"></i>
+                    <i class="fas fa-eye-slash" id="toggleIcon" data-password-toggle-icon></i>
                 </button>
             </div>
             <x-input-error :messages="$errors->get('password')" class="text-red-400 mt-1" />
@@ -160,71 +153,6 @@
                     warning.classList.add('hidden');
                 }
             });
-
-            // Password visibility toggle using dual inputs
-            const toggleBtn = document.getElementById('togglePassword');
-            const toggleIcon = document.getElementById('toggleIcon');
-            const passwordInput = document.getElementById('password');
-            const passwordVisible = document.getElementById('password-visible');
-            
-            if (toggleBtn && toggleIcon && passwordInput && passwordVisible) {
-                let isVisible = false;
-                
-                // Show/hide toggle button based on input
-                const updateToggleVisibility = () => {
-                    if (passwordInput.value.length > 0 || passwordVisible.value.length > 0) {
-                        toggleBtn.classList.remove('hidden');
-                    } else {
-                        toggleBtn.classList.add('hidden');
-                        // Reset to hidden state
-                        if (isVisible) {
-                            isVisible = false;
-                            passwordVisible.style.display = 'none';
-                            passwordInput.style.display = 'block';
-                            toggleIcon.classList.remove('fa-eye');
-                            toggleIcon.classList.add('fa-eye-slash');
-                        }
-                    }
-                };
-                
-                // Sync values between inputs
-                passwordInput.addEventListener('input', function() {
-                    passwordVisible.value = this.value;
-                    updateToggleVisibility();
-                });
-                
-                passwordVisible.addEventListener('input', function() {
-                    passwordInput.value = this.value;
-                    updateToggleVisibility();
-                });
-                
-                // Toggle visibility
-                toggleBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    isVisible = !isVisible;
-                    
-                    if (isVisible) {
-                        // Show password
-                        passwordInput.style.display = 'none';
-                        passwordVisible.style.display = 'block';
-                        passwordVisible.style.position = 'relative';
-                        passwordVisible.value = passwordInput.value;
-                        passwordVisible.focus();
-                        toggleIcon.classList.remove('fa-eye-slash');
-                        toggleIcon.classList.add('fa-eye');
-                    } else {
-                        // Hide password
-                        passwordVisible.style.display = 'none';
-                        passwordInput.style.display = 'block';
-                        passwordInput.value = passwordVisible.value;
-                        passwordInput.focus();
-                        toggleIcon.classList.remove('fa-eye');
-                        toggleIcon.classList.add('fa-eye-slash');
-                    }
-                });
-            }
-
 
         });
     </script>
