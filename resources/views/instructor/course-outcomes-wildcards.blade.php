@@ -21,9 +21,16 @@
             </div>
             @endif
         </div>
-        
+
+        @php
+            $dashboardRouteName = $routePrefix . '.dashboard';
+            $dashboardUrl = \Illuminate\Support\Facades\Route::has($dashboardRouteName)
+                ? route($dashboardRouteName)
+                : route('dashboard');
+        @endphp
+
         <x-breadcrumbs :items="[
-            ['label' => 'Dashboard', 'url' => route($routePrefix . '.dashboard')],
+            ['label' => 'Dashboard', 'url' => $dashboardUrl],
             ['label' => 'View Outcomes']
         ]" />
     </div>

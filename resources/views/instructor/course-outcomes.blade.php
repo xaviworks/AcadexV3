@@ -11,8 +11,13 @@
 
     {{-- Breadcrumbs --}}
     @php
+        $dashboardRouteName = $routePrefix . '.dashboard';
+        $dashboardUrl = \Illuminate\Support\Facades\Route::has($dashboardRouteName)
+            ? route($dashboardRouteName)
+            : route('dashboard');
+
         $breadcrumbItems = [
-            ['label' => 'Dashboard', 'url' => route($routePrefix . '.dashboard')],
+            ['label' => 'Dashboard', 'url' => $dashboardUrl],
             ['label' => 'View Outcomes']
         ];
         
