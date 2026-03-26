@@ -347,8 +347,8 @@
                     </p>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Deactivate</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -373,8 +373,8 @@
                     </p>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-warning">Remove GE Access</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -394,8 +394,8 @@
                     Are you sure you want to approve <strong id="approveName"></strong>'s account?
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success">Approve</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -415,8 +415,8 @@
                     Are you sure you want to reject <strong id="rejectName"></strong>'s account?
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Reject</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -436,60 +436,60 @@
                     Are you sure you want to activate <strong id="activateName"></strong>'s account?
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success">Activate</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-{{-- Approve GE Subject Request Modal --}}
+{{-- Approve GE Course Request Modal --}}
 <div class="modal fade" id="approveGERequestModal" tabindex="-1" aria-labelledby="approveGERequestModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form method="POST" id="approveGERequestForm">
             @csrf
             <div class="modal-content rounded-4 shadow">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="approveGERequestModalLabel">Approve GE Subject Request</h5>
+                    <h5 class="modal-title" id="approveGERequestModalLabel">Approve GE Course Request</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to approve the GE subject request for <strong id="approveGERequestName"></strong>?
+                    Are you sure you want to approve the GE Course request for <strong id="approveGERequestName"></strong>?
                     <p class="text-muted small mt-2">
                         <i class="bi bi-info-circle me-1"></i>
-                        This will allow the instructor to be assigned to GE subjects.
+                        This will allow the instructor to be assigned to GE courses.
                     </p>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success">Approve Request</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-{{-- Reject GE Subject Request Modal --}}
+{{-- Reject GE Course Request Modal --}}
 <div class="modal fade" id="rejectGERequestModal" tabindex="-1" aria-labelledby="rejectGERequestModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form method="POST" id="rejectGERequestForm">
             @csrf
             <div class="modal-content rounded-4 shadow">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="rejectGERequestModalLabel">Reject GE Subject Request</h5>
+                    <h5 class="modal-title" id="rejectGERequestModalLabel">Reject GE Course Request</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to reject the GE subject request for <strong id="rejectGERequestName"></strong>?
+                    Are you sure you want to reject the GE course request for <strong id="rejectGERequestName"></strong>?
                     <p class="text-muted small mt-2">
                         <i class="bi bi-info-circle me-1"></i>
-                        This will deny the instructor from being assigned to GE subjects.
+                        This will deny the instructor from being assigned to GE courses.
                     </p>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-danger">Reject Request</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>

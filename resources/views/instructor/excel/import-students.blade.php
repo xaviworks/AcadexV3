@@ -101,12 +101,12 @@
                             <div class="col-md-4">
                                 <label class="form-label small mb-1">
                                     <i class="bi bi-book-fill text-success me-1"></i>
-                                    Compare with Subject
+                                    Compare with Course
                                 </label>
                                 <div class="input-group input-group-sm">
                                     <select id="compareSubjectSelect" 
                                             class="form-select form-select-sm border-success">
-                                        <option value="">Select Subject</option>
+                                        <option value="">Select Course</option>
                                         @foreach ($subjects as $subject)
                                             <option value="{{ $subject->id }}" 
                                                     {{ request('compare_subject_id') == $subject->id ? 'selected' : '' }}>
@@ -264,7 +264,7 @@
                                                 <tr>
                                                     <td colspan="3" class="text-center text-muted py-4">
                                                         <i class="bi bi-people fs-2 d-block mb-2"></i>
-                                                        No subject selected
+                                                        No course selected
                                                     </td>
                                                 </tr>
                                             @endforelse
@@ -340,11 +340,11 @@
             </div>
 
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
                     <i class="bi bi-check2-all"></i>
                     <span>Confirm Import</span>
                 </button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
             </div>
         </form>
     </div>

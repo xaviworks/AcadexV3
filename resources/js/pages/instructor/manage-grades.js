@@ -4,7 +4,9 @@
  */
 
 export function initManageGradesPage() {
-  const cards = document.querySelectorAll('#subject-selection .subject-card[data-url]');
+  const cards = document.querySelectorAll(
+    '#instructor-subject-selection .subject-card[data-url], #subject-selection .subject-card[data-url]'
+  );
   if (!cards.length) {
     return;
   }
@@ -113,6 +115,7 @@ window.showUnsavedChangesModal = function (onConfirm, onCancel = null) {
 document.addEventListener('DOMContentLoaded', function () {
   if (
     document.querySelector('[data-page="instructor-manage-grades"]') ||
+    document.querySelector('#instructor-subject-selection') ||
     document.querySelector('#subject-selection')
   ) {
     initManageGradesPage();

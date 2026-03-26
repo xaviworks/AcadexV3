@@ -145,7 +145,8 @@ function announcementPopup() {
         /* ── Bootstrap: first fetch + start polling ── */
         async fetchAnnouncements() {
             await this._doFetch();
-            this._startPolling();
+            // TEMPORARILY DISABLED — testing without polling
+            // this._startPolling();
         },
 
         /* ── Core fetch logic (reused by init & poll) ── */
@@ -157,6 +158,13 @@ function announcementPopup() {
                         'Accept': 'application/json',
                     }
                 });
+
+                // Stop polling if session expired (redirected to login)
+                if (response.redirected) {
+                    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+                    window.location.href = response.url;
+                    return;
+                }
 
                 if (!response.ok) return;
 
@@ -210,12 +218,12 @@ function announcementPopup() {
             }
         },
 
-        /* ── Polling engine (5s) + Page Visibility API ── */
+        /* ── Polling engine (30s) + Page Visibility API ── */
         _startPolling() {
             this.polling = true;
 
-            // Poll every 5 seconds (announcements are less frequent than notifications)
-            _pollTimer = setInterval(() => this._doFetch(), 5000);
+            // Poll every 120 seconds (announcements are infrequent)
+            _pollTimer = setInterval(() => this._doFetch(), 120000);
 
             // Pause when tab is hidden, resume immediately when visible
             document.addEventListener('visibilitychange', () => {
@@ -224,7 +232,7 @@ function announcementPopup() {
                 } else {
                     this._doFetch(); // instant fetch on return
                     if (!_pollTimer) {
-                        _pollTimer = setInterval(() => this._doFetch(), 5000);
+                        _pollTimer = setInterval(() => this._doFetch(), 120000);
                     }
                 }
             });

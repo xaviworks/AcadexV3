@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\GradesFormula;
+use App\Support\Grades\FormulaDefaults;
 
 class GradesFormulaSeeder extends Seeder
 {
@@ -15,7 +16,7 @@ class GradesFormulaSeeder extends Seeder
         $formula = GradesFormula::updateOrCreate(
             ['name' => 'asbme_default'],
             [
-                'label' => 'ASBME Default',
+                'label' => FormulaDefaults::GLOBAL_FALLBACK_LABEL,
                 'scope_level' => 'global',
                 'department_id' => null,
                 'course_id' => null,
@@ -25,6 +26,11 @@ class GradesFormulaSeeder extends Seeder
                 'passing_grade' => 75,
             ]
         );
+
+        GradesFormula::query()
+            ->where('scope_level', 'global')
+            ->where('label', 'ASBME Default')
+            ->update(['label' => FormulaDefaults::GLOBAL_FALLBACK_LABEL]);
 
         $formula->weights()->delete();
         $formula->weights()->createMany([

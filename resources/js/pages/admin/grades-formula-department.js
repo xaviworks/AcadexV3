@@ -6,7 +6,6 @@
 export function initGradesFormulaDepartment() {
   const filterButtons = document.querySelectorAll('.wildcard-filter-btn');
   const cards = document.querySelectorAll('[data-wildcard-section] .wildcard-card');
-  const catalogSection = document.querySelector('[data-wildcard-section="catalog"]');
 
   filterButtons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -19,22 +18,10 @@ export function initGradesFormulaDepartment() {
 
       cards.forEach((card) => {
         const status = card.dataset.status;
-        let matches = false;
-
-        if (filter === 'all') {
-          matches = status !== 'catalog';
-        } else if (filter === 'custom') {
-          matches = status === 'catalog';
-        } else {
-          matches = status === filter;
-        }
+        const matches = filter === 'all' ? true : status === filter;
 
         card.parentElement.classList.toggle('d-none', !matches);
       });
-
-      if (catalogSection) {
-        catalogSection.classList.toggle('d-none', filter !== 'custom');
-      }
     });
   });
 
@@ -53,11 +40,6 @@ export function initGradesFormulaDepartment() {
       window.location.href = url;
     });
   });
-
-  // Initialize default state for catalog section visibility
-  if (catalogSection) {
-    catalogSection.classList.add('d-none');
-  }
 }
 
 // Auto-initialize on DOMContentLoaded

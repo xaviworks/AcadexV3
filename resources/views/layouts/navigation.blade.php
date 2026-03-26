@@ -247,13 +247,15 @@ document.addEventListener('alpine:init', () => {
         },
         
         startPolling() {
+            // TEMPORARILY DISABLED — testing without polling
+            return;
             // Initialize with current timestamp to only get new notifications
             this.lastPollTimestamp = new Date().toISOString();
             
             if (this.pollInterval) clearInterval(this.pollInterval);
             this.pollInterval = setInterval(() => {
                 this.pollForNewNotifications();
-            }, 2000);
+            }, 60000);
         },
         
         async pollForNewNotifications() {
@@ -264,6 +266,12 @@ document.addEventListener('alpine:init', () => {
                 }
                 
                 const response = await fetch(url.toString());
+                // Stop polling if session expired (redirected to login)
+                if (response.redirected) {
+                    clearInterval(this.pollInterval);
+                    window.location.href = response.url;
+                    return;
+                }
                 if (!response.ok) return;
                 
                 const data = await response.json();
@@ -467,12 +475,14 @@ document.addEventListener('alpine:init', () => {
         },
         
         startPolling() {
+            // TEMPORARILY DISABLED — testing without polling
+            return;
             this.lastPollTimestamp = new Date().toISOString();
             
             if (this.pollInterval) clearInterval(this.pollInterval);
             this.pollInterval = setInterval(() => {
                 this.pollForNewNotifications();
-            }, 2000);
+            }, 60000);
         },
         
         async pollForNewNotifications() {
@@ -483,6 +493,12 @@ document.addEventListener('alpine:init', () => {
                 }
                 
                 const response = await fetch(url.toString());
+                // Stop polling if session expired (redirected to login)
+                if (response.redirected) {
+                    clearInterval(this.pollInterval);
+                    window.location.href = response.url;
+                    return;
+                }
                 if (!response.ok) return;
                 
                 const data = await response.json();

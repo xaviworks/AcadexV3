@@ -9,25 +9,17 @@
  */
 
 // Make togglePasswordVisibility globally available
-window.togglePasswordVisibility = function (inputId) {
+window.togglePasswordVisibility = function (button, inputId) {
   const input = document.getElementById(inputId);
-  const button =
-    inputId === 'password'
-      ? document.getElementById('togglePassword')
-      : document.getElementById('togglePasswordConfirmation');
   const icon = button?.querySelector('i');
 
-  if (!input || !icon) return;
+  if (!input || !button || !icon) return;
 
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.classList.remove('fa-eye', 'bi-eye');
-    icon.classList.add('fa-eye-slash', 'bi-eye-slash');
-  } else {
-    input.type = 'password';
-    icon.classList.remove('fa-eye-slash', 'bi-eye-slash');
-    icon.classList.add('fa-eye', 'bi-eye');
-  }
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  icon.className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+  button.setAttribute('aria-pressed', String(isHidden));
+  button.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
 };
 
 /**
@@ -216,6 +208,30 @@ window.closeConfirmModal = function () {
 };
 
 /**
+ * Open reset 2FA modal and focus admin password field
+ */
+window.confirmReset2FAUser = function (userId, userName) {
+  const modalEl = document.getElementById('reset2FAUserModal');
+  if (!modalEl) return;
+
+  const userIdInput = document.getElementById('reset-2fa-user-user-id');
+  const userNameLabel = document.getElementById('reset-2fa-user-user-name');
+  if (userIdInput) userIdInput.value = userId;
+  if (userNameLabel) userNameLabel.textContent = userName;
+
+  const bsModal = new bootstrap.Modal(modalEl);
+  bsModal.show();
+
+  setTimeout(() => {
+    const passwordInput = document.getElementById('reset-2fa-user-password');
+    if (passwordInput) {
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  }, 100);
+};
+
+/**
  * Check password requirements and update UI
  */
 window.checkPassword = function (password) {
@@ -257,6 +273,22 @@ window.submitUserForm = function () {
  * Initialize admin users page functionality
  */
 function initAdminUsersPage() {
+  // Delegated handler for reset-2FA buttons (works with DataTables-rendered rows).
+  document.addEventListener('click', function (e) {
+    const resetBtn = e.target.closest('[data-action="reset-2fa-user"]');
+    if (!resetBtn) return;
+
+    const userId = Number(resetBtn.dataset.userId);
+    const userName = resetBtn.dataset.userName || 'this user';
+
+    if (!Number.isFinite(userId) || userId <= 0) {
+      notify.error('Unable to reset 2FA: missing user information.');
+      return;
+    }
+
+    window.confirmReset2FAUser(userId, userName);
+  });
+
   // Duration option handlers for disable modal
   document.addEventListener('change', function (e) {
     if (e.target && e.target.name === 'duration_option') {
@@ -297,80 +329,134 @@ function initAdminUsersPage() {
 
   // Disable form AJAX submission
   const chooseDisableForm = document.getElementById('chooseDisableForm');
-  if (chooseDisableForm) {
-    chooseDisableForm.addEventListener('submit', function (e) {
-      e.preventDefault();
+  if (chooseDisableForm && chooseDisableForm.dataset.disableHandlerBound !== '1') {
+    chooseDisableForm.dataset.disableHandlerBound = '1';
+    chooseDisableForm.addEventListener(
+      'submit',
+      async function (e) {
+        e.preventDefault();
+        // Prevent duplicate submit handlers from mutating button state.
+        e.stopImmediatePropagation();
 
-      const form = e.target;
-      const selected = document.querySelector('input[name="duration_option"]:checked');
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const defaultSubmitBtnHtml = submitBtn?.dataset.defaultHtml || submitBtn?.innerHTML || '';
 
-      if (!selected) {
-        alert('Please select a duration.');
-        return;
-      }
+        // Reset button state in case a previous request was interrupted.
+        if (submitBtn) {
+          submitBtn.dataset.defaultHtml = defaultSubmitBtnHtml;
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = defaultSubmitBtnHtml;
+        }
 
-      const duration = selected.value;
-      const formData = new FormData();
-      formData.append('duration', duration);
+        const selected = document.querySelector('input[name="duration_option"]:checked');
 
-      const tokenInput = document.querySelector('input[name="_token"]');
-      if (tokenInput) formData.append('_token', tokenInput.value);
-
-      // Start loading state
-      loading.start('disableUser');
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) submitBtn.disabled = true;
-
-      if (duration === 'custom') {
-        const customVal = document.getElementById('customDisableDatetime')?.value;
-        if (!customVal) {
-          notify.warning('Please select a custom date and time.');
-          loading.stop('disableUser');
-          if (submitBtn) submitBtn.disabled = false;
+        if (!selected) {
+          notify.warning('Please select a duration.');
           return;
         }
-        formData.append('custom_disable_datetime', customVal);
-      }
 
-      fetch(form.action, {
-        method: 'POST',
-        body: formData,
-      })
-        .then(async (response) => {
+        const duration = selected.value;
+
+        // Get duration display text for confirmation
+        let durationText = '';
+        switch (duration) {
+          case '1_week':
+            durationText = '1 week';
+            break;
+          case '1_month':
+            durationText = '1 month';
+            break;
+          case 'indefinite':
+            durationText = 'indefinitely';
+            break;
+          case 'custom':
+            const customDateCheck = document.getElementById('customDisableDatetime')?.value;
+            if (customDateCheck) {
+              const date = new Date(customDateCheck);
+              durationText = `until ${date.toLocaleString()}`;
+            } else {
+              notify.warning('Please select a custom date and time.');
+              return;
+            }
+            break;
+        }
+
+        try {
+          // Show confirmation dialog
+          const confirmed = await window.confirm.ask({
+            title: 'Disable User Account?',
+            message: `Are you sure you want to disable this account for ${durationText}? The user will be logged out immediately and won't be able to access the system.`,
+            confirmText: 'Yes, Disable Account',
+            cancelText: 'Cancel',
+            type: 'danger',
+          });
+
+          if (!confirmed) return;
+
+          const formData = new FormData();
+          formData.append('duration', duration);
+
+          const tokenInput = document.querySelector('input[name="_token"]');
+          if (tokenInput) formData.append('_token', tokenInput.value);
+
+          // Start loading indicator only after user confirms.
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Disabling...';
+          }
+
+          if (duration === 'custom') {
+            const customVal = document.getElementById('customDisableDatetime')?.value;
+            if (!customVal) {
+              notify.warning('Please select a custom date and time.');
+              return;
+            }
+            formData.append('custom_disable_datetime', customVal);
+          }
+
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+          });
+
           let parsed = null;
           const contentType = response.headers.get('content-type') || '';
           if (contentType.includes('application/json')) {
             parsed = await response.json();
           }
+
           if (!response.ok) {
             const errMsg =
               parsed?.message || parsed || (await response.text().catch(() => null)) || response.statusText;
             throw errMsg;
           }
-          return parsed;
-        })
-        .then((data) => {
-          if (data && data.success) {
+
+          if (parsed && parsed.success) {
             modal.close();
             // Store message in sessionStorage to show after reload
-            sessionStorage.setItem('userActionMessage', data.message);
+            sessionStorage.setItem('userActionMessage', parsed.message);
             sessionStorage.setItem('userActionType', 'success');
             location.reload();
-          } else {
-            throw data?.message || 'Failed to disable user.';
+            return;
           }
-        })
-        .catch((error) => {
+
+          throw parsed?.message || 'Failed to disable user.';
+        } catch (error) {
           console.error('Error:', error);
           const message =
             typeof error === 'string' ? error : error?.message || 'An error occurred while disabling the user.';
           notify.error(message);
-        })
-        .finally(() => {
-          loading.stop('disableUser');
-          if (submitBtn) submitBtn.disabled = false;
-        });
-    });
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML =
+              submitBtn.dataset.defaultHtml || '<i class="bi bi-person-slash me-2"></i>Disable Account';
+          }
+        }
+      },
+      { capture: true }
+    );
   }
 
   // Role change handler for user form
@@ -488,31 +574,13 @@ function initAdminUsersPage() {
 
   if (togglePassword && passwordField) {
     togglePassword.addEventListener('click', function () {
-      const icon = this.querySelector('i');
-      if (passwordField.type === 'password') {
-        passwordField.type = 'text';
-        icon?.classList.remove('bi-eye');
-        icon?.classList.add('bi-eye-slash');
-      } else {
-        passwordField.type = 'password';
-        icon?.classList.remove('bi-eye-slash');
-        icon?.classList.add('bi-eye');
-      }
+      window.togglePasswordVisibility(this, 'password');
     });
   }
 
   if (togglePasswordConfirmation && confirmPasswordField) {
     togglePasswordConfirmation.addEventListener('click', function () {
-      const icon = this.querySelector('i');
-      if (confirmPasswordField.type === 'password') {
-        confirmPasswordField.type = 'text';
-        icon?.classList.remove('bi-eye');
-        icon?.classList.add('bi-eye-slash');
-      } else {
-        confirmPasswordField.type = 'password';
-        icon?.classList.remove('bi-eye-slash');
-        icon?.classList.add('bi-eye');
-      }
+      window.togglePasswordVisibility(this, 'password_confirmation');
     });
   }
 

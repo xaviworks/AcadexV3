@@ -222,53 +222,6 @@ export function initGradesFormulaWildcards() {
     createFormulaModalInstance.show();
   }
 
-  // Delete Formula Modal Logic
-  const deleteFormulaModal = document.getElementById('delete-formula-modal');
-  const deleteFormulaForm = document.getElementById('delete-formula-form');
-  const deleteFormulaName = document.getElementById('delete-formula-name');
-  const deleteFormulaError = document.getElementById('delete-formula-error');
-  const deleteFormulaPassword = document.getElementById('delete-formula-password');
-  const deleteButtons = document.querySelectorAll('.js-delete-formula');
-  const deleteFormulaBaseUrl = pageData.deleteFormulaBaseUrl || '/admin/grades-formula/department';
-
-  deleteButtons.forEach((button) => {
-    button.addEventListener('click', function () {
-      const formulaId = this.dataset.formulaId;
-      const formulaLabel = this.dataset.formulaLabel || 'this formula';
-      const departmentId = this.dataset.departmentId;
-
-      if (deleteFormulaName) {
-        deleteFormulaName.textContent = formulaLabel;
-      }
-
-      if (deleteFormulaForm && formulaId && departmentId) {
-        const actionUrl = `${deleteFormulaBaseUrl}/${departmentId}/formulas/${formulaId}`;
-        deleteFormulaForm.setAttribute('action', actionUrl);
-      }
-    });
-  });
-
-  // Reset delete form when modal is closed
-  deleteFormulaModal?.addEventListener('hidden.bs.modal', function () {
-    if (deleteFormulaForm) {
-      deleteFormulaForm.reset();
-    }
-    if (deleteFormulaError) {
-      deleteFormulaError.classList.add('d-none');
-      deleteFormulaError.textContent = '';
-    }
-    if (deleteFormulaPassword) {
-      deleteFormulaPassword.classList.remove('is-invalid');
-    }
-  });
-
-  // Focus password when delete modal is shown
-  deleteFormulaModal?.addEventListener('shown.bs.modal', function () {
-    if (deleteFormulaPassword) {
-      window.setTimeout(() => deleteFormulaPassword.focus(), 120);
-    }
-  });
-
   // Delete Global Formula Modal Logic
   const deleteGlobalFormulaModal = document.getElementById('delete-global-formula-modal');
   const deleteGlobalFormulaForm = document.getElementById('delete-global-formula-form');

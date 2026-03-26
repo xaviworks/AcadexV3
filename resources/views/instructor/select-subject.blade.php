@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container py-5">
-    <h1 class="h3 mb-4">Select Subject to Manage Scores</h1>
+    <h1 class="h3 mb-4">Select Course to Manage Scores</h1>
 
     <div class="row">
         @foreach($subjects as $subject)

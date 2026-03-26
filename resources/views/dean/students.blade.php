@@ -1,8 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-6">
-    <div class="max-w-7xl mx-auto px-4">
+<div class="container-fluid px-4 py-4">
         <h1 class="text-2xl font-bold mb-6">
             <i class="bi bi-person-lines-fill text-success me-2"></i>
             Students in Department
@@ -48,6 +47,5 @@
                 </table>
             </div>
         @endif
-    </div>
 </div>
 @endsection

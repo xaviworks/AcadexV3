@@ -36,12 +36,18 @@ class ActivityController extends Controller
 
         $academicPeriodId = session('active_academic_period_id');
 
-                $subjects = Subject::where(function($q) {
-                        $q->where('instructor_id', Auth::id())
-                            ->orWhereHas('instructors', function($q2) { $q2->where('instructor_id', Auth::id()); });
-                })
+        // Avoid slow orWhereHas EXISTS subquery — use two indexed lookups merged in memory
+        $instructorId = Auth::id();
+        $directIds = Subject::where('instructor_id', $instructorId)
             ->where('is_deleted', false)
-            ->when($academicPeriodId, fn ($query) => $query->where('academic_period_id', $academicPeriodId))
+            ->when($academicPeriodId, fn($q) => $q->where('academic_period_id', $academicPeriodId))
+            ->pluck('id');
+        $pivotIds = \Illuminate\Support\Facades\DB::table('instructor_subject')
+            ->where('instructor_id', $instructorId)
+            ->pluck('subject_id');
+        $subjectIds = $directIds->merge($pivotIds)->unique()->values();
+
+        $subjects = Subject::whereIn('id', $subjectIds)
             ->with(['course', 'department', 'academicPeriod'])
             ->orderBy('subject_code')
             ->get();
@@ -312,7 +318,7 @@ class ActivityController extends Controller
             ? sprintf('%d %s activities created successfully.', $createCount, $typeLabel)
             : 'Activity created successfully.';
 
-        return redirect()->route('instructor.grades.index', [
+        return redirect()->route('instructor.activities.create', [
             'subject_id' => $subject->id,
             'term' => $request->term,
         ])->with('success', $message);

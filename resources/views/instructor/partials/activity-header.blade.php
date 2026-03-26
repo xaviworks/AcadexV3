@@ -65,7 +65,7 @@
                 <span class="text-muted mx-2" style="font-size: 1.2rem;">|</span>
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-calculator text-success"></i>
-                    <span class="fw-semibold text-dark">{{ $formulaMeta['label'] ?? 'ASBME Default' }}</span>
+                    <span class="fw-semibold text-dark">{{ $formulaMeta['label'] ?? 'Institution Baseline Formula' }}</span>
                     @php
                         $scopeLabel = strtolower($formulaMeta['scope'] ?? 'global');
                         $scopeClass = match($scopeLabel) {
@@ -279,8 +279,8 @@
 
                 <!-- Modal Footer -->
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success" data-component-save>Save Activity</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>

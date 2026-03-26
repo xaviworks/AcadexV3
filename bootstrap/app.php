@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Trust Railway's reverse proxy for correct HTTPS/URL detection
+        $middleware->trustProxies(at: '*');
+
         // Register global middleware (applies to ALL requests)
         $middleware->prepend(\App\Http\Middleware\NoCacheHeaders::class);
         
@@ -28,5 +33,23 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (HttpExceptionInterface $exception, Request $request) {
+            if ($exception->getStatusCode() !== 419) {
+                return null;
+            }
+
+            $message = 'Your session has expired. Please refresh and try again.';
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'message' => $message,
+                    'refresh' => true,
+                ], 419);
+            }
+
+            return redirect()
+                ->back()
+                ->withInput($request->except(['password', 'password_confirmation', 'current_password']))
+                ->with('error', $message);
+        });
     })->create();

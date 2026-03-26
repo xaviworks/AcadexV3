@@ -1,26 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $showDepartmentColumn = !request('department_id');
+@endphp
 <div class="container-fluid px-4 py-4">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-people-fill me-2"></i>Instructor Management
-                @if($selectedDepartment)
-                    <span class="text-muted">• {{ $selectedDepartment->department_description }}</span>
-                @endif
-            </h2>
-            <p class="text-muted mb-0">Manage instructors and their department assignments</p>
-        </div>
-        @if(request('department_id'))
-        <div>
-            <a href="{{ route('vpaa.departments') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
-                <i class="bi bi-arrow-left me-2"></i>Back
-            </a>
-        </div>
-        @endif
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-people-fill me-2"></i>Instructor Management
+            @if($selectedDepartment)
+                <span class="text-muted">• {{ $selectedDepartment->department_description }}</span>
+            @endif
+        </h2>
+        <p class="text-muted mb-0">Manage instructors and their department assignments</p>
     </div>
+
+    @if(request('department_id'))
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Departments', 'url' => route('vpaa.departments')],
+        ['label' => $selectedDepartment->department_code ?? 'Department']
+    ]" />
+    @endif
 
     <!-- Filter Card -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
@@ -51,7 +54,9 @@
                     <tr>
                         <th scope="col" class="px-4 py-3 fw-semibold">Name</th>
                         <th scope="col" class="px-4 py-3 fw-semibold">Role</th>
-                        <th scope="col" class="px-4 py-3 fw-semibold">Department</th>
+                        @if($showDepartmentColumn)
+                            <th scope="col" class="px-4 py-3 fw-semibold">Department</th>
+                        @endif
                         <th scope="col" class="px-4 py-3 fw-semibold">Email</th>
                         <th scope="col" class="px-4 py-3 fw-semibold">Status</th>
                     </tr>
@@ -89,9 +94,11 @@
                                     @endif
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
-                                <span class="text-muted">{{ $instructor->department->department_description ?? 'N/A' }}</span>
-                            </td>
+                            @if($showDepartmentColumn)
+                                <td class="px-4 py-3">
+                                    <span class="text-muted">{{ $instructor->department->department_description ?? 'N/A' }}</span>
+                                </td>
+                            @endif
                             <td class="px-4 py-3">
                                 <span class="text-muted">{{ $instructor->email }}</span>
                             </td>
@@ -103,7 +110,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">
+                            <td colspan="{{ $showDepartmentColumn ? 5 : 4 }}" class="text-center py-5">
                                 <div class="text-muted mb-3">
                                     <i class="bi bi-people-x fs-1 opacity-50"></i>
                                 </div>

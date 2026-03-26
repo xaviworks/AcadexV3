@@ -161,7 +161,7 @@
                 <div class="card-body p-4 d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="fw-semibold mb-0">
-                            <i class="bi bi-calendar-check me-2"></i>Monthly Overview
+                            <i class="bi bi-calendar-check me-2"></i>Monthly Login Overview
                         </h5>
                         <form action="{{ route('dashboard') }}" method="GET" class="d-flex align-items-center">
                             <select class="form-select form-select-sm shadow-none border-success-subtle" name="year" onchange="this.form.submit()">
@@ -235,8 +235,10 @@ function adminDashboard() {
             if (this.pollInterval) clearInterval(this.pollInterval);
         },
         startPolling() {
+            // TEMPORARILY DISABLED — testing without polling
+            return;
             if (this.pollInterval) clearInterval(this.pollInterval);
-            this.pollInterval = setInterval(() => this.fetchData(), 2000);
+            this.pollInterval = setInterval(() => this.fetchData(), 60000);
         },
         async fetchData() {
             try {
@@ -246,6 +248,7 @@ function adminDashboard() {
                 const r = await fetch(url, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                 });
+                if (r.redirected) { clearInterval(this.pollInterval); window.location.href = r.url; return; }
                 if (!r.ok) return;
                 const d = await r.json();
                 const j = JSON.stringify(d);

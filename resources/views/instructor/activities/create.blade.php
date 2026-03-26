@@ -27,12 +27,12 @@
   @if ($subjects->isEmpty())
     <x-empty-state
         icon="bi-clipboard-x"
-        title="No Assigned Subjects Found"
-        message="You don't have any subjects assigned for the current academic period."
+                title="No Assigned Courses Found"
+                message="You don't have any courses assigned for the current academic period."
     >
         <p class="small text-muted mb-0">
           <i class="bi bi-info-circle me-1"></i>
-          Contact your chairperson to get subjects assigned so you can start managing activities.
+                    Contact your chairperson to get courses assigned so you can start managing activities.
         </p>
     </x-empty-state>
   @else
@@ -116,7 +116,7 @@
         <div class="col-md-4 text-end">
             @if ($isAligned)
                 <span class="badge bg-success px-3 py-2 me-2" style="font-size: 0.9rem;">
-                    <i class="bi bi-check-circle me-1"></i>Perfectly Aligned
+                    <i class="bi bi-check-circle me-1"></i> Aligned
                 </span>
             @else
                 <span class="badge bg-warning px-3 py-2 me-2" style="font-size: 0.9rem;">
@@ -368,12 +368,14 @@
                                                 $badgeClass = match ($status) {
                                                     'ok' => 'bg-success',
                                                     'exceeds' => 'bg-danger',
-                                                    default => 'bg-warning text-dark',
+                                                    'missing' => 'bg-warning text-dark',
+                                                    default => 'bg-secondary',
                                                 };
                                                 $badgeIcon = match ($status) {
                                                     'ok' => 'check-circle',
                                                     'exceeds' => 'x-circle',
-                                                    default => 'exclamation-circle',
+                                                    'missing' => 'exclamation-circle',
+                                                    default => 'dash-circle',
                                                 };
                                             @endphp
                                             <td class="text-center">
@@ -396,7 +398,7 @@
             @if ($meta)
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h6 class="fw-bold mb-3" style="color: #198754;">{{ $meta['label'] ?? 'ASBME Default' }}</h6>
+                        <h6 class="fw-bold mb-3" style="color: #198754;">{{ $meta['label'] ?? 'Institution Baseline Formula' }}</h6>
                         
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             <span class="badge bg-light text-dark border px-3 py-2">
@@ -515,12 +517,10 @@
               </p>
             </div>
             <div class="modal-footer border-0">
-              <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                <i class="bi bi-x-circle me-1"></i>Cancel
-              </button>
               <button type="submit" class="btn btn-danger shadow-sm">
                 <i class="bi bi-trash me-1"></i>Delete Activity
               </button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
           </div>
         </form>
@@ -661,12 +661,10 @@
             </div>
           </div>
           <div class="modal-footer border-0 bg-light">
-            <button type="button" class="btn btn-light shadow-sm" data-bs-dismiss="modal">
-              <i class="bi bi-x-circle me-1"></i>Cancel
-            </button>
             <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;">
               <i class="bi bi-check-circle me-1"></i>Save Activity
             </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>            
           </div>
         </form>
       </div>

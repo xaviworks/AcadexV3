@@ -7,9 +7,9 @@
     {{-- Page Header --}}
     <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
         <i class="bi bi-book-half text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
-        <span>Confirm Curriculum Subjects</span>
+        <span>Confirm Curriculum Courses</span>
     </h1>
-    <p class="text-muted mb-4">Select and confirm subjects from the curriculum to enable them for the current academic period</p>
+    <p class="text-muted mb-4">Select and confirm courses from the curriculum to enable them for the current academic period</p>
 
     {{-- Success/Error Messages via Notify --}}
     @if(session('success'))
@@ -30,7 +30,7 @@
     @if(Auth::user()->role === 4)
         <div class="alert alert-info mb-4" role="alert">
             <i class="bi bi-info-circle me-2"></i>
-            <strong>Note:</strong> As a GE Coordinator, you can only import GE (General Education), PD (Professional Development), PE (Physical Education), RS (Religious Studies), and NSTP (National Service Training Program) subjects. Other subjects are managed by Department Chairpersons.
+            <strong>Note:</strong> As a GE Coordinator, you can only import GE (General Education), PD (Professional Development), PE (Physical Education), RS (Religious Studies), and NSTP (National Service Training Program) courses. Other courses are managed by Department Chairpersons.
         </div>
     @endif
 
@@ -49,13 +49,13 @@
                 </select>
             </div>
             <button id="loadSubjectsBtn" class="btn btn-success" disabled>
-                <span id="loadBtnText"><i class="bi bi-arrow-repeat me-1"></i> Load Subjects</span>
+                <span id="loadBtnText"><i class="bi bi-arrow-repeat me-1"></i> Load Courses</span>
                 <span id="loadBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
             </button>
         </div>
     </div>
 
-    {{-- Subject Selection Form --}}
+    {{-- Course Selection Form --}}
     <form method="POST" action="{{ route('curriculum.confirmSubjects') }}" id="confirmForm">
         @csrf
         <input type="hidden" name="curriculum_id" id="formCurriculumId">
@@ -74,10 +74,10 @@
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <div class="text-muted">
                     <i class="bi bi-info-circle me-1"></i>
-                    <span id="selectedCount">0</span> subject(s) selected
+                    <span id="selectedCount">0</span> course(s) selected
                 </div>
                 <button type="button" id="openConfirmModalBtn" class="btn btn-success shadow-sm" disabled>
-                    <i class="bi bi-check-circle me-1"></i> Confirm Selected Subjects
+                    <i class="bi bi-check-circle me-1"></i> Confirm Selected Courses
                 </button>
             </div>
         </div>
@@ -93,11 +93,11 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to confirm and save the selected subjects for this curriculum?
+                Are you sure you want to confirm and save the selected courses for this curriculum?
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" id="submitConfirmBtn" class="btn btn-success">Yes, Confirm</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Cancel</button>
             </div>
         </div>
     </div>

@@ -7,6 +7,7 @@ use App\Models\Subject;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 trait ActivityManagementTrait
 {
@@ -31,23 +32,39 @@ trait ActivityManagementTrait
             ->unique()
             ->values();
 
-        $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
+        DB::transaction(function () use ($subjectId, $term, $types, $maxAssessments, $labels): void {
+            Subject::whereKey($subjectId)->lockForUpdate()->first();
 
-        if ($activities->isEmpty()) {
+            $countsByType = Activity::selectRaw('LOWER(type) as type, COUNT(*) as total')
+                ->where('subject_id', $subjectId)
+                ->where('term', $term)
+                ->where('is_deleted', false)
+                ->groupBy('type')
+                ->pluck('total', 'type')
+                ->map(fn ($total) => (int) $total)
+                ->all();
+
             $defaultActivities = [];
 
             foreach ($types as $type) {
                 $baseType = FormulaStructure::baseActivityType($type);
                 $maxPerComponent = (int) ($maxAssessments[$type] ?? $maxAssessments[$baseType] ?? ($baseType === 'exam' ? 1 : 3));
-                $defaultCount = $baseType === 'exam' ? 1 : min(3, $maxPerComponent);
+                $defaultCount = max(1, $baseType === 'exam' ? 1 : min(3, $maxPerComponent));
                 $label = $labels[$type] ?? $labels[$baseType] ?? FormulaStructure::formatLabel($type);
 
-                for ($i = 1; $i <= max(1, $defaultCount); $i++) {
+                $existingCount = $countsByType[$type] ?? 0;
+                if ($existingCount >= $defaultCount) {
+                    continue;
+                }
+
+                $toCreate = $defaultCount - $existingCount;
+                for ($offset = 1; $offset <= $toCreate; $offset++) {
+                    $sequence = $existingCount + $offset;
                     $defaultActivities[] = [
                         'subject_id' => $subjectId,
                         'term' => $term,
                         'type' => $type,
-                        'title' => trim($label . ' ' . $i),
+                        'title' => trim($label . ' ' . $sequence),
                         'number_of_items' => 100,
                         'created_at' => now(),
                         'updated_at' => now(),
@@ -55,12 +72,12 @@ trait ActivityManagementTrait
                 }
             }
 
-            Activity::insert($defaultActivities);
+            if (! empty($defaultActivities)) {
+                Activity::insert($defaultActivities);
+            }
+        });
 
-            $activities = $this->orderedActivityQuery($subjectId, $term, $types)->get();
-        }
-
-        return $activities;
+        return $this->orderedActivityQuery($subjectId, $term, $types)->get();
     }
 
     protected function orderedActivityQuery(int $subjectId, string $term, \Illuminate\Support\Collection $typeOrder)
@@ -276,6 +293,46 @@ trait ActivityManagementTrait
         return false;
     }
 
+    protected function determineMinimumRequiredAssessments(array $component): int
+    {
+        $activityType = (string) ($component['activity_type'] ?? '');
+        $baseType = (string) ($component['base_type'] ?? FormulaStructure::baseActivityType($activityType));
+        $relativeWeight = (float) ($component['relative_weight_percent'] ?? 0);
+        $maxAllowed = array_key_exists('max_assessments', $component) && $component['max_assessments'] !== null
+            ? (int) $component['max_assessments']
+            : null;
+
+        $minRequired = $relativeWeight > 0 ? 1 : 0;
+
+        if ($baseType === 'exam') {
+            $minRequired = max(1, $minRequired);
+        }
+
+        if ($this->activityTypeHasKeyword($activityType, ['quiz', 'ocr'])
+            || $this->activityTypeHasKeyword($baseType, ['quiz', 'ocr'])) {
+            $minRequired = max(3, $minRequired);
+        }
+
+        if ($maxAllowed !== null) {
+            $minRequired = min($minRequired, $maxAllowed);
+        }
+
+        return $minRequired;
+    }
+
+    protected function determineAlignmentStatus(int $actualCount, int $minRequired, ?int $maxAllowed): string
+    {
+        if ($maxAllowed !== null && $actualCount > $maxAllowed) {
+            return 'exceeds';
+        }
+
+        if ($minRequired > 0 && $actualCount < $minRequired) {
+            return 'missing';
+        }
+
+        return 'ok';
+    }
+
     protected function getTermLabelMap(): array
     {
         return [
@@ -343,23 +400,17 @@ trait ActivityManagementTrait
                 $match = $termCounts->firstWhere('type', $component['activity_type']);
                 $actualCount = $match ? (int) $match->total : 0;
 
-                $minRequired = $component['relative_weight_percent'] > 0 ? 1 : 0;
-                if ($component['base_type'] === 'exam') {
-                    $minRequired = max(1, $minRequired);
-                }
-
+                $minRequired = $this->determineMinimumRequiredAssessments($component);
                 $maxAllowed = $component['max_assessments'];
                 $availableSlots = $maxAllowed !== null
                     ? max(0, (int) $maxAllowed - $actualCount)
                     : null;
 
-                $isMissing = $minRequired > 0 && $actualCount < $minRequired;
-                $exceeds = $maxAllowed !== null && $actualCount > $maxAllowed;
-                $status = $isMissing ? 'missing' : ($availableSlots === 0 && $maxAllowed !== null ? 'full' : 'ok');
+                $status = $this->determineAlignmentStatus($actualCount, $minRequired, $maxAllowed);
 
-                if ($isMissing) {
+                if ($status === 'missing') {
                     $alignmentSummary['missing']++;
-                } elseif ($exceeds) {
+                } elseif ($status === 'exceeds') {
                     $alignmentSummary['exceeds']++;
                 }
 

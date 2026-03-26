@@ -9,6 +9,13 @@ function getCourseOutcomesData() {
   return window.pageData || window.courseOutcomesData || {};
 }
 
+function getCourseOutcomesBasePath() {
+  const data = getCourseOutcomesData();
+  const routePrefix = data.routePrefix || 'instructor';
+
+  return `/${routePrefix}/course_outcomes`;
+}
+
 // Generate next CO code when add modal is shown
 function generateNextCOCode() {
   const data = getCourseOutcomesData();
@@ -286,8 +293,9 @@ export function makeEditable(element) {
 // Update description via AJAX
 function updateDescription(coId, newText, element, container) {
   container.innerHTML = '<div class="text-muted"><i class="bi bi-hourglass-split"></i> Updating...</div>';
+  const basePath = getCourseOutcomesBasePath();
 
-  fetch(`/instructor/course_outcomes/${coId}/description`, {
+  fetch(`${basePath}/${coId}/description`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -407,18 +415,21 @@ function showToast(message, type = 'success') {
 }
 
 // Modal Functions
-export function openEditModal(id, coCode, identifier, description) {
+export function openEditModal(id, coCode, identifier, description, targetPercentage = 75) {
   const editCoCode = document.getElementById('edit_co_code');
   const editCoIdentifier = document.getElementById('edit_co_identifier');
   const editDescription = document.getElementById('edit_description');
+  const editTargetPercentage = document.getElementById('edit_target_percentage');
   const editForm = document.getElementById('editForm');
+  const basePath = getCourseOutcomesBasePath();
 
   if (editCoCode) editCoCode.value = coCode;
   if (editCoIdentifier) editCoIdentifier.value = identifier;
   if (editDescription) editDescription.value = description;
+  if (editTargetPercentage) editTargetPercentage.value = targetPercentage;
 
   if (editForm) {
-    editForm.action = `/instructor/course_outcomes/${id}`;
+    editForm.action = `${basePath}/${id}`;
   }
 
   // Show the modal using Bootstrap
@@ -432,13 +443,14 @@ export function openEditModal(id, coCode, identifier, description) {
 export function openDeleteModal(id, coCode) {
   const deleteCoCode = document.getElementById('delete_co_code');
   const deleteForm = document.getElementById('deleteForm');
+  const basePath = getCourseOutcomesBasePath();
 
   if (deleteCoCode) {
     deleteCoCode.textContent = coCode;
   }
 
   if (deleteForm) {
-    deleteForm.action = `/instructor/course_outcomes/${id}`;
+    deleteForm.action = `${basePath}/${id}`;
   }
 
   // Show the modal using Bootstrap

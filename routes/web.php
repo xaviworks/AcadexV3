@@ -43,13 +43,32 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-// Session check endpoint for AJAX validation (prevents back button to cached pages)
+// Session check endpoint for AJAX validation (prevents back button to cached pages).
+// Intentionally no ->middleware('auth') here: the auth middleware would redirect (302) to
+// the login page, which fetch() follows and returns 200, masking the "logged out" signal.
+// We check Auth::check() manually so the endpoint always returns a real 401 when the
+// session has been revoked, allowing the JS poller to detect and force a page redirect.
+// Session check endpoint for AJAX validation (prevents back button to cached pages).
+// Intentionally no ->middleware('auth') here: the auth middleware would redirect (302) to
+// the login page, which fetch() follows and returns 200, masking the "logged out" signal.
+// We check Auth::check() manually so the endpoint always returns a real 401 when the
+// session has been revoked, allowing the JS poller to detect and force a page redirect.
 Route::get('/session/check', function () {
     if (!Auth::check()) {
         return response()->json(['authenticated' => false], 401);
     }
-    return response()->json(['authenticated' => true]);
-})->middleware('auth')->name('session.check');
+    return response()->json(['authenticated' => true, 'user_id' => Auth::id()]);
+})->name('session.check');
+
+// Refresh the current CSRF token so stale tabs can retry mutating requests
+// without falling straight through to the default 419 page.
+Route::get('/csrf-token', function (Request $request) {
+    $request->session()->regenerateToken();
+
+    return response()->json([
+        'token' => csrf_token(),
+    ]);
+})->name('csrf.refresh');
 
 // Announcement Routes (for all authenticated users)
 Route::middleware('auth')->group(function () {
@@ -360,9 +379,6 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::get('/grades-formula/default', [AdminController::class, 'gradesFormulaDefault'])->name('gradesFormula.default');
     Route::get('/grades-formula/department/{department}', [AdminController::class, 'gradesFormulaDepartment'])->name('gradesFormula.department');
     Route::get('/grades-formula/department/{department}/edit', [AdminController::class, 'gradesFormulaEditDepartment'])->name('gradesFormula.edit.department');
-    Route::get('/grades-formula/department/{department}/formulas/create', [AdminController::class, 'createDepartmentFormula'])->name('gradesFormula.department.formulas.create');
-    Route::get('/grades-formula/department/{department}/formulas/{formula}/edit', [AdminController::class, 'editDepartmentFormulaEntry'])->name('gradesFormula.department.formulas.edit');
-    Route::delete('/grades-formula/department/{department}/formulas/{formula}', [AdminController::class, 'destroyDepartmentFormula'])->name('gradesFormula.department.formulas.destroy');
     // REMOVED: Route::post('/grades-formula/department/bulk-apply') - Departments tab deprecated
     Route::post('/grades-formula/department/{department}/apply-template', [AdminController::class, 'applyDepartmentTemplate'])->name('gradesFormula.department.applyTemplate');
     Route::get('/grades-formula/department/{department}/course/{course}', [AdminController::class, 'gradesFormulaCourse'])->name('gradesFormula.course');

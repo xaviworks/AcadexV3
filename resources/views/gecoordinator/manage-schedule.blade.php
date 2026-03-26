@@ -7,9 +7,9 @@
     {{-- Page Header --}}
     <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
         <i class="bi bi-calendar-week text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
-        <span>Manage Schedule - GE Subjects</span>
+        <span>Manage Schedule - GE Course</span>
     </h1>
-    <p class="text-muted mb-4">View and manage GE subjects, instructor assignments, and enrollment information</p>
+    <p class="text-muted mb-4">View and manage GE courses, instructor assignments, and enrollment information</p>
 
     @if(session('success'))
         <script>document.addEventListener('DOMContentLoaded', () => window.notify?.success(@json(session('success'))));</script>
@@ -26,7 +26,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Course Code</th>
-                            <th>Subject Title</th>
+                            <th>Course Title</th>
                             <th class="text-center">Units</th>
                             <th class="text-center">Year Level</th>
                             <th>Assigned Instructors</th>
@@ -78,8 +78,8 @@
     @else
         <div class="text-center py-5">
             <i class="bi bi-calendar-x text-muted mb-3 d-block" style="font-size: 4rem;"></i>
-            <h5 class="text-muted mb-2">No GE Subjects Found</h5>
-            <p class="text-muted">No GE subjects found for the current academic period. Please check if subjects have been created for this academic period.</p>
+            <h5 class="text-muted mb-2">No GE Courses Found</h5>
+            <p class="text-muted">No GE courses found for the current academic period. Please check if courses have been created for this academic period.</p>
         </div>
     @endif
 </div>

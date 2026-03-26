@@ -50,8 +50,8 @@
         @else
             <x-empty-state
                 icon="bi-journal-x"
-                title="No Assigned Subjects"
-                message="No subjects have been assigned to you yet."
+                title="No Assigned Courses"
+                message="No courses have been assigned to you yet."
             />
         @endif
     @else
@@ -196,7 +196,7 @@
                             <strong>Final Summary:</strong> Shows all term grades and final averages<br>
                             <i class="bi bi-info-circle"></i>
                             <strong>Term Sheets:</strong> Detailed activities and scores per term<br><br>
-                            ⚠️ To remove URL or headers/footers in printout, uncheck <em>Headers &amp; footers</em> in your browser's print dialog.
+                             To remove URL or headers/footers in printout, uncheck <em>Headers &amp; footers</em> in your browser's print dialog.
                         </div>
                     </div>
                 </div>

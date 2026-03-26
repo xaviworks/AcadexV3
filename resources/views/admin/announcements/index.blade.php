@@ -224,8 +224,8 @@
                     @include('admin.announcements.partials.form', ['announcement' => null])
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create Announcement</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>                
                 </div>
             </form>
         </div>
@@ -251,8 +251,8 @@
                     @include('admin.announcements.partials.form', ['announcement' => new \App\Models\Announcement(), 'isEdit' => true])
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Update Announcement</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>

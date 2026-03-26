@@ -60,11 +60,11 @@ jobs:
       - name: Run Migrations
         run: php artisan migrate --force
 
-      - name: Run Tests
-        run: php artisan test
-
       - name: Build Assets
         run: npm run build
+
+      - name: Run Tests
+        run: php artisan test
 
       - name: Check Code Style (Prettier)
         run: npm run lint

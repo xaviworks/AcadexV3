@@ -273,14 +273,17 @@ function vpaaDashboard() {
             if (this.pollInterval) clearInterval(this.pollInterval);
         },
         startPolling() {
+            // TEMPORARILY DISABLED — testing without polling
+            return;
             if (this.pollInterval) clearInterval(this.pollInterval);
-            this.pollInterval = setInterval(() => this.fetchData(), 2000);
+            this.pollInterval = setInterval(() => this.fetchData(), 60000);
         },
         async fetchData() {
             try {
                 const r = await fetch('{{ route("vpaa.dashboard.poll") }}', {
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                 });
+                if (r.redirected) { clearInterval(this.pollInterval); window.location.href = r.url; return; }
                 if (!r.ok) return;
                 const d = await r.json();
                 const j = JSON.stringify(d);

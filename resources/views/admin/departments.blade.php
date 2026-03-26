@@ -101,10 +101,10 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-success" onclick="confirmAddDepartment()">
                         <i class="bi bi-plus-lg me-1"></i>Add Department
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -140,10 +140,11 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" onclick="confirmEditDepartment()">
                         <i class="bi bi-check-lg me-1"></i>Save Changes
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    
                 </div>
             </form>
         </div>
@@ -176,10 +177,10 @@
                 </div>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-danger" onclick="confirmDeleteDepartment()">
                     <i class="bi bi-trash me-1"></i>Delete Department
                 </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
@@ -219,8 +220,8 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelPasswordConfirm()">Cancel</button>
                     <button type="submit" class="btn btn-success" id="confirmPasswordBtn">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelPasswordConfirm()">Cancel</button>    
                         <span id="confirmPasswordBtnText">
                             <i class="bi bi-check-lg me-1"></i>Confirm
                         </span>

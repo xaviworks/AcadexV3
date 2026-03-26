@@ -90,12 +90,21 @@ class ProfileTest extends TestCase
                 'middle_name' => null,
                 'last_name' => 'User',
                 'email' => 'updated@example.com',
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        $passwordResponse = $this
+            ->actingAs($user)
+            ->put(route('profile.password.update'), [
                 'current_password' => 'password',
                 'password' => 'new-secure-password',
                 'password_confirmation' => 'new-secure-password',
             ]);
 
-        $response
+        $passwordResponse
             ->assertSessionHasNoErrors()
             ->assertRedirect('/profile');
 

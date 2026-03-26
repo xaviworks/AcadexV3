@@ -18,7 +18,6 @@ use Illuminate\Notifications\Notifiable;
  * @property int|null $course_id
  * @property string $password
  * @property bool $is_active
- * @property bool $is_universal
  * @property-read Department|null $department
  * @property-read Course|null $course
  * @property-read NotificationPreference|null $notificationPreferences
@@ -44,7 +43,6 @@ class User extends Authenticatable
         'can_teach_ge',
         'department_id',
         'course_id',
-        'is_universal',
         'disabled_until',
         'two_factor_secret',
         'two_factor_recovery_codes',
@@ -73,7 +71,6 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_active' => 'boolean',
         'can_teach_ge' => 'boolean',
-        'is_universal' => 'boolean',
         'disabled_until' => 'datetime',
         'two_factor_confirmed_at' => 'datetime',
     ];

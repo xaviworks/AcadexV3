@@ -4,7 +4,7 @@
 <div class="container-fluid px-4 py-4">
     {{-- Breadcrumbs --}}
     <x-breadcrumbs :items="[
-        ['label' => 'Home', 'url' => '/'],
+        ['label' => 'Home', 'url' => route('instructor.dashboard')],
         ['label' => 'Course Outcome Attainment Results']
     ]" />
 
@@ -38,9 +38,9 @@
     @else
         <x-empty-state
             icon="bi-folder-x"
-            title="No Subjects Found"
+            title="No Courses Found"
             :message="$academicYear && $semester
-                ? 'No subjects found for the current academic period.<br><strong>Academic Year:</strong> ' . e($academicYear) . '<br><strong>Semester:</strong> ' . e($semester)
+                ? 'No courses found for the current academic period.<br><strong>Academic Year:</strong> ' . e($academicYear) . '<br><strong>Semester:</strong> ' . e($semester)
                 : 'No active academic period is currently set. Please contact your administrator to set up an active academic period.'"
         >
             <x-slot:actions>

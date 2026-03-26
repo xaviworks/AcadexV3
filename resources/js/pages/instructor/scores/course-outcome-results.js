@@ -5,6 +5,13 @@
 
 let currentTerm = null;
 
+const DISPLAY_TYPE_ICON_SVG = {
+  score: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 2h3a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h3l1-2z"></path><path d="M9 10h6"></path><path d="M9 14h6"></path></svg>`,
+  percentage: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-3"></path></svg>`,
+  passfail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m9 12 2 2 4-4"></path></svg>`,
+  copasssummary: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"></path><path d="m6 15 4-4 3 3 5-6"></path></svg>`,
+};
+
 function isCourseOutcomeResultsPage() {
   return document.querySelector('[data-page="instructor.course-outcome-results"]');
 }
@@ -52,10 +59,12 @@ function coClosePrintModal() {
 window.coOpenPrintModal = coOpenPrintModal;
 window.coClosePrintModal = coClosePrintModal;
 
-function setDisplayType(type, icon, text) {
+function setDisplayType(type, iconKey, text) {
   const currentIcon = document.getElementById('currentIcon');
   const currentText = document.getElementById('currentText');
-  if (currentIcon) currentIcon.textContent = icon;
+  if (currentIcon) {
+    currentIcon.innerHTML = DISPLAY_TYPE_ICON_SVG[iconKey] || DISPLAY_TYPE_ICON_SVG[type] || '';
+  }
   if (currentText) currentText.textContent = text;
 
   const scoreTypeSelect = document.getElementById('scoreType');
@@ -619,7 +628,7 @@ export function initCourseOutcomeResultsPage() {
   });
 
   // Default to percentage view on load
-  setDisplayType('percentage', '📊', 'Percentage');
+  setDisplayType('percentage', 'percentage', 'Percentage');
 }
 
 document.addEventListener('DOMContentLoaded', initCourseOutcomeResultsPage);

@@ -1,32 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-diagram-3 text-success me-2"></i>Program CO Summary
-            </h2>
-            <p class="text-muted mb-0">Course Outcome compliance across all courses in {{ $department->department_description ?? 'your department' }}</p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            @if(request('department_id'))
-                <a href="{{ route('vpaa.reports.co-program') }}" class="btn btn-outline-success btn-sm rounded-pill px-4">
-                    <i class="bi bi-arrow-left me-2"></i>Back
-                </a>
-            @endif
-            @if($academicYear && $semester)
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
-                    <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
-                </span>
-            @endif
-        </div>
-    </div>
+<div class="container-fluid px-4 py-5">
+    {{-- Page Header --}}
+    @include('chairperson.partials.reports-header', [
+        'title' => 'Program Outcomes Summary',
+        'subtitle' => 'Course Outcome compliance across all courses in ' . ($department->department_description ?? 'your department'),
+        'icon' => 'bi-diagram-3',
+        'academicYear' => $academicYear,
+        'semester' => $semester
+    ])
+
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Program Outcomes Reports']
+    ]" />
 
     @if(!$department)
-        <div class="alert alert-warning border-0 rounded-4 shadow-sm">
-            <i class="bi bi-exclamation-triangle me-2"></i>Your account has no department assigned. Please contact admin.
-        </div>
+        <x-inline-alert type="warning" message="Your account has no department assigned. Please contact admin." />
     @endif
 
     <div class="card border-0 shadow-sm rounded-4">
@@ -54,10 +46,11 @@
                                     @php($val = $row['co'][$i] ?? null)
                                     <td class="text-center">
                                         @if($val)
-                                            <span class="badge {{ $val['percent'] >= 75 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3 py-2 rounded-pill">
+                                            @php($threshold = (int) ($val['target_percentage'] ?? 75))
+                                            <span class="badge {{ $val['percent'] >= $threshold ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-3 py-2 rounded-pill">
                                                 {{ number_format($val['percent'], 2) }}%
                                             </span>
-                                            <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }}</small></div>
+                                            <div><small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }} | target {{ $threshold }}%</small></div>
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif
@@ -79,3 +72,4 @@
     </div>
 </div>
 @endsection
+

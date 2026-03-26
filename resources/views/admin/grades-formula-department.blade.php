@@ -32,7 +32,7 @@
                 <i class="bi bi-arrow-left me-1"></i>Back
             </a>
             <a href="{{ $buildRoute('admin.gradesFormula.edit.department', ['department' => $department->id]) }}" class="btn btn-success btn-sm">
-                <i class="bi bi-pencil-square me-1"></i>{{ $needsDepartmentFormula ? 'Create Formula' : 'Edit Formula' }}
+                <i class="bi bi-pencil-square me-1"></i>Edit Department Baseline
             </a>
         </div>
     </div>
@@ -65,7 +65,6 @@
         $customCourses = $courseSummaries->filter(fn ($summary) => $summary['has_formula'])->count();
         $defaultCourses = max($totalCourses - $customCourses, 0);
         $fallbackLabel = $departmentFallback->label ?? $globalFormula->label ?? 'Baseline Formula';
-        $catalogTotal = $departmentFormulas->count();
     @endphp
 
     <div class="card border-0 shadow-sm mb-3 bg-success bg-opacity-10">
@@ -98,7 +97,7 @@
                     </button>
                     <button class="btn btn-outline-success btn-sm rounded-pill wildcard-filter-btn" data-filter="custom">
                         <i class="bi bi-star-fill me-1"></i>Formulas
-                        <span class="badge bg-success text-white ms-1">{{ $catalogTotal }}</span>
+                        <span class="badge bg-success text-white ms-1">{{ $customCourses }}</span>
                     </button>
                     <button class="btn btn-outline-success btn-sm rounded-pill wildcard-filter-btn" data-filter="default">
                         <i class="bi bi-shield-check me-1"></i>Subjects
@@ -107,94 +106,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row g-4 mb-4 d-none" id="department-formula-catalog" data-wildcard-section="catalog">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4 d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
-                    <div>
-                        <h5 class="fw-semibold mb-1 text-primary-green">Department Formula Catalog</h5>
-                        <p class="text-muted mb-0">Start subjects from a consistent baseline or tailor alternatives for special cases.</p>
-                    </div>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ $buildRoute('admin.gradesFormula.department.formulas.create', ['department' => $department->id]) }}" class="btn btn-success btn-sm rounded-pill shadow-sm">
-                            <i class="bi bi-plus-circle me-1"></i>Create Catalog Formula
-                        </a>
-                        <a href="{{ $buildRoute('admin.gradesFormula.edit.department', ['department' => $department->id]) }}" class="btn btn-outline-success btn-sm rounded-pill shadow-sm">
-                            <i class="bi bi-pencil-square me-1"></i>Edit Fallback Formula
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden bg-success bg-opacity-10" data-status="catalog" data-url="{{ $buildRoute('admin.gradesFormula.department.formulas.create', ['department' => $department->id]) }}">
-                <div class="position-relative header-height-80 bg-gradient-green"></div>
-                <div class="wildcard-circle bg-gradient-green-dark">
-                    <i class="bi bi-plus-lg text-white icon-lg"></i>
-                </div>
-                    <div class="card-body pt-5 text-center d-flex flex-column align-items-center gap-3">
-                    <div>
-                        <h6 class="fw-semibold wildcard-title mt-2 text-dark">Create New Catalog Formula</h6>
-                        <p class="text-muted small mb-0">Define reusable weightings for instructors to apply across subjects.</p>
-                    </div>
-                    {{-- Bottom badge intentionally removed to avoid empty placeholder --}}
-                </div>
-            </div>
-        </div>
-
-        @foreach($departmentFormulas as $formula)
-            @php
-                $weights = collect($formula->weight_map)
-                    ->map(fn ($weight, $type) => [
-                        'type' => strtoupper($type),
-                        'percent' => number_format($weight * 100, 0),
-                    ])
-                    ->values();
-                $isFallback = (bool) $formula->is_department_fallback;
-                                $editRoute = $isFallback
-                                    ? $buildRoute('admin.gradesFormula.edit.department', ['department' => $department->id])
-                                    : $buildRoute('admin.gradesFormula.department.formulas.edit', ['department' => $department->id, 'formula' => $formula->id]);
-            @endphp
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                <div class="wildcard-card card h-100 border-0 shadow-sm formula-card" data-status="catalog" data-url="{{ $editRoute }}">
-                    <div class="card-header {{ $isFallback ? 'bg-success' : 'bg-secondary' }} text-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="fw-bold mb-0">{{ $isFallback ? 'FALLBACK' : 'CATALOG' }}</h6>
-                            <span class="badge bg-white text-dark">{{ $isFallback ? 'Baseline' : 'Custom' }}</span>
-                        </div>
-                    </div>
-                    <div class="card-body d-flex flex-column gap-3">
-                        <div>
-                            <h6 class="fw-semibold wildcard-title text-dark mb-1" title="{{ $formula->label }}">{{ $formula->label }}</h6>
-                            <p class="text-muted small mb-1">Base {{ number_format($formula->base_score, 0) }} · Scale ×{{ number_format($formula->scale_multiplier, 0) }} · Passing {{ number_format($formula->passing_grade, 0) }}</p>
-                            <div class="text-muted small">Updated {{ $formula->updated_at?->diffForHumans() ?? 'n/a' }}</div>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            @foreach($weights as $weight)
-                                <span class="badge bg-success-subtle text-success">{{ $weight['type'] }} {{ $weight['percent'] }}%</span>
-                            @endforeach
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <a href="{{ $editRoute }}" class="btn btn-outline-success btn-sm rounded-pill">
-                                <i class="bi bi-pencil-square me-1"></i>Edit
-                            </a>
-                            @unless($isFallback)
-                                    <form action="{{ $buildRoute('admin.gradesFormula.department.formulas.destroy', ['department' => $department->id, 'formula' => $formula->id]) }}" method="POST" onsubmit="return confirm('Delete this formula? This action cannot be undone.');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill">
-                                        <i class="bi bi-trash me-1"></i>Delete
-                                    </button>
-                                </form>
-                            @endunless
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endforeach
     </div>
 
     @if($courseSummaries->isEmpty())

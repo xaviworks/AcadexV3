@@ -4,14 +4,14 @@
 <div class="container-fluid px-0">
     <div id="grade-section">
         @if (!$subject)
+            <div class="px-4 pt-4 pb-2">
+                <h1 class="h4 fw-bold mb-0 d-flex align-items-center">
+                    <i class="bi bi-card-checklist text-success me-2" style="font-size: 1.5rem;"></i>
+                    <span>Manage Grades</span>
+                </h1>
+            </div>
             @if(count($subjects))
-                <div class="px-4 pt-4 pb-2">
-                    <h1 class="h4 fw-bold mb-0 d-flex align-items-center">
-                        <i class="bi bi-card-checklist text-success me-2" style="font-size: 1.5rem;"></i>
-                        <span>Manage Grades</span>
-                    </h1>
-                </div>
-                <div class="row g-4 px-4 py-4" id="subject-selection">
+                <div class="row g-4 px-4 py-4" id="instructor-subject-selection">
                     @foreach($subjects as $subjectItem)
                         <div class="col-md-4">
                             <div
@@ -36,7 +36,7 @@
                                     {{-- Footer badges --}}
                                     <div class="d-flex justify-content-between align-items-center mt-4 px-2">
                                         <span class="badge bg-light border text-secondary px-3 py-2 rounded-pill">
-                                            👥 {{ $subjectItem->students_count }} Students
+                                            <i class="bi bi-people-fill me-1"></i>{{ $subjectItem->students_count }} Students
                                         </span>
                                         <span class="badge px-3 py-2 fw-semibold text-uppercase rounded-pill
                                             @if($subjectItem->grade_status === 'completed') bg-success
@@ -44,11 +44,11 @@
                                             @else bg-secondary
                                             @endif">
                                             @if($subjectItem->grade_status === 'completed')
-                                                ✔ Completed
+                                                <i class="bi bi-check-circle-fill me-1"></i>Completed
                                             @elseif($subjectItem->grade_status === 'pending')
-                                                ⏳ Pending
+                                                <i class="bi bi-hourglass-split me-1"></i>Pending
                                             @else
-                                                ⭕ Not Started
+                                                <i class="bi bi-dash-circle me-1"></i>Not Started
                                             @endif
                                         </span>
                                     </div>
@@ -58,11 +58,13 @@
                     @endforeach
                 </div>
             @else
-                <x-empty-state
-                    icon="bi-journal-x"
-                    title="No Assigned Subjects"
-                    message="No subjects have been assigned to you yet."
-                />
+                <div class="px-4 py-4">
+                    <x-empty-state
+                        icon="bi-journal-x"
+                        title="No Assigned Courses"
+                        message="No courses have been assigned to you yet."
+                    />
+                </div>
             @endif
         @else
             @include('instructor.partials.term-stepper')

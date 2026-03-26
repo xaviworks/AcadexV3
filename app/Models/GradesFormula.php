@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Grades\FormulaDefaults;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -115,7 +116,7 @@ class GradesFormula extends Model
             'subject' => 'Subject Override',
             'course' => 'Course Override',
             'department' => 'Department Default',
-            default => 'ASBME Default',
+            default => FormulaDefaults::GLOBAL_FALLBACK_LABEL,
         };
     }
 }

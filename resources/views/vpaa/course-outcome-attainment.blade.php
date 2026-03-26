@@ -22,7 +22,7 @@
         <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body p-4">
                 <h5 class="fw-semibold mb-3">
-                    <i class="bi bi-book me-2"></i>Select Subject to View Course Outcomes
+                    <i class="bi bi-book me-2"></i>Select Course to View Course Outcomes
                 </h5>
                 <div class="row g-4" id="subject-selection">
                     @foreach($subjects as $subjectItem)
@@ -105,7 +105,7 @@
                     </div>
                     <h5 class="text-muted mb-2">No Course Outcomes Available</h5>
                     <p class="text-muted mb-0">
-                        This subject doesn't have course outcomes yet. As VPAA, you can only view results once
+                        This course doesn't have course outcomes yet. As VPAA, you can only view results once
                         instructors define outcomes and record assessments.
                     </p>
                 </div>

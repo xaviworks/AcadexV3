@@ -49,11 +49,11 @@
                 Are you sure you want to generate a new academic period based on the latest one?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form method="POST" action="{{ route('admin.academicPeriods.generate') }}">
                     @csrf
                     <button type="submit" class="btn btn-success">Yes, Generate</button>
                 </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>

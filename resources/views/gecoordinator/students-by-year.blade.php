@@ -9,10 +9,10 @@
         <i class="bi bi-people-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
         <span>View Students</span>
     </h1>
-    <p class="text-muted mb-4">View all students enrolled in GE subjects</p>
+    <p class="text-muted mb-4">View all students enrolled in GE courses</p>
 
     @if(empty($selectedSubjectId))
-        {{-- Subject Selection Cards --}}
+        {{-- Course Selection Cards --}}
         @if($subjects->isEmpty())
             <div class="alert alert-warning shadow-sm">
                 <i class="bi bi-exclamation-triangle me-2"></i>
@@ -92,7 +92,7 @@
                         <th>Student Name</th>
                         <th>Course</th>
                         <th class="text-center">Year Level</th>
-                        <th>GE Subject(s)</th>
+                        <th>GE Course(s)</th>
                         <th>Instructor(s)</th>
                     </tr>
                 </thead>
@@ -124,7 +124,7 @@
                                         </div>
                                     @endforeach
                                 @else
-                                    <span class="text-muted">No GE subjects</span>
+                                    <span class="text-muted">No GE courses</span>
                                 @endif
                             </td>
                             <td>

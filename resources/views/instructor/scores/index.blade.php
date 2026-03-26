@@ -4,13 +4,13 @@
 <div class="container mx-auto px-4">
     <h1 class="text-2xl font-bold mb-6">Manage Grades</h1>
 
-    {{-- Subject and Term Selection --}}
+    {{-- Course and Term Selection --}}
     <form method="GET" action="{{ route('grades.index') }}">
         <div class="mb-6 flex items-center space-x-4">
             <div>
-                <label class="block text-sm font-medium mb-2">Select Subject:</label>
+                <label class="block text-sm font-medium mb-2">Select Course:</label>
                 <select name="subject_id" class="border rounded px-3 py-2 w-64" onchange="this.form.submit()">
-                    <option value="">-- Choose Subject --</option>
+                    <option value="">-- Choose Course --</option>
                     @foreach($subjects as $subject)
                         <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>
                             {{ $subject->subject_code }} - {{ $subject->subject_description }}
@@ -44,8 +44,8 @@
     @else
         <x-empty-state
             icon="bi-hand-index"
-            title="Select Subject & Term"
-            message="Please select a subject and term to manage grades."
+            title="Select Course & Term"
+            message="Please select a course and term to manage grades."
             :compact="true"
         />
     @endif

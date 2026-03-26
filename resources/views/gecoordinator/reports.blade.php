@@ -9,11 +9,11 @@
         <i class="bi bi-file-earmark-bar-graph text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
         <span>GE Coordinator Reports</span>
     </h1>
-    <p class="text-muted mb-4">Overview of GE subjects, instructors, and enrollment statistics</p>
+    <p class="text-muted mb-4">Overview of GE courses, instructors, and enrollment statistics</p>
 
     <!-- Statistics Cards -->
     <div class="row g-4 mb-4">
-        <!-- Total Subjects Card -->
+        <!-- Total Courses Card -->
         <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body d-flex align-items-center">
@@ -21,14 +21,14 @@
                         <i class="bi bi-book text-primary" style="font-size: 1.5rem;"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Total GE Subjects</div>
+                        <div class="text-muted small fw-medium">Total GE Courses</div>
                         <div class="fs-3 fw-bold text-dark">{{ $reportData['total_subjects'] }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Assigned Subjects Card -->
+        <!-- Assigned Courses Card -->
         <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body d-flex align-items-center">
@@ -36,14 +36,14 @@
                         <i class="bi bi-person-check text-success" style="font-size: 1.5rem;"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Assigned Subjects</div>
+                        <div class="text-muted small fw-medium">Assigned Courses</div>
                         <div class="fs-3 fw-bold text-dark">{{ $reportData['assigned_subjects'] }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Unassigned Subjects Card -->
+        <!-- Unassigned Courses Card -->
         <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body d-flex align-items-center">
@@ -51,7 +51,7 @@
                         <i class="bi bi-person-x text-danger" style="font-size: 1.5rem;"></i>
                     </div>
                     <div>
-                        <div class="text-muted small fw-medium">Unassigned Subjects</div>
+                        <div class="text-muted small fw-medium">Unassigned Courses</div>
                         <div class="fs-3 fw-bold text-dark">{{ $reportData['unassigned_subjects'] }}</div>
                     </div>
                 </div>
@@ -110,10 +110,10 @@
         </div>
     </div>
 
-    <!-- Subjects by Year Level -->
+    <!-- Courses by Year Level -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body">
-            <h5 class="fw-semibold mb-4">Subjects by Year Level</h5>
+            <h5 class="fw-semibold mb-4">Courses by Year Level</h5>
             <div class="row g-3">
                 @for($year = 1; $year <= 4; $year++)
                     <div class="col-md-3">
@@ -132,7 +132,7 @@
     <!-- Actions -->
     <div class="d-flex gap-3">
         <a href="{{ route('gecoordinator.assign-subjects') }}" class="btn btn-primary">
-            <i class="bi bi-person-plus me-2"></i>Assign Subjects
+            <i class="bi bi-person-plus me-2"></i>Assign Courses
         </a>
         <a href="{{ route('gecoordinator.manage-schedule') }}" class="btn btn-success">
             <i class="bi bi-calendar-week me-2"></i>Manage Schedule

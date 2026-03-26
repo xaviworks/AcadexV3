@@ -17,7 +17,7 @@
             @endphp
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title fw-semibold" id="addActivityModalLabel">➕ Add New Activity</h5>
+                    <h5 class="modal-title fw-semibold" id="addActivityModalLabel">Add New Activity</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -28,9 +28,9 @@
                         <input type="hidden" name="term" value="{{ request('term') }}">
                     @else
                         <div class="col-md-6">
-                            <label class="form-label">Select Subject</label>
+                            <label class="form-label">Select Course</label>
                             <select name="subject_id" class="form-select" required>
-                                <option value="">-- Select Subject --</option>
+                                <option value="">-- Select Course --</option>
                                 @foreach($subjects as $subject)
                                     <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
                                         {{ $subject->subject_code }} - {{ $subject->subject_description }}
@@ -87,8 +87,8 @@
                 </div>
 
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success">Save Activity</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>

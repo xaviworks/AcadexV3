@@ -47,7 +47,7 @@
 
                     {{-- Card Body --}}
                     <div class="card-body pt-4 text-center px-3 pb-4">
-                        <h6 class="fw-bold mt-3 mb-3 text-dark text-truncate" title="{{ $department->department_description }}" style="font-size: 1rem; line-height: 1.3;">
+                        <h6 class="fw-bold mt-3 mb-3 text-dark" title="{{ $department->department_description }}" style="font-size: 1rem; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; min-height: 2.8em;">
                             {{ $department->department_description }}
                         </h6>
                         

@@ -1,34 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">
-                <i class="bi bi-book text-success me-2"></i>{{ $course->course_code }} – Course CO Summary
-            </h2>
-            <p class="text-muted mb-0">{{ $course->course_description }}</p>
-        </div>
-        <div>
-            @if($academicYear && $semester)
-                <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">
-                    <i class="bi bi-calendar3 me-1"></i>{{ $academicYear }} – {{ $semester }}
-                </span>
-            @endif
-            <a href="{{ route('vpaa.reports.co-course') }}" class="btn btn-outline-secondary rounded-pill">
-                <i class="bi bi-arrow-left me-1"></i>Choose Course
-            </a>
-        </div>
-    </div>
+<div class="container-fluid px-4 py-5">
+    {{-- Page Header --}}
+    @include('chairperson.partials.reports-header', [
+        'title' => $course->course_code . ' – Course Outcomes Summary',
+        'subtitle' => $course->course_description,
+        'icon' => 'bi-book',
+        'academicYear' => $academicYear,
+        'semester' => $semester
+    ])
+
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Course Outcomes Reports', 'url' => route('vpaa.reports.co-course')],
+        ['label' => $course->course_code]
+    ]" />
 
     {{-- CO Results Table --}}
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
             @if(empty($subjectCOs))
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
-                    <p class="text-muted mb-0">No subjects found for this course in the selected academic period.</p>
-                </div>
+                <x-empty-state
+                    :compact="true"
+                    icon="bi-journal-x"
+                    title="No Courses Found"
+                    message="No Courses found for this course in the selected academic period."
+                />
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
@@ -39,7 +38,7 @@
                                         <div class="rounded-2 p-2 bg-primary-subtle me-2">
                                             <i class="bi bi-book-half text-primary"></i>
                                         </div>
-                                        <span class="fw-bold">Subject</span>
+                                        <span class="fw-bold">Course</span>
                                     </div>
                                 </th>
                                 @for($i=1; $i<=6; $i++)
@@ -72,11 +71,12 @@
                                         @php($val = $co[$i] ?? null)
                                         <td class="text-center py-3">
                                             @if($val)
+                                                @php($threshold = (int) ($val['target_percentage'] ?? 75))
                                                 <div class="d-flex flex-column align-items-center">
-                                                    <span class="badge {{ $val['percent'] >= 75 ? 'bg-success text-white' : 'bg-danger text-white' }} px-3 py-2 rounded-pill mb-1 fs-6">
+                                                    <span class="badge {{ $val['percent'] >= $threshold ? 'bg-success text-white' : 'bg-danger text-white' }} px-3 py-2 rounded-pill mb-1 fs-6">
                                                         {{ number_format($val['percent'], 1) }}%
                                                     </span>
-                                                    <small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }}</small>
+                                                    <small class="text-muted">{{ $val['raw'] }}/{{ $val['max'] }} | target {{ $threshold }}%</small>
                                                 </div>
                                             @else
                                                 <span class="text-muted fs-5">—</span>
@@ -98,12 +98,12 @@
                             </h6>
                             <div class="d-flex gap-3">
                                 <div class="d-flex align-items-center">
-                                    <span class="badge bg-success text-white px-2 py-1 me-2">75%+</span>
-                                    <small class="text-muted">Meeting Standards</small>
+                                    <span class="badge bg-success text-white px-2 py-1 me-2">>= target</span>
+                                    <small class="text-muted">Meeting configured target</small>
                                 </div>
                                 <div class="d-flex align-items-center">
-                                    <span class="badge bg-danger text-white px-2 py-1 me-2">&lt;75%</span>
-                                    <small class="text-muted">Below Standards</small>
+                                    <span class="badge bg-danger text-white px-2 py-1 me-2">&lt; target</span>
+                                    <small class="text-muted">Below configured target</small>
                                 </div>
                             </div>
                         </div>
@@ -120,3 +120,4 @@
     </div>
 </div>
 @endsection
+

@@ -12,12 +12,14 @@
     <div class="mt-4">
         @if(! auth()->user()->two_factor_secret)
             {{-- Enable 2FA --}}
-            <button
-                type="button"
-                x-data=""
-                x-on:click.prevent="$dispatch('open-modal', 'confirm-2fa-enable')"
-                class="btn btn-success px-4 py-2"
-            >{{ __('Enable') }}</button>
+            <div class="flex justify-end">
+                <button
+                    type="button"
+                    x-data=""
+                    x-on:click.prevent="$dispatch('open-modal', 'confirm-2fa-enable')"
+                    class="btn btn-success px-4 py-2"
+                >{{ __('Enable') }}</button>
+            </div>
         @else
             {{-- 2FA is Enabled --}}
             <div class="flex flex-col gap-4">
@@ -203,7 +205,7 @@
                     </div>
                 @endif
                 
-                <div class="mt-2">
+                <div class="mt-2 flex justify-end">
                     <x-danger-button
                         x-data=""
                         x-on:click.prevent="$dispatch('open-modal', 'confirm-2fa-disable')"
@@ -245,10 +247,6 @@
                             </div>
 
                             <div class="flex items-center justify-end gap-3">
-                                <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                                    {{ __('Cancel') }}
-                                </button>
-
                                 <button 
                                     id="reveal-submit-btn"
                                     type="button"
@@ -259,6 +257,10 @@
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
+                                </button>
+
+                                <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                                    {{ __('Cancel') }}
                                 </button>
                             </div>
                         </div>
@@ -303,13 +305,14 @@
                             </div>
 
                             <div class="flex items-center justify-end gap-3">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    {{ __('Disable 2FA') }}
+                                </button>
+
                                 <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
                                     {{ __('Cancel') }}
                                 </button>
 
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    {{ __('Disable 2FA') }}
-                                </button>
                             </div>
                         </form>
                     </div>
@@ -340,12 +343,12 @@
                 @csrf
 
                 <div class="flex items-center justify-end gap-3">
-                    <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                        {{ __('Cancel') }}
-                    </button>
-
                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         {{ __('Enable 2FA') }}
+                    </button>
+
+                    <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                        {{ __('Cancel') }}
                     </button>
                 </div>
             </form>
@@ -386,10 +389,6 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-3">
-                    <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                        {{ __('Cancel') }}
-                    </button>
-
                     <button 
                         id="show-recovery-submit-btn"
                         type="button"
@@ -400,6 +399,10 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
+                    </button>
+
+                    <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                        {{ __('Cancel') }}
                     </button>
                 </div>
             </div>
@@ -440,10 +443,6 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-3">
-                    <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                        {{ __('Cancel') }}
-                    </button>
-
                     <button 
                         id="regenerate-submit-btn"
                         type="button"
@@ -454,6 +453,10 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
+                    </button>
+
+                    <button type="button" x-on:click="show = false" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                        {{ __('Cancel') }}
                     </button>
                 </div>
             </div>

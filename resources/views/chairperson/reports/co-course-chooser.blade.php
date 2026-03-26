@@ -8,10 +8,14 @@
         'subtitle' => 'Select a course to view detailed Course Outcome compliance',
         'icon' => 'bi-book',
         'academicYear' => $academicYear,
-        'semester' => $semester,
-        'backRoute' => route('dashboard'),
-        'backLabel' => 'Back to Dashboard'
+        'semester' => $semester
     ])
+
+    {{-- Breadcrumbs --}}
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Course Outcomes Reports']
+    ]" />
 
     <div class="row g-4 px-4 py-2">
         @forelse($courses as $c)

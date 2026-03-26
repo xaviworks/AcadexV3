@@ -8,17 +8,17 @@
         <div class="mb-2">
             <h4 class="fw-bold mb-0" style="color: #2c3e50;">
                 <i class="bi bi-bullseye me-2" style="color: #198754;"></i>
-                Subject: {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
+                Course: {{ $selectedSubject->subject_code }} - {{ $selectedSubject->subject_description }}
             </h4>
-            <p class="text-muted mb-0 mt-1">Define and manage course outcomes for this subject</p>
+            <p class="text-muted mb-0 mt-1">Define and manage course outcomes for this course</p>
         </div>
     @endif
 
     {{-- Breadcrumbs --}}
     @php
         $breadcrumbItems = [
-            ['label' => 'Home', 'url' => '/'],
-            ['label' => 'Course Outcomes', 'url' => route($routePrefix . '.course_outcomes.index')]
+            ['label' => 'Dashboard', 'url' => route($routePrefix . '.dashboard')],
+            ['label' => 'View Outcomes', 'url' => route($routePrefix . '.course_outcomes.index')]
         ];
         if(isset($selectedSubject)) {
             $breadcrumbItems[] = ['label' => $selectedSubject->subject_code . ' - ' . $selectedSubject->subject_description];
@@ -39,7 +39,7 @@
                             <div>
                                 <h5 class="fw-bold mb-1">Course Outcomes Management</h5>
                                 <p class="text-muted mb-0">
-                                    Subject: {{ $selectedSubject->subject_code ?? 'N/A' }} - {{ $selectedSubject->subject_description ?? 'N/A' }}
+                                    Course: {{ $selectedSubject->subject_code ?? 'N/A' }} - {{ $selectedSubject->subject_description ?? 'N/A' }}
                                     @if($currentPeriod)
                                         | {{ $currentPeriod->academic_year }} - {{ $currentPeriod->semester }}
                                     @endif
@@ -51,16 +51,6 @@
                                 $coCount = $cos ? $cos->count() : 0;
                                 $isLimitReached = $coCount >= 6;
                             @endphp
-                            
-                            {{-- CO Count Badge --}}
-                            <div class="text-center">
-                                <div class="badge {{ $isLimitReached ? 'bg-warning' : 'bg-info' }} fs-6 px-3 py-2">
-                                    {{ $coCount }}/6 COs
-                                </div>
-                                <div class="text-muted small mt-1">
-                                    {{ $isLimitReached ? 'Limit Reached' : 'Available Slots' }}
-                                </div>
-                            </div>
                             
                             {{-- Add Button --}}
                             <div>
@@ -90,7 +80,7 @@
                 <x-empty-state
                     icon="bi-file-earmark-x"
                     title="No Course Outcome Data Available"
-                    :message="'No course outcomes have been set for ' . e($selectedSubject->subject_code ?? 'this subject') . ' yet.'"
+                    :message="'No course outcomes have been set for ' . e($selectedSubject->subject_code ?? 'this course') . ' yet.'"
                 >
                     <x-slot:actions>
                         @if(Auth::user()->isChairperson())
@@ -190,13 +180,13 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
-                                                    <span class="badge bg-success fs-6 px-3 py-2">75%</span>
+                                                    <span class="badge bg-success fs-6 px-3 py-2">{{ (int) $co->target_percentage }}%</span>
                                                 </td>
                                                 @if(Auth::user()->isChairperson() || Auth::user()->isGECoordinator())
                                                     <td class="text-center px-4">
                                                         <div class="btn-group" role="group">
                                                             <button type="button" class="btn btn-outline-success btn-sm" 
-                                                                    onclick="openEditModal({{ $co->id }}, '{{ $co->co_code }}', '{{ $co->co_identifier }}', '{{ addslashes($co->description) }}')"
+                                                                    onclick="openEditModal({{ $co->id }}, '{{ $co->co_code }}', '{{ $co->co_identifier }}', '{{ addslashes($co->description) }}', {{ (int) $co->target_percentage }})"
                                                                     title="Edit Course Outcome">
                                                                 <i class="bi bi-pencil-square"></i>
                                                             </button>
@@ -242,7 +232,7 @@
                             <x-empty-state
                                 icon="bi-mortarboard"
                                 title="No Course Outcomes Found"
-                                message="Get started by creating your first course outcome for this subject."
+                                message="Get started by creating your first course outcome for this course."
                                 :compact="true"
                             >
                                 <x-slot:actions>
@@ -347,13 +337,20 @@
                         <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
                         <textarea name="description" class="form-control" rows="4" placeholder="Enter the course outcome description..." required></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target % <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" name="target_percentage" class="form-control" min="0" max="100" step="1" value="75" required>
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
                     <input type="hidden" name="subject_id" value="{{ $selectedSubject->id ?? request('subject_id') }}">
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success">
                         <i class="bi bi-plus-circle me-2"></i>Add Outcome
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -393,14 +390,19 @@
                         <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
                         <textarea name="description" id="edit_description" class="form-control" rows="4" placeholder="Enter the course outcome description..." required></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target % <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" name="target_percentage" id="edit_target_percentage" class="form-control" min="0" max="100" step="1" required>
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-2"></i>Cancel
-                    </button>
                     <button type="submit" class="btn btn-success">
                         <i class="bi bi-check-circle me-2"></i>Update Outcome
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -436,12 +438,10 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-2"></i>Cancel
-                    </button>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Delete Permanently
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </form>
@@ -456,7 +456,8 @@
 @if(isset($selectedSubject))
     window.pageData = {
         subjectCode: '{{ $selectedSubject->subject_code }}',
-        userCanEdit: {{ (Auth::user()->isChairperson() || Auth::user()->isGECoordinator()) ? 'true' : 'false' }}
+        userCanEdit: {{ (Auth::user()->isChairperson() || Auth::user()->isGECoordinator()) ? 'true' : 'false' }},
+        routePrefix: '{{ $routePrefix }}'
     };
 @endif
 </script>

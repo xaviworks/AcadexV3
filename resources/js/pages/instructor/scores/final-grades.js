@@ -180,7 +180,7 @@ export function fgPrintSpecificTable(tableType) {
 
   if (tableType === 'summary') {
     // Print the final summary table
-    printFinalSummary();
+    fgPrintFinalSummary();
   } else {
     // Print individual term sheet — fetch HTML then print via iframe to avoid about:blank footers
     const url = new URL(termReportUrl);

@@ -31,7 +31,7 @@
 
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body py-3">
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 flex-wrap justify-content-center">
                 <a href="{{ route('admin.structureTemplateRequests.index', ['status' => 'all']) }}" 
                    class="btn btn-sm {{ $status === 'all' ? 'btn-success' : 'btn-outline-success' }}">
                     All Requests
@@ -223,11 +223,11 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>Cancel
-                    </button>
                     <button type="submit" class="btn btn-success px-4">
                         <i class="bi bi-check-circle me-1"></i>Approve Template
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
                     </button>
                 </div>
             </form>
@@ -265,11 +265,11 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>Cancel
-                    </button>
                     <button type="submit" class="btn btn-danger px-4">
                         <i class="bi bi-x-circle me-1"></i>Reject Template
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
                     </button>
                 </div>
             </form>
