@@ -1206,6 +1206,24 @@
                                 <i class="bi bi-grid-3x3"></i>Print Everything
                             </button>
                         </div>
+                        <div class="print-info-text mt-3 mb-2">
+                            <i class="bi bi-calendar2-week"></i>
+                            <strong>Summary Per Term:</strong> Print dashboard metrics for a single term
+                        </div>
+                        <div class="print-btn-list">
+                            <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('summary-prelim'); coClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Prelim Summary
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('summary-midterm'); coClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Midterm Summary
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('summary-prefinal'); coClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Prefinal Summary
+                            </button>
+                            <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('summary-final'); coClosePrintModal();">
+                                <i class="bi bi-printer"></i>Print Final Summary
+                            </button>
+                        </div>
                         <div class="print-info-text">
                             <i class="bi bi-info-circle"></i>
                             <strong>Combined Table:</strong> Shows all terms in one view<br>
@@ -1213,6 +1231,8 @@
                             <strong>Pass/Fail Analysis:</strong> Student performance analysis<br>
                             <i class="bi bi-info-circle"></i>
                             <strong>Course Outcomes Summary:</strong> Dashboard overview<br>
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Term Summary:</strong> Dashboard metrics for a selected term<br>
                             <i class="bi bi-info-circle"></i>
                             <strong>Print Everything:</strong> Includes all tables and analysis
                         </div>
