@@ -171,8 +171,9 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('77.50%');
-        $response->assertSee('target 75.00%');
-        $response->assertSee('CO1, CO2');
+        $response->assertSee('Target 75.00%');
+        $response->assertSee('CO1');
+        $response->assertSee('CO2');
         $response->assertSee('Engineering Knowledge');
         $response->assertSee('Problem Analysis');
         $response->assertSee('—');
@@ -340,7 +341,7 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('75.00%');
-        $response->assertSee('target 80.00%');
+        $response->assertSee('Target 80.00%');
         $response->assertSee('Met Expected Outcome');
     }
 

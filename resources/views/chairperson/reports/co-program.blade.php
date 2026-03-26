@@ -109,16 +109,23 @@
                                                     'warning' => 'bg-warning-subtle text-warning-emphasis',
                                                     default => 'bg-success-subtle text-success-emphasis',
                                                 })
+                                                @php($levelBannerClass = match($level['tone'] ?? 'success') {
+                                                    'danger' => 'plo-level-banner-danger',
+                                                    'warning' => 'plo-level-banner-warning',
+                                                    default => 'plo-level-banner-success',
+                                                })
                                                 <span class="badge {{ $toneClass }} px-3 py-2 rounded-pill">
                                                     {{ number_format((float) $value['percent'], 2) }}%
                                                 </span>
-                                                <div class="mt-2">
-                                                    <small class="text-muted d-block">
-                                                        {{ implode(', ', $value['co_codes']) }}
-                                                    </small>
-                                                    <small class="text-muted">target {{ number_format($threshold, 2) }}%</small>
+                                                <div class="mt-2 plo-result-meta">
+                                                    <div class="plo-result-chips">
+                                                        @foreach($value['co_codes'] as $coCode)
+                                                            <span class="plo-result-chip">{{ $coCode }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                    <div class="plo-target-text">Target {{ number_format($threshold, 2) }}%</div>
                                                     @if(!empty($level['label']))
-                                                        <small class="text-muted d-block">{{ $level['label'] }}</small>
+                                                        <div class="plo-level-banner {{ $levelBannerClass }}">{{ $level['label'] }}</div>
                                                     @endif
                                                 </div>
                                             @else
