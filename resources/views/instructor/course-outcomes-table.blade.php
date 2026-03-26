@@ -16,8 +16,13 @@
 
     {{-- Breadcrumbs --}}
     @php
+        $dashboardRouteName = $routePrefix . '.dashboard';
+        $dashboardUrl = \Illuminate\Support\Facades\Route::has($dashboardRouteName)
+            ? route($dashboardRouteName)
+            : route('dashboard');
+
         $breadcrumbItems = [
-            ['label' => 'Dashboard', 'url' => route($routePrefix . '.dashboard')],
+            ['label' => 'Dashboard', 'url' => $dashboardUrl],
             ['label' => 'View Outcomes', 'url' => route($routePrefix . '.course_outcomes.index')]
         ];
         if(isset($selectedSubject)) {
@@ -464,5 +469,3 @@
 @endpush
 
 {{-- Styles: resources/css/instructor/course-outcomes.css --}}
-
-@section('content')
