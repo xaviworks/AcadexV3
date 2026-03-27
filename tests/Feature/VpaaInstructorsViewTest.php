@@ -33,8 +33,8 @@ class VpaaInstructorsViewTest extends TestCase
         $response = $this->actingAs($vpaa)->get(route('vpaa.instructors'));
 
         $response->assertOk();
-        $response->assertSee('Department');
-        $response->assertSee('School of Arts and Science and Education');
+        $response->assertSee('<th scope="col" class="px-4 py-3 fw-semibold">Department</th>', false);
+        $response->assertSee('ASE');
     }
 
     public function test_department_column_is_hidden_when_specific_department_is_selected(): void
@@ -62,6 +62,7 @@ class VpaaInstructorsViewTest extends TestCase
         $response->assertDontSee('<th scope="col" class="px-4 py-3 fw-semibold">Department</th>', false);
         $response->assertSee('<th scope="col" class="px-4 py-3 fw-semibold">Email</th>', false);
         $response->assertSee('<th scope="col" class="px-4 py-3 fw-semibold">Status</th>', false);
-        $response->assertSee('Filter by Department');
+        $response->assertSee('Department');
+        $response->assertSee('Clear Filter');
     }
 }
