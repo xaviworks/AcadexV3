@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
+use App\Support\QRCodeHelper;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Validation\ValidationException;
+use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorAuthenticationController extends Controller
 {
@@ -15,6 +15,10 @@ class TwoFactorAuthenticationController extends Controller
      */
     public function store(Request $request)
     {
+        $validated = $request->validateWithBag('enableTwoFactor', [
+            'password' => ['required', 'current_password'],
+        ]);
+
         $user = $request->user();
         $google2fa = new Google2FA();
 
@@ -25,9 +29,12 @@ class TwoFactorAuthenticationController extends Controller
                     return \Illuminate\Support\Str::random(10) . '-' . \Illuminate\Support\Str::random(10);
                 })->all()
             )),
+            'two_factor_confirmed_at' => null,
         ])->save();
 
-        return back()->with('success', 'Two-factor authentication has been enabled. Please scan the QR code with your authenticator app.');
+        unset($validated);
+
+        return back()->with('success', 'Two-factor authentication has been enabled. Enter your password to load the QR code and complete setup.');
     }
 
     /**
@@ -85,8 +92,22 @@ class TwoFactorAuthenticationController extends Controller
             'password' => ['required', 'current_password'],
         ]);
 
+        $user = $request->user();
+
+        if (! $user->two_factor_secret) {
+            return response()->json([
+                'message' => 'Two-factor authentication is not enabled for this account.',
+            ], 404);
+        }
+
         return response()->json([
             'success' => true,
+            'qr_code' => QRCodeHelper::generate(
+                config('app.name'),
+                $user->email,
+                $user->two_factor_secret,
+                200
+            ),
         ]);
     }
 
@@ -100,7 +121,15 @@ class TwoFactorAuthenticationController extends Controller
                 'password' => ['required', 'current_password'],
             ]);
 
-            $recoveryCodes = json_decode(decrypt($request->user()->two_factor_recovery_codes));
+            $encryptedCodes = $request->user()->two_factor_recovery_codes;
+
+            if (! $encryptedCodes) {
+                return response()->json([
+                    'message' => 'Two-factor authentication is not enabled for this account.',
+                ], 404);
+            }
+
+            $recoveryCodes = json_decode(decrypt($encryptedCodes));
 
             // Ensure we have valid recovery codes
             if (!$recoveryCodes || !is_array($recoveryCodes) || count($recoveryCodes) === 0) {
@@ -135,7 +164,12 @@ class TwoFactorAuthenticationController extends Controller
                 'password' => ['required', 'current_password'],
             ]);
 
-            // Generate new recovery codes
+            if (! $request->user()->two_factor_secret) {
+                return response()->json([
+                    'message' => 'Two-factor authentication is not enabled for this account.',
+                ], 404);
+            }
+
             $newCodes = \Illuminate\Support\Collection::times(8, function () {
                 return \Illuminate\Support\Str::random(10) . '-' . \Illuminate\Support\Str::random(10);
             })->all();
@@ -144,7 +178,6 @@ class TwoFactorAuthenticationController extends Controller
                 'two_factor_recovery_codes' => encrypt(json_encode($newCodes)),
             ])->save();
 
-            // Return new codes in JSON for AJAX requests
             if ($request->expectsJson() || $request->wantsJson()) {
                 return response()->json([
                     'recovery_codes' => $newCodes,
@@ -152,7 +185,6 @@ class TwoFactorAuthenticationController extends Controller
                 ], 200);
             }
 
-            // Fallback for non-AJAX requests
             return back()->with('status', 'recovery-codes-regenerated');
             
         } catch (\Illuminate\Validation\ValidationException $e) {

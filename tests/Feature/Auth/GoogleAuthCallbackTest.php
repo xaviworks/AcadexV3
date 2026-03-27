@@ -19,6 +19,7 @@ class GoogleAuthCallbackTest extends TestCase
             'email' => 'instructor@brokenshire.edu.ph',
             'is_active' => true,
             'google_id' => null,
+            'remember_token' => null,
         ]);
 
         $googleUser = Mockery::mock();
@@ -52,5 +53,6 @@ class GoogleAuthCallbackTest extends TestCase
         ]);
         $this->assertDatabaseCount('user_logs', 1);
         $this->assertSame('google-user-123', $user->fresh()->google_id);
+        $this->assertNull($user->fresh()->remember_token);
     }
 }

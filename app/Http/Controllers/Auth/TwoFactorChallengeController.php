@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\UserDevice;
+use App\Services\Auth\LoginFlowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Jenssegers\Agent\Agent;
 use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorChallengeController extends Controller
 {
+    public function __construct(private readonly LoginFlowService $loginFlowService)
+    {
+    }
+
     public function create()
     {
         if (!session()->has('auth.2fa.id')) {
@@ -42,12 +45,13 @@ class TwoFactorChallengeController extends Controller
 
         $user = User::findOrFail($userId);
         
-        // If user doesn't have 2FA secret set up, we shouldn't be here
-        if (!$user->two_factor_secret) {
-             Auth::login($user);
-             session()->forget(['auth.2fa.id', 'auth.2fa.fingerprint']);
-             session()->regenerate();
-             return redirect()->intended(route('dashboard'));
+        if (! $user->two_factor_secret) {
+            Auth::login($user);
+            $request->session()->forget(['auth.2fa.id', 'auth.2fa.fingerprint']);
+            $this->loginFlowService->sanitizeIntendedUrl($request, $user);
+            $this->loginFlowService->finalizeLogin($request, $fingerprint);
+
+            return $this->loginFlowService->redirectAfterLogin($user);
         }
 
         $valid = false;
@@ -72,43 +76,27 @@ class TwoFactorChallengeController extends Controller
         }
 
         if ($valid) {
-            // Mark 2FA as confirmed on first successful challenge
-            if (!$user->two_factor_confirmed_at) {
+            if (! $user->two_factor_confirmed_at) {
                 $user->forceFill([
                     'two_factor_confirmed_at' => now(),
                 ])->save();
             }
 
             Auth::login($user);
-            session()->forget(['auth.2fa.id', 'auth.2fa.fingerprint']);
-            
-            // Store device fingerprint in session for middleware to use
-            if ($fingerprint) {
-                session()->put('device_fingerprint', $fingerprint);
-            }
-            
-            session()->regenerate();
+            $request->session()->forget(['auth.2fa.id', 'auth.2fa.fingerprint']);
+            $this->loginFlowService->sanitizeIntendedUrl($request, $user);
+            $this->loginFlowService->finalizeLogin($request, $fingerprint);
 
-            // Save device as trusted
             if ($fingerprint) {
-                $agent = new Agent();
-                $agent->setUserAgent($request->userAgent());
-
-                UserDevice::updateOrCreate(
-                    [
-                        'user_id' => $user->id,
-                        'device_fingerprint' => $fingerprint,
-                    ],
-                    [
-                        'ip_address' => $request->ip(),
-                        'browser' => $agent->browser(),
-                        'platform' => $agent->platform(),
-                        'last_used_at' => now(),
-                    ]
+                $this->loginFlowService->rememberTrustedDevice(
+                    $user,
+                    $fingerprint,
+                    $request->ip(),
+                    $request->userAgent()
                 );
             }
 
-            return redirect()->intended(route('dashboard'));
+            return $this->loginFlowService->redirectAfterLogin($user);
         }
 
         $errorMessage = $isRecoveryMode 

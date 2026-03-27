@@ -43,22 +43,17 @@
                     <div class="mb-4">
                         <p class="text-sm font-medium text-gray-700 mb-2">{{ __('QR Code') }}</p>
                         <div class="relative inline-block" id="qr-container">
-                            <!-- Single QR Code with blur toggle -->
-                            <div 
-                                id="qr-image" 
-                                class="border border-gray-300 rounded p-2 transition-all duration-300" 
-                                style="filter: blur(10px);">
-                                {!! \App\Support\QRCodeHelper::generate(
-                                    config('app.name'),
-                                    auth()->user()->email,
-                                    auth()->user()->two_factor_secret,
-                                    200
-                                ) !!}
+                            <div
+                                id="qr-image"
+                                class="border border-dashed border-gray-300 rounded p-4 bg-gray-50 text-center text-sm text-gray-500 flex items-center justify-center"
+                                style="width: 216px; height: 216px;">
+                                <span id="qr-placeholder">
+                                    {{ __('QR code is hidden. Enter your password to load it securely.') }}
+                                </span>
                             </div>
-                            
-                            <!-- Overlay with reveal button -->
+
                             <div id="qr-overlay" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded">
-                                <button 
+                                <button
                                     type="button"
                                     x-data=""
                                     x-on:click.prevent="$dispatch('open-modal', 'reveal-qr-code')"
@@ -71,8 +66,7 @@
                                 </button>
                             </div>
                             
-                            <!-- Hide button (shown after reveal) -->
-                            <button 
+                            <button
                                 id="hide-qr-btn"
                                 type="button"
                                 onclick="hideQRCode()"
@@ -322,7 +316,7 @@
     </div>
 
     {{-- Enable 2FA Confirmation Modal (outside conditional so always available) --}}
-    <x-modal name="confirm-2fa-enable" maxWidth="md" focusable>
+    <x-modal name="confirm-2fa-enable" maxWidth="md" :show="$errors->enableTwoFactor->isNotEmpty()" focusable>
         <div class="p-6 bg-white rounded-lg">
             <div class="mb-4">
                 <h2 class="text-lg font-medium text-gray-900">
@@ -341,6 +335,24 @@
 
             <form method="POST" action="{{ route('two-factor.enable') }}">
                 @csrf
+
+                <div class="mb-6">
+                    <label for="enable_2fa_password" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ __('Current Password') }}
+                    </label>
+
+                    <input
+                        id="enable_2fa_password"
+                        name="password"
+                        type="password"
+                        class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        placeholder="{{ __('Enter your password') }}"
+                        required
+                        autofocus
+                    />
+
+                    <x-input-error :messages="$errors->enableTwoFactor->get('password')" class="mt-2" />
+                </div>
 
                 <div class="flex items-center justify-end gap-3">
                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -464,6 +476,8 @@
     </x-modal>
 
     <script>
+        const defaultQrPlaceholder = @json(__('QR code is hidden. Enter your password to load it securely.'));
+
         function handleRevealQR() {
             const password = document.getElementById('reveal_password').value;
             const errorDiv = document.getElementById('reveal-error');
@@ -494,25 +508,33 @@
                 },
                 body: JSON.stringify({ password: password })
             })
-            .then(response => response.json())
+            .then(async (response) => {
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    const message = data.message
+                        || Object.values(data.errors || {}).flat()[0]
+                        || 'Invalid password. Please try again.';
+
+                    throw new Error(message);
+                }
+
+                return data;
+            })
             .then(data => {
                 if (data.success) {
-                    // Remove blur from QR code
                     const qrImage = document.getElementById('qr-image');
-                    qrImage.style.filter = 'blur(0px)';
-                    
-                    // Hide overlay, show hide button
+                    qrImage.innerHTML = data.qr_code;
+                    qrImage.classList.remove('bg-gray-50', 'text-gray-500', 'border-dashed');
+                    qrImage.classList.add('bg-white');
+
                     document.getElementById('qr-overlay').classList.add('hidden');
                     document.getElementById('hide-qr-btn').classList.remove('hidden');
-                    
-                    // Close modal
+
                     window.dispatchEvent(new CustomEvent('close-modal', { detail: 'reveal-qr-code' }));
-                    
-                    // Clear password field
                     document.getElementById('reveal_password').value = '';
                     errorDiv.classList.add('hidden');
-                    
-                    // Show success notification
+
                     if (typeof notify !== 'undefined') {
                         notify.success('QR code revealed successfully. Keep it secure!');
                     }
@@ -522,12 +544,11 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                errorDiv.textContent = 'An error occurred. Please try again.';
+                console.error('Reveal QR error:', error);
+                errorDiv.textContent = error.message || 'An error occurred. Please try again.';
                 errorDiv.classList.remove('hidden');
             })
             .finally(() => {
-                // Reset button state
                 submitBtn.disabled = false;
                 btnText.textContent = 'Reveal QR Code';
                 spinner.classList.add('hidden');
@@ -536,7 +557,9 @@
         
         function hideQRCode() {
             const qrImage = document.getElementById('qr-image');
-            qrImage.style.filter = 'blur(10px)';
+            qrImage.innerHTML = `<span id="qr-placeholder">${defaultQrPlaceholder}</span>`;
+            qrImage.classList.add('bg-gray-50', 'text-gray-500', 'border-dashed');
+            qrImage.classList.remove('bg-white');
             document.getElementById('qr-overlay').classList.remove('hidden');
             document.getElementById('hide-qr-btn').classList.add('hidden');
         }

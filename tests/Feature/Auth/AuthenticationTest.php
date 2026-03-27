@@ -50,5 +50,6 @@ class AuthenticationTest extends TestCase
 
         $this->assertGuest();
         $response->assertRedirect('/');
+        $this->assertNull($user->fresh()->remember_token);
     }
 }

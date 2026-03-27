@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Notifications\SecurityAlert;
+use App\Services\Auth\PasswordUpdateService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    public function __construct(private readonly PasswordUpdateService $passwordUpdateService)
+    {
+    }
+
     /**
      * Display the user's profile form.
      */
@@ -60,8 +64,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-        $user->password = Hash::make($validated['password']);
-        $user->save();
+
+        $this->passwordUpdateService->update(
+            $user,
+            $validated['password'],
+            $request->session()->getId()
+        );
 
         NotificationService::notifySecurityAlert(
             SecurityAlert::TYPE_PASSWORD_CHANGED,
