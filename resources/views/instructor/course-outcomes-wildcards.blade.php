@@ -15,8 +15,8 @@
             {{-- Generate CO Button (Chairperson and GE Coordinator Only) --}}
             @if(Auth::user()->role === 1 || Auth::user()->role === 4)
             <div>
-                <button type="button" class="btn btn-success rounded-pill shadow-sm" id="openGenerateCOModalBtn" style="font-weight: 600;">
-                    <i class="bi bi-magic me-1"></i>Generate COs
+                <button type="button" class="btn btn-success shadow-sm px-4" id="openGenerateCOModalBtn" style="font-weight: 600;">
+                    <i class="bi bi-magic me-2"></i>Generate COs
                 </button>
             </div>
             @endif
@@ -143,7 +143,7 @@
 <div class="modal fade" id="generateCOModal" tabindex="-1" aria-labelledby="generateCOModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
-            <div class="modal-header border-0" style="background: linear-gradient(135deg, #198754, #20c997); border-radius: 1rem 1rem 0 0;">
+            <div class="modal-header border-0 bg-success" style="border-radius: 1rem 1rem 0 0;">
                 <h5 class="modal-title text-white fw-bold" id="generateCOModalLabel">
                     <i class="bi bi-magic me-2"></i>Generate Course Outcomes
                 </h5>
@@ -167,11 +167,11 @@
                     </div>
                 @endif
 
-                <div class="alert alert-info border-0" style="background: rgba(13, 202, 240, 0.1);">
+                <div class="alert border border-success-subtle bg-success bg-opacity-10 mb-4">
                     <div class="d-flex align-items-start">
-                        <i class="bi bi-info-circle text-info me-3 mt-1"></i>
+                        <i class="bi bi-info-circle text-success me-3 mt-1"></i>
                         <div>
-                            <h6 class="text-info fw-bold mb-1">Auto-Generate Course Outcomes</h6>
+                            <h6 class="text-success fw-bold mb-1">Auto-Generate Course Outcomes</h6>
                             <p class="mb-0 text-muted small">
                                 This will generate course outcomes for subjects based on their current CO status. 
                                 Each CO will have the description: <strong>"Students have achieved 75% of the course outcomes"</strong><br>
@@ -286,7 +286,7 @@
                     </div>
 
                     {{-- Preview Section --}}
-                    <div class="card border-0" style="background: rgba(248, 249, 250, 0.8);">
+                    <div class="card border shadow-sm" style="background: #f8f9fa; border-color: #e9ecef !important;">
                         <div class="card-body p-3">
                             <h6 class="fw-semibold mb-2" style="color: #198754;">
                                 <i class="bi bi-eye me-1"></i>Preview: Course Outcomes to be Generated
@@ -322,11 +322,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="alert alert-info border-0 mt-3 mb-0" style="background: rgba(13, 202, 240, 0.1);">
+                            <div class="alert border border-success-subtle bg-success bg-opacity-10 mt-3 mb-0">
                                 <div class="d-flex align-items-start">
-                                    <i class="bi bi-info-circle text-info me-2 mt-1"></i>
+                                    <i class="bi bi-info-circle text-success me-2 mt-1"></i>
                                     <div>
-                                        <small class="text-info">
+                                        <small class="text-success">
                                             <strong>Smart Generation:</strong> The system will automatically identify which CO numbers (1-6) are missing for each subject and generate only those COs. Subjects that already have 6 COs will be skipped.
                                         </small>
                                     </div>
@@ -337,10 +337,10 @@
                 </form>
             </div>
             <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 1rem 1rem;">
-                <button type="button" class="btn btn-success rounded-pill fw-semibold" onclick="submitGenerateForm()" id="generateSubmitBtn">
-                    <i class="bi bi-magic me-1"></i>Generate Course Outcomes
-                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success fw-semibold px-4" onclick="submitGenerateForm()" id="generateSubmitBtn">
+                    <i class="bi bi-magic me-2"></i>Generate Course Outcomes
+                </button>
             </div>
         </div>
     </div>

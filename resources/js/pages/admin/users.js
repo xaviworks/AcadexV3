@@ -8,6 +8,10 @@
  * - DataTables initialization
  */
 
+function isAdminUsersPage() {
+  return Boolean(document.getElementById('usersTable') && document.getElementById('courseModal'));
+}
+
 // Make togglePasswordVisibility globally available
 window.togglePasswordVisibility = function (button, inputId) {
   const input = document.getElementById(inputId);
@@ -17,7 +21,7 @@ window.togglePasswordVisibility = function (button, inputId) {
 
   const isHidden = input.type === 'password';
   input.type = isHidden ? 'text' : 'password';
-  icon.className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+  icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
   button.setAttribute('aria-pressed', String(isHidden));
   button.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
 };
@@ -273,6 +277,10 @@ window.submitUserForm = function () {
  * Initialize admin users page functionality
  */
 function initAdminUsersPage() {
+  if (!isAdminUsersPage()) {
+    return;
+  }
+
   // Delegated handler for reset-2FA buttons (works with DataTables-rendered rows).
   document.addEventListener('click', function (e) {
     const resetBtn = e.target.closest('[data-action="reset-2fa-user"]');
@@ -724,6 +732,10 @@ function initAdminUsersPage() {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+  if (!isAdminUsersPage()) {
+    return;
+  }
+
   // Check for stored messages from page reload
   const storedMessage = sessionStorage.getItem('userActionMessage');
   const messageType = sessionStorage.getItem('userActionType');

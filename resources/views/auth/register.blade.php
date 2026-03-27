@@ -55,11 +55,11 @@
             <x-input-error :messages="$errors->get('department_id')" class="mt-2 text-red-400" />
         </div>
 
-        {{-- Course --}}
+        {{-- Program --}}
         <div class="hidden transition-opacity duration-300" id="course-wrapper">
-            <x-input-label for="course_id" :value="__('Select Course')" class="text-white" />
+            <x-input-label for="course_id" :value="__('Select Program')" class="text-white" />
             <select id="course_id" name="course_id" class="w-full mt-1 border-gray-300 rounded-md shadow-sm bg-gray-400 text-white" required>
-                <option value="">-- Choose Course --</option>
+                <option value="">-- Choose Program --</option>
             </select>
             <x-input-error :messages="$errors->get('course_id')" class="mt-2 text-red-400" />
         </div>
@@ -67,13 +67,13 @@
         {{-- GE Notice --}}
         <div id="ge-notice" class="hidden p-4 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 text-white mt-2">
             <strong class="font-semibold">General Education Instructor:</strong>
-            <span class="block sm:inline">You will be able to teach GE subjects across all courses and will be managed by the GE Coordinator.</span>
+            <span class="block sm:inline">You will be able to teach GE subjects across all programs and will be managed by the GE Coordinator.</span>
         </div>
 
         {{-- Password --}}
         <div>
             <x-input-label for="password" :value="__('Password')" class="text-white" />
-            <div class="relative">
+            <div class="relative" data-password-toggle-group>
                 <input
                     id="password"
                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-full mt-1 pr-12 text-white placeholder-white bg-transparent"
@@ -83,23 +83,18 @@
                     placeholder="Min. 8 characters"
                     autocomplete="new-password"
                     oninput="checkPassword(this.value)"
+                    data-password-toggle-input
                 />
-                
-                <input
-                    id="password-visible"
-                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-full mt-1 pr-12 text-white placeholder-white bg-transparent"
-                    type="text"
-                    style="display: none; position: absolute; top: 0; left: 0; width: 100%;"
-                    placeholder="Min. 8 characters"
-                    tabindex="-1"
-                />
-                
+
                 <button
                     type="button"
                     id="togglePassword"
                     class="absolute inset-y-0 right-0 flex items-center pr-3 mt-1 text-white/80 hover:text-white focus:outline-none transition-colors duration-200 z-10 hidden"
+                    data-password-toggle-button
+                    aria-label="Show password"
+                    title="Show password"
                 >
-                    <i class="fas fa-eye-slash" id="toggleIcon"></i>
+                    <i class="fas fa-eye-slash" id="toggleIcon" data-password-toggle-icon></i>
                 </button>
             </div>
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-400" />
@@ -132,7 +127,7 @@
         {{-- Confirm Password --}}
         <div>
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" class="text-white" />
-            <div class="relative">
+            <div class="relative" data-password-toggle-group>
                 <input
                     id="password_confirmation"
                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-full mt-1 pr-12 text-white placeholder-white bg-transparent"
@@ -140,22 +135,18 @@
                     name="password_confirmation"
                     required
                     autocomplete="new-password"
+                    data-password-toggle-input
                 />
-                
-                <input
-                    id="password_confirmation-visible"
-                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-full mt-1 pr-12 text-white placeholder-white bg-transparent"
-                    type="text"
-                    style="display: none; position: absolute; top: 0; left: 0; width: 100%;"
-                    tabindex="-1"
-                />
-                
+
                 <button
                     type="button"
                     id="togglePasswordConfirmation"
                     class="absolute inset-y-0 right-0 flex items-center pr-3 mt-1 text-white/80 hover:text-white focus:outline-none transition-colors duration-200 z-10 hidden"
+                    data-password-toggle-button
+                    aria-label="Show password"
+                    title="Show password"
                 >
-                    <i class="fas fa-eye-slash" id="toggleIconConfirmation"></i>
+                    <i class="fas fa-eye-slash" id="toggleIconConfirmation" data-password-toggle-icon></i>
                 </button>
             </div>
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-red-400" />
@@ -195,7 +186,7 @@
             
             if (!deptId) {
                 courseWrapper.classList.add('hidden');
-                courseSelect.innerHTML = '<option value="">-- Choose Course --</option>';
+                courseSelect.innerHTML = '<option value="">-- Choose Program --</option>';
                 geNotice.classList.add('hidden');
                 return;
             }
@@ -217,7 +208,7 @@
                             courseSelect.innerHTML = `<option value="${data[0].id}" selected>${data[0].name}</option>`;
                             courseWrapper.classList.add('hidden');
                         } else {
-                            courseSelect.innerHTML = '<option value="">-- Choose Course --</option>';
+                            courseSelect.innerHTML = '<option value="">-- Choose Program --</option>';
                             data.forEach(course => {
                                 courseSelect.innerHTML += `<option value="${course.id}">${course.name}</option>`;
                             });
@@ -227,120 +218,6 @@
             }
         });
         
-        // Password toggle for main password field
-        const toggleBtn = document.getElementById('togglePassword');
-        const toggleIcon = document.getElementById('toggleIcon');
-        const passwordInput = document.getElementById('password');
-        const passwordVisible = document.getElementById('password-visible');
-        
-        if (toggleBtn && toggleIcon && passwordInput && passwordVisible) {
-            let isVisible = false;
-            
-            const updateToggleVisibility = () => {
-                if (passwordInput.value.length > 0 || passwordVisible.value.length > 0) {
-                    toggleBtn.classList.remove('hidden');
-                } else {
-                    toggleBtn.classList.add('hidden');
-                    if (isVisible) {
-                        isVisible = false;
-                        passwordVisible.style.display = 'none';
-                        passwordInput.style.display = 'block';
-                        toggleIcon.classList.remove('fa-eye');
-                        toggleIcon.classList.add('fa-eye-slash');
-                    }
-                }
-            };
-            
-            passwordInput.addEventListener('input', function() {
-                passwordVisible.value = this.value;
-                updateToggleVisibility();
-            });
-            
-            passwordVisible.addEventListener('input', function() {
-                passwordInput.value = this.value;
-                updateToggleVisibility();
-                checkPassword(this.value);
-            });
-            
-            toggleBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                isVisible = !isVisible;
-                
-                if (isVisible) {
-                    passwordInput.style.display = 'none';
-                    passwordVisible.style.display = 'block';
-                    passwordVisible.style.position = 'relative';
-                    passwordVisible.value = passwordInput.value;
-                    passwordVisible.focus();
-                    toggleIcon.classList.remove('fa-eye-slash');
-                    toggleIcon.classList.add('fa-eye');
-                } else {
-                    passwordVisible.style.display = 'none';
-                    passwordInput.style.display = 'block';
-                    passwordInput.value = passwordVisible.value;
-                    passwordInput.focus();
-                    toggleIcon.classList.remove('fa-eye');
-                    toggleIcon.classList.add('fa-eye-slash');
-                }
-            });
-        }
-        
-        // Password toggle for confirmation field
-        const toggleBtnConf = document.getElementById('togglePasswordConfirmation');
-        const toggleIconConf = document.getElementById('toggleIconConfirmation');
-        const passwordConfInput = document.getElementById('password_confirmation');
-        const passwordConfVisible = document.getElementById('password_confirmation-visible');
-        
-        if (toggleBtnConf && toggleIconConf && passwordConfInput && passwordConfVisible) {
-            let isVisibleConf = false;
-            
-            const updateToggleVisibilityConf = () => {
-                if (passwordConfInput.value.length > 0 || passwordConfVisible.value.length > 0) {
-                    toggleBtnConf.classList.remove('hidden');
-                } else {
-                    toggleBtnConf.classList.add('hidden');
-                    if (isVisibleConf) {
-                        isVisibleConf = false;
-                        passwordConfVisible.style.display = 'none';
-                        passwordConfInput.style.display = 'block';
-                        toggleIconConf.classList.remove('fa-eye');
-                        toggleIconConf.classList.add('fa-eye-slash');
-                    }
-                }
-            };
-            
-            passwordConfInput.addEventListener('input', function() {
-                passwordConfVisible.value = this.value;
-                updateToggleVisibilityConf();
-            });
-            
-            passwordConfVisible.addEventListener('input', function() {
-                passwordConfInput.value = this.value;
-                updateToggleVisibilityConf();
-            });
-            
-            toggleBtnConf.addEventListener('click', function(e) {
-                e.preventDefault();
-                isVisibleConf = !isVisibleConf;
-                
-                if (isVisibleConf) {
-                    passwordConfInput.style.display = 'none';
-                    passwordConfVisible.style.display = 'block';
-                    passwordConfVisible.style.position = 'relative';
-                    passwordConfVisible.value = passwordConfInput.value;
-                    passwordConfVisible.focus();
-                    toggleIconConf.classList.remove('fa-eye-slash');
-                    toggleIconConf.classList.add('fa-eye');
-                } else {
-                    passwordConfVisible.style.display = 'none';
-                    passwordConfInput.style.display = 'block';
-                    passwordConfInput.value = passwordConfVisible.value;
-                    passwordConfInput.focus();
-                    toggleIconConf.classList.remove('fa-eye');
-                    toggleIconConf.classList.add('fa-eye-slash');
-                }
-            });
-        }
     });
 
     function checkPassword(password) {

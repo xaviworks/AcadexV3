@@ -11,10 +11,6 @@ class DepartmentsTableSeeder extends Seeder
     {
         $departments = [
             [
-                'department_code' => 'GE',
-                'department_description' => 'School of General Education',
-            ],
-            [
                 'department_code' => 'ASE',
                 'department_description' => 'School of Arts and Science and Education',
             ],

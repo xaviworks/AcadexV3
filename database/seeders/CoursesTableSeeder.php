@@ -32,10 +32,25 @@ class CoursesTableSeeder extends Seeder
                 'course_description' => 'Bachelor of Science in Business Administration',
                 'department_id' => $sbism->id,
             ],
+            [
+                'course_code' => 'BSHM',
+                'course_description' => 'Bachelor of Science in Hospitality Management',
+                'department_id' => $sbism->id,
+            ],
             // ASE Courses
             [
                 'course_code' => 'BSPSY',
                 'course_description' => 'Bachelor of Science in Psychology',
+                'department_id' => $ase->id,
+            ],
+            [
+                'course_code' => 'ABTHEO',
+                'course_description' => 'Bachelor of Arts in Theology',
+                'department_id' => $ase->id,
+            ],
+            [
+                'course_code' => 'BSEd',
+                'course_description' => 'Bachelor of Science in Education',
                 'department_id' => $ase->id,
             ],
             // Nursing Course

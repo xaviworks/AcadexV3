@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Activity;
 use App\Models\Course;
 use App\Models\CourseOutcomes;
+use App\Models\ProgramLearningOutcome;
+use App\Models\ProgramLearningOutcomeMapping;
 use App\Models\Score;
 use App\Models\Student;
 use App\Models\Subject;
@@ -23,6 +25,8 @@ class CourseOutcomeReportingService
 {
     use CourseOutcomeTrait;
 
+    public const DEFAULT_PLO_COUNT = 5;
+    public const MAX_PLO_COUNT = 20;
     /**
      * Compute CO attainment for a single student in a specific subject across terms.
      * Returns structure compatible with computeCoAttainment plus term/column helpers.
@@ -294,23 +298,27 @@ class CourseOutcomeReportingService
             return [];
         }
 
-        // Get all enrolled students for these subjects
-        $students = Student::whereHas('subjects', function ($q) use ($subjectIds) {
-            $q->whereIn('subject_id', $subjectIds)
-              ->where('student_subjects.is_deleted', false);
-        })
-        ->where('students.is_deleted', false)
-        ->select('id')
-        ->get();
+        // Build a per-subject enrollment map so each activity only counts
+        // students actually enrolled in that specific subject.
+        $subjectStudentMap = \DB::table('student_subjects')
+            ->join('students', 'students.id', '=', 'student_subjects.student_id')
+            ->whereIn('student_subjects.subject_id', $subjectIds)
+            ->where('student_subjects.is_deleted', false)
+            ->where('students.is_deleted', false)
+            ->select('student_subjects.subject_id', 'student_subjects.student_id')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(fn ($rows) => $rows->pluck('student_id')->unique()->values()->all());
 
-        if ($students->isEmpty()) {
+        if ($subjectStudentMap->isEmpty()) {
             return [];
         }
 
+        $studentIds = $subjectStudentMap->flatten()->unique()->values()->all();
+
         // Prefetch all scores for these activities and students
         $activityIds = $activities->pluck('id')->all();
-        $studentIds = $students->pluck('id')->all();
-        
+
         $scores = Score::whereIn('activity_id', $activityIds)
             ->whereIn('student_id', $studentIds)
             ->select('activity_id', 'student_id', 'score')
@@ -337,9 +345,11 @@ class CourseOutcomeReportingService
                 $coTargets[$coNum] = (int) ($co->target_percentage ?? 75);
             }
 
-            // For each student, add score and max
-            foreach ($students as $student) {
-                $key = $activity->id.'::'.$student->id;
+            $enrolledStudentIds = $subjectStudentMap->get($activity->subject_id, []);
+
+            // For each student enrolled in this activity's subject, add score and max
+            foreach ($enrolledStudentIds as $studentId) {
+                $key = $activity->id.'::'.$studentId;
                 $score = $scores->get($key)?->first();
                 $merged[$coNum]['raw'] += $score ? (int)$score->score : 0;
                 $merged[$coNum]['max'] += (int)$activity->number_of_items;
@@ -506,5 +516,169 @@ class CourseOutcomeReportingService
         }
 
         return $out;
+    }
+
+    /**
+     * Ensure the program has a default PLO scaffold the first time the report is opened.
+     */
+    public function ensureDefaultProgramLearningOutcomes(int $courseId): Collection
+    {
+        $existing = ProgramLearningOutcome::where('course_id', $courseId)
+            ->where('is_deleted', false)
+            ->orderBy('display_order')
+            ->get();
+
+        if ($existing->isNotEmpty()) {
+            return $existing;
+        }
+
+        $defaults = collect();
+        for ($i = 1; $i <= self::DEFAULT_PLO_COUNT; $i++) {
+            $defaults->push(ProgramLearningOutcome::create([
+                'course_id' => $courseId,
+                'plo_code' => 'PLO' . $i,
+                'title' => 'Program Learning Outcome ' . $i,
+                'display_order' => $i,
+                'is_active' => true,
+                'is_deleted' => false,
+            ]));
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * Get ordered PLO definitions for a program.
+     */
+    public function getProgramLearningOutcomes(int $courseId, bool $activeOnly = false): Collection
+    {
+        $query = ProgramLearningOutcome::where('course_id', $courseId)
+            ->where('is_deleted', false)
+            ->orderBy('display_order')
+            ->orderBy('id');
+
+        if ($activeOnly) {
+            $query->where('is_active', true);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Build PLO report data from existing CO aggregates.
+     */
+    public function aggregateProgramLearningOutcomes(
+        int $courseId,
+        ?int $academicPeriodId = null,
+        bool $excludeGE = false
+    ): array {
+        $allPlos = $this->ensureDefaultProgramLearningOutcomes($courseId);
+        $activePlos = $allPlos->where('is_active', true)
+            ->sortBy('display_order')
+            ->values();
+
+        $coAggregates = $this->aggregateCourse($courseId, $academicPeriodId, $excludeGE);
+        $mappings = ProgramLearningOutcomeMapping::where('course_id', $courseId)
+            ->whereIn('program_learning_outcome_id', $allPlos->pluck('id'))
+            ->get()
+            ->groupBy('program_learning_outcome_id');
+
+        $results = [];
+
+        foreach ($activePlos as $plo) {
+            $mappedCoCodes = $mappings->get($plo->id, collect())
+                ->pluck('co_code')
+                ->unique()
+                ->sortBy(fn ($code) => $this->extractOutcomeNumber($code))
+                ->values();
+
+            $mappedMetrics = $mappedCoCodes
+                ->map(function ($code) use ($coAggregates) {
+                    $coNumber = $this->extractOutcomeNumber($code);
+                    return $coAggregates[$coNumber] ?? null;
+                })
+                ->filter();
+
+            if ($mappedMetrics->isEmpty()) {
+                $results[$plo->id] = null;
+                continue;
+            }
+
+            $metrics = $this->computeProgramLearningOutcomeMetrics($mappedMetrics);
+            $metrics['co_codes'] = $mappedCoCodes->all();
+            $metrics['level'] = $this->resolveAttainmentLevel($metrics['percent']);
+            $results[$plo->id] = $metrics;
+        }
+
+        return [
+            'definitions' => $allPlos->values(),
+            'activeDefinitions' => $activePlos,
+            'mappings' => $mappings->map(fn ($items) => $items->pluck('co_code')->unique()->values()->all())->all(),
+            'availableCoCodes' => $this->getAvailableCoCodes($courseId, $academicPeriodId, $excludeGE),
+            'coAggregates' => $coAggregates,
+            'results' => $results,
+        ];
+    }
+
+    public function getAvailableCoCodes(
+        int $courseId,
+        ?int $academicPeriodId = null,
+        bool $excludeGE = false
+    ): array {
+        $coCodes = CourseOutcomes::query()
+            ->select('course_outcomes.co_code')
+            ->join('subjects', 'subjects.id', '=', 'course_outcomes.subject_id')
+            ->where('course_outcomes.is_deleted', false)
+            ->where('subjects.is_deleted', false)
+            ->where('subjects.course_id', $courseId)
+            ->when($excludeGE, function ($query) {
+                $query->where('subjects.department_id', '!=', 1);
+            })
+            ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
+                $query->where('subjects.academic_period_id', $academicPeriodId);
+            })
+            ->pluck('course_outcomes.co_code')
+            ->filter()
+            ->unique()
+            ->sortBy(fn ($code) => $this->extractOutcomeNumber($code))
+            ->values()
+            ->all();
+
+        return $coCodes;
+    }
+
+    private function computeProgramLearningOutcomeMetrics(Collection $mappedMetrics): array
+    {
+        return [
+            'percent' => round($mappedMetrics->avg('percent'), 2),
+            'target_percentage' => round($mappedMetrics->avg('target_percentage'), 2),
+        ];
+    }
+
+    private function resolveAttainmentLevel(float $percent): array
+    {
+        if ($percent >= 85) {
+            return [
+                'label' => 'Exceeded Expected Outcome',
+                'tone' => 'success',
+            ];
+        }
+
+        if ($percent >= 70) {
+            return [
+                'label' => 'Met Expected Outcome',
+                'tone' => 'warning',
+            ];
+        }
+
+        return [
+            'label' => 'Needs Improvement',
+            'tone' => 'danger',
+        ];
+    }
+
+    private function extractOutcomeNumber(string $code): int
+    {
+        return (int) preg_replace('/[^0-9]/', '', $code);
     }
 }

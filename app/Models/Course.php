@@ -74,6 +74,13 @@ class Course extends Model
             ->where('is_deleted', false);
     }
 
+    public function programLearningOutcomes()
+    {
+        return $this->hasMany(ProgramLearningOutcome::class)
+            ->where('is_deleted', false)
+            ->orderBy('display_order');
+    }
+
     /**
      * Accessors
      */

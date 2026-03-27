@@ -1,13 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $showCourseColumn = empty($selectedCourseId);
+    $showProgramFilter = isset($courses) && $courses->count() > 1;
+@endphp
 <div class="container-fluid px-4 py-4">
     <!-- Page Header -->
     <div class="mb-4">
         <h2 class="fw-bold text-dark mb-1">
             <i class="bi bi-mortarboard me-2"></i>Students Overview
             @if(isset($department))
-                <span class="text-muted fs-5">• {{ $department->department_description ?? '' }}</span>
+                <span class="text-muted fs-5">• {{ $department->department_code ?? '' }}</span>
             @endif
         </h2>
         <p class="text-muted mb-0">View and manage students across departments and courses</p>
@@ -36,19 +40,21 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label for="course_id" class="form-label">Course</label>
-                    <select name="course_id" id="course_id" class="form-select" {{ !isset($department) ? 'disabled' : '' }} onchange="this.form.submit()">
-                        <option value="">All Courses</option>
-                        @if(isset($courses) && isset($department))
-                            @foreach($courses as $course)
-                                <option value="{{ $course->id }}" {{ (isset($selectedCourseId) && $selectedCourseId == $course->id) ? 'selected' : '' }}>
-                                    {{ $course->course_code }} - {{ $course->name }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
+                @if($showProgramFilter)
+                    <div class="col-md-4">
+                        <label for="course_id" class="form-label">Program</label>
+                        <select name="course_id" id="course_id" class="form-select" {{ !isset($department) ? 'disabled' : '' }} onchange="this.form.submit()">
+                            <option value="">All Programs</option>
+                            @if(isset($courses) && isset($department))
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}" {{ (isset($selectedCourseId) && $selectedCourseId == $course->id) ? 'selected' : '' }}>
+                                        {{ $course->course_code }} - {{ $course->course_description }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                @endif
             </form>
         </div>
     </div>
@@ -59,8 +65,9 @@
                 <thead class="table-light">
                     <tr>
                         <th scope="col" class="px-4 py-3 fw-semibold">Name</th>
-                        <th scope="col" class="px-4 py-3 fw-semibold">Course</th>
-                        <th scope="col" class="px-4 py-3 fw-semibold">Department</th>
+                        @if($showCourseColumn)
+                            <th scope="col" class="px-4 py-3 fw-semibold">Program</th>
+                        @endif
                         <th scope="col" class="px-4 py-3 fw-semibold">Year Level</th>
                     </tr>
                 </thead>
@@ -77,14 +84,13 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3">
-                                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">
-                                    {{ $student->course->course_code ?? 'N/A' }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <span class="text-muted">{{ $student->department->department_description ?? 'N/A' }}</span>
-                            </td>
+                            @if($showCourseColumn)
+                                <td class="px-4 py-3">
+                                    <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">
+                                        {{ $student->course->course_code ?? 'N/A' }}
+                                    </span>
+                                </td>
+                            @endif
                             <td class="px-4 py-3">
                                 <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
                                     Year {{ $student->year_level }}
@@ -93,7 +99,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-5">
+                            <td colspan="{{ $showCourseColumn ? 3 : 2 }}" class="text-center py-5">
                                 <div class="text-muted mb-3">
                                     <i class="bi bi-people-x fs-1 opacity-50"></i>
                                 </div>

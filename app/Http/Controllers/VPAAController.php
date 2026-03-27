@@ -202,11 +202,13 @@ class VPAAController extends Controller
             ->where('is_active', true)
             ->count();
         $studentsCount = Student::where('is_deleted', false)->count();
+        $academicPrograms = Course::where('is_deleted', false)->count();
 
         return view('vpaa.dashboard', [
             'departmentsCount' => $departmentsCount,
             'instructorsCount' => $instructorsCount,
-            'studentsCount' => $studentsCount
+            'studentsCount' => $studentsCount,
+            'academicPrograms' => $academicPrograms,
         ]);
     }
 
@@ -220,12 +222,13 @@ class VPAAController extends Controller
             ->where('is_active', true)
             ->count();
         $studentsCount = Student::where('is_deleted', false)->count();
+        $academicPrograms = Course::where('is_deleted', false)->count();
 
         return response()->json([
             'departmentsCount' => $departmentsCount,
             'instructorsCount' => $instructorsCount,
             'studentsCount' => $studentsCount,
-            'academicPrograms' => $departmentsCount * 3,
+            'academicPrograms' => $academicPrograms,
         ]);
     }
 
@@ -357,12 +360,12 @@ class VPAAController extends Controller
         $departmentId = $departmentId ?: $request->input('department_id');
         
         // Build query for instructors
-        $query = User::where('is_active', true)
-            ->where('role', '!=', 3) // Exclude admin users (role 3)
+        $query = User::where('role', '!=', 3) // Exclude admin users (role 3)
             ->where('role', '!=', 5) // Exclude VPAA users (role 5)
             ->with(['department' => function($query) {
                 $query->select('id', 'department_code', 'department_description');
             }])
+            ->orderBy('is_active', 'desc')
             ->orderBy('last_name');
         
         // Apply department filter if selected
@@ -370,8 +373,7 @@ class VPAAController extends Controller
             $query->where('department_id', $departmentId);
         }
         
-        // Always paginate (returns empty paginator when no results)
-        $instructors = $query->paginate(15);
+        $instructors = $query->get();
 
         $departments = Department::where('is_deleted', false)
             ->select('id', 'department_code', 'department_description')
@@ -447,16 +449,30 @@ class VPAAController extends Controller
             ->orderBy('department_description')
             ->get();
         $departmentId = $request->input('department_id');
+        $selectedCourseId = $request->input('course_id');
 
         if ($departmentId) {
-            $students = Student::where('department_id', $departmentId)
+            $query = Student::with('course')
+                ->where('department_id', $departmentId)
                 ->where('is_deleted', false)
                 ->select('id', 'first_name', 'middle_name', 'last_name', 'department_id', 'course_id', 'year_level')
-                ->orderBy('last_name')
+                ->orderBy('last_name');
+
+            if ($selectedCourseId) {
+                $query->where('course_id', $selectedCourseId);
+            }
+
+            $students = $query->get();
+
+            $courses = Course::where('department_id', $departmentId)
+                ->where('is_deleted', false)
+                ->select('id', 'course_code', 'course_description')
+                ->orderBy('course_code')
                 ->get();
+
             $department = Department::select('id', 'department_code', 'department_description')
                 ->find($departmentId);
-            return view('vpaa.students', compact('students', 'department', 'departments'));
+            return view('vpaa.students', compact('students', 'department', 'departments', 'courses', 'selectedCourseId'));
         }
 
         // Show department wildcards first

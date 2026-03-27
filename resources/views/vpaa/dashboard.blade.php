@@ -98,7 +98,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted mb-0 small">Academic Programs</h6>
-                            <h4 class="fw-bold text-warning mb-0" x-text="data.academicPrograms">{{ ($departmentsCount ?? 0) * 3 }}</h4>
+                            <h4 class="fw-bold text-warning mb-0" x-text="data.academicPrograms">{{ $academicPrograms ?? 0 }}</h4>
                         </div>
                     </div>
                     <p class="text-muted small mb-0" style="font-size: 0.8rem;">
@@ -252,7 +252,7 @@ function vpaaDashboard() {
             departmentsCount: @json($departmentsCount ?? 0),
             instructorsCount: @json($instructorsCount ?? 0),
             studentsCount: @json($studentsCount ?? 0),
-            academicPrograms: @json(($departmentsCount ?? 0) * 3),
+            academicPrograms: @json($academicPrograms ?? 0),
         },
         get avgPerDept() {
             return this.data.departmentsCount > 0

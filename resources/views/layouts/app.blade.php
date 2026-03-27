@@ -146,22 +146,32 @@
             }, 200);
         }
 
-        // Smooth page transitions - show loader on navigation
+        // Smooth page transitions - show loader only when navigation will actually continue.
         document.addEventListener('click', function(e) {
             const link = e.target.closest('a');
-            
-            if (link && 
-                link.href && 
-                link.href.indexOf(window.location.origin) === 0 &&
-                !link.hasAttribute('target') &&
-                !link.hasAttribute('download') &&
-                !link.classList.contains('dropdown-toggle') &&
-                !link.getAttribute('href').startsWith('#') &&
-                !link.closest('.dropdown-menu')) {
-                
-                // Show loading screen for internal navigation
-                document.body.classList.remove('loaded');
+
+            if (!link ||
+                !link.href ||
+                link.href.indexOf(window.location.origin) !== 0 ||
+                link.hasAttribute('target') ||
+                link.hasAttribute('download') ||
+                link.hasAttribute('data-no-page-loader') ||
+                link.classList.contains('dropdown-toggle') ||
+                link.getAttribute('href').startsWith('#') ||
+                link.closest('.dropdown-menu')) {
+                return;
             }
+
+            // Let page-level handlers run first. If they cancel navigation
+            // (for example, to show an unsaved-changes modal), keep the loader hidden.
+            setTimeout(function() {
+                if (e.defaultPrevented) {
+                    document.body.classList.add('loaded');
+                    return;
+                }
+
+                document.body.classList.remove('loaded');
+            }, 0);
         });
 
         // Handle browser back/forward
