@@ -100,94 +100,27 @@ class VPAAController extends Controller
      */
     public function subject($subjectId)
     {
-    // Subject + context (no academic period required for VPAA)
-    $selectedSubject = \App\Models\Subject::with(['course', 'academicPeriod'])->findOrFail($subjectId);
+        $sourceData = app(CourseOutcomeAttainmentController::class)->subject($subjectId)->getData();
 
-        // Students enrolled in the subject
-        $students = \App\Models\Student::whereHas('subjects', function($q) use ($subjectId) {
-            $q->where('subject_id', $subjectId);
-        })->get();
+        $viewData = array_intersect_key($sourceData, array_flip([
+            'students',
+            'coResults',
+            'coColumnsByTerm',
+            'coDetails',
+            'finalCOs',
+            'terms',
+            'subjectId',
+            'selectedSubject',
+            'incompleteCOs',
+            'maxScoresByTermCo',
+            'totalMaxByCoId',
+            'studentTermCoScores',
+            'coSummaryStats',
+            'termCoSummaryStats',
+            'targetLevelThresholds',
+        ]));
 
-        // Terms
-        $terms = ['prelim', 'midterm', 'prefinal', 'final'];
-
-        // Activities grouped by term with COs
-        $activitiesByTerm = [];
-        $coColumnsByTerm = [];
-        foreach ($terms as $term) {
-            $activities = \App\Models\Activity::where('subject_id', $subjectId)
-                ->where('term', $term)
-                ->where('is_deleted', false)
-                ->whereNotNull('course_outcome_id')
-                ->get();
-            $activitiesByTerm[$term] = $activities;
-
-            $coIds = $activities->pluck('course_outcome_id')->unique()->toArray();
-            if (!empty($coIds)) {
-                $sortedCos = \App\Models\CourseOutcomes::whereIn('id', $coIds)
-                    ->orderBy('co_code')
-                    ->pluck('id')
-                    ->toArray();
-                $coColumnsByTerm[$term] = $sortedCos;
-            } else {
-                $coColumnsByTerm[$term] = [];
-            }
-        }
-
-        // Map activity->CO per term
-        $activityCoMap = [];
-        foreach ($activitiesByTerm as $term => $activities) {
-            foreach ($activities as $activity) {
-                $activityCoMap[$term][$activity->id] = $activity->course_outcome_id;
-            }
-        }
-
-        // Gather student scores per activity
-        $studentScores = [];
-        foreach ($students as $student) {
-            foreach ($activitiesByTerm as $term => $activities) {
-                foreach ($activities as $activity) {
-                    $score = \App\Models\Score::where('student_id', $student->id)
-                        ->where('activity_id', $activity->id)
-                        ->first();
-                    $studentScores[$student->id][$term][$activity->id] = [
-                        'score' => $score ? $score->score : 0,
-                        'max' => $activity->number_of_items,
-                    ];
-                }
-            }
-        }
-
-        // Compute CO attainment per student using existing trait
-        $coResults = [];
-        $calculator = new \App\Http\Controllers\CourseOutcomeAttainmentController();
-        foreach ($students as $student) {
-            $coResults[$student->id] = $calculator->computeCoAttainment($studentScores[$student->id] ?? [], $activityCoMap);
-        }
-
-        // CO details and final ordered list
-        $flat = array_merge(...array_values($coColumnsByTerm ?: [[]]));
-        $finalCOs = array_unique($flat);
-        $coDetails = \App\Models\CourseOutcomes::whereIn('id', $finalCOs)->get()->keyBy('id');
-        usort($finalCOs, function($a, $b) use ($coDetails) {
-            $codeA = $coDetails[$a]->co_code ?? '';
-            $codeB = $coDetails[$b]->co_code ?? '';
-            $numA = (int)preg_replace('/[^0-9]/', '', $codeA);
-            $numB = (int)preg_replace('/[^0-9]/', '', $codeB);
-            return $numA <=> $numB;
-        });
-        $finalCOs = array_values($finalCOs);
-
-        return view('vpaa.scores.course-outcome-results', [
-            'students' => $students,
-            'coResults' => $coResults,
-            'coColumnsByTerm' => $coColumnsByTerm,
-            'coDetails' => $coDetails,
-            'finalCOs' => $finalCOs,
-            'terms' => $terms,
-            'subjectId' => $subjectId,
-            'selectedSubject' => $selectedSubject,
-        ]);
+        return view('vpaa.scores.course-outcome-results', $viewData);
     }
     
     /**

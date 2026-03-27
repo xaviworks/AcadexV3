@@ -5,6 +5,13 @@
 
 let currentTerm = null;
 
+const TERM_LABELS = {
+  prelim: 'Prelim',
+  midterm: 'Midterm',
+  prefinal: 'Prefinal',
+  final: 'Final',
+};
+
 const DISPLAY_TYPE_ICON_SVG = {
   score: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 2h3a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h3l1-2z"></path><path d="M9 10h6"></path><path d="M9 14h6"></path></svg>`,
   percentage: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"></path><path d="M7 16v-5"></path><path d="M12 16V8"></path><path d="M17 16v-3"></path></svg>`,
@@ -14,6 +21,13 @@ const DISPLAY_TYPE_ICON_SVG = {
 
 function isCourseOutcomeResultsPage() {
   return document.querySelector('[data-page="instructor.course-outcome-results"]');
+}
+
+function updateCurrentViewBadge(term = null) {
+  const currentViewBadge = document.getElementById('current-view');
+  if (!currentViewBadge) return;
+
+  currentViewBadge.textContent = term ? `${TERM_LABELS[term] || term} Term` : 'All Terms';
 }
 
 // ==================== CUSTOM PRINT MODAL (No Bootstrap dependency) ====================
@@ -86,7 +100,7 @@ function setDisplayType(type, iconKey, text) {
   const compactStepper = document.querySelector('.compact-stepper');
   const stepperColumn = document.querySelector('.col-md-6.text-end');
 
-  if (type === 'passfail' || type === 'copasssummary') {
+  if (type === 'passfail') {
     if (termStepperContainer) {
       termStepperContainer.style.display = 'none';
       termStepperContainer.style.visibility = 'hidden';
@@ -109,16 +123,22 @@ function setDisplayType(type, iconKey, text) {
   }
 
   toggleScoreTypeWithValue(type);
+  updateCurrentViewBadge(currentTerm);
 }
 
 function toggleScoreTypeWithValue(type) {
   const passfailTable = document.getElementById('passfail-table');
   const copasssummaryTable = document.getElementById('copasssummary-table');
+  const summaryTargetLevelControls = document.getElementById('summary-target-level-controls');
   const mainTables = document.querySelectorAll('.main-table');
   const termTables = document.querySelectorAll('.term-table');
   const summaryLabel = document.getElementById('summaryLabel');
   const termSummaryLabels = document.querySelectorAll('.term-summary-label');
   const termStepperContainer = document.getElementById('term-navigation-container');
+
+  if (summaryTargetLevelControls) {
+    summaryTargetLevelControls.style.display = type === 'copasssummary' ? 'block' : 'none';
+  }
 
   if (type === 'passfail') {
     if (passfailTable) passfailTable.style.display = 'block';
@@ -132,14 +152,22 @@ function toggleScoreTypeWithValue(type) {
     document.querySelectorAll('.passfail-term-table').forEach((tbl) => (tbl.style.display = 'none'));
   } else if (type === 'copasssummary') {
     if (passfailTable) passfailTable.style.display = 'none';
-    if (copasssummaryTable) copasssummaryTable.style.display = 'block';
     mainTables.forEach((tbl) => (tbl.style.display = 'none'));
     termTables.forEach((tbl) => (tbl.style.display = 'none'));
     if (termStepperContainer) {
-      termStepperContainer.style.display = 'none';
-      termStepperContainer.style.visibility = 'hidden';
+      termStepperContainer.style.display = 'flex';
+      termStepperContainer.style.visibility = 'visible';
     }
+    document.querySelectorAll('.passfail-term-table').forEach((tbl) => (tbl.style.display = 'none'));
     document.querySelectorAll('.summary-term-table').forEach((tbl) => (tbl.style.display = 'none'));
+
+    if (currentTerm) {
+      if (copasssummaryTable) copasssummaryTable.style.display = 'none';
+      const activeSummaryTable = document.getElementById(`summary-term-${currentTerm}`);
+      if (activeSummaryTable) activeSummaryTable.style.display = 'block';
+    } else if (copasssummaryTable) {
+      copasssummaryTable.style.display = 'block';
+    }
   } else {
     if (passfailTable) passfailTable.style.display = 'none';
     if (copasssummaryTable) copasssummaryTable.style.display = 'none';
@@ -257,6 +285,8 @@ function switchTerm(term, index) {
     const percent = el.getAttribute('data-percentage');
     el.textContent = type === 'score' ? score : percent !== '' && percent !== null ? `${percent}%` : '-';
   });
+
+  updateCurrentViewBadge(term);
 }
 
 function showAllTerms() {
@@ -293,6 +323,7 @@ function showAllTerms() {
   });
 
   toggleScoreType();
+  updateCurrentViewBadge(null);
 }
 
 function coPrintTable() {
@@ -340,6 +371,22 @@ function coPrintSpecificTable(tableType) {
     case 'copasssummary':
       content = getCourseOutcomeSummaryContent();
       reportTitle = 'Course Outcomes Summary Dashboard Report';
+      break;
+    case 'summary-prelim':
+      content = getCourseOutcomeSummaryContent('prelim');
+      reportTitle = 'Course Outcomes Summary Dashboard - Prelim Term';
+      break;
+    case 'summary-midterm':
+      content = getCourseOutcomeSummaryContent('midterm');
+      reportTitle = 'Course Outcomes Summary Dashboard - Midterm Term';
+      break;
+    case 'summary-prefinal':
+      content = getCourseOutcomeSummaryContent('prefinal');
+      reportTitle = 'Course Outcomes Summary Dashboard - Prefinal Term';
+      break;
+    case 'summary-final':
+      content = getCourseOutcomeSummaryContent('final');
+      reportTitle = 'Course Outcomes Summary Dashboard - Final Term';
       break;
     case 'all':
       content = getAllTablesContent();
@@ -541,12 +588,19 @@ function getPassFailContent() {
   return content;
 }
 
-function getCourseOutcomeSummaryContent() {
-  const summaryTable = document.querySelector('#copasssummary-table table');
+function getCourseOutcomeSummaryContent(termType = 'combined') {
+  const selector = termType === 'combined' ? '#copasssummary-table table' : `#summary-term-${termType} table`;
+  const summaryTable = document.querySelector(selector);
   if (!summaryTable) return '<p>No Course Outcomes Summary data available.</p>';
 
+  const termLabel = TERM_LABELS[termType] || termType;
+  const sectionTitle =
+    termType === 'combined'
+      ? 'Course Outcomes Summary Dashboard'
+      : `${termLabel} Term - Course Outcomes Summary Dashboard`;
+
   let content = '<div class="term-section">';
-  content += '<h3 class="term-title">Course Outcomes Summary Dashboard</h3>';
+  content += `<h3 class="term-title">${sectionTitle}</h3>`;
   content += '<table class="print-table">';
 
   const rows = summaryTable.querySelectorAll('tr');
@@ -627,8 +681,18 @@ export function initCourseOutcomeResultsPage() {
     });
   });
 
-  // Default to percentage view on load
-  setDisplayType('percentage', 'percentage', 'Percentage');
+  const viewQuery = new URLSearchParams(window.location.search).get('view');
+  const validViews = ['score', 'percentage', 'passfail', 'copasssummary'];
+  const requestedView = validViews.includes(viewQuery) ? viewQuery : 'percentage';
+
+  const viewLabelMap = {
+    score: 'Scores',
+    percentage: 'Percentage',
+    passfail: 'Pass/Fail',
+    copasssummary: 'Summary',
+  };
+
+  setDisplayType(requestedView, requestedView, viewLabelMap[requestedView]);
 }
 
 document.addEventListener('DOMContentLoaded', initCourseOutcomeResultsPage);

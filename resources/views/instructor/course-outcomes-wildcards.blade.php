@@ -2,6 +2,12 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
+    @php
+        $isChairpersonOrGE = Auth::user()->role === 1 || Auth::user()->role === 4;
+        $hasSubjectsForGeneration = isset($subjects) && $subjects->isNotEmpty();
+        $generateDisabledReason = 'No subjects available for the selected academic period. Assign subjects first.';
+    @endphp
+
     {{-- Header Section --}}
     <div class="mb-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -13,11 +19,26 @@
             </div>
             
             {{-- Generate CO Button (Chairperson and GE Coordinator Only) --}}
-            @if(Auth::user()->role === 1 || Auth::user()->role === 4)
+            @if($isChairpersonOrGE)
             <div>
-                <button type="button" class="btn btn-success shadow-sm px-4" id="openGenerateCOModalBtn" style="font-weight: 600;">
-                    <i class="bi bi-magic me-2"></i>Generate COs
+                <button
+                    type="button"
+                    class="btn btn-success rounded-pill shadow-sm"
+                    id="openGenerateCOModalBtn"
+                    style="font-weight: 600;"
+                    @disabled(!$hasSubjectsForGeneration)
+                    aria-disabled="{{ $hasSubjectsForGeneration ? 'false' : 'true' }}"
+                    @if(!$hasSubjectsForGeneration) aria-describedby="generateCODisabledHint" @endif
+                    title="{{ $hasSubjectsForGeneration ? 'Generate course outcomes for available subjects.' : $generateDisabledReason }}"
+                >
+                    <i class="bi bi-magic me-1"></i>Generate COs
                 </button>
+                @if(!$hasSubjectsForGeneration)
+                    <p id="generateCODisabledHint" class="mb-0 mt-2 text-muted small d-flex align-items-start" style="gap: 0.4rem; max-width: 360px; line-height: 1.35;">
+                        <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+                        <span>{{ $generateDisabledReason }}</span>
+                    </p>
+                @endif
             </div>
             @endif
         </div>
@@ -112,7 +133,7 @@
             title="No Courses Found"
             :message="$emptyMessage"
         >
-            @if(Auth::user()->role === 1 || Auth::user()->role === 4)
+            @if($isChairpersonOrGE)
                 <div class="alert alert-light border border-success text-start">
                     <div class="d-flex align-items-start">
                         <i class="bi bi-info-circle text-success me-3 mt-1"></i>
@@ -139,7 +160,7 @@
 </div>
 
 {{-- Generate Course Outcomes Modal --}}
-@if(Auth::user()->role === 1 || Auth::user()->role === 4)
+@if($isChairpersonOrGE)
 <div class="modal fade" id="generateCOModal" tabindex="-1" aria-labelledby="generateCOModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
@@ -355,7 +376,8 @@
 <script>
     window.pageData = {
         userRole: {{ Auth::user()->role }},
-        isChairpersonOrGE: {{ (Auth::user()->role === 1 || Auth::user()->role === 4) ? 'true' : 'false' }},
+        isChairpersonOrGE: {{ $isChairpersonOrGE ? 'true' : 'false' }},
+        canGenerateCOs: {{ $hasSubjectsForGeneration ? 'true' : 'false' }},
         hasValidationErrors: {{ $errors->any() ? 'true' : 'false' }},
         hasErrors: {{ $errors->any() ? 'true' : 'false' }},
         oldGenerationMode: '{{ old('generation_mode', '') }}',
@@ -364,7 +386,7 @@
         @else
         oldYearLevels: null,
         @endif
-        @if(Auth::user()->role === 1 || Auth::user()->role === 4)
+        @if($isChairpersonOrGE)
         validatePasswordUrl: '{{ route($routePrefix . ".course_outcomes.validate_password") }}'
         @else
         validatePasswordUrl: ''

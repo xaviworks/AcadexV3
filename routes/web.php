@@ -338,6 +338,7 @@ Route::prefix('instructor')
         // Course Outcome Attainments
         Route::get('/course-outcome-attainments', [CourseOutcomeAttainmentController::class,    'index'])->name('course-outcome-attainments.index');
         Route::get('/course-outcome-attainments/subject/{subject}', [CourseOutcomeAttainmentController::class, 'subject'])->name('course-outcome-attainments.subject');
+        Route::put('/course-outcome-attainments/subject/{subject}/target-levels', [CourseOutcomeAttainmentController::class, 'updateTargetLevels'])->name('course-outcome-attainments.target-levels.update');
         Route::post('/course-outcome-attainments', [CourseOutcomeAttainmentController::class,   'store'])->name('course-outcome-attainments.store');
         Route::get('/course-outcome-attainments/{id}',  [CourseOutcomeAttainmentController::class, 'show'])->name('course-outcome-attainments.show');
         Route::put('/course-outcome-attainments/{id}',  [CourseOutcomeAttainmentController::class, 'update'])->name('course-outcome-attainments. update');
@@ -471,12 +472,11 @@ Route::prefix('vpaa')
     ->middleware(['auth', 'academic.period.set'])
     ->name('vpaa.')
     ->group(function () {
-        // Course Outcome Attainment
-        Route::get('/course-outcome-attainment', [VPAAController::class, 'viewCourseOutcomeAttainment'])
-            ->name('course-outcome-attainment');
-        Route::get('/course-outcome-attainment/subject/{subject}', [VPAAController::class, 'subject'])
-            ->name('course-outcome-attainment.subject');
         // CO Reports
+        Route::get('/reports/attainment', [VPAAController::class, 'viewCourseOutcomeAttainment'])
+            ->name('reports.attainment');
+        Route::get('/reports/attainment/subject/{subject}', [VPAAController::class, 'subject'])
+            ->name('reports.attainment.subject');
         Route::get('/reports/co-student', [CourseOutcomeReportsController::class, 'vpaaStudent'])
             ->name('reports.co-student');
         Route::get('/reports/co-course', [CourseOutcomeReportsController::class, 'vpaaCourse'])

@@ -166,6 +166,7 @@ function scrollToYear(year) {
 export function initCourseOutcomesWildcardsPage() {
   const pageData = window.pageData || {};
   const isChairpersonOrGE = pageData.isChairpersonOrGE || false;
+  const canGenerateCOs = pageData.canGenerateCOs || false;
   const hasValidationErrors = pageData.hasValidationErrors || false;
   const oldGenerationMode = pageData.oldGenerationMode || '';
   const oldYearLevels = pageData.oldYearLevels || [];
@@ -175,6 +176,11 @@ export function initCourseOutcomesWildcardsPage() {
 
   // Helper function to safely open the Generate CO modal
   function openGenerateCOModal() {
+    const openModalBtn = document.getElementById('openGenerateCOModalBtn');
+    if (openModalBtn && (openModalBtn.disabled || openModalBtn.getAttribute('aria-disabled') === 'true')) {
+      return;
+    }
+
     const modalEl = document.getElementById('generateCOModal');
     if (!modalEl) return;
 
@@ -192,7 +198,7 @@ export function initCourseOutcomesWildcardsPage() {
   if (isChairpersonOrGE) {
     // Set up the open modal button handler
     const openModalBtn = document.getElementById('openGenerateCOModalBtn');
-    if (openModalBtn) {
+    if (openModalBtn && !openModalBtn.disabled && canGenerateCOs) {
       openModalBtn.addEventListener('click', openGenerateCOModal);
     }
 
