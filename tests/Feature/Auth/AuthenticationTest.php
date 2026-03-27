@@ -44,6 +44,21 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_invalid_password_attempts_are_logged_as_failed_logins(): void
+    {
+        $user = User::factory()->create();
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $this->assertDatabaseHas('user_logs', [
+            'user_id' => $user->id,
+            'event_type' => 'failed_login',
+        ]);
+    }
+
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
