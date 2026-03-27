@@ -79,10 +79,10 @@
 
 {{-- Backdrop is injected directly onto <body> via JS to avoid parent overflow/transform issues --}}
 
+<div x-data>
 <div class="shadow-lg rounded-4 overflow-hidden border" 
-     x-data 
-     @click.stop
-     :class="$store.gradeTable.isFullscreen ? 'grade-table-fullscreen' : ''">
+    @click.stop
+    :class="$store.gradeTable.isFullscreen ? 'grade-table-fullscreen' : ''">
     
     <!-- Fullscreen close button (X button on top right) - only visible in fullscreen mode -->
     <template x-if="$store.gradeTable.isFullscreen">
@@ -98,6 +98,7 @@
             </button>
         </div>
     </template>
+
     @if ($hasData)
         <div class="table-responsive">
             <div style="max-height: 600px; overflow-y: auto;">
@@ -268,6 +269,33 @@
     @endif
 </div>
 
+@if ($hasData)
+    <template x-if="$store.gradeTable.isFullscreen">
+        <div x-transition
+             class="position-fixed d-flex align-items-center gap-2 grade-table-fullscreen-actions"
+             style="bottom: 16px; z-index: 10000;">
+            <div x-data x-show="$store.grades.unsavedChanges" x-transition>
+                <div class="alert alert-warning mb-0 py-2 px-3 d-flex align-items-center gap-2 shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span class="small fw-semibold">Unsaved grades</span>
+                </div>
+            </div>
+            <button type="submit"
+                    form="gradeForm"
+                    class="btn btn-success shadow d-flex align-items-center gap-2"
+                    :disabled="!($store.grades && $store.grades.unsavedChanges) || $store.loading.isLoading('saveGrades')"
+                    title="Save grades while expanded">
+                <i class="bi bi-save"></i>
+                <span x-text="$store.loading.isLoading('saveGrades') ? 'Saving...' : 'Save Grades'"></span>
+                <div x-show="$store.loading.isLoading('saveGrades')" x-transition class="spinner-border spinner-border-sm ms-1" role="status">
+                    <span class="visually-hidden">Saving...</span>
+                </div>
+            </button>
+        </div>
+    </template>
+@endif
+</div>
+
 
 
 <!-- JavaScript for Client-Side Filtering -->
@@ -414,6 +442,11 @@ body:has(.grade-table-fullscreen) .grade-table-fullscreen {
     pointer-events: auto !important;
 }
 
+.grade-table-fullscreen-actions {
+    max-width: calc(100vw - 32px);
+    right: calc((100vw - min(95vw, 1800px)) / 2 + 16px);
+}
+
 /* Responsive adjustments */
 @media (max-width: 1400px) {
     .grade-table-fullscreen {
@@ -427,5 +460,11 @@ body:has(.grade-table-fullscreen) .grade-table-fullscreen {
         width: 100vw !important;
         height: 100vh !important;
         border-radius: 0 !important;
+    }
+
+    .grade-table-fullscreen-actions {
+        right: 12px !important;
+        left: 12px;
+        justify-content: flex-end;
     }
 }</style>

@@ -24,6 +24,17 @@ function getLoadingStore() {
   return null;
 }
 
+function exitExpandedGradeTableIfOpen() {
+  if (typeof Alpine === 'undefined' || typeof Alpine.store !== 'function') {
+    return;
+  }
+
+  const gradeTableStore = Alpine.store('gradeTable');
+  if (gradeTableStore && gradeTableStore.isFullscreen && typeof gradeTableStore.toggleFullscreen === 'function') {
+    gradeTableStore.toggleFullscreen();
+  }
+}
+
 export function bindGradeInputEvents() {
   console.log('Binding grade input events...');
 
@@ -688,6 +699,9 @@ export function bindGradeInputEvents() {
             if (saveButton) {
               saveButton.disabled = true;
             }
+
+            // If user saved while in expanded view, return to normal table layout.
+            exitExpandedGradeTableIfOpen();
 
             const refreshPromise =
               typeof window.refreshGradeSection === 'function' ? window.refreshGradeSection() : Promise.resolve();

@@ -328,15 +328,21 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">CO Code <span class="text-danger">*</span></label>
-                                <input type="text" name="co_code" id="co_code" class="form-control" readonly style="background-color: #f8f9fa;" required>
+                                <input type="text" name="co_code" id="co_code" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Identifier <span class="text-danger">*</span></label>
-                                <input type="text" name="co_identifier" id="co_identifier" class="form-control" readonly style="background-color: #f8f9fa;" required>
+                                <input type="text" name="co_identifier" id="co_identifier" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
                             </div>
                         </div>
+                    </div>
+                    <div class="mb-3 mt-n2">
+                        <small class="text-muted d-flex align-items-center gap-1">
+                            <i class="bi bi-lock-fill"></i>
+                            CO Code and Identifier are auto-assigned and cannot be edited.
+                        </small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
@@ -381,15 +387,21 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">CO Code <span class="text-danger">*</span></label>
-                                <input type="text" name="co_code" id="edit_co_code" class="form-control" required>
+                                <input type="text" name="co_code" id="edit_co_code" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Identifier <span class="text-danger">*</span></label>
-                                <input type="text" name="co_identifier" id="edit_co_identifier" class="form-control" required>
+                                <input type="text" name="co_identifier" id="edit_co_identifier" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
                             </div>
                         </div>
+                    </div>
+                    <div class="mb-3 mt-n2">
+                        <small class="text-muted d-flex align-items-center gap-1">
+                            <i class="bi bi-lock-fill"></i>
+                            CO Code and Identifier are auto-assigned and cannot be edited.
+                        </small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
