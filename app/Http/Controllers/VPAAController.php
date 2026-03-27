@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Department;
 use App\Models\CourseOutcomeAttainment;
+use App\Models\AcademicPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -130,12 +131,52 @@ class VPAAController extends Controller
      */
     public function index()
     {
-        $departmentsCount = Department::where('is_deleted', false)->count();
+        $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+
+        $departmentsCount = Department::where('is_deleted', false)
+            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                $q->whereExists(function ($subQuery) use ($academicPeriodId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('courses')
+                        ->join('subjects', 'subjects.course_id', '=', 'courses.id')
+                        ->whereColumn('courses.department_id', 'departments.id')
+                        ->where('courses.is_deleted', false)
+                        ->where('subjects.is_deleted', false)
+                        ->where('subjects.academic_period_id', $academicPeriodId);
+                });
+            })
+            ->count();
+
         $instructorsCount = User::where('role', 0) // Instructor role
             ->where('is_active', true)
+            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                $q->whereExists(function ($subQuery) use ($academicPeriodId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('subjects')
+                        ->whereColumn('subjects.instructor_id', 'users.id')
+                        ->where('subjects.is_deleted', false)
+                        ->where('subjects.academic_period_id', $academicPeriodId);
+                });
+            })
             ->count();
-        $studentsCount = Student::where('is_deleted', false)->count();
-        $academicPrograms = Course::where('is_deleted', false)->count();
+
+        $studentsCount = Student::where('is_deleted', false)
+            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                $q->where('academic_period_id', $academicPeriodId);
+            })
+            ->count();
+
+        $academicPrograms = Course::where('is_deleted', false)
+            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                $q->whereExists(function ($subQuery) use ($academicPeriodId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('subjects')
+                        ->whereColumn('subjects.course_id', 'courses.id')
+                        ->where('subjects.is_deleted', false)
+                        ->where('subjects.academic_period_id', $academicPeriodId);
+                });
+            })
+            ->count();
 
         return view('vpaa.dashboard', [
             'departmentsCount' => $departmentsCount,
@@ -150,12 +191,52 @@ class VPAAController extends Controller
      */
     public function pollData(): \Illuminate\Http\JsonResponse
     {
-        $departmentsCount = Department::where('is_deleted', false)->count();
+        $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+
+        $departmentsCount = Department::where('is_deleted', false)
+            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                $q->whereExists(function ($subQuery) use ($academicPeriodId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('courses')
+                        ->join('subjects', 'subjects.course_id', '=', 'courses.id')
+                        ->whereColumn('courses.department_id', 'departments.id')
+                        ->where('courses.is_deleted', false)
+                        ->where('subjects.is_deleted', false)
+                        ->where('subjects.academic_period_id', $academicPeriodId);
+                });
+            })
+            ->count();
+
         $instructorsCount = User::where('role', 0)
             ->where('is_active', true)
+            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                $q->whereExists(function ($subQuery) use ($academicPeriodId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('subjects')
+                        ->whereColumn('subjects.instructor_id', 'users.id')
+                        ->where('subjects.is_deleted', false)
+                        ->where('subjects.academic_period_id', $academicPeriodId);
+                });
+            })
             ->count();
-        $studentsCount = Student::where('is_deleted', false)->count();
-        $academicPrograms = Course::where('is_deleted', false)->count();
+
+        $studentsCount = Student::where('is_deleted', false)
+            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                $q->where('academic_period_id', $academicPeriodId);
+            })
+            ->count();
+
+        $academicPrograms = Course::where('is_deleted', false)
+            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
+                $q->whereExists(function ($subQuery) use ($academicPeriodId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('subjects')
+                        ->whereColumn('subjects.course_id', 'courses.id')
+                        ->where('subjects.is_deleted', false)
+                        ->where('subjects.academic_period_id', $academicPeriodId);
+                });
+            })
+            ->count();
 
         return response()->json([
             'departmentsCount' => $departmentsCount,
@@ -163,6 +244,29 @@ class VPAAController extends Controller
             'studentsCount' => $studentsCount,
             'academicPrograms' => $academicPrograms,
         ]);
+    }
+
+    /**
+     * Resolve active academic period from session; for VPAA fallback to the latest available period.
+     */
+    private function resolveActiveAcademicPeriodId(): ?int
+    {
+        $sessionPeriodId = session('active_academic_period_id');
+        if ($sessionPeriodId && AcademicPeriod::where('id', $sessionPeriodId)->exists()) {
+            return (int) $sessionPeriodId;
+        }
+
+        $latestPeriod = AcademicPeriod::where('is_deleted', false)
+            ->orderByDesc('academic_year')
+            ->orderByRaw("FIELD(semester, '1st', '2nd', 'Summer')")
+            ->first();
+
+        if ($latestPeriod) {
+            session(['active_academic_period_id' => $latestPeriod->id]);
+            return (int) $latestPeriod->id;
+        }
+
+        return null;
     }
 
     // ============================
