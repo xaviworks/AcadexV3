@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -69,5 +70,42 @@ class PasswordResetTest extends TestCase
 
             return true;
         });
+    }
+
+    public function test_password_reset_revokes_existing_authenticated_sessions(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+
+        DB::table('sessions')->insert([
+            'id' => 'session-to-revoke',
+            'user_id' => $user->id,
+            'ip_address' => '127.0.0.10',
+            'user_agent' => 'Reset Test Browser',
+            'payload' => '',
+            'last_activity' => now()->timestamp,
+        ]);
+
+        $this->post('/forgot-password', ['email' => $user->email]);
+
+        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+            $response = $this->post('/reset-password', [
+                'token' => $notification->token,
+                'email' => $user->email,
+                'password' => 'new-password',
+                'password_confirmation' => 'new-password',
+            ]);
+
+            $response
+                ->assertSessionHasNoErrors()
+                ->assertRedirect(route('login'));
+
+            return true;
+        });
+
+        $this->assertDatabaseMissing('sessions', [
+            'id' => 'session-to-revoke',
+        ]);
     }
 }

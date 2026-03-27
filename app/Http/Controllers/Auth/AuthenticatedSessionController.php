@@ -33,14 +33,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
-
         /** @var User $user */
-        $user = Auth::user();
+        $user = $request->authenticate();
         $deviceFingerprint = $request->input('device_fingerprint');
 
         if (! $user->is_active) {
-            Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
@@ -50,7 +47,6 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($user->role !== 3 && $this->loginFlowService->hasActiveSession($user->id, $deviceFingerprint)) {
-            Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
@@ -60,9 +56,10 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($this->loginFlowService->requiresTwoFactorChallenge($user, $deviceFingerprint)) {
-            return $this->loginFlowService->beginTwoFactorChallenge($request, $user, $deviceFingerprint, true);
+            return $this->loginFlowService->beginTwoFactorChallenge($request, $user, $deviceFingerprint);
         }
 
+        Auth::login($user, $request->boolean('remember'));
         $this->loginFlowService->markTrustedDeviceUsed($user, $deviceFingerprint, $request->ip());
         $this->loginFlowService->sanitizeIntendedUrl($request, $user);
         $this->loginFlowService->finalizeLogin($request, $deviceFingerprint);
@@ -85,10 +82,10 @@ class AuthenticatedSessionController extends Controller
 
         Auth::guard('web')->logout();
 
-        if ($userId) {
-            $this->trackedSessionService->destroyUserSessions($userId);
-        } elseif ($sessionId) {
+        if ($sessionId) {
             $this->trackedSessionService->destroySessions([$sessionId]);
+        } elseif ($userId) {
+            $this->trackedSessionService->destroyUserSessions($userId);
         }
 
         $request->session()->invalidate();
