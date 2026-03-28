@@ -121,11 +121,11 @@
     <div class="mt-3 d-flex align-items-center gap-4 px-1">
         <div class="d-flex align-items-center">
             <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill me-2">>= target</span>
-            <small class="text-muted">Meeting configured target</small>
+            <small class="text-muted">On Track</small>
         </div>
         <div class="d-flex align-items-center">
             <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill me-2">&lt; target</span>
-            <small class="text-muted">Below configured target</small>
+            <small class="text-muted">Needs Improvement</small>
         </div>
         <div class="d-flex align-items-center">
             <span class="text-muted me-2">—</span>

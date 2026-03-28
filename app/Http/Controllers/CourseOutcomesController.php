@@ -70,7 +70,8 @@ class CourseOutcomesController extends Controller
         // Only show subjects in the current academic period
         $subjectsQuery = Subject::query()
             ->where('academic_period_id', $academicPeriodId)
-            ->where('is_deleted', false);
+            ->where('is_deleted', false)
+            ->withCount('courseOutcomes');
 
         // Role-based filtering
         if (Auth::user()->role === 1) {

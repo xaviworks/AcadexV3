@@ -109,8 +109,15 @@ Route::middleware('auth')->group(function () {
         $request->validate([
             'academic_period_id' => 'required|exists:academic_periods,id',
         ]);
+
         session(['active_academic_period_id' => $request->academic_period_id]);
-        return redirect()->intended('/dashboard');
+
+        $redirectTo = $request->input('redirect_to');
+        if (is_string($redirectTo) && str_starts_with($redirectTo, '/')) {
+            return redirect($redirectTo);
+        }
+
+        return redirect()->back();
     })->name('set.academicPeriod');
 });
 

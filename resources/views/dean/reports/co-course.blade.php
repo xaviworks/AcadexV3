@@ -99,11 +99,11 @@
                             <div class="d-flex gap-3">
                                 <div class="d-flex align-items-center">
                                     <span class="badge bg-success text-white px-2 py-1 me-2">>= target</span>
-                                    <small class="text-muted">Meeting configured target</small>
+                                    <small class="text-muted">On Track</small>
                                 </div>
                                 <div class="d-flex align-items-center">
                                     <span class="badge bg-danger text-white px-2 py-1 me-2">&lt; target</span>
-                                    <small class="text-muted">Below configured target</small>
+                                    <small class="text-muted">Needs Improvement</small>
                                 </div>
                             </div>
                         </div>
