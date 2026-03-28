@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Crypt;
 
 /**
  * @property int $id
@@ -74,6 +77,14 @@ class User extends Authenticatable
         'disabled_until' => 'datetime',
         'two_factor_confirmed_at' => 'datetime',
     ];
+
+    protected function twoFactorSecret(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $this->decryptSecretIfNeeded($value),
+            set: fn ($value) => $this->encryptSecretIfNeeded($value),
+        );
+    }
 
     public function devices()
     {
@@ -196,5 +207,47 @@ class User extends Authenticatable
     public function isVPAA(): bool
     {
         return $this->role === 5;
+    }
+
+    private function decryptSecretIfNeeded(mixed $value): ?string
+    {
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (DecryptException) {
+            return $value;
+        }
+    }
+
+    private function encryptSecretIfNeeded(mixed $value): ?string
+    {
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        if ($this->looksEncrypted($value)) {
+            return $value;
+        }
+
+        return Crypt::encryptString($value);
+    }
+
+    private function looksEncrypted(string $value): bool
+    {
+        $decoded = base64_decode($value, true);
+
+        if ($decoded === false) {
+            return false;
+        }
+
+        $payload = json_decode($decoded, true);
+
+        return is_array($payload)
+            && array_key_exists('iv', $payload)
+            && array_key_exists('value', $payload)
+            && array_key_exists('mac', $payload);
     }
 }

@@ -75,6 +75,7 @@ class ProfileTest extends TestCase
         $user = User::factory()->create([
             'password' => Hash::make('password'),
         ]);
+        $originalRememberToken = $user->remember_token;
 
         $admin = User::factory()->create([
             'role' => 3,
@@ -114,6 +115,7 @@ class ProfileTest extends TestCase
         $this->assertSame('User', $user->last_name);
         $this->assertSame('updated@example.com', $user->email);
         $this->assertTrue(Hash::check('new-secure-password', $user->password));
+        $this->assertNotSame($originalRememberToken, $user->remember_token);
 
         Notification::assertSentTo(
             $admin,

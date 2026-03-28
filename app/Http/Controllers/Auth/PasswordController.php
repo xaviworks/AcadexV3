@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\NotificationService;
 use App\Notifications\SecurityAlert;
+use App\Services\Auth\PasswordUpdateService;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class PasswordController extends Controller
 {
+    public function __construct(private readonly PasswordUpdateService $passwordUpdateService)
+    {
+    }
+
     /**
      * Update the user's password.
      */
@@ -23,12 +27,13 @@ class PasswordController extends Controller
         ]);
 
         $user = $request->user();
-        
-        $user->update([
-            'password' => Hash::make($validated['password']),
-        ]);
 
-        // Notify admins about password change
+        $this->passwordUpdateService->update(
+            $user,
+            $validated['password'],
+            $request->session()->getId()
+        );
+
         NotificationService::notifySecurityAlert(
             SecurityAlert::TYPE_PASSWORD_CHANGED,
             $user,

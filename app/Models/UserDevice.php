@@ -13,14 +13,17 @@ class UserDevice extends Model
     protected $fillable = [
         'user_id',
         'device_fingerprint',
+        'trust_token_hash',
         'ip_address',
         'browser',
         'platform',
         'last_used_at',
+        'trusted_until',
     ];
 
     protected $casts = [
         'last_used_at' => 'datetime',
+        'trusted_until' => 'datetime',
     ];
 
     public function user(): BelongsTo
