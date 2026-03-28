@@ -98,7 +98,7 @@ class GoogleAuthController extends Controller
                 return $this->loginFlowService->beginTwoFactorChallenge($request, $user, $deviceFingerprint);
             }
 
-            $this->loginFlowService->markTrustedDeviceUsed($user, $deviceFingerprint, $request->ip());
+            $this->loginFlowService->markTrustedDeviceUsed($request, $user, $deviceFingerprint);
             Auth::login($user);
             $this->loginFlowService->sanitizeIntendedUrl($request, $user);
             $this->loginFlowService->finalizeLogin($request, $deviceFingerprint);

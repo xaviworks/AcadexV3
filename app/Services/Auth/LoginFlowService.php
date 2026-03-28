@@ -7,9 +7,11 @@ use App\Models\UserDevice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 
@@ -111,7 +113,7 @@ class LoginFlowService
             return true;
         }
 
-        return ! $user->devices()->where('device_fingerprint', $deviceFingerprint)->exists();
+        return ! $this->hasValidTrustedDevice($user, $deviceFingerprint, request());
     }
 
     public function beginTwoFactorChallenge(
@@ -131,22 +133,42 @@ class LoginFlowService
         return redirect()->route('two-factor.login');
     }
 
-    public function markTrustedDeviceUsed(User $user, ?string $deviceFingerprint, string $ipAddress): void
+    public function markTrustedDeviceUsed(Request $request, User $user, ?string $deviceFingerprint): void
     {
         if (! $deviceFingerprint) {
             return;
         }
 
-        $user->devices()->where('device_fingerprint', $deviceFingerprint)->update([
+        $device = $this->resolveTrustedDevice($user, $deviceFingerprint, $request);
+
+        if (! $device) {
+            return;
+        }
+
+        $agent = new Agent();
+        $agent->setUserAgent($request->userAgent());
+
+        $plainToken = Str::random(64);
+        $trustedUntil = $this->trustedUntil();
+
+        $device->update([
+            'trust_token_hash' => hash('sha256', $plainToken),
+            'trusted_until' => $trustedUntil,
             'last_used_at' => now(),
-            'ip_address' => $ipAddress,
+            'ip_address' => $request->ip(),
+            'browser' => $agent->browser(),
+            'platform' => $agent->platform(),
         ]);
+
+        $this->queueTrustedDeviceCookie($user, $plainToken, $trustedUntil);
     }
 
     public function rememberTrustedDevice(User $user, string $deviceFingerprint, string $ipAddress, ?string $userAgent): void
     {
         $agent = new Agent();
         $agent->setUserAgent($userAgent);
+        $plainToken = Str::random(64);
+        $trustedUntil = $this->trustedUntil();
 
         UserDevice::updateOrCreate(
             [
@@ -154,12 +176,16 @@ class LoginFlowService
                 'device_fingerprint' => $deviceFingerprint,
             ],
             [
+                'trust_token_hash' => hash('sha256', $plainToken),
+                'trusted_until' => $trustedUntil,
                 'ip_address' => $ipAddress,
                 'browser' => $agent->browser(),
                 'platform' => $agent->platform(),
                 'last_used_at' => now(),
             ]
         );
+
+        $this->queueTrustedDeviceCookie($user, $plainToken, $trustedUntil);
     }
 
     public function finalizeLogin(Request $request, ?string $deviceFingerprint): void
@@ -225,5 +251,60 @@ class LoginFlowService
         }
 
         return false;
+    }
+
+    private function hasValidTrustedDevice(User $user, string $deviceFingerprint, Request $request): bool
+    {
+        return $this->resolveTrustedDevice($user, $deviceFingerprint, $request) !== null;
+    }
+
+    private function resolveTrustedDevice(User $user, string $deviceFingerprint, Request $request): ?UserDevice
+    {
+        $plainToken = $request->cookie($this->trustedDeviceCookieName($user));
+
+        if (! is_string($plainToken) || $plainToken === '') {
+            return null;
+        }
+
+        $device = $user->devices()
+            ->where('device_fingerprint', $deviceFingerprint)
+            ->whereNotNull('trust_token_hash')
+            ->whereNotNull('trusted_until')
+            ->first();
+
+        if (! $device || ! $device->trusted_until || $device->trusted_until->isPast()) {
+            return null;
+        }
+
+        return hash_equals((string) $device->trust_token_hash, hash('sha256', $plainToken))
+            ? $device
+            : null;
+    }
+
+    private function queueTrustedDeviceCookie(User $user, string $plainToken, Carbon $trustedUntil): void
+    {
+        $minutes = max(1, now()->diffInMinutes($trustedUntil, false));
+
+        Cookie::queue(Cookie::make(
+            $this->trustedDeviceCookieName($user),
+            $plainToken,
+            $minutes,
+            config('session.path', '/'),
+            config('session.domain'),
+            config('session.secure'),
+            true,
+            false,
+            config('session.same_site', 'lax')
+        ));
+    }
+
+    private function trustedDeviceCookieName(User $user): string
+    {
+        return 'trusted_device_'.$user->id;
+    }
+
+    private function trustedUntil(): Carbon
+    {
+        return now()->addDays(max(1, (int) config('auth.trusted_device_days', 30)));
     }
 }

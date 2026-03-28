@@ -59,6 +59,67 @@ class AuthenticationTest extends TestCase
         ]);
     }
 
+    public function test_existing_device_fingerprint_alone_can_not_bypass_two_factor(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_secret' => app(Google2FA::class)->generateSecretKey(),
+            'two_factor_confirmed_at' => now(),
+        ]);
+
+        DB::table('user_devices')->insert([
+            'user_id' => $user->id,
+            'device_fingerprint' => 'trusted-fingerprint',
+            'ip_address' => '127.0.0.2',
+            'browser' => 'Chrome',
+            'platform' => 'macOS',
+            'last_used_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'device_fingerprint' => 'trusted-fingerprint',
+        ]);
+
+        $response->assertRedirect(route('two-factor.login'));
+        $this->assertGuest();
+    }
+
+    public function test_valid_trusted_device_cookie_can_bypass_two_factor(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_secret' => app(Google2FA::class)->generateSecretKey(),
+            'two_factor_confirmed_at' => now(),
+        ]);
+
+        $token = str_repeat('a', 64);
+
+        DB::table('user_devices')->insert([
+            'user_id' => $user->id,
+            'device_fingerprint' => 'trusted-fingerprint',
+            'trust_token_hash' => hash('sha256', $token),
+            'ip_address' => '127.0.0.2',
+            'browser' => 'Chrome',
+            'platform' => 'macOS',
+            'last_used_at' => now(),
+            'trusted_until' => now()->addDays(30),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->withCookie('trusted_device_'.$user->id, $token)
+            ->post('/login', [
+                'email' => $user->email,
+                'password' => 'password',
+                'device_fingerprint' => 'trusted-fingerprint',
+            ]);
+
+        $this->assertAuthenticatedAs($user->fresh());
+        $response->assertRedirect(route('select.academicPeriod', absolute: false));
+    }
+
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();

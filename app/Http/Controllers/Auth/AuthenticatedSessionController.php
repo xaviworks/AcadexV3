@@ -60,7 +60,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         Auth::login($user, $request->boolean('remember'));
-        $this->loginFlowService->markTrustedDeviceUsed($user, $deviceFingerprint, $request->ip());
+        $this->loginFlowService->markTrustedDeviceUsed($request, $user, $deviceFingerprint);
         $this->loginFlowService->sanitizeIntendedUrl($request, $user);
         $this->loginFlowService->finalizeLogin($request, $deviceFingerprint);
 

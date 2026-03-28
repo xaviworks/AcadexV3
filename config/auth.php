@@ -110,6 +110,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trusted Devices
+    |--------------------------------------------------------------------------
+    |
+    | These options control how long a successfully verified device can skip
+    | the two-factor challenge before the user must verify it again.
+    |
+    */
+
+    'trusted_device_days' => (int) env('AUTH_TRUSTED_DEVICE_DAYS', 30),
+
+    /*
+    |--------------------------------------------------------------------------
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
     |

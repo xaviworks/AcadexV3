@@ -82,6 +82,36 @@ class TwoFactorSecurityTest extends TestCase
         $this->assertStringContainsString('qr-code', $response->json('qr_code'));
     }
 
+    public function test_successful_two_factor_login_sets_a_server_issued_trusted_device_cookie(): void
+    {
+        $secret = app(Google2FA::class)->generateSecretKey();
+        $user = User::factory()->create([
+            'two_factor_secret' => $secret,
+            'two_factor_confirmed_at' => now(),
+        ]);
+
+        $response = $this->withSession([
+            'auth.2fa.id' => $user->id,
+            'auth.2fa.fingerprint' => 'fingerprint-123',
+        ])->post(route('two-factor.login.store'), [
+            'code' => app(Google2FA::class)->getCurrentOtp($secret),
+            'device_fingerprint' => 'fingerprint-123',
+        ]);
+
+        $response->assertRedirect(route('select.academicPeriod', absolute: false));
+        $response->assertCookie('trusted_device_'.$user->id);
+        $this->assertDatabaseHas('user_devices', [
+            'user_id' => $user->id,
+            'device_fingerprint' => 'fingerprint-123',
+        ]);
+        $this->assertNotNull(
+            DB::table('user_devices')->where('user_id', $user->id)->value('trust_token_hash')
+        );
+        $this->assertNotNull(
+            DB::table('user_devices')->where('user_id', $user->id)->value('trusted_until')
+        );
+    }
+
     public function test_two_factor_login_challenge_is_rate_limited(): void
     {
         $user = User::factory()->create([

@@ -87,6 +87,19 @@ class PasswordResetTest extends TestCase
             'last_activity' => now()->timestamp,
         ]);
 
+        DB::table('user_devices')->insert([
+            'user_id' => $user->id,
+            'device_fingerprint' => 'trusted-device',
+            'trust_token_hash' => hash('sha256', str_repeat('c', 64)),
+            'ip_address' => '127.0.0.11',
+            'browser' => 'Chrome',
+            'platform' => 'macOS',
+            'last_used_at' => now(),
+            'trusted_until' => now()->addDays(30),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $this->post('/forgot-password', ['email' => $user->email]);
 
         Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
@@ -106,6 +119,10 @@ class PasswordResetTest extends TestCase
 
         $this->assertDatabaseMissing('sessions', [
             'id' => 'session-to-revoke',
+        ]);
+        $this->assertDatabaseMissing('user_devices', [
+            'user_id' => $user->id,
+            'device_fingerprint' => 'trusted-device',
         ]);
     }
 }

@@ -20,5 +20,6 @@ class PasswordUpdateService
         ])->save();
 
         $this->trackedSessionService->destroyUserSessions($user->id, $currentSessionId);
+        $user->devices()->delete();
     }
 }
