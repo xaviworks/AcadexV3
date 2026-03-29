@@ -12,10 +12,10 @@
         </div>
     </div>
 
-    {{-- View-only banner --}}
-    <div class="alert alert-success bg-success-subtle border-0 text-dark d-flex align-items-center" role="alert">
-        <i class="bi bi-eye me-2"></i>
-        VPAA view is read-only. Editing is unavailable here.
+    {{-- Temporary edit banner --}}
+    <div class="alert alert-info bg-info-subtle border-0 text-dark d-flex align-items-center" role="alert">
+        <i class="bi bi-sliders me-2"></i>
+        Target levels are editable for temporary preview. Changes update this page instantly and reset on refresh.
     </div>
 
     {{-- Reuse instructor results UI (wrapped to hide non-view actions) --}}

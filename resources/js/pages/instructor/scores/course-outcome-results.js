@@ -4,6 +4,20 @@
  */
 
 let currentTerm = null;
+let targetLevelEditorInitialized = false;
+
+const TARGET_LEVEL_INPUT_IDS = {
+  level_3: 'target-level-3',
+  level_2: 'target-level-2',
+  level_1: 'target-level-1',
+};
+
+const TARGET_LEVEL_TEXT_CLASSES = ['text-muted', 'text-success', 'text-primary', 'text-warning', 'text-danger'];
+
+const targetLevelState = {
+  initialLevels: null,
+  lastValidLevels: null,
+};
 
 const TERM_LABELS = {
   prelim: 'Prelim',
@@ -28,6 +42,205 @@ function updateCurrentViewBadge(term = null) {
   if (!currentViewBadge) return;
 
   currentViewBadge.textContent = term ? `${TERM_LABELS[term] || term} Term` : 'All Terms';
+}
+
+function parseTargetLevelValue(rawValue) {
+  if (typeof rawValue !== 'string') return null;
+  const trimmed = rawValue.trim();
+  if (trimmed === '') return null;
+
+  const parsed = Number.parseFloat(trimmed);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function clampTargetLevelValue(value) {
+  if (!Number.isFinite(value)) return null;
+  if (value > 100) return 100;
+  if (value < 0) return 0;
+  return value;
+}
+
+function normalizeTargetLevelInput(input) {
+  if (!input || typeof input.value !== 'string') return;
+
+  const parsed = parseTargetLevelValue(input.value);
+  if (parsed === null) return;
+
+  const clamped = clampTargetLevelValue(parsed);
+  if (clamped !== null && clamped !== parsed) {
+    input.value = String(clamped);
+  }
+}
+
+function readTargetLevelsFromInputs() {
+  const level3Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_3);
+  const level2Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_2);
+  const level1Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_1);
+
+  return {
+    level_3: parseTargetLevelValue(level3Input?.value || ''),
+    level_2: parseTargetLevelValue(level2Input?.value || ''),
+    level_1: parseTargetLevelValue(level1Input?.value || ''),
+  };
+}
+
+function hasCompleteTargetLevels(levels) {
+  return levels.level_3 !== null && levels.level_2 !== null && levels.level_1 !== null;
+}
+
+function hasTargetLevelsInRange(levels) {
+  return [levels.level_3, levels.level_2, levels.level_1].every(
+    (value) => value !== null && value >= 0 && value <= 100
+  );
+}
+
+function hasValidTargetLevelOrder(levels) {
+  return levels.level_3 >= levels.level_2 && levels.level_2 >= levels.level_1;
+}
+
+function isValidTargetLevelSet(levels) {
+  return hasCompleteTargetLevels(levels) && hasTargetLevelsInRange(levels) && hasValidTargetLevelOrder(levels);
+}
+
+function resolveTargetLevelAchievedForPreview(metTargetPercentage, levels) {
+  if (metTargetPercentage === null || Number.isNaN(metTargetPercentage)) {
+    return null;
+  }
+
+  if (metTargetPercentage >= levels.level_3) return 3.0;
+  if (metTargetPercentage >= levels.level_2) return 2.0;
+  if (metTargetPercentage >= levels.level_1) return 1.0;
+  return 0.0;
+}
+
+function getTargetLevelClass(value) {
+  if (value === null) return 'text-muted';
+  if (value >= 3.0) return 'text-success';
+  if (value >= 2.0) return 'text-primary';
+  if (value >= 1.0) return 'text-warning';
+  return 'text-danger';
+}
+
+function getTargetLevelDisplayText(value) {
+  return value === null ? '--' : value.toFixed(1);
+}
+
+function setTargetLevelValidationState(message = '', isInvalid = false) {
+  const validationMessage = document.getElementById('target-level-validation-message');
+  if (validationMessage) {
+    validationMessage.textContent = message;
+    validationMessage.classList.toggle('d-none', !isInvalid);
+  }
+
+  Object.values(TARGET_LEVEL_INPUT_IDS).forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.classList.toggle('is-invalid', isInvalid);
+    }
+  });
+}
+
+function renderTargetLevelAchievedCells(levels) {
+  document.querySelectorAll('[data-target-level-cell="true"]').forEach((cell) => {
+    const rawMetTargetPercentage = cell.getAttribute('data-met-target-percentage');
+    const metTargetPercentage =
+      rawMetTargetPercentage === '' || rawMetTargetPercentage === null
+        ? null
+        : Number.parseFloat(rawMetTargetPercentage);
+
+    const targetLevelValue = resolveTargetLevelAchievedForPreview(metTargetPercentage, levels);
+    const nextClass = getTargetLevelClass(targetLevelValue);
+
+    cell.classList.remove(...TARGET_LEVEL_TEXT_CLASSES);
+    cell.classList.add(nextClass);
+    cell.textContent = getTargetLevelDisplayText(targetLevelValue);
+  });
+}
+
+function applyLiveTargetLevelPreview() {
+  const levels = readTargetLevelsFromInputs();
+
+  if (!hasCompleteTargetLevels(levels)) {
+    setTargetLevelValidationState('All target levels are required to preview changes.', true);
+    return;
+  }
+
+  if (!hasTargetLevelsInRange(levels)) {
+    setTargetLevelValidationState('Target levels must be between 0 and 100.', true);
+    return;
+  }
+
+  if (!hasValidTargetLevelOrder(levels)) {
+    setTargetLevelValidationState('Target levels must follow Level 3 >= Level 2 >= Level 1.', true);
+    return;
+  }
+
+  setTargetLevelValidationState('', false);
+  targetLevelState.lastValidLevels = { ...levels };
+  renderTargetLevelAchievedCells(levels);
+}
+
+function resetTemporaryTargetLevels() {
+  if (!targetLevelState.initialLevels) return;
+
+  const level3Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_3);
+  const level2Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_2);
+  const level1Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_1);
+
+  if (level3Input) level3Input.value = targetLevelState.initialLevels.level_3;
+  if (level2Input) level2Input.value = targetLevelState.initialLevels.level_2;
+  if (level1Input) level1Input.value = targetLevelState.initialLevels.level_1;
+
+  setTargetLevelValidationState('', false);
+  targetLevelState.lastValidLevels = { ...targetLevelState.initialLevels };
+  renderTargetLevelAchievedCells(targetLevelState.initialLevels);
+}
+
+function initTargetLevelEditor() {
+  if (targetLevelEditorInitialized) return;
+
+  const summaryTargetLevelForm = document.getElementById('summary-target-level-form');
+  if (!summaryTargetLevelForm) return;
+
+  const level3Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_3);
+  const level2Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_2);
+  const level1Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_1);
+  const resetButton = document.getElementById('target-level-reset-btn');
+
+  if (!level3Input || !level2Input || !level1Input) return;
+
+  summaryTargetLevelForm.addEventListener('submit', (event) => {
+    // Non-persistent by design: prevent accidental DB writes through Enter key submits.
+    event.preventDefault();
+  });
+
+  [level3Input, level2Input, level1Input].forEach((input) => {
+    input.removeAttribute('readonly');
+    input.setAttribute('max', '100');
+    input.addEventListener('input', () => {
+      normalizeTargetLevelInput(input);
+      applyLiveTargetLevelPreview();
+    });
+    input.addEventListener('change', () => {
+      normalizeTargetLevelInput(input);
+      applyLiveTargetLevelPreview();
+    });
+  });
+
+  if (resetButton) {
+    resetButton.addEventListener('click', resetTemporaryTargetLevels);
+  }
+
+  [level3Input, level2Input, level1Input].forEach(normalizeTargetLevelInput);
+
+  const initialLevels = readTargetLevelsFromInputs();
+  if (isValidTargetLevelSet(initialLevels)) {
+    targetLevelState.initialLevels = { ...initialLevels };
+    targetLevelState.lastValidLevels = { ...initialLevels };
+    renderTargetLevelAchievedCells(initialLevels);
+  }
+
+  targetLevelEditorInitialized = true;
 }
 
 // ==================== CUSTOM PRINT MODAL (No Bootstrap dependency) ====================
@@ -693,6 +906,7 @@ export function initCourseOutcomeResultsPage() {
   };
 
   setDisplayType(requestedView, requestedView, viewLabelMap[requestedView]);
+  initTargetLevelEditor();
 }
 
 document.addEventListener('DOMContentLoaded', initCourseOutcomeResultsPage);
