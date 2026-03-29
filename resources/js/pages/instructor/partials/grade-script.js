@@ -50,7 +50,29 @@ export function bindGradeInputEvents() {
     const inputs = Array.from(tableBody.querySelectorAll('.grade-input') || []);
     const itemsInputs = Array.from(document.querySelectorAll('.items-input') || []);
     const courseOutcomeInputs = Array.from(document.querySelectorAll('.course-outcome-select') || []);
-    const saveButton = document.getElementById('saveGradesBtn');
+    const getSaveButtons = () => Array.from(document.querySelectorAll('[data-save-grades-btn], #saveGradesBtn'));
+    const getNotificationContainers = () => Array.from(document.querySelectorAll('.unsaved-notification-container'));
+
+    function setSaveButtonsState({ disabled, title, hasChanges }) {
+      getSaveButtons().forEach((button) => {
+        if (typeof disabled === 'boolean') {
+          button.disabled = disabled;
+        }
+        if (typeof title === 'string') {
+          button.title = title;
+        }
+        if (typeof hasChanges === 'boolean') {
+          button.classList.toggle('has-changes', hasChanges);
+        }
+      });
+    }
+
+    function renderValidationNotification(html) {
+      getNotificationContainers().forEach((container) => {
+        container.innerHTML = html;
+      });
+    }
+
     form = document.getElementById('gradeForm'); // Target grade form explicitly
     const studentSearch = document.getElementById('studentSearch');
 
@@ -119,7 +141,7 @@ export function bindGradeInputEvents() {
 
     // Function to update save button state
     function updateSaveButtonState() {
-      if (!saveButton) return;
+      if (getSaveButtons().length === 0) return;
 
       const { hasChanges, hasInvalidInputs } = checkForChanges();
 
@@ -136,11 +158,10 @@ export function bindGradeInputEvents() {
       }
 
       // Update button state
-      saveButton.disabled = !hasChanges || hasInvalidInputs;
-      saveButton.classList.toggle('has-changes', hasChanges);
-
-      // Update notification
-      const container = document.getElementById('unsavedNotificationContainer');
+      setSaveButtonsState({
+        disabled: !hasChanges || hasInvalidInputs,
+        hasChanges,
+      });
 
       // Only show notification for validation errors (Alpine handles unsaved changes indicator)
       if (hasInvalidInputs) {
@@ -151,23 +172,18 @@ export function bindGradeInputEvents() {
                     </div>
                 `;
 
-        if (container) {
-          container.innerHTML = errorNotificationHTML;
-        }
+        renderValidationNotification(errorNotificationHTML);
       } else {
-        // Clear validation error notification
-        if (container) {
-          container.innerHTML = '';
-        }
+        renderValidationNotification('');
       }
 
       // Update save button tooltip
       if (hasInvalidInputs) {
-        saveButton.title = 'Please correct invalid grades before saving';
+        setSaveButtonsState({ title: 'Please correct invalid grades before saving' });
       } else if (!hasChanges) {
-        saveButton.title = 'No changes to save';
+        setSaveButtonsState({ title: 'No changes to save' });
       } else {
-        saveButton.title = 'Save changes';
+        setSaveButtonsState({ title: 'Save changes' });
       }
     }
 
@@ -246,9 +262,10 @@ export function bindGradeInputEvents() {
     function validateInput(input) {
       const value = input.value.trim();
       const max = parseInt(input.getAttribute('max'));
+      const tooltipHost = input.closest('td') || input.parentNode;
 
       // Remove existing tooltip
-      const existingTooltip = input.parentNode.querySelector('.invalid-tooltip');
+      const existingTooltip = tooltipHost?.querySelector('.invalid-tooltip');
       if (existingTooltip) {
         existingTooltip.remove();
       }
@@ -276,7 +293,10 @@ export function bindGradeInputEvents() {
           const tooltip = document.createElement('div');
           tooltip.className = 'invalid-tooltip';
           tooltip.innerHTML = `<div class="error-message">${errorHTML}</div>`;
-          input.parentNode.appendChild(tooltip);
+          if (tooltipHost) {
+            tooltipHost.style.position = 'relative';
+            tooltipHost.appendChild(tooltip);
+          }
 
           return false;
         }
@@ -395,10 +415,8 @@ export function bindGradeInputEvents() {
             return;
           }
 
-          // Disable save button during the update
-          if (saveButton) {
-            saveButton.disabled = true;
-          }
+          // Disable save buttons during the update
+          setSaveButtonsState({ disabled: true });
 
           fetch('/instructor/activities/' + activityId, {
             method: 'PUT',
@@ -447,11 +465,11 @@ export function bindGradeInputEvents() {
                 });
 
                 // Update save button state
-                if (saveButton) {
-                  const isValid = validateAllInputs();
-                  saveButton.disabled = !isValid;
-                  saveButton.title = isValid ? '' : 'Please correct invalid grades before saving';
-                }
+                const isValid = validateAllInputs();
+                setSaveButtonsState({
+                  disabled: !isValid,
+                  title: isValid ? '' : 'Please correct invalid grades before saving',
+                });
 
                 // Show warning if any grades became invalid
                 if (hasInvalidGrades) {
@@ -471,11 +489,9 @@ export function bindGradeInputEvents() {
               }
               this.value = oldValue;
 
-              // Re-enable save button on error
-              if (saveButton) {
-                const isValid = validateAllInputs();
-                saveButton.disabled = !isValid;
-              }
+              // Re-enable save buttons on error
+              const isValid = validateAllInputs();
+              setSaveButtonsState({ disabled: !isValid });
             });
         });
       });
@@ -580,8 +596,10 @@ export function bindGradeInputEvents() {
 
         // Helper function to show errors
         function showError(input, message) {
+          const tooltipHost = input.closest('td') || input.parentNode;
+
           // Remove any existing tooltip first
-          const existingTooltip = input.parentNode.querySelector('.invalid-tooltip');
+          const existingTooltip = tooltipHost?.querySelector('.invalid-tooltip');
           if (existingTooltip) {
             existingTooltip.remove();
           }
@@ -594,7 +612,10 @@ export function bindGradeInputEvents() {
                             <span>${message}</span>
                         </div>
                     `;
-          input.parentNode.appendChild(tooltip);
+          if (tooltipHost) {
+            tooltipHost.style.position = 'relative';
+            tooltipHost.appendChild(tooltip);
+          }
           input.classList.add('is-invalid');
 
           setTimeout(() => {
@@ -609,9 +630,10 @@ export function bindGradeInputEvents() {
 
         // Clear error on focus
         input.addEventListener('focus', function () {
+          const tooltipHost = this.closest('td') || this.parentNode;
           if (this.value.trim() === '') {
             this.classList.remove('is-invalid');
-            const tooltip = this.parentNode.querySelector('.invalid-tooltip');
+            const tooltip = tooltipHost?.querySelector('.invalid-tooltip');
             if (tooltip) tooltip.remove();
           }
         });
@@ -639,9 +661,7 @@ export function bindGradeInputEvents() {
         if (loadingStore) {
           loadingStore.start('saveGrades');
         }
-        if (saveButton) {
-          saveButton.disabled = true;
-        }
+        setSaveButtonsState({ disabled: true });
 
         // Clear unsaved changes in Alpine store before submitting
         const gradesStoreSubmit = getGradesStore();
@@ -696,9 +716,7 @@ export function bindGradeInputEvents() {
             if (loadingStoreStop) {
               loadingStoreStop.stop('saveGrades');
             }
-            if (saveButton) {
-              saveButton.disabled = true;
-            }
+            setSaveButtonsState({ disabled: true });
 
             // If user saved while in expanded view, return to normal table layout.
             exitExpandedGradeTableIfOpen();
@@ -732,10 +750,7 @@ export function bindGradeInputEvents() {
             }
 
             // Reset button state
-            if (saveButton) {
-              saveButton.disabled = false;
-              saveButton.querySelector('.spinner-border')?.classList.add('d-none');
-            }
+            setSaveButtonsState({ disabled: false });
           });
       });
     }
@@ -846,26 +861,20 @@ export function bindGradeInputEvents() {
     // Initial state check
     updateSaveButtonState();
 
-    // Add click handler for save button to prevent beforeunload warning
-    if (saveButton) {
-      saveButton.addEventListener('click', function (e) {
+    // Add click handlers for active save buttons to prevent beforeunload warning
+    getSaveButtons().forEach((button) => {
+      button.addEventListener('click', function () {
         console.log('Save button clicked');
         if (form) {
           form.submitting = true;
         }
-        // Clear unsaved changes in Alpine store
         const gradesStoreSave = getGradesStore();
         if (gradesStoreSave) {
           gradesStoreSave.clearUnsaved();
         }
-
-        // Clear the notification immediately
-        const container = document.getElementById('unsavedNotificationContainer');
-        if (container) {
-          container.innerHTML = '';
-        }
+        renderValidationNotification('');
       });
-    }
+    });
 
     // Initialize course outcome dropdowns
     if (typeof initializeCourseOutcomeDropdowns === 'function') {

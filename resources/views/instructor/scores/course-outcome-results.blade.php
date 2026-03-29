@@ -493,15 +493,13 @@
 
                         @php
                             $thresholdInputs = $targetLevelThresholds ?? [
-                                'level_3' => 75,
-                                'level_2' => 50,
-                                'level_1' => 25,
+                                'level_3' => 80,
+                                'level_2' => 70,
+                                'level_1' => 60,
                             ];
                         @endphp
                         <div id="summary-target-level-controls" class="border-top pt-3 mt-3 no-print" style="display: {{ request('view') === 'copasssummary' ? 'block' : 'none' }};">
-                            <form action="{{ route('instructor.course-outcome-attainments.target-levels.update', ['subject' => $subjectId]) }}" method="POST">
-                                @csrf
-                                @method('PUT')
+                            <form id="summary-target-level-form" action="javascript:void(0)" method="POST" onsubmit="return false;">
                                 <div class="table-responsive target-level-grid mb-2">
                                     <table class="table table-sm table-bordered align-middle mb-0">
                                         <tbody>
@@ -519,7 +517,6 @@
                                                         max="100"
                                                         step="0.1"
                                                         value="{{ old('level_3', $thresholdInputs['level_3']) }}"
-                                                        readonly
                                                         required
                                                     >
                                                 </td>
@@ -538,7 +535,6 @@
                                                         max="100"
                                                         step="0.1"
                                                         value="{{ old('level_2', $thresholdInputs['level_2']) }}"
-                                                        readonly
                                                         required
                                                     >
                                                 </td>
@@ -557,7 +553,6 @@
                                                         max="100"
                                                         step="0.1"
                                                         value="{{ old('level_1', $thresholdInputs['level_1']) }}"
-                                                        readonly
                                                         required
                                                     >
                                                 </td>
@@ -572,6 +567,17 @@
                                         Used by <strong>Target Level Achieved</strong> in summary mode. "Percent of students to get the desired mark." is based on dynamic CO target (%) from each summary column header. Rule: Level 3 &gt;= Level 2 &gt;= Level 1.
                                     </small>
                                 </div>
+
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-2">
+                                    <small id="target-level-temporary-note" class="text-info-emphasis">
+                                        Temporary preview only: changes update this page instantly and reset on refresh.
+                                    </small>
+                                    <button type="button" id="target-level-reset-btn" class="btn btn-sm btn-outline-secondary">
+                                        Reset Levels
+                                    </button>
+                                </div>
+
+                                <div id="target-level-validation-message" class="small text-danger mt-2 d-none"></div>
 
                                 @if($errors->has('level_3') || $errors->has('level_2') || $errors->has('level_1'))
                                     <div class="alert alert-danger py-2 mb-0 mt-2">
@@ -692,7 +698,7 @@
                                                 ? 'text-muted'
                                                 : ($metTargetPercentage >= 75 ? 'text-success' : 'text-danger');
                                         @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? $metTargetPercentage . '%' : '--' }}</td>
+                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? number_format((float) $metTargetPercentage, 0) . '%' : '--' }}</td>
                                     @endif
                                 @endforeach
                             </tr>
@@ -726,7 +732,13 @@
                                                 $targetLevelClass = 'text-danger';
                                             }
                                         @endphp
-                                        <td class="fw-bold {{ $targetLevelClass }}">{{ $targetLevelText }}</td>
+                                        <td
+                                            class="fw-bold {{ $targetLevelClass }}"
+                                            data-target-level-cell="true"
+                                            data-target-level-scope="combined"
+                                            data-co-id="{{ $coId }}"
+                                            data-met-target-percentage="{{ $stats['met_target_percentage'] ?? '' }}"
+                                        >{{ $targetLevelText }}</td>
                                     @endif
                                 @endforeach
                             </tr>
@@ -1221,7 +1233,7 @@
                                                 ? 'text-muted'
                                                 : ($metTargetPercentage >= 75 ? 'text-success' : 'text-danger');
                                         @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? $metTargetPercentage . '%' : '--' }}</td>
+                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? number_format((float) $metTargetPercentage, 0) . '%' : '--' }}</td>
                                     @endforeach
                                 </tr>
                                 <tr style="background:#fff;">
@@ -1253,7 +1265,14 @@
                                                 $targetLevelClass = 'text-danger';
                                             }
                                         @endphp
-                                        <td class="fw-bold {{ $targetLevelClass }}">{{ $targetLevelText }}</td>
+                                        <td
+                                            class="fw-bold {{ $targetLevelClass }}"
+                                            data-target-level-cell="true"
+                                            data-target-level-scope="term"
+                                            data-term="{{ $term }}"
+                                            data-co-id="{{ $coId }}"
+                                            data-met-target-percentage="{{ $stats['met_target_percentage'] ?? '' }}"
+                                        >{{ $targetLevelText }}</td>
                                     @endforeach
                                 </tr>
                             </tbody>

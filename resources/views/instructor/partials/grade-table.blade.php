@@ -248,6 +248,7 @@
     @endif
 
     @if ($hasData)
+        <template x-if="!($store.gradeTable && $store.gradeTable.isFullscreen)">
         <div class="text-end mt-4 mb-4 me-4 d-flex justify-content-end align-items-center">
             <!-- Alpine-powered unsaved changes indicator -->
             <div x-data x-show="$store.grades.unsavedChanges" x-transition class="me-3">
@@ -257,8 +258,8 @@
                 </div>
             </div>
             <!-- Container for validation error messages only -->
-            <div id="unsavedNotificationContainer" class="me-3"></div>
-            <button type="submit" id="saveGradesBtn" class="btn btn-success px-4 py-2 d-flex align-items-center gap-2 position-relative" disabled x-data>
+            <div id="unsavedNotificationContainer" class="me-3 unsaved-notification-container"></div>
+            <button type="submit" id="saveGradesBtn" data-save-grades-btn class="btn btn-success px-4 py-2 d-flex align-items-center gap-2 position-relative" disabled x-data>
                 <i class="bi bi-save"></i>
                 <span x-text="$store.loading.isLoading('saveGrades') ? 'Saving...' : 'Save Grades'"></span>
                 <div x-show="$store.loading.isLoading('saveGrades')" x-transition class="spinner-border spinner-border-sm ms-1" role="status">
@@ -266,6 +267,7 @@
                 </div>
             </button>
         </div>
+        </template>
     @endif
 </div>
 
@@ -280,10 +282,12 @@
                     <span class="small fw-semibold">Unsaved grades</span>
                 </div>
             </div>
+            <div class="unsaved-notification-container"></div>
             <button type="submit"
                     form="gradeForm"
+                    data-save-grades-btn
                     class="btn btn-success shadow d-flex align-items-center gap-2"
-                    :disabled="!($store.grades && $store.grades.unsavedChanges) || $store.loading.isLoading('saveGrades')"
+                    disabled
                     title="Save grades while expanded">
                 <i class="bi bi-save"></i>
                 <span x-text="$store.loading.isLoading('saveGrades') ? 'Saving...' : 'Save Grades'"></span>
@@ -417,11 +421,20 @@
 .grade-table-fullscreen .table-responsive {
     height: calc(100% - 20px);
     padding: 10px;
+    overflow: auto !important;
 }
 
 .grade-table-fullscreen .table-responsive > div {
     max-height: 100% !important;
     height: 100% !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Keep validation tooltip anchored to the edited cell in expanded mode */
+.grade-table-fullscreen .table td,
+.grade-table-fullscreen .table th {
+    position: relative;
 }
 
 /* Backdrop is injected directly on body via JS (#grade-table-body-backdrop) */

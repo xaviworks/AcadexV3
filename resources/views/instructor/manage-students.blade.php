@@ -65,6 +65,36 @@
         #studentTabsContent .tab-pane {
             background: transparent !important;
         }
+
+        /* Improve visibility of checkbox outlines in Import Students tab */
+        #import .form-check-input,
+        #import #selectAll,
+        #import .student-checkbox {
+            border: 2px solid #198754 !important;
+            box-shadow: 0 0 0 1px rgba(25, 135, 84, 0.2);
+        }
+
+        #import .form-check-input:hover,
+        #import #selectAll:hover,
+        #import .student-checkbox:hover {
+            border-color: #146c43 !important;
+            box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.25);
+        }
+
+        #import .form-check-input:focus,
+        #import #selectAll:focus,
+        #import .student-checkbox:focus {
+            border-color: #146c43 !important;
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.3) !important;
+        }
+
+        #import .form-check-input:checked,
+        #import #selectAll:checked,
+        #import .student-checkbox:checked {
+            background-color: #198754;
+            border-color: #146c43 !important;
+            box-shadow: 0 0 0 1px rgba(20, 108, 67, 0.35);
+        }
     </style>
 
     <div class="tab-content" id="studentTabsContent" style="background: transparent;">

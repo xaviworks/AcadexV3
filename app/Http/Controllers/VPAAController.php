@@ -147,17 +147,8 @@ class VPAAController extends Controller
             })
             ->count();
 
-        $instructorsCount = User::where('role', 0) // Instructor role
+        $instructorsCount = User::where('role', 0)
             ->where('is_active', true)
-            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
-                $q->whereExists(function ($subQuery) use ($academicPeriodId) {
-                    $subQuery->select(DB::raw(1))
-                        ->from('subjects')
-                        ->whereColumn('subjects.instructor_id', 'users.id')
-                        ->where('subjects.is_deleted', false)
-                        ->where('subjects.academic_period_id', $academicPeriodId);
-                });
-            })
             ->count();
 
         $studentsCount = Student::where('is_deleted', false)
@@ -209,15 +200,6 @@ class VPAAController extends Controller
 
         $instructorsCount = User::where('role', 0)
             ->where('is_active', true)
-            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
-                $q->whereExists(function ($subQuery) use ($academicPeriodId) {
-                    $subQuery->select(DB::raw(1))
-                        ->from('subjects')
-                        ->whereColumn('subjects.instructor_id', 'users.id')
-                        ->where('subjects.is_deleted', false)
-                        ->where('subjects.academic_period_id', $academicPeriodId);
-                });
-            })
             ->count();
 
         $studentsCount = Student::where('is_deleted', false)
@@ -397,8 +379,7 @@ class VPAAController extends Controller
         $departmentId = $departmentId ?: $request->input('department_id');
         
         // Build query for instructors
-        $query = User::where('role', '!=', 3) // Exclude admin users (role 3)
-            ->where('role', '!=', 5) // Exclude VPAA users (role 5)
+        $query = User::where('role', 0)
             ->with(['department' => function($query) {
                 $query->select('id', 'department_code', 'department_description');
             }])
@@ -448,7 +429,7 @@ class VPAAController extends Controller
     public function updateInstructor(Request $request, $id)
     {
         $instructor = User::findOrFail($id);
-        
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -456,7 +437,7 @@ class VPAAController extends Controller
             'department_id' => 'required|exists:departments,id',
             'is_active' => 'boolean'
         ]);
-        
+
         // Update the instructor
         $instructor->update([
             'first_name' => $validated['first_name'],
@@ -465,7 +446,7 @@ class VPAAController extends Controller
             'department_id' => $validated['department_id'],
             'is_active' => $request->has('is_active') ? 1 : 0,
         ]);
-        
+
         return redirect()->route('vpaa.instructors', ['department_id' => request('department_id')])
             ->with('success', 'Instructor updated successfully.');
     }

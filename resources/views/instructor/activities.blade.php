@@ -72,7 +72,7 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-medium">Term:</label>
+                            <label class="form-label small fw-medium">Period:</label>
                             <select name="term" class="form-select" required>
                                 <option value="">-- Select --</option>
                                 <option value="prelim">Prelim</option>
@@ -108,7 +108,7 @@
                                 <tr>
                                     <th class="text-start">Title</th>
                                     <th class="text-center">Type</th>
-                                    <th class="text-center">Term</th>
+                                    <th class="text-center">Period</th>
                                     <th class="text-center">Number of Items</th>
                                     <th class="text-center">Actions</th>
                                 </tr>

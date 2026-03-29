@@ -27,9 +27,9 @@ class CourseOutcomeAttainmentController extends Controller
             ->first();
 
         $targetLevelThresholds = [
-            'level_3' => (float) ($savedTargetLevels->level_3 ?? 75),
-            'level_2' => (float) ($savedTargetLevels->level_2 ?? 50),
-            'level_1' => (float) ($savedTargetLevels->level_1 ?? 25),
+            'level_3' => (float) ($savedTargetLevels->level_3 ?? 80),
+            'level_2' => (float) ($savedTargetLevels->level_2 ?? 70),
+            'level_1' => (float) ($savedTargetLevels->level_1 ?? 60),
         ];
 
         // Get students enrolled in the subject - order by last_name, first_name for consistent display

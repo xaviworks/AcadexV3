@@ -141,7 +141,7 @@ class VpaaDashboardAcademicPeriodTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('departmentsCount', 1);
-        $response->assertJsonPath('instructorsCount', 1);
+        $response->assertJsonPath('instructorsCount', 2);
         $response->assertJsonPath('studentsCount', 1);
         $response->assertJsonPath('academicPrograms', 1);
     }
