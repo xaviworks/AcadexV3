@@ -44,15 +44,18 @@
         <div class="card-body p-0">
             @if($guides->isEmpty())
                 {{-- Empty State --}}
-                <div class="text-center py-5">
-                    <div class="text-muted">
-                        <i class="bi bi-inbox display-4 d-block mb-3"></i>
-                        <p class="mb-2">No help guides created yet.</p>
+                <x-empty-state
+                    icon="bi-inbox"
+                    title="No Help Guides Yet"
+                    message="No help guides created yet."
+                    compact="true"
+                >
+                    <x-slot:actions>
                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createGuideModal">
                             <i class="bi bi-plus-lg me-1"></i> Create Your First Guide
                         </button>
-                    </div>
-                </div>
+                    </x-slot:actions>
+                </x-empty-state>
             @else
                 <div class="table-responsive guides-table-wrapper">
                     <table id="guidesTable" class="table table-bordered table-hover mb-0">

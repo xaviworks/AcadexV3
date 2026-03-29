@@ -42,15 +42,11 @@
             @endforeach
         </div>
     @else
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-5 text-center">
-                <div class="text-muted mb-3">
-                    <i class="bi bi-journal-x fs-1 opacity-50"></i>
-                </div>
-                <h5 class="text-muted mb-2">No Departments Found</h5>
-                <p class="text-muted mb-0">Departments data is required to browse students.</p>
-            </div>
-        </div>
+        <x-empty-state
+            icon="bi-journal-x"
+            title="No Departments Found"
+            message="Departments data is required to browse students."
+        />
     @endif
 </div>
 @endsection

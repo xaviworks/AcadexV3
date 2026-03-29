@@ -101,7 +101,12 @@
                         <h2 class="visually-hidden">Active Instructors</h2>
 
                         @if($activeInstructors->isEmpty())
-                            <div class="alert alert-warning shadow-sm rounded">No active instructors.</div>
+                            <x-empty-state
+                                compact="true"
+                                icon="bi-people-x"
+                                title="No Active Instructors"
+                                message="No active instructors."
+                            />
                         @else
                             <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
                                 <table class="table table-bordered align-middle mb-0">
@@ -159,7 +164,12 @@
                         {{-- $inactiveInstructors already computed above --}}
 
                         @if($inactiveInstructors->isEmpty())
-                            <div class="alert alert-warning shadow-sm rounded">No inactive instructors.</div>
+                            <x-empty-state
+                                compact="true"
+                                icon="bi-person-dash"
+                                title="No Inactive Instructors"
+                                message="No inactive instructors."
+                            />
                         @else
                             <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
                                 <table class="table table-bordered align-middle mb-0">
@@ -219,7 +229,12 @@
                         <h2 class="visually-hidden">Pending Approvals</h2>
 
                         @if($pendingAccounts->isEmpty())
-                            <div class="alert alert-info shadow-sm rounded">No pending instructor applications.</div>
+                            <x-empty-state
+                                compact="true"
+                                icon="bi-hourglass-split"
+                                title="No Pending Applications"
+                                message="No pending instructor applications."
+                            />
                         @else
                             <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
                                 <table class="table table-bordered align-middle mb-0">
@@ -277,7 +292,12 @@
         @endphp
 
         @if($geRequests->isEmpty())
-            <div class="alert alert-warning shadow-sm rounded">No pending GE courses requests.</div>
+            <x-empty-state
+                compact="true"
+                icon="bi-inbox"
+                title="No Pending GE Requests"
+                message="No pending GE courses requests."
+            />
         @else
             <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
                 <table class="table table-bordered align-middle mb-0">

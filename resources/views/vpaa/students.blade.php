@@ -100,17 +100,14 @@
                     @empty
                         <tr>
                             <td colspan="{{ $showCourseColumn ? 3 : 2 }}" class="text-center py-5">
-                                <div class="text-muted mb-3">
-                                    <i class="bi bi-people-x fs-1 opacity-50"></i>
-                                </div>
-                                <h6 class="text-muted mb-1">No students found</h6>
-                                <p class="text-muted small mb-0">
-                                    @if(isset($department))
-                                        No students are assigned to this department.
-                                    @else
-                                        Try selecting a different department.
-                                    @endif
-                                </p>
+                                <x-empty-state
+                                    compact="true"
+                                    icon="bi-people-x"
+                                    title="No Students Found"
+                                    :message="isset($department)
+                                        ? 'No students are assigned to this department.'
+                                        : 'Try selecting a different department.'"
+                                />
                             </td>
                         </tr>
                     @endforelse

@@ -76,11 +76,11 @@
             </div>
         </div>
     @else
-        <div class="text-center py-5">
-            <i class="bi bi-calendar-x text-muted mb-3 d-block" style="font-size: 4rem;"></i>
-            <h5 class="text-muted mb-2">No GE Courses Found</h5>
-            <p class="text-muted">No GE courses found for the current academic period. Please check if courses have been created for this academic period.</p>
-        </div>
+        <x-empty-state
+            icon="bi-calendar-x"
+            title="No GE Courses Found"
+            message="No GE courses found for the current academic period. Please check if courses have been created for this academic period."
+        />
     @endif
 </div>
 @endsection
