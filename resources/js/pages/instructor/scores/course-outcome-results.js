@@ -13,10 +13,16 @@ const TARGET_LEVEL_INPUT_IDS = {
 };
 
 const TARGET_LEVEL_TEXT_CLASSES = ['text-muted', 'text-success', 'text-primary', 'text-warning', 'text-danger'];
+const MET_TARGET_PERCENTAGE_TEXT_CLASSES = ['text-muted', 'text-success', 'text-danger'];
+const CO_TARGET_INPUT_SELECTOR = '[data-co-target-input="true"]';
+const CO_THRESHOLD_PREVIEW_DATA_ID = 'co-threshold-preview-data';
 
 const targetLevelState = {
   initialLevels: null,
   lastValidLevels: null,
+  initialCoTargets: {},
+  lastValidCoTargets: {},
+  previewData: null,
 };
 
 const TERM_LABELS = {
@@ -60,6 +66,58 @@ function clampTargetLevelValue(value) {
   return value;
 }
 
+function getCoTargetInputs() {
+  return Array.from(document.querySelectorAll(CO_TARGET_INPUT_SELECTOR));
+}
+
+function normalizePreviewDataset(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return {
+      initial_targets: {},
+      combined_evaluations: {},
+      term_evaluations: {},
+    };
+  }
+
+  return {
+    initial_targets: raw.initial_targets && typeof raw.initial_targets === 'object' ? raw.initial_targets : {},
+    combined_evaluations:
+      raw.combined_evaluations && typeof raw.combined_evaluations === 'object' ? raw.combined_evaluations : {},
+    term_evaluations: raw.term_evaluations && typeof raw.term_evaluations === 'object' ? raw.term_evaluations : {},
+  };
+}
+
+function readCoThresholdPreviewData() {
+  const script = document.getElementById(CO_THRESHOLD_PREVIEW_DATA_ID);
+  if (!script) {
+    return normalizePreviewDataset(null);
+  }
+
+  try {
+    return normalizePreviewDataset(JSON.parse(script.textContent || '{}'));
+  } catch (error) {
+    console.warn('Failed to parse CO threshold preview payload.', error);
+    return normalizePreviewDataset(null);
+  }
+}
+
+function normalizeCoTargetMap(rawTargets) {
+  const normalized = {};
+
+  if (!rawTargets || typeof rawTargets !== 'object') {
+    return normalized;
+  }
+
+  Object.entries(rawTargets).forEach(([coId, value]) => {
+    const parsed = Number.parseFloat(String(value));
+    if (Number.isFinite(parsed)) {
+      normalized[String(coId)] = parsed;
+    }
+  });
+
+  return normalized;
+}
+
 function normalizeTargetLevelInput(input) {
   if (!input || typeof input.value !== 'string') return;
 
@@ -84,6 +142,18 @@ function readTargetLevelsFromInputs() {
   };
 }
 
+function readCoTargetsFromInputs() {
+  const targets = {};
+
+  getCoTargetInputs().forEach((input) => {
+    const coId = input.getAttribute('data-co-id');
+    if (!coId) return;
+    targets[coId] = parseTargetLevelValue(input.value || '');
+  });
+
+  return targets;
+}
+
 function hasCompleteTargetLevels(levels) {
   return levels.level_3 !== null && levels.level_2 !== null && levels.level_1 !== null;
 }
@@ -100,6 +170,20 @@ function hasValidTargetLevelOrder(levels) {
 
 function isValidTargetLevelSet(levels) {
   return hasCompleteTargetLevels(levels) && hasTargetLevelsInRange(levels) && hasValidTargetLevelOrder(levels);
+}
+
+function hasCompleteCoTargets(coTargets) {
+  const values = Object.values(coTargets);
+  if (values.length === 0) return true;
+
+  return values.every((value) => value !== null);
+}
+
+function hasCoTargetsInRange(coTargets) {
+  const values = Object.values(coTargets);
+  if (values.length === 0) return true;
+
+  return values.every((value) => value !== null && value >= 0 && value <= 100);
 }
 
 function resolveTargetLevelAchievedForPreview(metTargetPercentage, levels) {
@@ -125,18 +209,116 @@ function getTargetLevelDisplayText(value) {
   return value === null ? '--' : value.toFixed(1);
 }
 
-function setTargetLevelValidationState(message = '', isInvalid = false) {
+function getMetTargetPercentageClass(value) {
+  if (value === null) return 'text-muted';
+  return value >= 75 ? 'text-success' : 'text-danger';
+}
+
+function getMetTargetPercentageDisplayText(value) {
+  if (value === null) return '--';
+  return `${Math.round(value)}%`;
+}
+
+function getCoTargetDisplayText(value) {
+  if (!Number.isFinite(value)) return '--';
+
+  const rounded = Math.round(value * 10) / 10;
+  if (Number.isInteger(rounded)) {
+    return String(rounded);
+  }
+
+  return rounded.toFixed(1);
+}
+
+function roundToSingleDecimal(value) {
+  return Math.round(value * 10) / 10;
+}
+
+function resolveCoTargetThreshold(coTargets, coId) {
+  if (Object.prototype.hasOwnProperty.call(coTargets, coId) && Number.isFinite(coTargets[coId])) {
+    return coTargets[coId];
+  }
+
+  if (
+    targetLevelState.initialCoTargets &&
+    Object.prototype.hasOwnProperty.call(targetLevelState.initialCoTargets, coId) &&
+    Number.isFinite(targetLevelState.initialCoTargets[coId])
+  ) {
+    return targetLevelState.initialCoTargets[coId];
+  }
+
+  return null;
+}
+
+function getSummaryEvaluations(scope, term, coId) {
+  if (!targetLevelState.previewData) {
+    return [];
+  }
+
+  if (scope === 'term') {
+    const termEvaluations = targetLevelState.previewData.term_evaluations?.[term];
+    const coEvaluations = termEvaluations?.[coId];
+    return Array.isArray(coEvaluations) ? coEvaluations : [];
+  }
+
+  const combinedEvaluations = targetLevelState.previewData.combined_evaluations?.[coId];
+  return Array.isArray(combinedEvaluations) ? combinedEvaluations : [];
+}
+
+function computeSummaryMetrics(scope, term, coId, threshold) {
+  const evaluations = getSummaryEvaluations(scope, term, coId);
+
+  let attempted = 0;
+  let metTargetCount = 0;
+
+  evaluations.forEach((evaluation) => {
+    const attemptedFlag = evaluation?.attempted === true;
+    if (!attemptedFlag) return;
+
+    const percent = Number.parseFloat(String(evaluation?.percent));
+    if (!Number.isFinite(percent)) return;
+
+    attempted += 1;
+    if (percent >= threshold) {
+      metTargetCount += 1;
+    }
+  });
+
+  return {
+    attempted,
+    metTargetCount,
+    metTargetPercentage: attempted > 0 ? roundToSingleDecimal((metTargetCount / attempted) * 100) : null,
+  };
+}
+
+function setTargetLevelValidationState(message = '', levelInputsInvalid = false, coTargetInputsInvalid = false) {
   const validationMessage = document.getElementById('target-level-validation-message');
   if (validationMessage) {
     validationMessage.textContent = message;
-    validationMessage.classList.toggle('d-none', !isInvalid);
+    validationMessage.classList.toggle('d-none', message === '');
   }
 
   Object.values(TARGET_LEVEL_INPUT_IDS).forEach((id) => {
     const input = document.getElementById(id);
     if (input) {
-      input.classList.toggle('is-invalid', isInvalid);
+      input.classList.toggle('is-invalid', levelInputsInvalid);
     }
+  });
+
+  getCoTargetInputs().forEach((input) => {
+    input.classList.toggle('is-invalid', coTargetInputsInvalid);
+  });
+}
+
+function renderCoTargetLabels(coTargets) {
+  document.querySelectorAll('[data-co-target-label="true"]').forEach((label) => {
+    const coId = label.getAttribute('data-co-id');
+    if (!coId) return;
+
+    const threshold = resolveCoTargetThreshold(coTargets, coId);
+    if (!Number.isFinite(threshold)) return;
+
+    label.textContent = getCoTargetDisplayText(threshold);
   });
 }
 
@@ -157,27 +339,112 @@ function renderTargetLevelAchievedCells(levels) {
   });
 }
 
+function renderSummaryPreview(levels, coTargets) {
+  if (!targetLevelState.previewData) {
+    renderTargetLevelAchievedCells(levels);
+    return;
+  }
+
+  renderCoTargetLabels(coTargets);
+
+  const metricsCache = new Map();
+  const getCachedMetrics = (scope, term, coId, threshold) => {
+    const cacheKey = `${scope}|${term || 'combined'}|${coId}|${threshold}`;
+    if (metricsCache.has(cacheKey)) {
+      return metricsCache.get(cacheKey);
+    }
+
+    const metrics = computeSummaryMetrics(scope, term, coId, threshold);
+    metricsCache.set(cacheKey, metrics);
+    return metrics;
+  };
+
+  document.querySelectorAll('[data-met-target-count-cell="true"]').forEach((cell) => {
+    const scope = cell.getAttribute('data-target-level-scope') || 'combined';
+    const term = cell.getAttribute('data-term') || '';
+    const coId = cell.getAttribute('data-co-id');
+    if (!coId) return;
+
+    const threshold = resolveCoTargetThreshold(coTargets, coId);
+    if (!Number.isFinite(threshold)) return;
+
+    const metrics = getCachedMetrics(scope, term, coId, threshold);
+    cell.textContent = String(metrics.metTargetCount);
+  });
+
+  document.querySelectorAll('[data-met-target-percentage-cell="true"]').forEach((cell) => {
+    const scope = cell.getAttribute('data-target-level-scope') || 'combined';
+    const term = cell.getAttribute('data-term') || '';
+    const coId = cell.getAttribute('data-co-id');
+    if (!coId) return;
+
+    const threshold = resolveCoTargetThreshold(coTargets, coId);
+    if (!Number.isFinite(threshold)) return;
+
+    const metrics = getCachedMetrics(scope, term, coId, threshold);
+    const nextClass = getMetTargetPercentageClass(metrics.metTargetPercentage);
+
+    cell.classList.remove(...MET_TARGET_PERCENTAGE_TEXT_CLASSES);
+    cell.classList.add(nextClass);
+    cell.textContent = getMetTargetPercentageDisplayText(metrics.metTargetPercentage);
+  });
+
+  document.querySelectorAll('[data-target-level-cell="true"]').forEach((cell) => {
+    const scope = cell.getAttribute('data-target-level-scope') || 'combined';
+    const term = cell.getAttribute('data-term') || '';
+    const coId = cell.getAttribute('data-co-id');
+    if (!coId) return;
+
+    const threshold = resolveCoTargetThreshold(coTargets, coId);
+    if (!Number.isFinite(threshold)) return;
+
+    const metrics = getCachedMetrics(scope, term, coId, threshold);
+    const targetLevelValue = resolveTargetLevelAchievedForPreview(metrics.metTargetPercentage, levels);
+    const nextClass = getTargetLevelClass(targetLevelValue);
+
+    cell.setAttribute(
+      'data-met-target-percentage',
+      metrics.metTargetPercentage === null ? '' : String(metrics.metTargetPercentage)
+    );
+    cell.classList.remove(...TARGET_LEVEL_TEXT_CLASSES);
+    cell.classList.add(nextClass);
+    cell.textContent = getTargetLevelDisplayText(targetLevelValue);
+  });
+}
+
 function applyLiveTargetLevelPreview() {
   const levels = readTargetLevelsFromInputs();
+  const coTargets = readCoTargetsFromInputs();
 
   if (!hasCompleteTargetLevels(levels)) {
-    setTargetLevelValidationState('All target levels are required to preview changes.', true);
+    setTargetLevelValidationState('All target levels are required to preview changes.', true, false);
     return;
   }
 
   if (!hasTargetLevelsInRange(levels)) {
-    setTargetLevelValidationState('Target levels must be between 0 and 100.', true);
+    setTargetLevelValidationState('Target levels must be between 0 and 100.', true, false);
     return;
   }
 
   if (!hasValidTargetLevelOrder(levels)) {
-    setTargetLevelValidationState('Target levels must follow Level 3 >= Level 2 >= Level 1.', true);
+    setTargetLevelValidationState('Target levels must follow Level 3 >= Level 2 >= Level 1.', true, false);
     return;
   }
 
-  setTargetLevelValidationState('', false);
+  if (!hasCompleteCoTargets(coTargets)) {
+    setTargetLevelValidationState('All CO target percentages are required to preview changes.', false, true);
+    return;
+  }
+
+  if (!hasCoTargetsInRange(coTargets)) {
+    setTargetLevelValidationState('CO target percentages must be between 0 and 100.', false, true);
+    return;
+  }
+
+  setTargetLevelValidationState('', false, false);
   targetLevelState.lastValidLevels = { ...levels };
-  renderTargetLevelAchievedCells(levels);
+  targetLevelState.lastValidCoTargets = { ...coTargets };
+  renderSummaryPreview(levels, coTargets);
 }
 
 function resetTemporaryTargetLevels() {
@@ -191,9 +458,19 @@ function resetTemporaryTargetLevels() {
   if (level2Input) level2Input.value = targetLevelState.initialLevels.level_2;
   if (level1Input) level1Input.value = targetLevelState.initialLevels.level_1;
 
-  setTargetLevelValidationState('', false);
+  getCoTargetInputs().forEach((input) => {
+    const coId = input.getAttribute('data-co-id');
+    if (!coId) return;
+
+    if (Object.prototype.hasOwnProperty.call(targetLevelState.initialCoTargets, coId)) {
+      input.value = String(targetLevelState.initialCoTargets[coId]);
+    }
+  });
+
+  setTargetLevelValidationState('', false, false);
   targetLevelState.lastValidLevels = { ...targetLevelState.initialLevels };
-  renderTargetLevelAchievedCells(targetLevelState.initialLevels);
+  targetLevelState.lastValidCoTargets = { ...targetLevelState.initialCoTargets };
+  renderSummaryPreview(targetLevelState.initialLevels, targetLevelState.initialCoTargets);
 }
 
 function initTargetLevelEditor() {
@@ -205,9 +482,13 @@ function initTargetLevelEditor() {
   const level3Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_3);
   const level2Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_2);
   const level1Input = document.getElementById(TARGET_LEVEL_INPUT_IDS.level_1);
+  const coTargetInputs = getCoTargetInputs();
   const resetButton = document.getElementById('target-level-reset-btn');
 
   if (!level3Input || !level2Input || !level1Input) return;
+
+  targetLevelState.previewData = readCoThresholdPreviewData();
+  const fallbackCoTargets = normalizeCoTargetMap(targetLevelState.previewData.initial_targets);
 
   summaryTargetLevelForm.addEventListener('submit', (event) => {
     // Non-persistent by design: prevent accidental DB writes through Enter key submits.
@@ -227,17 +508,53 @@ function initTargetLevelEditor() {
     });
   });
 
+  coTargetInputs.forEach((input) => {
+    const coId = input.getAttribute('data-co-id');
+
+    if (
+      coId &&
+      Object.prototype.hasOwnProperty.call(fallbackCoTargets, coId) &&
+      parseTargetLevelValue(input.value || '') === null
+    ) {
+      input.value = String(fallbackCoTargets[coId]);
+    }
+
+    input.setAttribute('max', '100');
+    input.setAttribute('min', '0');
+    input.addEventListener('input', () => {
+      normalizeTargetLevelInput(input);
+      applyLiveTargetLevelPreview();
+    });
+    input.addEventListener('change', () => {
+      normalizeTargetLevelInput(input);
+      applyLiveTargetLevelPreview();
+    });
+  });
+
   if (resetButton) {
     resetButton.addEventListener('click', resetTemporaryTargetLevels);
   }
 
   [level3Input, level2Input, level1Input].forEach(normalizeTargetLevelInput);
+  coTargetInputs.forEach(normalizeTargetLevelInput);
 
   const initialLevels = readTargetLevelsFromInputs();
-  if (isValidTargetLevelSet(initialLevels)) {
+  let initialCoTargets = readCoTargetsFromInputs();
+
+  if (Object.keys(initialCoTargets).length === 0) {
+    initialCoTargets = { ...fallbackCoTargets };
+  }
+
+  if (
+    isValidTargetLevelSet(initialLevels) &&
+    hasCompleteCoTargets(initialCoTargets) &&
+    hasCoTargetsInRange(initialCoTargets)
+  ) {
     targetLevelState.initialLevels = { ...initialLevels };
     targetLevelState.lastValidLevels = { ...initialLevels };
-    renderTargetLevelAchievedCells(initialLevels);
+    targetLevelState.initialCoTargets = { ...initialCoTargets };
+    targetLevelState.lastValidCoTargets = { ...initialCoTargets };
+    renderSummaryPreview(initialLevels, initialCoTargets);
   }
 
   targetLevelEditorInitialized = true;

@@ -119,6 +119,7 @@ class VPAAController extends Controller
             'coSummaryStats',
             'termCoSummaryStats',
             'targetLevelThresholds',
+            'coThresholdPreviewData',
         ]));
 
         return view('vpaa.scores.course-outcome-results', $viewData);
