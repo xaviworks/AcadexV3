@@ -145,6 +145,13 @@ class AdminController extends Controller
     {
         Gate::authorize('admin');
 
+        if ($department->isGeneralEducation()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The legacy GE department record is system-managed during the GE migration phase.',
+            ], 422);
+        }
+
         $request->validate([
             'department_code' => ['required', 'string', 'max:50', Rule::unique('departments')->where('is_deleted', false)->ignore($department->id)],
             'department_description' => 'required|string|max:255',
@@ -171,6 +178,13 @@ class AdminController extends Controller
     public function destroyDepartment(Request $request, Department $department)
     {
         Gate::authorize('admin');
+
+        if ($department->isGeneralEducation()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The legacy GE department record is system-managed and cannot be deleted.',
+            ], 422);
+        }
 
         $request->validate([
             'password' => 'required|string',
@@ -739,7 +753,7 @@ class AdminController extends Controller
             'structure_label' => $structureLabel,
         ];
 
-        $departmentLabel = trim($department->department_description ?? 'Department');
+        $departmentLabel = trim($department->formulaDisplayName());
         $message = sprintf(
             'Applied the %s template to %s\'s baseline formula.',
             $structureLabel,
@@ -2153,7 +2167,7 @@ class AdminController extends Controller
 
         $label = $validated['label'] ?? match ($scope) {
             'global' => 'Institution Fallback Formula',
-            'department' => ($department?->department_description ?? 'Department') . ' Formula',
+            'department' => ($department?->formulaDisplayName() ?? 'Department') . ' Formula',
             'course' => ($course?->course_code ? $course->course_code . ' · ' : '') . ($course?->course_description ?? 'Course') . ' Formula',
             'subject' => ($subject?->subject_code ? $subject->subject_code . ' · ' : '') . ($subject?->subject_description ?? 'Subject') . ' Formula',
             default => 'Custom Formula',
@@ -2685,7 +2699,7 @@ class AdminController extends Controller
             return $genericFallback;
         }
 
-        $label = trim(($department->department_description ?? 'Department') . ' Baseline Formula');
+        $label = trim(($department->formulaDisplayName() ?: 'Department') . ' Baseline Formula');
         if ($label === '') {
             $label = 'Department Baseline Formula';
         }

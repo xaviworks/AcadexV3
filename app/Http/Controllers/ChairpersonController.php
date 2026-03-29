@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\Course;
 use App\Models\FinalGrade;
 use App\Models\UnverifiedUser;
+use App\Support\Organization\GEContext;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +35,7 @@ class ChairpersonController extends Controller
         }
         
         // Get GE department to exclude GE department instructors from chairperson management
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartmentId = Department::generalEducation()?->id;
         
         // Base query for instructors
         $query = User::where('role', 0);
@@ -45,7 +46,7 @@ class ChairpersonController extends Controller
         if (Auth::user()->role === 1) {
             $query->where('department_id', Auth::user()->department_id)
                   ->where('course_id', Auth::user()->course_id)
-                  ->where('department_id', '!=', $geDepartment->id);
+                  ->when($geDepartmentId !== null, fn ($subQuery) => $subQuery->where('department_id', '!=', $geDepartmentId));
         }
         
         $instructors = $query->orderBy('is_active', 'desc') // Show active instructors first
@@ -57,14 +58,15 @@ class ChairpersonController extends Controller
             ->get()
             ->keyBy('instructor_id');
 
-        $pendingAccounts = UnverifiedUser::with('department', 'course')
+        $pendingAccountsQuery = UnverifiedUser::with('department', 'course')
             ->when(Auth::user()->role === 1, function($q) {
                 $q->where('department_id', Auth::user()->department_id)
                   ->where('course_id', Auth::user()->course_id);
             })
-            ->where('department_id', '!=', $geDepartment->id)
-            ->whereNotNull('email_verified_at')
-            ->get();
+            ->whereNotNull('email_verified_at');
+
+        GEContext::applyNonGERegistrationTargetFilter($pendingAccountsQuery);
+        $pendingAccounts = $pendingAccountsQuery->get();
             
         return view('chairperson.manage-instructors', compact('instructors', 'pendingAccounts', 'geRequests'));
     }
@@ -121,14 +123,14 @@ class ChairpersonController extends Controller
         }
         
         // Exclude GE department instructors
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartmentId = Department::generalEducation()?->id;
         
         $query = User::where('id', $id)->where('role', 0);
         if (Auth::user()->role === 1) {
             $query->where('department_id', Auth::user()->department_id)
                   ->where('course_id', Auth::user()->course_id);
         }
-        $query->where('department_id', '!=', $geDepartment->id);
+        $query->when($geDepartmentId !== null, fn ($subQuery) => $subQuery->where('department_id', '!=', $geDepartmentId));
         $instructor = $query->firstOrFail();
         
         // When chairperson deactivates, only remove active status.
@@ -147,14 +149,14 @@ class ChairpersonController extends Controller
         }
         
         // Exclude GE department instructors
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartmentId = Department::generalEducation()?->id;
         
         $query = User::where('id', $id)->where('role', 0);
         if (Auth::user()->role === 1) {
             $query->where('department_id', Auth::user()->department_id)
                   ->where('course_id', Auth::user()->course_id);
         }
-        $query->where('department_id', '!=', $geDepartment->id);
+        $query->when($geDepartmentId !== null, fn ($subQuery) => $subQuery->where('department_id', '!=', $geDepartmentId));
         $instructor = $query->firstOrFail();
         
         // Check if the instructor had a previously approved GE request (to restore GE access)
@@ -259,7 +261,7 @@ class ChairpersonController extends Controller
         // Chairperson: manages subjects with course_id != 1 (department subjects)
         $subject = Subject::where('id', $request->subject_id)
             ->where('department_id', Auth::user()->department_id)
-            ->where('course_id', '!=', 1) // Exclude General Education subjects
+            ->notManagedByGE()
             ->where('academic_period_id', $academicPeriodId)
             ->firstOrFail();
             
@@ -385,7 +387,9 @@ class ChairpersonController extends Controller
         $courseId = Auth::user()->course_id;
         
         // Fetch instructors depending on the user role (role: 0 = instructor)
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartment = Department::generalEducation();
+        $geDepartmentId = $geDepartment?->id;
+
         // When a Chairperson (role === 1) views this, only instructors in their
         // department and course should be visible (exclude GE instructors).
         // When a GE Coordinator (role === 4) views this, show GE department
@@ -395,15 +399,19 @@ class ChairpersonController extends Controller
                 ->where('is_active', true)
                 ->where('department_id', $departmentId)
                 ->where('course_id', $courseId)
-                ->where('department_id', '!=', $geDepartment->id)
+                ->when($geDepartmentId !== null, fn ($query) => $query->where('department_id', '!=', $geDepartmentId))
                 ->orderBy('last_name')
                 ->get();
         } else { // GE Coordinator or admin roles that are allowed
             $instructors = User::where('role', 0)
                 ->where('is_active', true)
                 ->where(function($query) use ($geDepartment) {
-                    $query->where('department_id', $geDepartment->id)
-                          ->orWhere('can_teach_ge', true);
+                    if ($geDepartment) {
+                        $query->where('department_id', $geDepartment->id)
+                            ->orWhere('can_teach_ge', true);
+                    } else {
+                        $query->where('can_teach_ge', true);
+                    }
                 })
                 ->orderBy('last_name')
                 ->get();
@@ -428,7 +436,7 @@ class ChairpersonController extends Controller
                 $subjectQuery->where('department_id', $departmentId)
                             ->where('course_id', $courseId);
             } else if (Auth::user()->role === 4) {
-                $subjectQuery->where('is_universal', true);
+                $subjectQuery->managedByGE();
             }
             $subjects = $subjectQuery->orderBy('subject_code')->get();
         }
@@ -443,7 +451,7 @@ class ChairpersonController extends Controller
                 $subjectQuery->where('department_id', $departmentId)
                             ->where('course_id', $courseId);
             } else if (Auth::user()->role === 4) {
-                $subjectQuery->where('is_universal', true);
+                $subjectQuery->managedByGE();
             }
             $subject = $subjectQuery->firstOrFail();
     
@@ -489,7 +497,7 @@ class ChairpersonController extends Controller
                 ->get();
         } else {
             // GE Coordinator: students enrolled in GE subjects
-            $geSubjectIds = Subject::where('is_universal', true)->pluck('id');
+            $geSubjectIds = Subject::query()->managedByGE()->pluck('id');
             $students = Student::whereHas('subjects', function($q) use ($geSubjectIds) {
                     $q->whereIn('subjects.id', $geSubjectIds);
                 })

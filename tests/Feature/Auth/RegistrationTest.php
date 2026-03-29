@@ -52,4 +52,47 @@ class RegistrationTest extends TestCase
             'course_id' => $course->id,
         ]);
     }
+
+    public function test_registration_rejects_legacy_ge_department_payload_when_ge_program_is_selected(): void
+    {
+        $aseDepartment = Department::firstOrCreate([
+            'department_code' => 'ASE',
+        ], [
+            'department_description' => 'Arts and Sciences Education',
+            'is_deleted' => false,
+        ]);
+
+        $geDepartment = Department::firstOrCreate([
+            'department_code' => 'GE',
+        ], [
+            'department_description' => 'General Education',
+            'is_deleted' => false,
+        ]);
+
+        $geCourse = Course::firstOrCreate([
+            'course_code' => 'GE',
+        ], [
+            'course_description' => 'General Education',
+            'department_id' => $aseDepartment->id,
+            'is_deleted' => false,
+        ]);
+
+        $response = $this->from('/register')->post('/register', [
+            'first_name' => 'Legacy',
+            'middle_name' => 'GE',
+            'last_name' => 'Payload',
+            'email' => 'legacygep',
+            'department_id' => $geDepartment->id,
+            'course_id' => $geCourse->id,
+            'password' => 'Password1!',
+            'password_confirmation' => 'Password1!',
+        ]);
+
+        $response->assertRedirect('/register');
+        $response->assertSessionHasErrors(['department_id']);
+        $this->assertGuest('unverified');
+        $this->assertDatabaseMissing('unverified_users', [
+            'email' => 'legacygep@brokenshire.edu.ph',
+        ]);
+    }
 }

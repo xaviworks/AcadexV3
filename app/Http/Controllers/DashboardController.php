@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use App\Support\Organization\GEContext;
 use App\Models\
 {
     Student, 
@@ -372,7 +373,7 @@ class DashboardController extends Controller
         $academicPeriodId = session('active_academic_period_id');
         
         // Get GE department
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartment = Department::generalEducation();
         
         if (!$geDepartment) {
             return back()->with('error', 'GE department not found. Please contact administrator.');
@@ -414,19 +415,21 @@ class DashboardController extends Controller
             })
             ->count();
             
-        $countPendingInstructors = UnverifiedUser::where("department_id", $geDepartment->id)
-            ->count();
+        $pendingInstructorsQuery = UnverifiedUser::query();
+        GEContext::applyGERegistrationTargetFilter($pendingInstructorsQuery);
+        $countPendingInstructors = $pendingInstructorsQuery->count();
 
         $data = [
             "countInstructors" => $countInstructors,
-            "countStudents" => Student::whereHas('subjects', function($query) use ($geDepartment, $academicPeriodId) {
-                    $query->where('department_id', $geDepartment->id)
+            "countStudents" => Student::whereHas('subjects', function($query) use ($academicPeriodId) {
+                    $query->managedByGE()
                           ->where('academic_period_id', $academicPeriodId);
                 })
                 ->where("is_deleted", false)
                 ->distinct()
                 ->count("students.id"),
-            "countCourses" => Subject::where("department_id", $geDepartment->id)
+            "countCourses" => Subject::query()
+                ->managedByGE()
                 ->where("is_deleted", false)
                 ->where('academic_period_id', $academicPeriodId)
                 ->distinct('subject_code')
@@ -566,7 +569,7 @@ class DashboardController extends Controller
         }
 
         $academicPeriodId = session('active_academic_period_id');
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartment = Department::generalEducation();
 
         if (!$geDepartment) {
             return response()->json(['error' => 'GE department not found'], 404);
@@ -605,17 +608,20 @@ class DashboardController extends Controller
             })
             ->count();
 
-        $countPendingInstructors = UnverifiedUser::where("department_id", $geDepartment->id)->count();
+        $pendingInstructorsQuery = UnverifiedUser::query();
+        GEContext::applyGERegistrationTargetFilter($pendingInstructorsQuery);
+        $countPendingInstructors = $pendingInstructorsQuery->count();
 
-        $countStudents = Student::whereHas('subjects', function($query) use ($geDepartment, $academicPeriodId) {
-                $query->where('department_id', $geDepartment->id)
+        $countStudents = Student::whereHas('subjects', function($query) use ($academicPeriodId) {
+                $query->managedByGE()
                       ->where('academic_period_id', $academicPeriodId);
             })
             ->where("is_deleted", false)
             ->distinct()
             ->count("students.id");
 
-        $countCourses = Subject::where("department_id", $geDepartment->id)
+        $countCourses = Subject::query()
+            ->managedByGE()
             ->where("is_deleted", false)
             ->where('academic_period_id', $academicPeriodId)
             ->distinct('subject_code')

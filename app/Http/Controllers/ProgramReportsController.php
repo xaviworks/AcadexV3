@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\ProgramLearningOutcome;
 use App\Models\ProgramLearningOutcomeMapping;
 use App\Services\CourseOutcomeReportingService;
+use App\Support\Organization\GEContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -30,7 +31,10 @@ class ProgramReportsController extends Controller
 
         // If no department selected, show departments list to choose from
         if (!$departmentId) {
+            $geDepartmentId = GEContext::geDepartmentId();
+
             $departments = \App\Models\Department::where('is_deleted', false)
+                ->when($geDepartmentId !== null, fn ($query) => $query->where('id', '!=', $geDepartmentId))
                 ->select('id', 'department_code', 'department_description')
                 ->orderBy('department_description')
                 ->get();
@@ -63,9 +67,8 @@ class ProgramReportsController extends Controller
     {
         $periodId = session('active_academic_period_id');
         $period = $periodId ? AcademicPeriod::find($periodId) : null;
-        
-        $departmentId = 1; // GE department
-        $department = Department::find($departmentId);
+
+        $department = Department::ase() ?? Department::generalEducation();
         
         // Get CO data for GE subjects across all programs
         $byCourse = $service->aggregateGESubjectsAcrossCourses($periodId);

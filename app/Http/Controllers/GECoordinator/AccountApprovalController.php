@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\GECoordinator;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use App\Models\UnverifiedUser;
 use App\Models\User;
-use App\Models\Department;
+use App\Support\Organization\GEContext;
 use App\Listeners\NotifyUserCreated;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class AccountApprovalController extends Controller
 {
+    private const LEGACY_GE_PAYLOAD_ERROR = 'Legacy GE-department registration payloads are no longer eligible. Use ASE department with the GE program selection.';
+
     /**
      * Display a list of all pending GE instructor accounts for approval.
      */
@@ -26,17 +26,41 @@ class AccountApprovalController extends Controller
             abort(403);
         }
 
-        // Get GE department
-        $geDepartment = Department::where('department_code', 'GE')->first();
-        
-        // Eager-load related department and course for display, filtered by GE department
-        // Only show verified email accounts
-        $pendingAccounts = UnverifiedUser::with(['department', 'course'])
-            ->where('department_id', $geDepartment->id)
-            ->whereNotNull('email_verified_at')
+        $geDepartment = Department::generalEducation();
+        $geCourseId = GEContext::geCourseId();
+
+        $instructors = User::where('role', 0)
+            ->where(function ($query) use ($geDepartment, $geCourseId) {
+                if ($geDepartment) {
+                    $query->where('department_id', $geDepartment->id)
+                        ->orWhere('can_teach_ge', true);
+                } else {
+                    $query->where('can_teach_ge', true);
+                }
+
+                if ($geCourseId !== null) {
+                    $query->orWhere('course_id', $geCourseId);
+                }
+
+                $query->orWhere(function ($subQuery) {
+                    $subQuery->where('is_active', false)
+                        ->whereHas('geSubjectRequests', function ($requestQuery) {
+                            $requestQuery->where('status', 'approved');
+                        });
+                });
+            })
+            ->orderBy('last_name')
             ->get();
 
-        return view('gecoordinator.manage-instructors', compact('pendingAccounts'));
+        // Eager-load related department and course for display.
+        // Canonical GE cutover: include GE-program registrations only.
+        $pendingAccountsQuery = UnverifiedUser::with(['department', 'course'])
+            ->whereNotNull('email_verified_at');
+
+        GEContext::applyGERegistrationTargetFilter($pendingAccountsQuery);
+        $pendingAccounts = $pendingAccountsQuery->get();
+
+        return view('gecoordinator.manage-instructors', compact('instructors', 'pendingAccounts'));
     }
 
     /**
@@ -51,21 +75,20 @@ class AccountApprovalController extends Controller
             abort(403);
         }
 
-        // Get GE department
-        $geDepartment = Department::where('department_code', 'GE')->first();
-
-        if (!$geDepartment) {
-            return back()->withErrors(['error' => 'GE Department not found.']);
-        }
-
-        $pending = UnverifiedUser::where('id', $id)
-            ->where('department_id', $geDepartment->id)
-            ->whereNotNull('email_verified_at')
-            ->first();
+        $pending = UnverifiedUser::find($id);
 
         if (!$pending) {
             return back()->withErrors(['error' => 'Pending account not found or already processed.']);
         }
+
+        if (!GEContext::isGERegistrationTarget((int) $pending->department_id, (int) $pending->course_id)) {
+            return back()->withErrors(['error' => self::LEGACY_GE_PAYLOAD_ERROR]);
+        }
+
+        if (!$pending->email_verified_at) {
+            return back()->withErrors(['error' => 'Pending account email is not yet verified.']);
+        }
+
 
         try {
             // Transfer to the main users table
@@ -79,6 +102,7 @@ class AccountApprovalController extends Controller
                 'course_id'     => $pending->course_id,
                 'role'          => 0, // Instructor role
                 'is_active'     => true,
+                'can_teach_ge'  => true,
             ]);
 
             // Remove from unverified list
@@ -108,19 +132,14 @@ class AccountApprovalController extends Controller
             abort(403);
         }
 
-        // Get GE department
-        $geDepartment = Department::where('department_code', 'GE')->first();
-
-        if (!$geDepartment) {
-            return back()->withErrors(['error' => 'GE Department not found.']);
-        }
-
-        $pending = UnverifiedUser::where('id', $id)
-            ->where('department_id', $geDepartment->id)
-            ->first();
+        $pending = UnverifiedUser::find($id);
 
         if (!$pending) {
             return back()->withErrors(['error' => 'Pending account not found or already processed.']);
+        }
+
+        if (!GEContext::isGERegistrationTarget((int) $pending->department_id, (int) $pending->course_id)) {
+            return back()->withErrors(['error' => self::LEGACY_GE_PAYLOAD_ERROR]);
         }
         
         // Store info before deletion for notification

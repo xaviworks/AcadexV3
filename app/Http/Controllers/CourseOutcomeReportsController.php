@@ -182,7 +182,8 @@ class CourseOutcomeReportsController extends Controller
 
         if (!$courseId) {
             // List all courses that have GE subjects
-            $coursesWithGESubjects = Subject::where('department_id', 1) // GE subjects
+            $coursesWithGESubjects = Subject::query()
+                ->managedByGE()
                 ->where('is_deleted', false)
                 ->when($periodId, fn($q) => $q->where('academic_period_id', $periodId))
                 ->distinct()
@@ -207,8 +208,9 @@ class CourseOutcomeReportsController extends Controller
             ->firstOrFail();
         
         // Get only GE subjects for this course in the active period
-        $subjects = Subject::where('course_id', $courseId)
-            ->where('department_id', 1) // Only GE subjects
+        $subjects = Subject::query()
+            ->where('course_id', $courseId)
+            ->managedByGE()
             ->where('is_deleted', false)
             ->when($periodId, fn($q) => $q->where('academic_period_id', $periodId))
             ->orderBy('subject_code')
@@ -248,7 +250,7 @@ class CourseOutcomeReportsController extends Controller
             $studentSuggestions = Student::with('course')
                 ->where('students.is_deleted', false)
                 ->whereHas('subjects', function ($q) use ($periodId) {
-                    $q->where('subjects.department_id', 1)
+                    $q->managedByGE()
                         ->where('subjects.is_deleted', false)
                         ->where('student_subjects.is_deleted', false)
                         ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
@@ -277,7 +279,7 @@ class CourseOutcomeReportsController extends Controller
                             ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name) like ?", [$searchTerm]);
                     })
                     ->whereHas('subjects', function ($q) use ($periodId) {
-                        $q->where('subjects.department_id', 1)
+                        $q->managedByGE()
                             ->where('subjects.is_deleted', false)
                             ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
@@ -293,7 +295,7 @@ class CourseOutcomeReportsController extends Controller
                     ->where('students.id', $studentId)
                     ->where('students.is_deleted', false)
                     ->whereHas('subjects', function ($q) use ($periodId) {
-                        $q->where('subjects.department_id', 1)
+                        $q->managedByGE()
                             ->where('subjects.is_deleted', false)
                             ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
@@ -301,7 +303,7 @@ class CourseOutcomeReportsController extends Controller
                     ->firstOrFail();
 
                 $enrolledSubjects = Subject::with('course')
-                    ->where('subjects.department_id', 1)
+                    ->managedByGE()
                     ->where('subjects.is_deleted', false)
                     ->when($periodId, fn($q) => $q->where('subjects.academic_period_id', $periodId))
                     ->whereHas('students', function ($q) use ($selectedStudent) {
@@ -325,7 +327,7 @@ class CourseOutcomeReportsController extends Controller
 
         // Ensure the subject is a GE subject
         $subject = Subject::with(['course','academicPeriod'])
-            ->where('department_id', 1) // GE subject
+            ->managedByGE()
             ->where('id', $subjectId)
             ->where('is_deleted', false)
             ->firstOrFail();
@@ -380,7 +382,7 @@ class CourseOutcomeReportsController extends Controller
         
         // Get subjects for this course in the active period (excluding GE subjects)
         $subjects = Subject::where('course_id', $courseId)
-            ->where('department_id', '!=', 1) // Exclude GE subjects (department_id = 1)
+            ->notManagedByGE()
             ->where('is_deleted', false)
             ->when($periodId, fn($q) => $q->where('academic_period_id', $periodId))
             ->orderBy('subject_code')
@@ -427,7 +429,7 @@ class CourseOutcomeReportsController extends Controller
                 ->where('students.is_deleted', false)
                 ->whereHas('subjects', function ($q) use ($userCourseId, $periodId) {
                     $q->where('subjects.course_id', $userCourseId)
-                        ->where('subjects.department_id', '!=', 1)
+                        ->notManagedByGE()
                         ->where('subjects.is_deleted', false)
                         ->where('student_subjects.is_deleted', false)
                         ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
@@ -457,7 +459,7 @@ class CourseOutcomeReportsController extends Controller
                     })
                     ->whereHas('subjects', function ($q) use ($userCourseId, $periodId) {
                         $q->where('subjects.course_id', $userCourseId)
-                            ->where('subjects.department_id', '!=', 1)
+                            ->notManagedByGE()
                             ->where('subjects.is_deleted', false)
                             ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
@@ -474,7 +476,7 @@ class CourseOutcomeReportsController extends Controller
                     ->where('students.is_deleted', false)
                     ->whereHas('subjects', function ($q) use ($userCourseId, $periodId) {
                         $q->where('subjects.course_id', $userCourseId)
-                            ->where('subjects.department_id', '!=', 1)
+                            ->notManagedByGE()
                             ->where('subjects.is_deleted', false)
                             ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
@@ -483,7 +485,7 @@ class CourseOutcomeReportsController extends Controller
 
                 $enrolledSubjects = Subject::with('course')
                     ->where('subjects.course_id', $userCourseId)
-                    ->where('subjects.department_id', '!=', 1)
+                    ->notManagedByGE()
                     ->where('subjects.is_deleted', false)
                     ->when($periodId, fn($q) => $q->where('subjects.academic_period_id', $periodId))
                     ->whereHas('students', function ($q) use ($selectedStudent) {
@@ -509,7 +511,7 @@ class CourseOutcomeReportsController extends Controller
         $userCourseId = Auth::user()?->course_id;
         $subject = Subject::with(['course','academicPeriod'])
             ->where('course_id', $userCourseId)
-            ->where('department_id', '!=', 1) // Exclude GE subjects
+            ->notManagedByGE()
             ->where('id', $subjectId)
             ->where('is_deleted', false)
             ->firstOrFail();

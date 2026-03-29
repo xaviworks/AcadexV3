@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Organization\GEContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -38,10 +39,12 @@ class Course extends Model
     {
         static::saved(function () {
             Cache::forget('courses:all');
+            GEContext::forgetResolvedIds();
         });
 
         static::deleted(function () {
             Cache::forget('courses:all');
+            GEContext::forgetResolvedIds();
         });
     }
 

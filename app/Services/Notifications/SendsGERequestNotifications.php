@@ -7,6 +7,7 @@ use App\Models\GESubjectRequest;
 use App\Notifications\GERequestSubmitted;
 use App\Notifications\GERequestApproved;
 use App\Notifications\GERequestRejected;
+use App\Support\Organization\GEContext;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +34,7 @@ trait SendsGERequestNotifications
                 return;
             }
             
-            $geCoordinators = User::where('role', 4)->where('is_active', true)->get();
+            $geCoordinators = GEContext::geCoordinatorsQuery()->get();
 
             if ($geCoordinators->isNotEmpty()) {
                 Notification::send(

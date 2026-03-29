@@ -29,7 +29,15 @@
 
     @php
         // Precompute filtered lists and counts for nav badges and tab usage
-        $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
+        $geDepartment = \App\Models\Department::generalEducation();
+        $geDepartmentId = $geDepartment?->id;
+        $geCourseId = \App\Support\Organization\GEContext::geCourseId();
+        $isPrimaryGEInstructor = static function ($instructor) use ($geDepartmentId, $geCourseId): bool {
+            $isLegacyGEInstructor = $geDepartmentId !== null && (int) $instructor->department_id === (int) $geDepartmentId;
+            $isCanonicalGEInstructor = $geCourseId !== null && (int) $instructor->course_id === (int) $geCourseId;
+
+            return $isLegacyGEInstructor || $isCanonicalGEInstructor;
+        };
         $activeInstructors = $instructors->filter(fn($i) => $i->is_active);
         $inactiveInstructors = $instructors->filter(fn($i) => !$i->is_active);
         $pendingAccountsCount = $pendingAccounts->count();
@@ -114,16 +122,19 @@
                                     </thead>
                                     <tbody>
                                         @foreach($activeInstructors as $instructor)
+                                                @php
+                                                    $isPrimaryGE = $isPrimaryGEInstructor($instructor);
+                                                @endphp
                                                 <tr>
                                                     <td>
                                                         {{ $instructor->last_name }}, {{ $instructor->first_name }} {{ $instructor->middle_name }}
-                                                        @if($instructor->department_id !== $geDepartment?->id)
+                                                        @if(!$isPrimaryGE)
                                                             <span class="badge bg-info text-white ms-1" title="Has GE teaching access">GE Access</span>
                                                         @endif
                                                     </td>
                                                     <td>{{ $instructor->email }}</td>
                                                     <td class="text-center">
-                                                        @if($instructor->department_id === $geDepartment?->id)
+                                                        @if($isPrimaryGE)
                                                             <button type="button"
                                                                 class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
                                                                 data-bs-toggle="modal"
@@ -173,10 +184,13 @@
                                     </thead>
                                     <tbody>
                                         @foreach($inactiveInstructors as $instructor)
+                                            @php
+                                                $isPrimaryGE = $isPrimaryGEInstructor($instructor);
+                                            @endphp
                                             <tr>
                                                 <td>
                                                     {{ $instructor->last_name }}, {{ $instructor->first_name }} {{ $instructor->middle_name }}
-                                                    @if($instructor->department_id !== $geDepartment?->id)
+                                                    @if(!$isPrimaryGE)
                                                         <span class="badge bg-info text-white ms-1" title="Has GE teaching access (not GE Dept)">GE Access Only</span>
                                                     @endif
                                                 </td>
@@ -187,7 +201,7 @@
                                                     </span>
                                                 </td>
                                                 <td class="text-center">
-                                                    @if($instructor->department_id === $geDepartment?->id)
+                                                    @if($isPrimaryGE)
                                                         {{-- GE Department instructors can be fully activated --}}
                                                         <button type="button"
                                                             class="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
@@ -199,7 +213,7 @@
                                                             Activate
                                                         </button>
                                                     @else
-                                                        {{-- Non-GE Department instructors cannot be activated by GE Coordinator --}}
+                                                        {{-- Non-primary GE instructors cannot be activated by GE Coordinator --}}
                                                         <span class="text-muted small" title="Contact the department chairperson to activate this instructor">
                                                             <i class="bi bi-info-circle me-1"></i>
                                                             Managed by {{ $instructor->department->department_code ?? 'Dept' }} Chairperson
@@ -355,7 +369,7 @@
     </div>
 </div>
 
-{{-- Remove GE Access Modal (for non-GE department instructors) --}}
+{{-- Remove GE Access Modal (for non-primary GE instructors) --}}
 <div class="modal fade" id="confirmRemoveGEAccessModal" tabindex="-1" aria-labelledby="confirmRemoveGEAccessModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form id="removeGEAccessForm" method="POST">

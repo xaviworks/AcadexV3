@@ -8,7 +8,9 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Course;
 use App\Models\UnverifiedUser;
+use App\Support\Organization\GEContext;
 use App\Services\NotificationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -32,13 +34,13 @@ class GECoordinatorController extends Controller
             abort(403);
         }
         
-        $geDepartment = Department::where('department_code', 'GE')->firstOrFail();
+        $geDepartment = Department::generalEducation();
+        abort_if(!$geDepartment, 404, 'General Education department not found.');
         
         $instructors = User::where('role', 0)
             ->where('is_active', true)
             ->where(function($query) use ($geDepartment) {
-                $query->where('department_id', $geDepartment->id)
-                      ->orWhere('can_teach_ge', true);
+                $this->applyManagedGEInstructorFilter($query, $geDepartment);
             })
             ->orderBy('last_name')
             ->get(['id', 'first_name', 'middle_name', 'last_name'])
@@ -62,9 +64,7 @@ class GECoordinatorController extends Controller
         }
         
         // Ensure the subject is a GE subject.
-        // Allow subjects that are explicitly marked as general education (course_id == 1)
-        // or are marked as universal (is_universal flag), which the GE Coordinator manages.
-        if (!($subject->course_id == 1 || ($subject->is_universal ?? false))) {
+        if (!GEContext::isGESubject($subject)) {
             return response()->json(['error' => 'Subject is not managed by GE Coordinator'], 403);
         }
         
@@ -89,27 +89,31 @@ class GECoordinatorController extends Controller
         }
         
         // GE Coordinator: show instructors from GE department AND those who can/could teach GE subjects
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartment = Department::generalEducation();
+        abort_if(!$geDepartment, 404, 'General Education department not found.');
         
         $instructors = User::where('role', 0)
             ->where(function($query) use ($geDepartment) {
-                $query->where('department_id', $geDepartment->id) // Always show GE department instructors
-                      ->orWhere('can_teach_ge', true) // Show those who can currently teach GE
-                      ->orWhere(function($subQuery) {
-                          // Show inactive instructors who previously had approved GE requests (were managed by GE Coordinator)
-                          $subQuery->where('is_active', false)
-                                   ->whereHas('geSubjectRequests', function($requestQuery) {
-                                       $requestQuery->where('status', 'approved');
-                                   });
-                      });
+                // Always show primary GE instructors (legacy GE department + canonical GE program)
+                // and those with GE teaching access.
+                $this->applyManagedGEInstructorFilter($query, $geDepartment);
+
+                $query->orWhere(function($subQuery) {
+                    // Show inactive instructors who previously had approved GE requests.
+                    $subQuery->where('is_active', false)
+                        ->whereHas('geSubjectRequests', function($requestQuery) {
+                            $requestQuery->where('status', 'approved');
+                        });
+                });
             })
             ->orderBy('last_name')
             ->get();
             
-        $pendingAccounts = UnverifiedUser::with('department', 'course')
-            ->where('department_id', $geDepartment->id)
-            ->whereNotNull('email_verified_at')
-            ->get();
+        $pendingAccountsQuery = UnverifiedUser::with('department', 'course')
+            ->whereNotNull('email_verified_at');
+
+        GEContext::applyGERegistrationTargetFilter($pendingAccountsQuery);
+        $pendingAccounts = $pendingAccountsQuery->get();
         
         return view('gecoordinator.manage-instructors', compact('instructors', 'pendingAccounts'));
     }
@@ -172,19 +176,19 @@ class GECoordinatorController extends Controller
             ->firstOrFail();
         
         // Get GE department to check if instructor belongs to it
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartment = Department::generalEducation();
+        abort_if(!$geDepartment, 404, 'General Education department not found.');
         
-        // Only GE department instructors can be fully deactivated by GE Coordinator
-        // For instructors from other departments, only remove their GE teaching access
-        if ($instructor->department_id === $geDepartment?->id) {
-            // Full deactivation for GE department instructors
+        // Primary GE instructors (legacy GE department or canonical GE program)
+        // are fully deactivated. Others only lose GE teaching access.
+        if ($this->isPrimaryGEInstructor($instructor, $geDepartment)) {
             $instructor->update([
                 'can_teach_ge' => false,
                 'is_active' => false
             ]);
             $message = 'Instructor deactivated successfully.';
         } else {
-            // For non-GE department instructors, only remove GE teaching capability
+            // For non-primary GE instructors, only remove GE teaching capability
             $instructor->update([
                 'can_teach_ge' => false
             ]);
@@ -211,19 +215,19 @@ class GECoordinatorController extends Controller
             ->firstOrFail();
         
         // Get GE department to check if instructor belongs to it
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartment = Department::generalEducation();
+        abort_if(!$geDepartment, 404, 'General Education department not found.');
         
-        // Only GE department instructors can be fully activated by GE Coordinator
-        // For instructors from other departments, GE Coordinator cannot activate their account
-        if ($instructor->department_id === $geDepartment?->id) {
-            // Full activation for GE department instructors
+        // Primary GE instructors (legacy GE department or canonical GE program)
+        // can be fully activated by GE Coordinator.
+        if ($this->isPrimaryGEInstructor($instructor, $geDepartment)) {
             $instructor->update([
                 'can_teach_ge' => true,
                 'is_active' => true
             ]);
             $message = 'Instructor activated successfully.';
         } else {
-            // For non-GE department instructors, GE Coordinator cannot activate their account
+            // For non-primary GE instructors, GE Coordinator cannot activate their account
             // They can only restore GE access if the instructor is already active
             if (!$instructor->is_active) {
                 return redirect()->back()->with('error', 'Cannot activate instructors from other departments. Please contact the department chairperson to activate this instructor first.');
@@ -278,13 +282,13 @@ class GECoordinatorController extends Controller
         }
             
         // Get all GE instructors
-        $geDepartment = Department::where('department_code', 'GE')->firstOrFail();
+        $geDepartment = Department::generalEducation();
+        abort_if(!$geDepartment, 404, 'General Education department not found.');
         
         // Get available instructors
         $instructors = User::where('role', 0)
             ->where(function($query) use ($geDepartment) {
-                $query->where('department_id', $geDepartment->id)
-                      ->orWhere('can_teach_ge', true);
+                $this->applyManagedGEInstructorFilter($query, $geDepartment);
             })
             ->where('is_active', true)
             ->orderBy('last_name')
@@ -318,11 +322,11 @@ class GECoordinatorController extends Controller
         ]);
 
         $subject = Subject::where('id', $request->subject_id)
-            ->where('course_id', 1) // Only General Education subjects for GE Coordinator
+            ->managedByGE()
             ->firstOrFail();
 
-        // Ensure the subject is managed by GE Coordinator (course_id = 1)
-        if ($subject->course_id != 1) {
+        // Ensure the subject is managed by GE Coordinator.
+        if (!$subject->isManagedByGE()) {
             return redirect()->back()->with('error', 'Only General Education subjects can be assigned by GE Coordinator.');
         }
 
@@ -342,8 +346,9 @@ class GECoordinatorController extends Controller
         $academicPeriodId = session('active_academic_period_id');
 
         // Get GE subjects for the current academic period
-        $subjects = Subject::where('academic_period_id', $academicPeriodId)
-            ->where('course_id', 1) // GE course_id is 1
+        $subjects = Subject::query()
+            ->where('academic_period_id', $academicPeriodId)
+            ->managedByGE()
             ->with(['instructors', 'students'])
             ->orderBy('subject_code')
             ->get();
@@ -361,38 +366,55 @@ class GECoordinatorController extends Controller
         $academicPeriodId = session('active_academic_period_id');
 
         // Get GE subjects statistics
-        $totalSubjects = Subject::where('academic_period_id', $academicPeriodId)
-            ->where('course_id', 1)
+        $totalSubjects = Subject::query()
+            ->where('academic_period_id', $academicPeriodId)
+            ->managedByGE()
             ->count();
 
-        $assignedSubjects = Subject::where('academic_period_id', $academicPeriodId)
-            ->where('course_id', 1)
+        $assignedSubjects = Subject::query()
+            ->where('academic_period_id', $academicPeriodId)
+            ->managedByGE()
             ->whereHas('instructors')
             ->count();
 
         $unassignedSubjects = $totalSubjects - $assignedSubjects;
 
         // Get instructor statistics
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartment = Department::generalEducation();
+        abort_if(!$geDepartment, 404, 'General Education department not found.');
+
         $totalInstructors = User::where('role', 0)
             ->where(function($query) use ($geDepartment) {
-                $query->where('department_id', $geDepartment->id ?? 0)
-                      ->orWhere('can_teach_ge', true);
+                $this->applyManagedGEInstructorFilter($query, $geDepartment);
             })
             ->where('is_active', true)
             ->count();
+
+        $geDepartmentId = GEContext::geDepartmentId();
+        $geCourseId = GEContext::geCourseId();
 
         // Get student enrollment statistics
         $totalEnrollments = DB::table('student_subjects')
             ->join('subjects', 'student_subjects.subject_id', '=', 'subjects.id')
             ->where('subjects.academic_period_id', $academicPeriodId)
-            ->where('subjects.course_id', 1)
+            ->where(function ($query) use ($geDepartmentId, $geCourseId) {
+                $query->where('subjects.is_universal', true);
+
+                if ($geDepartmentId !== null) {
+                    $query->orWhere('subjects.department_id', $geDepartmentId);
+                }
+
+                if ($geCourseId !== null) {
+                    $query->orWhere('subjects.course_id', $geCourseId);
+                }
+            })
             ->where('student_subjects.is_deleted', false)
             ->count();
 
         // Get subjects by year level
-        $subjectsByYear = Subject::where('academic_period_id', $academicPeriodId)
-            ->where('course_id', 1)
+        $subjectsByYear = Subject::query()
+            ->where('academic_period_id', $academicPeriodId)
+            ->managedByGE()
             ->select('year_level', DB::raw('count(*) as count'))
             ->groupBy('year_level')
             ->get()
@@ -422,16 +444,12 @@ class GECoordinatorController extends Controller
             'instructor_id' => 'required|exists:users,id',
         ]);
 
-        // Only allow toggling assignments on GE subjects (course_id == 1) or universal subjects.
         $subject = Subject::where('id', $request->subject_id)
-            ->where(function ($query) {
-                $query->where('course_id', 1)
-                      ->orWhere('is_universal', true);
-            })
+            ->managedByGE()
             ->firstOrFail();
         
-        // Ensure the subject is managed by GE Coordinator (course_id = 1 OR is_universal)
-        if (!($subject->course_id == 1 || ($subject->is_universal ?? false))) {
+        // Ensure the subject is managed by GE Coordinator.
+        if (!$subject->isManagedByGE()) {
             return response()->json(['error' => 'Only General Education subjects can be managed by GE Coordinator.'], 403);
         }
         
@@ -503,17 +521,20 @@ class GECoordinatorController extends Controller
         // - From the GE department, or
         // - Marked as can_teach_ge, or
         // - Assigned to GE subjects in the selected academic period.
-        $geDepartment = Department::where('department_code', 'GE')->first();
+        $geDepartment = Department::generalEducation();
+        abort_if(!$geDepartment, 404, 'General Education department not found.');
+
         $instructors = User::where('role', 0)
             ->where('is_active', true)
             ->where(function($query) use ($academicPeriodId, $geDepartment) {
                 $query->whereHas('subjects', function($q) use ($academicPeriodId) {
-                        $q->where('course_id', 1)
-                          ->where('academic_period_id', $academicPeriodId)
-                          ->where('is_deleted', false);
+                        $q->managedByGE()
+                            ->where('academic_period_id', $academicPeriodId)
+                            ->where('is_deleted', false);
                     })
-                    ->orWhere('department_id', $geDepartment->id)
-                    ->orWhere('can_teach_ge', true);
+                    ->orWhere(function ($managedQuery) use ($geDepartment) {
+                        $this->applyManagedGEInstructorFilter($managedQuery, $geDepartment);
+                    });
             })
             ->orderBy('last_name')
             ->get();
@@ -527,18 +548,15 @@ class GECoordinatorController extends Controller
         // Courses are loaded only when an instructor is selected
         $subjects = [];
         if ($selectedInstructorId) {
-            $subjects = Subject::where('academic_period_id', $academicPeriodId)
-            ->where('is_deleted', false)
-            ->where(function ($query) {
-                // Match assignment rules: GE course or universal GE-eligible course
-                $query->where('course_id', 1)
-                    ->orWhere('is_universal', true);
-            })
-            ->whereHas('instructors', function($query) use ($selectedInstructorId) {
-                $query->where('users.id', $selectedInstructorId);
-            })
-            ->orderBy('subject_code')
-            ->get();
+            $subjects = Subject::query()
+                ->where('academic_period_id', $academicPeriodId)
+                ->where('is_deleted', false)
+                ->managedByGE()
+                ->whereHas('instructors', function($query) use ($selectedInstructorId) {
+                    $query->where('users.id', $selectedInstructorId);
+                })
+                ->orderBy('subject_code')
+                ->get();
         }
     
         // Students and grades are only loaded when a subject is selected
@@ -667,5 +685,34 @@ class GECoordinatorController extends Controller
         NotificationService::notifyGERequestRejected($request, Auth::user());
 
         return redirect()->back()->with('status', 'GE assignment request rejected successfully.');
+    }
+
+    private function applyManagedGEInstructorFilter(Builder $query, Department $geDepartment): Builder
+    {
+        $geCourseId = GEContext::geCourseId();
+
+        $query->where('department_id', $geDepartment->id)
+            ->orWhere('can_teach_ge', true);
+
+        if ($geCourseId !== null) {
+            $query->orWhere('course_id', $geCourseId);
+        }
+
+        return $query;
+    }
+
+    private function isPrimaryGEInstructor(User $instructor, ?Department $geDepartment = null): bool
+    {
+        $geDepartmentId = $geDepartment?->id ?? Department::generalEducation()?->id;
+
+        $isLegacyGEDepartmentInstructor = $geDepartmentId !== null
+            && (int) $instructor->department_id === (int) $geDepartmentId;
+
+        $isCanonicalGEProgramInstructor = GEContext::isGERegistrationTarget(
+            $instructor->department_id !== null ? (int) $instructor->department_id : null,
+            $instructor->course_id !== null ? (int) $instructor->course_id : null
+        );
+
+        return $isLegacyGEDepartmentInstructor || $isCanonicalGEProgramInstructor;
     }
 }

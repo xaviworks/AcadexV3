@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Department;
 use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
+use App\Support\Organization\GEContext;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,10 +30,10 @@ class UnverifiedVerifyEmailController extends Controller
 
         // Check if already verified
         if ($user->hasVerifiedEmail()) {
-            // Check if the selected department is GE
-            $isGEDepartment = Department::where('id', $user->department_id)
-                ->where('department_code', 'GE')
-                ->exists();
+            $isGEDepartment = GEContext::isGERegistrationTarget(
+                (int) $user->department_id,
+                (int) $user->course_id
+            );
 
             $approvalMessage = $isGEDepartment 
                 ? 'Your email is already verified! Your account request is pending GE Coordinator approval.'
@@ -51,10 +51,10 @@ class UnverifiedVerifyEmailController extends Controller
             NotificationService::notifyInstructorPending($user);
         }
 
-        // Check if the selected department is GE
-        $isGEDepartment = Department::where('id', $user->department_id)
-            ->where('department_code', 'GE')
-            ->exists();
+        $isGEDepartment = GEContext::isGERegistrationTarget(
+            (int) $user->department_id,
+            (int) $user->course_id
+        );
 
         $approvalMessage = $isGEDepartment 
             ? 'Your email has been verified successfully! Your account request is now pending GE Coordinator approval.'

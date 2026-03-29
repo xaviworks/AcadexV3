@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\GradeNotification;
 use App\Models\Subject;
 use App\Models\User;
+use App\Support\Organization\GEContext;
 use Illuminate\Support\Facades\Auth;
 
 class GradeNotificationService
@@ -57,10 +58,9 @@ class GradeNotificationService
             }
         }
 
-        // Notify GE Coordinator if this is a GE subject
-        if ($subject->department_id == 1) { // GE department
-            $geCoordinators = User::where('role', 4) // GE Coordinator role
-                ->where('is_active', true)
+        // Notify GE Coordinators when the subject is GE-managed.
+        if (GEContext::isGESubject($subject)) {
+            $geCoordinators = GEContext::geCoordinatorsQuery()
                 ->get();
 
             foreach ($geCoordinators as $geCoordinator) {

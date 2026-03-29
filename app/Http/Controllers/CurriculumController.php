@@ -270,7 +270,7 @@ class CurriculumController extends Controller
             // Use GE department for universal subjects, otherwise use the course's department
             // This ensures proper formula inheritance from the department level
             $departmentId = $isGE ? 
-                Department::where('department_code', 'GE')->first()?->id : 
+                Department::generalEducation()?->id : 
                 $courseDepartmentId;
 
             Subject::firstOrCreate([

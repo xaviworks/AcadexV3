@@ -44,23 +44,35 @@
                     </thead>
                     <tbody>
                         @forelse($departments as $department)
+                            @php($isLegacyGE = strtoupper((string) $department->department_code) === 'GE')
                             <tr data-department-id="{{ $department->id }}">
                                 <td>{{ $department->id }}</td>
-                                <td class="fw-semibold department-code">{{ $department->department_code }}</td>
+                                <td class="fw-semibold department-code">
+                                    {{ $department->department_code }}
+                                    @if($isLegacyGE)
+                                        <span class="badge bg-warning text-dark ms-1">System Managed</span>
+                                    @endif
+                                </td>
                                 <td class="department-description">{{ $department->department_description }}</td>
                                 <td class="text-center">{{ $department->created_at->format('Y-m-d') }}</td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                onclick="openEditDepartmentModal({{ $department->id }}, '{{ addslashes($department->department_code) }}', '{{ addslashes($department->department_description) }}')"
-                                                title="Edit Department">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                onclick="openDeleteDepartmentModal({{ $department->id }}, '{{ addslashes($department->department_code) }}')"
-                                                title="Delete Department">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        @if($isLegacyGE)
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="System managed during GE transition">
+                                                <i class="bi bi-lock"></i>
+                                            </button>
+                                        @else
+                                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                    onclick="openEditDepartmentModal({{ $department->id }}, '{{ addslashes($department->department_code) }}', '{{ addslashes($department->department_description) }}')"
+                                                    title="Edit Department">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="openDeleteDepartmentModal({{ $department->id }}, '{{ addslashes($department->department_code) }}')"
+                                                    title="Delete Department">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

@@ -124,6 +124,7 @@
     })->values();
 
     $formulaCount = $structureTemplates->count();
+    $normalizeFormulaDisplayText = fn (?string $text): string => \App\Models\Department::normalizeFormulaDisplayText($text);
 @endphp
 
 @section('content')
@@ -232,6 +233,7 @@
                     @php
                         $department = $summary['department'];
                         $status = $summary['status'];
+                        $departmentDisplayName = $department->formulaDisplayName();
                     @endphp
                     <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                         <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="text-decoration-none text-reset">
@@ -245,8 +247,8 @@
 
                             {{-- Card body --}}
                             <div class="card-body pt-5 text-center">
-                                <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $department->department_description }}">
-                                    {{ $department->department_description }}
+                                <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $departmentDisplayName }}">
+                                    {{ $departmentDisplayName }}
                                 </h6>
                                 <p class="text-muted small mb-3">{{ $summary['scope_text'] }}</p>
 
@@ -429,7 +431,7 @@
 
                     return [
                         'id' => $formula->id,
-                        'label' => $formula->label ?? 'Institution Fallback Formula',
+                        'label' => \App\Models\Department::normalizeFormulaDisplayText($formula->label ?? 'Institution Fallback Formula'),
                         'is_fallback' => false,
                         'context_label' => $formula->academic_period_id 
                             ? ($formula->semester ? "{$formula->semester} Semester" : 'Period-specific')
@@ -520,8 +522,10 @@
                         $deptFormulas = $departmentCatalogs->get($dept->id, collect());
                         $baselineFormula = $deptFormulas->first();
                         $hasCustomBaseline = $baselineFormula !== null;
-                        $formulaLabel = $hasCustomBaseline ? ($baselineFormula->label ?? 'Unnamed Formula') : null;
-                        $globalLabel = optional($globalFormula)->label ?? 'Institution Fallback';
+                        $formulaLabel = $hasCustomBaseline ? $normalizeFormulaDisplayText($baselineFormula->label ?? 'Unnamed Formula') : null;
+                        $globalLabel = $normalizeFormulaDisplayText(optional($globalFormula)->label ?? 'Institution Fallback');
+                        $departmentDisplayName = $dept->formulaDisplayName();
+                        $isGEDepartment = $dept->isGeneralEducation();
                         
                         // Build hierarchical weight display for department baseline
                         $weights = [];
@@ -571,11 +575,16 @@
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center gap-2 mb-2">
                                             <span class="badge bg-success fw-semibold">{{ $dept->department_code }}</span>
-                                            <h5 class="fw-semibold text-dark mb-0">{{ $dept->department_description }}</h5>
+                                            <h5 class="fw-semibold text-dark mb-0">{{ $departmentDisplayName }}</h5>
                                         </div>
                                         <p class="text-muted small mb-2">
                                             <i class="bi bi-shield-check me-1"></i>Department Baseline
                                         </p>
+                                        @if($isGEDepartment)
+                                            <p class="small text-warning-emphasis mb-2">
+                                                <i class="bi bi-exclamation-triangle-fill me-1"></i>GE requires a separate baseline formula because it serves multiple programs.
+                                            </p>
+                                        @endif
                                         @if($hasCustomBaseline)
                                             <span class="badge bg-success-subtle text-success">
                                                 <i class="bi bi-check-circle-fill me-1"></i>Custom: {{ $formulaLabel }}
@@ -638,9 +647,9 @@
                                 <div class="card-body p-4 d-flex flex-column gap-3">
                                     <div class="d-flex justify-content-between align-items-start gap-2">
                                         <div class="flex-grow-1">
-                                            <h5 class="fw-semibold text-dark mb-1">{{ $formula['label'] }}</h5>
+                                            <h5 class="fw-semibold text-dark mb-1">{{ $normalizeFormulaDisplayText($formula['label']) }}</h5>
                                             <p class="text-muted small mb-2">
-                                                <i class="bi bi-building me-1"></i>{{ $formula['department_code'] }} - {{ $formula['department_name'] }}
+                                                <i class="bi bi-building me-1"></i>{{ $formula['department_code'] }} - {{ $normalizeFormulaDisplayText($formula['department_name']) }}
                                             </p>
                                             @if($formula['is_fallback'])
                                                 <span class="badge bg-primary-subtle text-primary">

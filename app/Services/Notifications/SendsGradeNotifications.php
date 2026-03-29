@@ -5,6 +5,7 @@ namespace App\Services\Notifications;
 use App\Models\User;
 use App\Models\Subject;
 use App\Notifications\GradeSubmitted;
+use App\Support\Organization\GEContext;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 
@@ -42,10 +43,9 @@ trait SendsGradeNotifications
             }
         }
 
-        // Notify GE Coordinator if this is a GE subject (department_id = 1)
-        if ($subject->department_id == 1) {
-            $geCoordinators = User::where('role', 4)
-                ->where('is_active', true)
+        // Notify GE Coordinator when the subject is managed as GE.
+        if (GEContext::isGESubject($subject)) {
+            $geCoordinators = GEContext::geCoordinatorsQuery()
                 ->where('id', '!=', $instructor->id)
                 ->whereNotIn('id', $recipients->pluck('id'))
                 ->get();

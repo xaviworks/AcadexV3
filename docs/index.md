@@ -25,6 +25,8 @@ An Outcome Based Grading System - A comprehensive Laravel 12 based student infor
 | [CLI Commands](commands) | ACADEX command line tools |
 | [Configuration](configuration) | Environment and settings |
 | [Database Setup](database) | Database configuration |
+| [GE Registration Cutover](GE_REGISTRATION_CUTOVER) | Canonical GE registration operations |
+| [GE Migration Command Decommission](GE_MIGRATION_COMMAND_DECOMMISSION) | Retirement and rollback plan |
 
 ---
 

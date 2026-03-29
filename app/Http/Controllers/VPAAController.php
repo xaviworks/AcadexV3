@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\CourseOutcomeAttainment;
 use App\Models\AcademicPeriod;
+use App\Support\Organization\GEContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -48,8 +49,11 @@ class VPAAController extends Controller
         $period = $academicPeriodId ? \App\Models\AcademicPeriod::find($academicPeriodId) : null;
 
         if (!$departmentId) {
+            $geDepartmentId = GEContext::geDepartmentId();
+
             // Show department wildcards with chairperson and GE coordinator (optimized with eager loading)
             $departments = Department::where('is_deleted', false)
+                ->when($geDepartmentId !== null, fn ($query) => $query->where('id', '!=', $geDepartmentId))
                 ->select('id', 'department_code', 'department_description')
                 ->with([
                     'users' => function ($query) {
@@ -132,8 +136,10 @@ class VPAAController extends Controller
     public function index()
     {
         $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+        $geDepartmentId = GEContext::geDepartmentId();
 
         $departmentsCount = Department::where('is_deleted', false)
+            ->when($geDepartmentId !== null, fn ($query) => $query->where('id', '!=', $geDepartmentId))
             ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
                 $q->whereExists(function ($subQuery) use ($academicPeriodId) {
                     $subQuery->select(DB::raw(1))
@@ -192,8 +198,10 @@ class VPAAController extends Controller
     public function pollData(): \Illuminate\Http\JsonResponse
     {
         $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+        $geDepartmentId = GEContext::geDepartmentId();
 
         $departmentsCount = Department::where('is_deleted', false)
+            ->when($geDepartmentId !== null, fn ($query) => $query->where('id', '!=', $geDepartmentId))
             ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
                 $q->whereExists(function ($subQuery) use ($academicPeriodId) {
                     $subQuery->select(DB::raw(1))
@@ -275,8 +283,11 @@ class VPAAController extends Controller
 
     public function viewDepartments()
     {
+        $geDepartmentId = GEContext::geDepartmentId();
+
         // Get all non-deleted departments with optimized eager loading
         $departments = Department::where('is_deleted', false)
+            ->when($geDepartmentId !== null, fn ($query) => $query->where('id', '!=', $geDepartmentId))
             ->select('id', 'department_code', 'department_description')
             ->withCount([
                 'users as instructor_count' => function ($query) {
@@ -395,6 +406,7 @@ class VPAAController extends Controller
     {
         // Check if department_id is passed as a URL parameter or as a request parameter
         $departmentId = $departmentId ?: $request->input('department_id');
+        $geDepartmentId = GEContext::geDepartmentId();
         
         // Build query for instructors
         $query = User::where('role', '!=', 3) // Exclude admin users (role 3)
@@ -413,6 +425,7 @@ class VPAAController extends Controller
         $instructors = $query->get();
 
         $departments = Department::where('is_deleted', false)
+            ->when($geDepartmentId !== null, fn ($query) => $query->where('id', '!=', $geDepartmentId))
             ->select('id', 'department_code', 'department_description')
             ->orderBy('department_description')
             ->get();
@@ -481,8 +494,11 @@ class VPAAController extends Controller
 
     public function viewStudents(Request $request)
     {
+        $geDepartmentId = GEContext::geDepartmentId();
+
         $departments = Department::select('id', 'department_code', 'department_description')
             ->where('is_deleted', false)
+            ->when($geDepartmentId !== null, fn ($query) => $query->where('id', '!=', $geDepartmentId))
             ->orderBy('department_description')
             ->get();
         $departmentId = $request->input('department_id');

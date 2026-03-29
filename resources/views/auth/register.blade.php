@@ -47,7 +47,14 @@
             <select id="department_id" name="department_id" class="w-full mt-1 border-gray-300 rounded-md shadow-sm bg-gray-400 text-white" required>
                 <option value="">-- Choose Department --</option>
                 @foreach($departments as $dept)
-                    <option value="{{ $dept->id }}" data-is-ge="{{ $dept->department_code === 'GE' ? 'true' : 'false' }}">
+                    @if($geDepartmentId && (int) $dept->id === (int) $geDepartmentId && (string) old('department_id') !== (string) $dept->id)
+                        @continue
+                    @endif
+                    <option
+                        value="{{ $dept->id }}"
+                        data-is-ase="{{ ($aseDepartment && (int) $dept->id === (int) $aseDepartment->id) ? 'true' : 'false' }}"
+                        {{ (string) old('department_id') === (string) $dept->id ? 'selected' : '' }}
+                    >
                         {{ $dept->department_description }}
                     </option>
                 @endforeach
@@ -67,7 +74,7 @@
         {{-- GE Notice --}}
         <div id="ge-notice" class="hidden p-4 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 text-white mt-2">
             <strong class="font-semibold">General Education Instructor:</strong>
-            <span class="block sm:inline">You will be able to teach GE subjects across all programs and will be managed by the GE Coordinator.</span>
+            <span class="block sm:inline">You selected the General Education program under ASE. This registration will be routed to the GE Coordinator.</span>
         </div>
 
         {{-- Password --}}
@@ -167,6 +174,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const emailInput = document.getElementById('email');
         const emailWarning = document.getElementById('email-warning');
+        const oldCourseId = @json(old('course_id'));
 
         emailInput.addEventListener('input', () => {
             const hasAtSymbol = emailInput.value.includes('@');
@@ -177,12 +185,16 @@
         const deptSelect = document.getElementById('department_id');
         const courseSelect = document.getElementById('course_id');
         const courseWrapper = document.getElementById('course-wrapper');
+        const geNotice = document.getElementById('ge-notice');
+
+        function updateGeNoticeVisibility() {
+            const selectedCourse = courseSelect.options[courseSelect.selectedIndex];
+            const isGeProgram = selectedCourse?.getAttribute('data-is-ge-program') === 'true';
+            geNotice.classList.toggle('hidden', !isGeProgram);
+        }
 
         deptSelect.addEventListener('change', function () {
             const deptId = this.value;
-            const selectedOption = this.options[this.selectedIndex];
-            const isGeDepartment = selectedOption.getAttribute('data-is-ge') === 'true';
-            const geNotice = document.getElementById('ge-notice');
             
             if (!deptId) {
                 courseWrapper.classList.add('hidden');
@@ -191,32 +203,54 @@
                 return;
             }
 
-            // Show/hide GE notice
-            geNotice.classList.toggle('hidden', !isGeDepartment);
+            courseSelect.innerHTML = '<option value="">Loading...</option>';
 
-            if (isGeDepartment) {
-                // For GE department, set a default course and hide course selection
-                courseSelect.innerHTML = '<option value="1" selected>General Education</option>';
-                courseWrapper.classList.add('hidden');
-            } else {
-                // For other departments, fetch courses normally
-                courseSelect.innerHTML = '<option value="">Loading...</option>';
-                fetch(`/api/department/${deptId}/courses`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.length === 1) {
-                            courseSelect.innerHTML = `<option value="${data[0].id}" selected>${data[0].name}</option>`;
-                            courseWrapper.classList.add('hidden');
-                        } else {
-                            courseSelect.innerHTML = '<option value="">-- Choose Program --</option>';
-                            data.forEach(course => {
-                                courseSelect.innerHTML += `<option value="${course.id}">${course.name}</option>`;
-                            });
-                            courseWrapper.classList.remove('hidden');
-                        }
+            fetch(`/api/department/${deptId}/courses`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!Array.isArray(data) || data.length === 0) {
+                        courseSelect.innerHTML = '<option value="">No programs available</option>';
+                        courseWrapper.classList.remove('hidden');
+                        geNotice.classList.add('hidden');
+                        return;
+                    }
+
+                    if (data.length === 1) {
+                        const onlyCourse = data[0];
+                        const selected = String(oldCourseId || '') === String(onlyCourse.id) ? 'selected' : 'selected';
+                        const geFlag = onlyCourse.is_ge_program ? 'true' : 'false';
+                        const label = onlyCourse.code ? `${onlyCourse.code} - ${onlyCourse.name}` : onlyCourse.name;
+
+                        courseSelect.innerHTML = `<option value="${onlyCourse.id}" data-is-ge-program="${geFlag}" ${selected}>${label}</option>`;
+                        courseWrapper.classList.add('hidden');
+                        updateGeNoticeVisibility();
+                        return;
+                    }
+
+                    courseSelect.innerHTML = '<option value="">-- Choose Program --</option>';
+                    data.forEach(course => {
+                        const isSelected = String(oldCourseId || '') === String(course.id) ? ' selected' : '';
+                        const geFlag = course.is_ge_program ? 'true' : 'false';
+                        const label = course.code ? `${course.code} - ${course.name}` : course.name;
+
+                        courseSelect.innerHTML += `<option value="${course.id}" data-is-ge-program="${geFlag}"${isSelected}>${label}</option>`;
                     });
-            }
+
+                    courseWrapper.classList.remove('hidden');
+                    updateGeNoticeVisibility();
+                })
+                .catch(() => {
+                    courseSelect.innerHTML = '<option value="">Error loading programs</option>';
+                    courseWrapper.classList.remove('hidden');
+                    geNotice.classList.add('hidden');
+                });
         });
+
+        courseSelect.addEventListener('change', updateGeNoticeVisibility);
+
+        if (deptSelect.value) {
+            deptSelect.dispatchEvent(new Event('change'));
+        }
         
     });
 

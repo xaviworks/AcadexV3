@@ -3,7 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\UnverifiedUser;
-use App\Models\Department;
+use App\Support\Organization\GEContext;
 
 /**
  * Notification sent to Chairpersons/GE Coordinators when a new instructor registers and is pending approval.
@@ -18,9 +18,10 @@ class InstructorPendingApproval extends BaseNotification
     public function __construct(
         protected UnverifiedUser $pendingUser
     ) {
-        // Check if this is a GE department instructor
-        $geDepartment = Department::where('department_code', 'GE')->first();
-        $this->isGEDepartment = $geDepartment && $this->pendingUser->department_id === $geDepartment->id;
+        $this->isGEDepartment = GEContext::isGERegistrationTarget(
+            (int) $this->pendingUser->department_id,
+            (int) $this->pendingUser->course_id
+        );
     }
 
     public function getCategory(): string

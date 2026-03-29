@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Department;
+use App\Support\Organization\GEContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,10 +23,10 @@ class UnverifiedEmailVerificationPromptController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            // Check if the selected department is GE
-            $isGEDepartment = Department::where('id', $user->department_id)
-                ->where('department_code', 'GE')
-                ->exists();
+            $isGEDepartment = GEContext::isGERegistrationTarget(
+                (int) $user->department_id,
+                (int) $user->course_id
+            );
 
             $approvalMessage = $isGEDepartment 
                 ? 'Your account request has been submitted and is pending GE Coordinator approval.'

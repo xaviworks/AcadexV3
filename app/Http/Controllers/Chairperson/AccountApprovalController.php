@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Chairperson;
 use App\Http\Controllers\Controller;
 use App\Models\UnverifiedUser;
 use App\Models\User;
+use App\Support\Organization\GEContext;
 use App\Listeners\NotifyUserCreated;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
@@ -23,20 +24,32 @@ class AccountApprovalController extends Controller
     {
         Gate::authorize('chairperson');
 
-        // Get GE department to exclude it
-        $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
+        $instructorsQuery = User::where('role', 0)
+            ->where('department_id', Auth::user()->department_id)
+            ->where('course_id', Auth::user()->course_id);
+
+        GEContext::applyNonGERegistrationTargetFilter($instructorsQuery);
+        $instructors = $instructorsQuery
+            ->orderBy('is_active', 'desc')
+            ->orderBy('last_name')
+            ->get();
+
+        $geRequests = \App\Models\GESubjectRequest::whereIn('instructor_id', $instructors->pluck('id'))
+            ->get()
+            ->keyBy('instructor_id');
 
         // Eager-load related department and course for display, filtered by chairperson's department and course
         // Exclude GE department instructors
         // Only show verified email accounts
-        $pendingAccounts = UnverifiedUser::with(['department', 'course'])
+        $pendingAccountsQuery = UnverifiedUser::with(['department', 'course'])
             ->where('department_id', Auth::user()->department_id)
             ->where('course_id', Auth::user()->course_id)
-            ->where('department_id', '!=', $geDepartment->id)
-            ->whereNotNull('email_verified_at')
-            ->get();
+            ->whereNotNull('email_verified_at');
 
-        return view('chairperson.manage-instructors', compact('pendingAccounts'));
+        GEContext::applyNonGERegistrationTargetFilter($pendingAccountsQuery);
+        $pendingAccounts = $pendingAccountsQuery->get();
+
+        return view('chairperson.manage-instructors', compact('instructors', 'pendingAccounts', 'geRequests'));
     }
 
     /**
@@ -49,19 +62,14 @@ class AccountApprovalController extends Controller
     {
         Gate::authorize('chairperson');
 
-        // Get GE department to exclude it
-        $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
-
-        if (!$geDepartment) {
-            return back()->withErrors(['error' => 'GE Department not found.']);
-        }
-
         $pending = UnverifiedUser::where('id', $id)
             ->where('department_id', Auth::user()->department_id)
             ->where('course_id', Auth::user()->course_id)
-            ->where('department_id', '!=', $geDepartment->id)
             ->whereNotNull('email_verified_at')
-            ->first();
+            ;
+
+        GEContext::applyNonGERegistrationTargetFilter($pending);
+        $pending = $pending->first();
 
         if (!$pending) {
             return back()->withErrors(['error' => 'Pending account not found or already processed.']);
@@ -106,18 +114,13 @@ class AccountApprovalController extends Controller
     {
         Gate::authorize('chairperson');
 
-        // Get GE department to exclude it
-        $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
-
-        if (!$geDepartment) {
-            return back()->withErrors(['error' => 'GE Department not found.']);
-        }
-
         $pending = UnverifiedUser::where('id', $id)
             ->where('department_id', Auth::user()->department_id)
             ->where('course_id', Auth::user()->course_id)
-            ->where('department_id', '!=', $geDepartment->id)
-            ->first();
+            ;
+
+        GEContext::applyNonGERegistrationTargetFilter($pending);
+        $pending = $pending->first();
 
         if (!$pending) {
             return back()->withErrors(['error' => 'Pending account not found or already processed.']);

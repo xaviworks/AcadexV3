@@ -16,6 +16,7 @@
 
     $requiresPasswordPrompt = $context === 'subject' && ($requiresPasswordConfirmation ?? false);
     $passwordErrorMessage = $requiresPasswordPrompt ? ($errors->first('current_password') ?? '') : '';
+    $normalizeFormulaDisplayText = fn (?string $text): string => \App\Models\Department::normalizeFormulaDisplayText($text);
 
     $subjectStructureContext = 'this subject';
     if (($requiresPasswordPrompt || $context === 'subject') && isset($subject)) {
@@ -31,9 +32,9 @@
         }
     }
 
-    $labelSuggestion = $defaultFormula->label ?? 'Grades Formula';
+    $labelSuggestion = $normalizeFormulaDisplayText($defaultFormula->label ?? 'Grades Formula');
     if ($context === "department" && isset($department)) {
-        $labelSuggestion = trim(($department->department_description ?? 'Department') . ' Formula');
+        $labelSuggestion = trim(($department->formulaDisplayName() ?: 'Department') . ' Formula');
     } elseif ($context === 'course' && isset($course)) {
         $courseLabel = trim(($course->course_code ? $course->course_code . ' - ' : '') . ($course->course_description ?? 'Course'));
         $labelSuggestion = $courseLabel ? $courseLabel . ' Formula' : $labelSuggestion;
@@ -42,6 +43,7 @@
         $labelSuggestion = $subjectLabel ? $subjectLabel . ' Formula' : $labelSuggestion;
     }
     $labelValue = old('label', $formula->label ?? $labelSuggestion);
+    $labelValue = $normalizeFormulaDisplayText($labelValue);
 
     $queryParams = array_filter([
         'academic_year' => $selectedAcademicYear ?? null,
@@ -78,12 +80,13 @@
     if ($context === 'default') {
         $pageTitle = 'Institution Fallback Formula';
     } elseif ($context === 'department' && isset($department)) {
-        $pageTitle = trim(($department->department_code ? $department->department_code . ' - ' : '') . ($department->department_description ?? 'Department'));
+        $pageTitle = trim(($department->department_code ? $department->department_code . ' - ' : '') . ($department->formulaDisplayName() ?: 'Department'));
     } elseif ($context === 'course' && isset($course)) {
         $pageTitle = trim(($course->course_code ? $course->course_code . ' - ' : '') . ($course->course_description ?? 'Course'));
     } elseif ($context === 'subject' && isset($subject)) {
         $pageTitle = trim(($subject->subject_code ? $subject->subject_code . ' - ' : '') . ($subject->subject_description ?? 'Subject'));
     }
+    $pageTitle = $normalizeFormulaDisplayText($pageTitle);
 
     $pageSubtitle = null;
     if ($context === 'default') {

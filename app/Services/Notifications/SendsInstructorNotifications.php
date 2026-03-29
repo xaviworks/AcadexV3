@@ -7,6 +7,7 @@ use App\Models\UnverifiedUser;
 use App\Notifications\InstructorPendingApproval;
 use App\Notifications\InstructorApproved;
 use App\Notifications\InstructorRejected;
+use App\Support\Organization\GEContext;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 
@@ -18,18 +19,20 @@ trait SendsInstructorNotifications
 {
     /**
      * Notify appropriate approver when a new instructor registers and is pending approval.
-     * - GE Department instructors → notify GE Coordinators
+        * - GE program registrations → notify GE Coordinators
      * - Other departments → notify Chairpersons of that department/course
      * System notification only (no email).
      */
     public static function notifyInstructorPending(UnverifiedUser $pendingUser): void
     {
         try {
-            $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
-            $isGEDepartment = $geDepartment && $pendingUser->department_id === $geDepartment->id;
+            $isGEDepartment = GEContext::isGERegistrationTarget(
+                (int) $pendingUser->department_id,
+                (int) $pendingUser->course_id
+            );
             
             if ($isGEDepartment) {
-                $recipients = User::where('role', 4)->where('is_active', true)->get();
+                $recipients = GEContext::geCoordinatorsQuery()->get();
                 $recipientType = 'GE Coordinator';
             } else {
                 $recipients = User::where('role', 1)
@@ -90,19 +93,8 @@ trait SendsInstructorNotifications
         ?User $rejectedBy = null
     ): void {
         try {
-            $notifiable = new class($email) {
-                public string $email;
-                
-                public function __construct(string $email) {
-                    $this->email = $email;
-                }
-                
-                public function routeNotificationForMail(): string {
-                    return $this->email;
-                }
-            };
-            
-            $notifiable->notify(new InstructorRejected($email, $name, $rejectedBy));
+            Notification::route('mail', $email)
+                ->notify(new InstructorRejected($email, $name, $rejectedBy));
             
             Log::info('Instructor rejected notification sent', [
                 'instructor_email' => $email,

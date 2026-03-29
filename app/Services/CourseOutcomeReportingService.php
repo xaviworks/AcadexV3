@@ -10,6 +10,7 @@ use App\Models\ProgramLearningOutcomeMapping;
 use App\Models\Score;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Support\Organization\GEContext;
 use Illuminate\Support\Collection;
 use App\Traits\CourseOutcomeTrait;
 
@@ -258,9 +259,7 @@ class CourseOutcomeReportingService
     {
         $subjects = Subject::where('course_id', $courseId)
             ->where('is_deleted', false)
-            ->when($excludeGE, function ($q) {
-                $q->where('department_id', '!=', 1);
-            })
+            ->when($excludeGE, fn ($q) => $q->notManagedByGE())
             ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
                 $q->where('academic_period_id', $academicPeriodId);
             })
@@ -412,8 +411,9 @@ class CourseOutcomeReportingService
         // Get all courses (programs)
         $courses = Course::where('is_deleted', false)->get();
 
-        // Get all GE subjects for the period
-        $geSubjects = Subject::where('department_id', 1) // GE department
+        // Get all GE-managed subjects for the period.
+        $geSubjects = Subject::query()
+            ->managedByGE()
             ->where('is_deleted', false)
             ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
                 $q->where('academic_period_id', $academicPeriodId);
@@ -632,7 +632,18 @@ class CourseOutcomeReportingService
             ->where('subjects.is_deleted', false)
             ->where('subjects.course_id', $courseId)
             ->when($excludeGE, function ($query) {
-                $query->where('subjects.department_id', '!=', 1);
+                $geDepartmentId = GEContext::geDepartmentId();
+                $geCourseId = GEContext::geCourseId();
+
+                $query->where('subjects.is_universal', false);
+
+                if ($geDepartmentId !== null) {
+                    $query->where('subjects.department_id', '!=', $geDepartmentId);
+                }
+
+                if ($geCourseId !== null) {
+                    $query->where('subjects.course_id', '!=', $geCourseId);
+                }
             })
             ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
                 $query->where('subjects.academic_period_id', $academicPeriodId);

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\Organization\GEContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -77,6 +79,18 @@ class Subject extends Model
         return $this->hasOne(SubjectAttainmentLevel::class, 'subject_id');
     }
 
+    public function scopeManagedByGE(Builder $query): Builder
+    {
+        return GEContext::applyManagedSubjectFilter($query);
+    }
 
+    public function scopeNotManagedByGE(Builder $query): Builder
+    {
+        return GEContext::applyNonManagedSubjectFilter($query);
+    }
 
+    public function isManagedByGE(): bool
+    {
+        return GEContext::isGESubject($this);
+    }
 }

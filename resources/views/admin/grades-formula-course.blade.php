@@ -63,7 +63,7 @@
         $customSubjects = $subjectSummaries->filter(fn ($summary) => $summary['has_formula'])->count();
         $defaultSubjects = max($totalSubjects - $customSubjects, 0);
     $fallbackScope = $courseFormula ? 'Course Formula' : ($departmentFallback ? 'Department Baseline' : 'Institution Fallback Formula');
-    $fallbackLabel = $courseFormula->label ?? $departmentFallback->label ?? $globalFormula->label ?? 'Institution Fallback';
+    $fallbackLabel = \App\Models\Department::normalizeFormulaDisplayText($courseFormula->label ?? $departmentFallback->label ?? $globalFormula->label ?? 'Institution Fallback');
     @endphp
 
     <div class="card border-0 shadow-sm mb-3 bg-gradient-green-card">

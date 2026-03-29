@@ -19,13 +19,15 @@
 
         return $url . '?' . http_build_query($queryParams);
     };
+
+    $departmentDisplayName = $department->formulaDisplayName();
 @endphp
 <div class="container-fluid py-4">
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-building-fill text-success me-2"></i>{{ $department->department_code }} Department</h1>
-            <p class="text-muted mb-0">{{ $department->department_description }}</p>
+            <p class="text-muted mb-0">{{ $departmentDisplayName }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ $buildRoute('admin.gradesFormula', ['view' => 'overview']) }}" class="btn btn-outline-secondary btn-sm">
@@ -64,7 +66,7 @@
         $totalCourses = $courseSummaries->count();
         $customCourses = $courseSummaries->filter(fn ($summary) => $summary['has_formula'])->count();
         $defaultCourses = max($totalCourses - $customCourses, 0);
-        $fallbackLabel = $departmentFallback->label ?? $globalFormula->label ?? 'Baseline Formula';
+        $fallbackLabel = \App\Models\Department::normalizeFormulaDisplayText($departmentFallback->label ?? $globalFormula->label ?? 'Baseline Formula');
     @endphp
 
     <div class="card border-0 shadow-sm mb-3 bg-success bg-opacity-10">

@@ -75,6 +75,7 @@
     @endif
 
     @php
+        $normalizeFormulaDisplayText = fn (?string $text): string => \App\Models\Department::normalizeFormulaDisplayText($text);
         $subjectName = trim(($subject->subject_code ? $subject->subject_code . ' - ' : '') . ($subject->subject_description ?? ''));
         if ($subjectName === '') {
             $subjectName = 'this subject';
@@ -88,13 +89,13 @@
         }
 
         $departmentName = $department
-            ? trim(($department->department_code ? $department->department_code . ' - ' : '') . ($department->department_description ?? ''))
+            ? trim(($department->department_code ? $department->department_code . ' - ' : '') . ($department->formulaDisplayName() ?? ''))
             : '';
         if ($departmentName === '') {
             $departmentName = 'this department';
         }
 
-        $activeLabel = $activeMeta['label'] ?? ($subjectFormula?->label ?? 'Institution Fallback');
+        $activeLabel = $normalizeFormulaDisplayText($activeMeta['label'] ?? ($subjectFormula?->label ?? 'Institution Fallback'));
         $activeScopeLabel = match ($activeScope ?? 'default') {
             'subject' => 'Subject Custom Formula',
             'course' => 'Inherits Course Formula',
@@ -262,7 +263,7 @@
                                         $weights = collect($blueprint['weights']);
                                         $isSelected = $selectedStructureKey === $blueprint['key'];
                                         $structureTypeKey = $blueprint['key'];
-                                        $structureTypeLabel = $blueprint['label'];
+                                        $structureTypeLabel = $normalizeFormulaDisplayText($blueprint['label']);
                                         $structureTypeDescription = $blueprint['description'] ?? '';
                                     @endphp
                                     <div class="col-xl-4 col-lg-6 formula-card-column" data-structure-type="{{ $structureTypeKey }}">

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
 use App\Models\Department;
 use App\Models\UnverifiedUser;
+use App\Support\Organization\GEContext;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,9 +23,16 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        $departments = Department::all();
-        $geDepartment = Department::where('department_code', 'GE')->first();
-        return view('auth.register', compact('departments', 'geDepartment'));
+        $departments = Department::query()
+            ->where('is_deleted', false)
+            ->orderBy('department_description')
+            ->get();
+
+        $geDepartmentId = Department::generalEducation()?->id;
+        $aseDepartment = Department::ase();
+        $geCourseId = GEContext::geCourseId();
+
+        return view('auth.register', compact('departments', 'geDepartmentId', 'aseDepartment', 'geCourseId'));
     }
 
     /**
@@ -62,6 +71,34 @@ class RegisteredUserController extends Controller
 
         if (\App\Models\User::where('email', $fullEmail)->exists()) {
             return back()->withErrors(['email' => 'This email is already registered.'])->withInput();
+        }
+
+        $departmentId = (int) $request->department_id;
+        $courseId = (int) $request->course_id;
+
+        $courseBelongsToDepartment = Course::query()
+            ->where('id', $courseId)
+            ->where('department_id', $departmentId)
+            ->where('is_deleted', false)
+            ->exists();
+
+        $isGERegistrationAlias = GEContext::isGERegistrationTarget($departmentId, $courseId);
+        $registrationDepartmentId = GEContext::geRegistrationDepartmentId();
+
+        if (
+            $isGERegistrationAlias
+            && $registrationDepartmentId !== null
+            && $departmentId !== (int) $registrationDepartmentId
+        ) {
+            return back()->withErrors([
+                'department_id' => 'General Education registrations must use the ASE department selection.',
+            ])->withInput();
+        }
+
+        if (!$courseBelongsToDepartment && !$isGERegistrationAlias) {
+            return back()->withErrors([
+                'course_id' => 'The selected program does not belong to the selected department.',
+            ])->withInput();
         }
 
         // Store in unverified_users table
