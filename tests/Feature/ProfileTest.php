@@ -101,8 +101,8 @@ class ProfileTest extends TestCase
             ->actingAs($user)
             ->put(route('profile.password.update'), [
                 'current_password' => 'password',
-                'password' => 'new-secure-password',
-                'password_confirmation' => 'new-secure-password',
+                'password' => 'NewSecure1!',
+                'password_confirmation' => 'NewSecure1!',
             ]);
 
         $passwordResponse
@@ -114,7 +114,7 @@ class ProfileTest extends TestCase
         $this->assertSame('Updated', $user->first_name);
         $this->assertSame('User', $user->last_name);
         $this->assertSame('updated@example.com', $user->email);
-        $this->assertTrue(Hash::check('new-secure-password', $user->password));
+        $this->assertTrue(Hash::check('NewSecure1!', $user->password));
         $this->assertNotSame($originalRememberToken, $user->remember_token);
 
         Notification::assertSentTo(
