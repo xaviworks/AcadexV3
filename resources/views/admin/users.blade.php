@@ -10,12 +10,15 @@
         <button class="btn btn-success" onclick="openModal()">+ Add User</button>
     </div>
 
-    {{-- Success/Error Messages --}}
+    {{-- Error/Info Messages --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof notify !== 'undefined') {
+                    notify.success(@json(session('success')));
+                }
+            });
+        </script>
     @endif
     
     @if(session('error'))
@@ -460,7 +463,7 @@
                 <h5 class="modal-title" id="confirmModalLabel">Confirm Your Password</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="confirm-form" action="#" method="POST">
+            <form id="confirm-form" action="{{ route('admin.confirmUserCreationWithPassword') }}" method="POST" data-no-page-loader="true">
                 @csrf
                 <div class="modal-body">
                     <p>To make sure this is you, you will need to re-enter your password for safety purposes.</p>
