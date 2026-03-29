@@ -191,9 +191,7 @@ function initializeCreateModalComponentGuard() {
 
   const updateSaveState = () => {
     const option = typeSelect.options[typeSelect.selectedIndex];
-    const optionAvailable = option && option.dataset
-      ? parseInt(option.dataset.available ?? '1', 10)
-      : 1;
+    const optionAvailable = option && option.dataset ? parseInt(option.dataset.available ?? '1', 10) : 1;
 
     if (!hasAvailableOptions()) {
       saveButton.disabled = true;
