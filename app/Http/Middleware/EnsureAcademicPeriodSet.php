@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AcademicPeriod;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,11 +13,27 @@ class EnsureAcademicPeriodSet
     {
         $user = Auth::user();
         $isInstructor = $user && $user->role === 0;
-        $isGeCoordinator = $user && $user->role === 4; // Add check for GE Coordinator role (assuming 4 is the role ID for GE Coordinator)
+        $isGeCoordinator = $user && $user->role === 4;
+        $autoAssignLatestPeriod = $user && in_array($user->role, [2, 5], true);
+
+        if (
+            Auth::check() &&
+            $autoAssignLatestPeriod &&
+            !session()->has('active_academic_period_id')
+        ) {
+            $latestPeriod = AcademicPeriod::where('is_deleted', false)
+                ->orderByDesc('academic_year')
+                ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
+                ->first();
+
+            if ($latestPeriod) {
+                session(['active_academic_period_id' => $latestPeriod->id]);
+            }
+        }
         
         if (
             Auth::check() &&
-            ($isInstructor || $isGeCoordinator) && // Check both Instructor and GE Coordinator roles
+            ($isInstructor || $isGeCoordinator) &&
             !session()->has('active_academic_period_id') &&
             !$request->is('select-academic-period') &&
             !$request->is('set-academic-period')

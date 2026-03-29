@@ -6,7 +6,9 @@
             @php
                 $activePeriod = \App\Models\AcademicPeriod::find(session('active_academic_period_id'));
                 $user = Auth::user();
+                $isDean = $user->role === 2;
                 $isVpaa = $user->role === 5;
+                $showPeriodDropdown = $isDean || $isVpaa;
                 $availablePeriods = collect();
                 
                 // For roles without a selected period, fall back to the latest/current period
@@ -14,14 +16,14 @@
                     $activePeriod = \App\Models\AcademicPeriod::orderBy('created_at', 'desc')->first();
                 }
 
-                if ($isVpaa) {
+                if ($showPeriodDropdown) {
                     $availablePeriods = \App\Models\AcademicPeriod::where('is_deleted', false)
                         ->orderByDesc('academic_year')
-                        ->orderByRaw("FIELD(semester, '1st', '2nd', 'Summer')")
+                        ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
                         ->get();
                 }
             @endphp
-            @if($isVpaa)
+            @if($showPeriodDropdown)
                 <form action="{{ route('set.academicPeriod') }}" method="POST" class="d-inline-flex align-items-center m-0">
                     @csrf
                     <input type="hidden" name="redirect_to" value="{{ request()->getRequestUri() }}">
@@ -49,7 +51,7 @@
                         </span>
                     </div>
                 </form>
-            @elseif($activePeriod && !in_array($user->role, [3, 5])) <!-- Exclude Admin, VPAA -->
+            @elseif($activePeriod && !in_array($user->role, [3, 5])) <!-- Exclude Admin, VPAA from badge mode -->
                 @php
                     $semesterLabel = '';
                     $academicYear = $activePeriod->academic_year;
