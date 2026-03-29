@@ -599,8 +599,15 @@ function initAdminUsersPage() {
       e.preventDefault();
       const formData = new FormData(this);
       const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const explicitAction = this.getAttribute('action');
+      const confirmEndpoint = explicitAction && explicitAction !== '#' ? explicitAction : window.confirmUserCreationUrl;
 
-      fetch(this.action || window.confirmUserCreationUrl, {
+      if (!confirmEndpoint) {
+        notify.error('Unable to verify password endpoint. Please refresh and try again.');
+        return;
+      }
+
+      fetch(confirmEndpoint, {
         method: 'POST',
         body: formData,
         headers: {
