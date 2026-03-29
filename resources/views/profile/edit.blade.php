@@ -95,8 +95,40 @@
                     </div>
                     <div>
                         <x-input-label for="update_password_password" :value="__('New Password')" />
-                        <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+                        <x-text-input
+                            id="update_password_password"
+                            name="password"
+                            type="password"
+                            class="mt-1 block w-full"
+                            autocomplete="new-password"
+                            placeholder="Min. 8 characters"
+                            oninput="checkProfilePassword(this.value)"
+                        />
                         <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+
+                        <div id="profile-password-requirements" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700">
+                            <h3 class="md:col-span-2 text-sm font-semibold mb-1 text-gray-800">Password Requirements:</h3>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <div id="profile-circle-length" class="w-3 h-3 rounded-full bg-gray-300 border transition-all"></div>
+                                    <span>Minimum 8 chars</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div id="profile-circle-case" class="w-3 h-3 rounded-full bg-gray-300 border transition-all"></div>
+                                    <span>Upper & lowercase</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <div id="profile-circle-number" class="w-3 h-3 rounded-full bg-gray-300 border transition-all"></div>
+                                    <span>At least 1 number</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div id="profile-circle-special" class="w-3 h-3 rounded-full bg-gray-300 border transition-all"></div>
+                                    <span>Special character</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
@@ -138,4 +170,46 @@
         });
     </script>
 @endif
+
+<script>
+    function checkProfilePassword(password) {
+        const checks = {
+            length: password.length >= 8,
+            number: /[0-9]/.test(password),
+            case: /[a-z]/.test(password) && /[A-Z]/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+
+        const update = (id, valid) => {
+            const el = document.getElementById(`profile-circle-${id}`);
+
+            if (!el) {
+                return;
+            }
+
+            el.classList.remove('bg-red-400', 'bg-green-500', 'bg-gray-300');
+            el.classList.add(valid ? 'bg-green-500' : (password.length ? 'bg-red-400' : 'bg-gray-300'));
+        };
+
+        update('length', checks.length);
+        update('number', checks.number);
+        update('case', checks.case);
+        update('special', checks.special);
+
+        const requirements = document.getElementById('profile-password-requirements');
+
+        if (requirements) {
+            const allValid = Object.values(checks).every(Boolean);
+            requirements.classList.toggle('hidden', allValid);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('update_password_password');
+
+        if (passwordInput) {
+            checkProfilePassword(passwordInput.value);
+        }
+    });
+</script>
 @endsection
