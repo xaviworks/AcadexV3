@@ -19,18 +19,19 @@ class ProgramReportsController extends Controller
     }
 
     /**
-     * VPAA/Chair view: CO compliance per program (department) summarized per course for the active academic period.
-     * GET /vpaa/reports/co-program?department_id=<id>
+     * VPAA view: Program Learning Outcome summary for a selected program in a department.
+     * GET /vpaa/reports/co-program?department_id=<id>&course_id=<id>
      */
     public function vpaaDepartment(Request $request, CourseOutcomeReportingService $service)
     {
         $departmentId = (int)$request->input('department_id', 0);
+        $courseId = (int)$request->input('course_id', 0);
         $periodId = $this->resolveRequiredAcademicPeriodId();
         $period = AcademicPeriod::find($periodId);
 
-        // If no department selected, show departments list to choose from
+        // Step 1: Department chooser
         if (!$departmentId) {
-            $departments = \App\Models\Department::where('is_deleted', false)
+            $departments = Department::where('is_deleted', false)
                 ->select('id', 'department_code', 'department_description')
                 ->orderBy('department_description')
                 ->get();
@@ -42,13 +43,47 @@ class ProgramReportsController extends Controller
             ]);
         }
 
-        $department = Department::select('id', 'department_code', 'department_description')
+        $department = Department::where('is_deleted', false)
+            ->select('id', 'department_code', 'department_description')
             ->findOrFail($departmentId);
-        $byCourse = $service->aggregateDepartmentByCourse($departmentId, $periodId);
+
+        // Step 2: Program chooser inside selected department
+        if (!$courseId) {
+            $courses = Course::where('department_id', $department->id)
+                ->where('is_deleted', false)
+                ->orderBy('course_code')
+                ->get(['id', 'course_code', 'course_description', 'department_id']);
+
+            return view('vpaa.reports.co-program-courses', [
+                'department' => $department,
+                'courses' => $courses,
+                'academicYear' => $period?->academic_year,
+                'semester' => $period?->semester,
+            ]);
+        }
+
+        // Step 3: Program-level PLO summary for selected program
+        $course = Course::with('department')
+            ->where('department_id', $department->id)
+            ->where('is_deleted', false)
+            ->findOrFail($courseId);
+
+        $ploSummary = $service->aggregateProgramLearningOutcomes($course->id, $periodId, true);
+        $byProgram = [
+            $course->id => [
+                'program' => $course,
+                'plos' => $ploSummary['results'],
+            ],
+        ];
 
         return view('vpaa.reports.co-program', [
             'department' => $department,
-            'byCourse' => $byCourse,
+            'program' => $course,
+            'byProgram' => $byProgram,
+            'ploDefinitions' => $ploSummary['definitions'],
+            'activePloDefinitions' => $ploSummary['activeDefinitions'],
+            'ploMappings' => $ploSummary['mappings'],
+            'availableCoCodes' => $ploSummary['availableCoCodes'],
             'academicYear' => $period?->academic_year,
             'semester' => $period?->semester,
         ]);
@@ -268,13 +303,14 @@ class ProgramReportsController extends Controller
     }
 
     /**
-     * Dean view: CO compliance for their department for the active academic period.
-     * GET /dean/reports/co-program
+     * Dean view: Program Learning Outcome summary for a selected program in their department.
+     * GET /dean/reports/co-program?course_id=<id>
      */
     public function deanProgram(Request $request, CourseOutcomeReportingService $service)
     {
         $periodId = $this->resolveRequiredAcademicPeriodId();
         $period = AcademicPeriod::find($periodId);
+        $courseId = (int) $request->input('course_id', 0);
         $user = auth()->user();
         $departmentId = $user?->department_id;
 
@@ -282,12 +318,45 @@ class ProgramReportsController extends Controller
             abort(403, 'You are not assigned to any department.');
         }
 
-        $department = Department::find($departmentId);
-        $byCourse = $service->aggregateDepartmentByCourse($departmentId, $periodId);
+        $department = Department::where('is_deleted', false)
+            ->select('id', 'department_code', 'department_description')
+            ->findOrFail($departmentId);
+
+        if (!$courseId) {
+            $courses = Course::where('department_id', $department->id)
+                ->where('is_deleted', false)
+                ->orderBy('course_code')
+                ->get(['id', 'course_code', 'course_description', 'department_id']);
+
+            return view('dean.reports.co-program-courses', [
+                'department' => $department,
+                'courses' => $courses,
+                'academicYear' => $period?->academic_year,
+                'semester' => $period?->semester,
+            ]);
+        }
+
+        $course = Course::with('department')
+            ->where('department_id', $department->id)
+            ->where('is_deleted', false)
+            ->findOrFail($courseId);
+
+        $ploSummary = $service->aggregateProgramLearningOutcomes($course->id, $periodId, true);
+        $byProgram = [
+            $course->id => [
+                'program' => $course,
+                'plos' => $ploSummary['results'],
+            ],
+        ];
 
         return view('dean.reports.co-program', [
             'department' => $department,
-            'byCourse' => $byCourse,
+            'program' => $course,
+            'byProgram' => $byProgram,
+            'ploDefinitions' => $ploSummary['definitions'],
+            'activePloDefinitions' => $ploSummary['activeDefinitions'],
+            'ploMappings' => $ploSummary['mappings'],
+            'availableCoCodes' => $ploSummary['availableCoCodes'],
             'academicYear' => $period?->academic_year,
             'semester' => $period?->semester,
         ]);

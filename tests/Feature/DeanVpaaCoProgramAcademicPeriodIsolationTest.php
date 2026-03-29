@@ -7,6 +7,8 @@ use App\Models\Activity;
 use App\Models\Course;
 use App\Models\CourseOutcomes;
 use App\Models\Department;
+use App\Models\ProgramLearningOutcome;
+use App\Models\ProgramLearningOutcomeMapping;
 use App\Models\Score;
 use App\Models\Student;
 use App\Models\Subject;
@@ -54,16 +56,35 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
         $this->seedCourseOutcomeDataForPeriod($course, $department, $newPeriod, 80, $vpaa->id);
         $this->seedCourseOutcomeDataForPeriod($course, $department, $oldPeriod, 10, $vpaa->id);
 
+        $plo = ProgramLearningOutcome::create([
+            'course_id' => $course->id,
+            'plo_code' => 'PLO1',
+            'title' => 'Program Learning Outcome 1',
+            'display_order' => 1,
+            'is_active' => true,
+            'is_deleted' => false,
+        ]);
+
+        ProgramLearningOutcomeMapping::create([
+            'course_id' => $course->id,
+            'program_learning_outcome_id' => $plo->id,
+            'co_code' => 'CO1',
+        ]);
+
         $response = $this->actingAs($vpaa)
             ->withSession(['active_academic_period_id' => $newPeriod->id])
-            ->get(route('vpaa.reports.co-program', ['department_id' => $department->id]));
+            ->get(route('vpaa.reports.co-program', [
+                'department_id' => $department->id,
+                'course_id' => $course->id,
+            ]));
 
         $response->assertOk();
         $response->assertSeeText($course->course_code);
         $response->assertSeeText('80.00%');
-        $response->assertSeeText('80/100 | target 75%');
+        $response->assertSeeText('Target 75.00%');
+        $response->assertSeeText('CO1');
         $response->assertDontSeeText('45.00%');
-        $response->assertDontSeeText('90/200 | target 75%');
+        $response->assertDontSeeText('Configure PLOs');
     }
 
     public function test_dean_co_program_report_only_uses_selected_academic_period_data(): void
@@ -101,16 +122,32 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
         $this->seedCourseOutcomeDataForPeriod($course, $department, $newPeriod, 80, $dean->id);
         $this->seedCourseOutcomeDataForPeriod($course, $department, $oldPeriod, 10, $dean->id);
 
+        $plo = ProgramLearningOutcome::create([
+            'course_id' => $course->id,
+            'plo_code' => 'PLO1',
+            'title' => 'Program Learning Outcome 1',
+            'display_order' => 1,
+            'is_active' => true,
+            'is_deleted' => false,
+        ]);
+
+        ProgramLearningOutcomeMapping::create([
+            'course_id' => $course->id,
+            'program_learning_outcome_id' => $plo->id,
+            'co_code' => 'CO1',
+        ]);
+
         $response = $this->actingAs($dean)
             ->withSession(['active_academic_period_id' => $newPeriod->id])
-            ->get(route('dean.reports.co-program'));
+            ->get(route('dean.reports.co-program', ['course_id' => $course->id]));
 
         $response->assertOk();
         $response->assertSeeText($course->course_code);
-        $response->assertSeeText('80.0%');
-        $response->assertSeeText('80/100 | target 75%');
-        $response->assertDontSeeText('45.0%');
-        $response->assertDontSeeText('90/200 | target 75%');
+        $response->assertSeeText('80.00%');
+        $response->assertSeeText('Target 75.00%');
+        $response->assertSeeText('CO1');
+        $response->assertDontSeeText('45.00%');
+        $response->assertDontSeeText('Configure PLOs');
     }
 
     private function seedCourseOutcomeDataForPeriod(
