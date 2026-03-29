@@ -599,8 +599,28 @@ function initAdminUsersPage() {
       e.preventDefault();
       const formData = new FormData(this);
       const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const actionUrl = this.getAttribute('action') || window.confirmUserCreationUrl;
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const passwordInput = this.querySelector('input[name="confirm_password"]');
+      const defaultSubmitText = submitBtn?.dataset.defaultText || submitBtn?.innerHTML || '';
 
-      fetch(this.action || window.confirmUserCreationUrl, {
+      if (submitBtn) {
+        submitBtn.dataset.defaultText = defaultSubmitText;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming...';
+      }
+
+      if (!actionUrl || actionUrl === '#') {
+        document.body.classList.add('loaded');
+        notify.error('Unable to verify your password right now. Please refresh the page and try again.');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = defaultSubmitText;
+        }
+        return;
+      }
+
+      fetch(actionUrl, {
         method: 'POST',
         body: formData,
         headers: {
@@ -614,12 +634,24 @@ function initAdminUsersPage() {
             notify.success('Password verified. Creating user...');
             setTimeout(() => submitUserForm(), 500);
           } else {
+            document.body.classList.add('loaded');
             notify.error(data.message || 'Invalid password. Please try again.');
+            if (passwordInput) {
+              passwordInput.value = '';
+              passwordInput.focus();
+            }
           }
         })
         .catch((error) => {
           console.error('Error:', error);
+          document.body.classList.add('loaded');
           notify.error('There was an error processing your request. Please try again.');
+        })
+        .finally(() => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = submitBtn.dataset.defaultText || 'Confirm';
+          }
         });
     });
   }

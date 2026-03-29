@@ -218,7 +218,8 @@ class AdminController extends Controller
     {
         Gate::authorize('admin');
     
-        $courses = Course::where('is_deleted', false)
+        $courses = Course::with('department')
+            ->where('is_deleted', false)
             ->orderBy('course_code')
             ->get();
     
@@ -246,22 +247,138 @@ class AdminController extends Controller
     {
         Gate::authorize('admin');
 
-        $request->validate([
-            'course_code' => 'required|string|max:50',
+        $rules = [
+            'course_code' => ['required', 'string', 'max:50', Rule::unique('courses')->where('is_deleted', false)],
             'course_description' => 'required|string|max:255',
-            'department_id' => 'required|exists:departments,id',
-        ]);
+            'department_id' => [
+                'required',
+                Rule::exists('departments', 'id')->where('is_deleted', false),
+            ],
+        ];
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $request->validate($rules + ['password' => 'required|string']);
+
+            if (! Hash::check($request->password, Auth::user()->password)) {
+                return response()->json(['success' => false, 'message' => 'Incorrect password. Please try again.'], 422);
+            }
+
+            $course = Course::create([
+                'course_code' => trim((string) $request->course_code),
+                'course_description' => trim((string) $request->course_description),
+                'department_id' => $request->department_id,
+                'is_deleted' => false,
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
+            ])->load('department');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Program added successfully.',
+                'course' => $course,
+            ]);
+        }
+
+        $request->validate($rules);
 
         Course::create([
-            'course_code' => $request->course_code,
-            'course_description' => $request->course_description,
+            'course_code' => trim((string) $request->course_code),
+            'course_description' => trim((string) $request->course_description),
             'department_id' => $request->department_id,
             'is_deleted' => false,
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ]);
 
-        return redirect()->route('admin.courses')->with('success', 'Course added successfully.');
+        return redirect()->route('admin.courses')->with('success', 'Program added successfully.');
+    }
+
+    public function updateCourse(Request $request, Course $course)
+    {
+        Gate::authorize('admin');
+
+        $request->validate([
+            'course_code' => ['required', 'string', 'max:50', Rule::unique('courses')->where('is_deleted', false)->ignore($course->id)],
+            'course_description' => 'required|string|max:255',
+            'department_id' => [
+                'required',
+                Rule::exists('departments', 'id')->where('is_deleted', false),
+            ],
+            'password' => 'required|string',
+        ]);
+
+        if (! Hash::check($request->password, Auth::user()->password)) {
+            return response()->json(['success' => false, 'message' => 'Incorrect password. Please try again.'], 422);
+        }
+
+        $course->update([
+            'course_code' => trim((string) $request->course_code),
+            'course_description' => trim((string) $request->course_description),
+            'department_id' => $request->department_id,
+            'updated_by' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Program updated successfully.',
+            'course' => $course->fresh(['department']),
+        ]);
+    }
+
+    public function destroyCourse(Request $request, Course $course)
+    {
+        Gate::authorize('admin');
+
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (! Hash::check($request->password, Auth::user()->password)) {
+            return response()->json(['success' => false, 'message' => 'Incorrect password. Please try again.'], 422);
+        }
+
+        $hasSubjects = Subject::where('course_id', $course->id)->where('is_deleted', false)->exists();
+        $hasUsers = User::where('course_id', $course->id)->exists();
+        $hasStudents = \App\Models\Student::where('course_id', $course->id)->exists();
+        $hasCurriculums = \App\Models\Curriculum::where('course_id', $course->id)->exists();
+
+        if ($hasSubjects) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete program. It has associated subjects. Please remove or reassign them first.',
+            ], 422);
+        }
+
+        if ($hasUsers) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete program. It has associated users. Please remove or reassign them first.',
+            ], 422);
+        }
+
+        if ($hasStudents) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete program. It has associated students. Please remove or reassign them first.',
+            ], 422);
+        }
+
+        if ($hasCurriculums) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete program. It has associated curriculum records. Please remove or reassign them first.',
+            ], 422);
+        }
+
+        $course->update([
+            'is_deleted' => true,
+            'updated_by' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Program deleted successfully.',
+        ]);
     }
 
     // ============================
@@ -307,21 +424,50 @@ class AdminController extends Controller
     {
         Gate::authorize('admin');
 
-        $request->validate([
-            'subject_code' => 'required|string|max:255|unique:subjects,subject_code',
+        $rules = [
+            'subject_code' => ['required', 'string', 'max:255', Rule::unique('subjects', 'subject_code')->where('is_deleted', false)],
             'subject_description' => 'required|string|max:255',
             'units' => 'required|integer|min:1|max:6',
             'year_level' => 'required|integer|min:1|max:5',
             'academic_period_id' => 'required|exists:academic_periods,id',
-            'department_id' => 'required|exists:departments,id',
-            'course_id' => 'required|exists:courses,id',
-        ]);
+            'department_id' => ['required', Rule::exists('departments', 'id')->where('is_deleted', false)],
+            'course_id' => ['required', Rule::exists('courses', 'id')->where('is_deleted', false)],
+        ];
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $request->validate($rules + ['password' => 'required|string']);
+
+            if (! Hash::check($request->password, Auth::user()->password)) {
+                return response()->json(['success' => false, 'message' => 'Incorrect password. Please try again.'], 422);
+            }
+
+            $subject = Subject::create([
+                'subject_code' => trim((string) $request->subject_code),
+                'subject_description' => trim((string) $request->subject_description),
+                'units' => (int) $request->units,
+                'year_level' => (int) $request->year_level,
+                'academic_period_id' => $request->academic_period_id,
+                'department_id' => $request->department_id,
+                'course_id' => $request->course_id,
+                'is_deleted' => false,
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
+            ])->load(['department', 'course', 'academicPeriod']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subject added successfully.',
+                'subject' => $subject,
+            ]);
+        }
+
+        $request->validate($rules);
 
         Subject::create([
-            'subject_code' => $request->subject_code,
-            'subject_description' => $request->subject_description,
-            'units' => $request->units,
-            'year_level' => $request->year_level,
+            'subject_code' => trim((string) $request->subject_code),
+            'subject_description' => trim((string) $request->subject_description),
+            'units' => (int) $request->units,
+            'year_level' => (int) $request->year_level,
             'academic_period_id' => $request->academic_period_id,
             'department_id' => $request->department_id,
             'course_id' => $request->course_id,
@@ -331,6 +477,132 @@ class AdminController extends Controller
         ]);
 
         return redirect()->route('admin.subjects')->with('success', 'Subject added successfully.');
+    }
+
+    public function updateSubject(Request $request, Subject $subject)
+    {
+        Gate::authorize('admin');
+
+        $request->validate([
+            'subject_code' => ['required', 'string', 'max:255', Rule::unique('subjects', 'subject_code')->where('is_deleted', false)->ignore($subject->id)],
+            'subject_description' => 'required|string|max:255',
+            'units' => 'required|integer|min:1|max:6',
+            'year_level' => 'required|integer|min:1|max:5',
+            'academic_period_id' => 'required|exists:academic_periods,id',
+            'department_id' => ['required', Rule::exists('departments', 'id')->where('is_deleted', false)],
+            'course_id' => ['required', Rule::exists('courses', 'id')->where('is_deleted', false)],
+            'password' => 'required|string',
+        ]);
+
+        if (! Hash::check($request->password, Auth::user()->password)) {
+            return response()->json(['success' => false, 'message' => 'Incorrect password. Please try again.'], 422);
+        }
+
+        $subject->update([
+            'subject_code' => trim((string) $request->subject_code),
+            'subject_description' => trim((string) $request->subject_description),
+            'units' => (int) $request->units,
+            'year_level' => (int) $request->year_level,
+            'academic_period_id' => $request->academic_period_id,
+            'department_id' => $request->department_id,
+            'course_id' => $request->course_id,
+            'updated_by' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Subject updated successfully.',
+            'subject' => $subject->fresh(['department', 'course', 'academicPeriod']),
+        ]);
+    }
+
+    public function destroySubject(Request $request, Subject $subject)
+    {
+        Gate::authorize('admin');
+
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (! Hash::check($request->password, Auth::user()->password)) {
+            return response()->json(['success' => false, 'message' => 'Incorrect password. Please try again.'], 422);
+        }
+
+        $hasStudentEnrollments = \App\Models\StudentSubject::where('subject_id', $subject->id)
+            ->where('is_deleted', false)
+            ->exists();
+        $hasInstructorAssignments = DB::table('instructor_subject')
+            ->where('subject_id', $subject->id)
+            ->exists();
+        $hasCourseOutcomes = \App\Models\CourseOutcomes::where('subject_id', $subject->id)
+            ->where('is_deleted', false)
+            ->exists();
+        $hasActivities = Activity::where('subject_id', $subject->id)
+            ->where('is_deleted', false)
+            ->exists();
+        $hasTermGrades = TermGrade::where('subject_id', $subject->id)->exists();
+        $hasFinalGrades = FinalGrade::where('subject_id', $subject->id)->exists();
+        $hasSubjectFormula = GradesFormula::where('subject_id', $subject->id)->exists();
+        $hasAttainmentLevel = \App\Models\SubjectAttainmentLevel::where('subject_id', $subject->id)->exists();
+
+        if ($hasStudentEnrollments) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete subject. It still has enrolled students.',
+            ], 422);
+        }
+
+        if ($hasInstructorAssignments) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete subject. It is still assigned to instructors.',
+            ], 422);
+        }
+
+        if ($hasCourseOutcomes) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete subject. It already has course outcomes.',
+            ], 422);
+        }
+
+        if ($hasActivities) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete subject. It already has activities.',
+            ], 422);
+        }
+
+        if ($hasTermGrades || $hasFinalGrades) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete subject. It already has recorded grades.',
+            ], 422);
+        }
+
+        if ($hasSubjectFormula) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete subject. It already has a grading formula configuration.',
+            ], 422);
+        }
+
+        if ($hasAttainmentLevel) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete subject. It already has attainment settings.',
+            ], 422);
+        }
+
+        $subject->update([
+            'is_deleted' => true,
+            'updated_by' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Subject deleted successfully.',
+        ]);
     }
 
     // ============================

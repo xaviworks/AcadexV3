@@ -45,7 +45,7 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <label for="template_name" class="form-label fw-semibold">Template Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="template_name" name="template_name" value="{{ old('template_name') }}" required maxlength="255" placeholder="e.g., CS Theory Courses, Lab-Heavy Structure">
+                        <input type="text" class="form-control" id="template_name" name="template_name" value="{{ old('template_name') }}" required maxlength="255" placeholder="e.g., IT Core Courses, Lab-Heavy Structure">
                         <small class="text-muted">Choose a descriptive name that identifies the purpose of this template.</small>
                     </div>
                     <div class="col-12">

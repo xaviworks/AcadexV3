@@ -1,6 +1,30 @@
 @extends('layouts.app')
 
 @section('content')
+@if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.notify?.success(@json(session('success')));
+        });
+    </script>
+@endif
+
+@if(session('warning'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.notify?.warning(@json(session('warning')));
+        });
+    </script>
+@endif
+
+@if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.notify?.error(@json(session('error')));
+        });
+    </script>
+@endif
+
 <div class="container py-4">
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">

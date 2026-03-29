@@ -150,7 +150,7 @@
                 <x-empty-state
                     icon="bi-person-x"
                     title="No Students Found"
-                    message="No matching student with enrolled courses was found. Try a different keyword."
+                    message="No matching student was found. Try a different keyword."
                 />
             @else
                 <div class="card border-0 shadow-sm rounded-4">

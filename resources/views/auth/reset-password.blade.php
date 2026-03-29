@@ -36,7 +36,8 @@
                     name="password"
                     required
                     autocomplete="new-password"
-                    placeholder="New password"
+                    placeholder="Min. 8 characters"
+                    oninput="checkPassword(this.value)"
                 />
                 
                 <!-- Text input (visible) - hidden by default -->
@@ -45,7 +46,7 @@
                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm pr-12 mt-1 w-full border border-gray-300 shadow-sm bg-transparent text-white placeholder-white focus:ring-green-500 focus:border-green-500"
                     type="text"
                     style="display: none; position: absolute; top: 0; left: 0; width: 100%;"
-                    placeholder="New password"
+                    placeholder="Min. 8 characters"
                     tabindex="-1"
                 />
                 
@@ -58,6 +59,30 @@
                 </button>
             </div>
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-400" />
+
+            <div id="password-requirements" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm text-white">
+                <h3 class="md:col-span-2 text-sm font-semibold mb-1">Password Requirements:</h3>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <div id="circle-length" class="w-3 h-3 rounded-full bg-gray-300 border transition-all"></div>
+                        <span>Minimum 8 chars</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div id="circle-case" class="w-3 h-3 rounded-full bg-gray-300 border transition-all"></div>
+                        <span>Upper & lowercase</span>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <div id="circle-number" class="w-3 h-3 rounded-full bg-gray-300 border transition-all"></div>
+                        <span>At least 1 number</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div id="circle-special" class="w-3 h-3 rounded-full bg-gray-300 border transition-all"></div>
+                        <span>Special character</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Confirm Password -->
@@ -104,6 +129,38 @@
     </form>
 
     <script>
+        function checkPassword(password) {
+            const checks = {
+                length: password.length >= 8,
+                number: /[0-9]/.test(password),
+                case: /[a-z]/.test(password) && /[A-Z]/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+
+            const update = (id, valid) => {
+                const el = document.getElementById(`circle-${id}`);
+
+                if (!el) {
+                    return;
+                }
+
+                el.classList.remove('bg-red-400', 'bg-green-500', 'bg-gray-300');
+                el.classList.add(valid ? 'bg-green-500' : (password.length ? 'bg-red-400' : 'bg-gray-300'));
+            };
+
+            update('length', checks.length);
+            update('number', checks.number);
+            update('case', checks.case);
+            update('special', checks.special);
+
+            const requirements = document.getElementById('password-requirements');
+
+            if (requirements) {
+                const allValid = Object.values(checks).every(Boolean);
+                requirements.classList.toggle('hidden', allValid);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // Password visibility toggle
             const toggleBtn = document.getElementById('togglePassword');
@@ -132,11 +189,13 @@
                 
                 passwordInput.addEventListener('input', function() {
                     passwordVisible.value = this.value;
+                    checkPassword(this.value);
                     updateToggleVisibility();
                 });
                 
                 passwordVisible.addEventListener('input', function() {
                     passwordInput.value = this.value;
+                    checkPassword(this.value);
                     updateToggleVisibility();
                 });
                 
@@ -161,6 +220,8 @@
                         toggleIcon.classList.add('fa-eye-slash');
                     }
                 });
+
+                checkPassword(passwordInput.value);
             }
 
             // Password confirmation visibility toggle

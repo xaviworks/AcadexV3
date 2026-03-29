@@ -1,55 +1,18 @@
 /**
  * Admin - Subjects Page JavaScript
  *
- * Handles:
- * - DataTable initialization for subjects list
- * - Department-Course filtering cascade
+ * Note: The main functionality has been moved inline to the Blade template
+ * for better integration with Laravel routes and CSRF tokens.
+ *
+ * This file is kept for backwards compatibility only.
  */
 
 /**
  * Initialize the admin subjects page
  */
 function initAdminSubjectsPage() {
-  // Initialize DataTable
-  if ($.fn.DataTable && $('#subjectsTable').length) {
-    $('#subjectsTable').DataTable({
-      order: [[1, 'asc']], // Sort by Code
-      language: {
-        search: '_INPUT_',
-        searchPlaceholder: 'Search courses...',
-        lengthMenu: 'Show _MENU_ entries',
-        info: 'Showing _START_ to _END_ of _TOTAL_ courses',
-        emptyTable: 'No courses found',
-      },
-    });
-  }
-
-  // Filter courses based on selected department
-  $('#department-select').on('change', function () {
-    const departmentId = $(this).val();
-    const courseSelect = $('#course-select');
-
-    // Reset course selection
-    courseSelect.val('');
-
-    // Show/hide courses based on department
-    courseSelect.find('option').each(function () {
-      const $option = $(this);
-      if (!departmentId || $option.val() === '' || $option.data('department') == departmentId) {
-        $option.show();
-      } else {
-        $option.hide();
-      }
-    });
-  });
+  console.log('[subjects.js] Page initialization delegated to inline script.');
 }
 
 // Export for global access
 window.initAdminSubjectsPage = initAdminSubjectsPage;
-
-// Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function () {
-  if (typeof $ !== 'undefined' && $('#subjectsTable').length) {
-    initAdminSubjectsPage();
-  }
-});

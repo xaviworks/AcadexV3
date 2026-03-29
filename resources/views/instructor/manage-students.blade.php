@@ -180,7 +180,6 @@
 
                 <div class="row">
                     <div class="col-12">
-
                         @if(session('status'))
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {
@@ -206,8 +205,10 @@
                                   action="{{ route('instructor.students.import.upload') }}" 
                                   enctype="multipart/form-data" 
                                   id="uploadForm" 
+                                  data-no-page-loader="true"
                                   class="d-flex align-items-center gap-2">
                                 @csrf
+                                <input type="hidden" name="compare_subject_id" value="{{ request('compare_subject_id') }}">
                                 <div class="input-group input-group-sm">
                                     <input type="file" 
                                            name="file" 
@@ -222,6 +223,9 @@
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                        <div class="small text-muted mb-3">
+                            Accepted Excel template columns: <span class="fw-semibold">Last Name, First Name, Middle Name, Year Level, Course Code</span>.
                         </div>
 
                         <div class="card shadow border-0 rounded-4 hover-card">

@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Services\CourseOutcomeReportingService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -81,11 +82,6 @@ class CourseOutcomeReportsController extends Controller
             $enrolledSubjects = collect();
             $studentSuggestions = Student::with('course')
                 ->where('students.is_deleted', false)
-                ->whereHas('subjects', function ($q) use ($periodId) {
-                    $q->where('subjects.is_deleted', false)
-                        ->where('student_subjects.is_deleted', false)
-                        ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
-                })
                 ->orderBy('students.last_name')
                 ->orderBy('students.first_name')
                 ->limit(40)
@@ -101,19 +97,11 @@ class CourseOutcomeReportsController extends Controller
             if ($studentQuery !== '') {
                 $searchTerm = '%' . $studentQuery . '%';
                 $searchedStudents = Student::with('course')
-                    ->where('students.is_deleted', false)
-                    ->where(function ($q) use ($searchTerm) {
-                        $q->where('students.first_name', 'like', $searchTerm)
-                            ->orWhere('students.last_name', 'like', $searchTerm)
-                            ->orWhere('students.middle_name', 'like', $searchTerm)
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, '')) like ?", [$searchTerm])
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name) like ?", [$searchTerm]);
-                    })
-                    ->whereHas('subjects', function ($q) use ($periodId) {
-                        $q->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
-                            ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
-                    })
+                    ->where('students.is_deleted', false);
+
+                $this->applyStudentNameSearch($searchedStudents, $searchTerm);
+
+                $searchedStudents = $searchedStudents
                     ->orderBy('students.last_name')
                     ->orderBy('students.first_name')
                     ->limit(25)
@@ -124,11 +112,6 @@ class CourseOutcomeReportsController extends Controller
                 $selectedStudent = Student::with('course')
                     ->where('students.id', $studentId)
                     ->where('students.is_deleted', false)
-                    ->whereHas('subjects', function ($q) use ($periodId) {
-                        $q->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
-                            ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
-                    })
                     ->firstOrFail();
 
                 $enrolledSubjects = Subject::with('course')
@@ -268,14 +251,11 @@ class CourseOutcomeReportsController extends Controller
             if ($studentQuery !== '') {
                 $searchTerm = '%' . $studentQuery . '%';
                 $searchedStudents = Student::with('course')
-                    ->where('students.is_deleted', false)
-                    ->where(function ($q) use ($searchTerm) {
-                        $q->where('students.first_name', 'like', $searchTerm)
-                            ->orWhere('students.last_name', 'like', $searchTerm)
-                            ->orWhere('students.middle_name', 'like', $searchTerm)
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, '')) like ?", [$searchTerm])
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name) like ?", [$searchTerm]);
-                    })
+                    ->where('students.is_deleted', false);
+
+                $this->applyStudentNameSearch($searchedStudents, $searchTerm);
+
+                $searchedStudents = $searchedStudents
                     ->whereHas('subjects', function ($q) use ($periodId) {
                         $q->where('subjects.department_id', 1)
                             ->where('subjects.is_deleted', false)
@@ -447,14 +427,11 @@ class CourseOutcomeReportsController extends Controller
             if ($studentQuery !== '') {
                 $searchTerm = '%' . $studentQuery . '%';
                 $searchedStudents = Student::with('course')
-                    ->where('students.is_deleted', false)
-                    ->where(function ($q) use ($searchTerm) {
-                        $q->where('students.first_name', 'like', $searchTerm)
-                            ->orWhere('students.last_name', 'like', $searchTerm)
-                            ->orWhere('students.middle_name', 'like', $searchTerm)
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, '')) like ?", [$searchTerm])
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name) like ?", [$searchTerm]);
-                    })
+                    ->where('students.is_deleted', false);
+
+                $this->applyStudentNameSearch($searchedStudents, $searchTerm);
+
+                $searchedStudents = $searchedStudents
                     ->whereHas('subjects', function ($q) use ($userCourseId, $periodId) {
                         $q->where('subjects.course_id', $userCourseId)
                             ->where('subjects.department_id', '!=', 1)
@@ -628,14 +605,11 @@ class CourseOutcomeReportsController extends Controller
             if ($studentQuery !== '') {
                 $searchTerm = '%' . $studentQuery . '%';
                 $searchedStudents = Student::with('course')
-                    ->where('students.is_deleted', false)
-                    ->where(function ($q) use ($searchTerm) {
-                        $q->where('students.first_name', 'like', $searchTerm)
-                            ->orWhere('students.last_name', 'like', $searchTerm)
-                            ->orWhere('students.middle_name', 'like', $searchTerm)
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, '')) like ?", [$searchTerm])
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name) like ?", [$searchTerm]);
-                    })
+                    ->where('students.is_deleted', false);
+
+                $this->applyStudentNameSearch($searchedStudents, $searchTerm);
+
+                $searchedStudents = $searchedStudents
                     ->whereHas('subjects', function ($q) use ($departmentId, $periodId) {
                         $q->where('subjects.department_id', $departmentId)
                             ->where('subjects.is_deleted', false)
@@ -703,5 +677,31 @@ class CourseOutcomeReportsController extends Controller
             'selectedSubject' => $subject,
             'student' => $student,
         ]));
+    }
+
+    private function applyStudentNameSearch(Builder $query, string $searchTerm): void
+    {
+        $query->where(function (Builder $builder) use ($searchTerm) {
+            $builder->where('students.first_name', 'like', $searchTerm)
+                ->orWhere('students.last_name', 'like', $searchTerm)
+                ->orWhere('students.middle_name', 'like', $searchTerm)
+                ->orWhereRaw($this->studentFormattedNameExpression(true) . ' like ?', [$searchTerm])
+                ->orWhereRaw($this->studentFormattedNameExpression(false) . ' like ?', [$searchTerm]);
+        });
+    }
+
+    private function studentFormattedNameExpression(bool $includeMiddleName): string
+    {
+        $driver = Student::query()->getConnection()->getDriverName();
+
+        if (in_array($driver, ['sqlite', 'pgsql'], true)) {
+            return $includeMiddleName
+                ? "students.last_name || ', ' || students.first_name || ' ' || COALESCE(students.middle_name, '')"
+                : "students.last_name || ', ' || students.first_name";
+        }
+
+        return $includeMiddleName
+            ? "CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, ''))"
+            : "CONCAT(students.last_name, ', ', students.first_name)";
     }
 }
