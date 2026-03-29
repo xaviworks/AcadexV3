@@ -493,9 +493,9 @@
 
                         @php
                             $thresholdInputs = $targetLevelThresholds ?? [
-                                'level_3' => 75,
-                                'level_2' => 50,
-                                'level_1' => 25,
+                                'level_3' => 80,
+                                'level_2' => 70,
+                                'level_1' => 60,
                             ];
                         @endphp
                         <div id="summary-target-level-controls" class="border-top pt-3 mt-3 no-print" style="display: {{ request('view') === 'copasssummary' ? 'block' : 'none' }};">

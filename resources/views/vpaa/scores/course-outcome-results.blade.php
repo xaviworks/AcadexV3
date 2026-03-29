@@ -36,9 +36,9 @@
         'coSummaryStats' => $coSummaryStats ?? [],
         'termCoSummaryStats' => $termCoSummaryStats ?? [],
         'targetLevelThresholds' => $targetLevelThresholds ?? [
-            'level_3' => 75,
-            'level_2' => 50,
-            'level_1' => 25,
+            'level_3' => 80,
+            'level_2' => 70,
+            'level_1' => 60,
         ],
         'resultsHomeRoute' => route('vpaa.dashboard'),
         'resultsIndexRoute' => route('vpaa.reports.attainment'),
