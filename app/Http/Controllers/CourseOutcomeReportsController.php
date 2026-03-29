@@ -81,11 +81,6 @@ class CourseOutcomeReportsController extends Controller
             $enrolledSubjects = collect();
             $studentSuggestions = Student::with('course')
                 ->where('students.is_deleted', false)
-                ->whereHas('subjects', function ($q) use ($periodId) {
-                    $q->where('subjects.is_deleted', false)
-                        ->where('student_subjects.is_deleted', false)
-                        ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
-                })
                 ->orderBy('students.last_name')
                 ->orderBy('students.first_name')
                 ->limit(40)
@@ -109,11 +104,6 @@ class CourseOutcomeReportsController extends Controller
                             ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, '')) like ?", [$searchTerm])
                             ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name) like ?", [$searchTerm]);
                     })
-                    ->whereHas('subjects', function ($q) use ($periodId) {
-                        $q->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
-                            ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
-                    })
                     ->orderBy('students.last_name')
                     ->orderBy('students.first_name')
                     ->limit(25)
@@ -124,11 +114,6 @@ class CourseOutcomeReportsController extends Controller
                 $selectedStudent = Student::with('course')
                     ->where('students.id', $studentId)
                     ->where('students.is_deleted', false)
-                    ->whereHas('subjects', function ($q) use ($periodId) {
-                        $q->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
-                            ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
-                    })
                     ->firstOrFail();
 
                 $enrolledSubjects = Subject::with('course')
