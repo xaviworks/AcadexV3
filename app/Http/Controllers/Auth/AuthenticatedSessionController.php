@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\UnverifiedUser;
 use App\Models\User;
 use App\Services\Auth\LoginFlowService;
 use App\Services\Auth\TrackedSessionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -33,6 +36,18 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        $request->ensureIsNotRateLimited();
+
+        $unverifiedUser = UnverifiedUser::where('email', $request->input('email'))->first();
+
+        if ($unverifiedUser && Hash::check($request->input('password'), $unverifiedUser->password)) {
+            Auth::guard('unverified')->login($unverifiedUser);
+            RateLimiter::clear($request->throttleKey());
+            $request->session()->regenerate();
+
+            return redirect()->route('unverified.verification.notice');
+        }
+
         /** @var User $user */
         $user = $request->authenticate();
         $deviceFingerprint = $request->input('device_fingerprint');

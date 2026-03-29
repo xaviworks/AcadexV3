@@ -2,9 +2,13 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Course;
+use App\Models\Department;
+use App\Models\UnverifiedUser;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use PragmaRX\Google2FA\Google2FA;
 use Tests\TestCase;
 
@@ -42,6 +46,35 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertGuest();
+    }
+
+    public function test_unverified_users_are_redirected_to_unverified_verify_email(): void
+    {
+        $unverifiedUser = $this->createUnverifiedUserForLogin('pending@brokenshire.edu.ph', 'password');
+
+        $response = $this->post('/login', [
+            'email' => 'pending',
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('unverified.verification.notice', absolute: false));
+        $this->assertAuthenticatedAs($unverifiedUser->fresh(), 'unverified');
+        $this->assertGuest('web');
+    }
+
+    public function test_unverified_users_can_not_authenticate_with_invalid_password(): void
+    {
+        $this->createUnverifiedUserForLogin('pending-invalid@brokenshire.edu.ph', 'password');
+
+        $response = $this->from('/login')->post('/login', [
+            'email' => 'pending-invalid',
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertRedirect('/login');
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest('web');
+        $this->assertGuest('unverified');
     }
 
     public function test_invalid_password_attempts_are_logged_as_failed_logins(): void
@@ -173,6 +206,34 @@ class AuthenticationTest extends TestCase
         $this->assertDatabaseHas('sessions', [
             'id' => 'other-admin-session',
             'user_id' => $admin->id,
+        ]);
+    }
+
+    private function createUnverifiedUserForLogin(string $email, string $password): UnverifiedUser
+    {
+        $token = substr(md5($email), 0, 8);
+
+        $department = Department::create([
+            'department_code' => 'DP'.$token,
+            'department_description' => 'Department '.$token,
+            'is_deleted' => false,
+        ]);
+
+        $course = Course::create([
+            'course_code' => 'CR'.$token,
+            'course_description' => 'Course '.$token,
+            'department_id' => $department->id,
+            'is_deleted' => false,
+        ]);
+
+        return UnverifiedUser::create([
+            'first_name' => 'Pending',
+            'middle_name' => null,
+            'last_name' => 'User',
+            'email' => $email,
+            'password' => Hash::make($password),
+            'department_id' => $department->id,
+            'course_id' => $course->id,
         ]);
     }
 }
