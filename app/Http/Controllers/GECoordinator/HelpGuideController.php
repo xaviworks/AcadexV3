@@ -30,11 +30,7 @@ class HelpGuideController extends Controller
             ->ordered()
             ->get();
 
-        $availableRoles = array_filter(
-            HelpGuide::availableRoles(),
-            fn($label, $roleId) => $roleId !== HelpGuide::ROLE_ADMIN,
-            ARRAY_FILTER_USE_BOTH
-        );
+        $availableRoles = HelpGuide::availableRoles();
 
         return view('gecoordinator.help-guides.index', compact('guides', 'availableRoles'));
     }

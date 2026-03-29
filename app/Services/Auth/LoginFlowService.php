@@ -207,7 +207,7 @@ class LoginFlowService
 
     public function redirectAfterLogin(User $user): RedirectResponse
     {
-        if (in_array($user->role, [0, 2], true)) {
+        if ($user->role === 0) {
             return redirect()->route('select.academicPeriod');
         }
 

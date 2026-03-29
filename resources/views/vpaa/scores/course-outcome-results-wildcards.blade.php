@@ -18,7 +18,7 @@
             <div class="card-body d-flex flex-wrap gap-3 align-items-center">
                 @if(isset($selectedDepartment))
                     <div class="me-auto">
-                        <a href="{{ route('vpaa.course-outcome-attainment') }}" class="btn btn-outline-secondary btn-sm me-2">
+                        <a href="{{ route('vpaa.reports.attainment') }}" class="btn btn-outline-secondary btn-sm me-2">
                             <i class="bi bi-arrow-left"></i> Departments
                         </a>
                         <span class="fw-semibold">{{ $selectedDepartment->department_code }}</span>
@@ -57,7 +57,7 @@
                 <div class="col-md-4">
                     <div
                         class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden transform transition hover:scale-105 hover:shadow-xl"
-                        data-url="{{ route('vpaa.course-outcome-attainment.subject', ['subject' => $subjectItem->id]) }}"
+                        data-url="{{ route('vpaa.reports.attainment.subject', ['subject' => $subjectItem->id]) }}"
                         style="cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;"
                     >
                         <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
@@ -96,7 +96,7 @@
                     @endif
                 </p>
                 <div class="d-flex justify-content-center gap-3">
-                    <a href="{{ route('vpaa.course-outcome-attainment') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('vpaa.reports.attainment') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-clockwise me-2"></i>Refresh
                     </a>
                 </div>

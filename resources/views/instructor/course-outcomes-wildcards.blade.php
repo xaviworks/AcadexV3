@@ -2,6 +2,12 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
+    @php
+        $isChairpersonOrGE = Auth::user()->role === 1 || Auth::user()->role === 4;
+        $hasSubjectsForGeneration = isset($subjects) && $subjects->isNotEmpty();
+        $generateDisabledReason = 'No subjects available for the selected academic period. Assign subjects first.';
+    @endphp
+
     {{-- Header Section --}}
     <div class="mb-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -13,11 +19,26 @@
             </div>
             
             {{-- Generate CO Button (Chairperson and GE Coordinator Only) --}}
-            @if(Auth::user()->role === 1 || Auth::user()->role === 4)
+            @if($isChairpersonOrGE)
             <div>
-                <button type="button" class="btn btn-success shadow-sm px-4" id="openGenerateCOModalBtn" style="font-weight: 600;">
-                    <i class="bi bi-magic me-2"></i>Generate COs
+                <button
+                    type="button"
+                    class="btn btn-success rounded-pill shadow-sm"
+                    id="openGenerateCOModalBtn"
+                    style="font-weight: 600;"
+                    @disabled(!$hasSubjectsForGeneration)
+                    aria-disabled="{{ $hasSubjectsForGeneration ? 'false' : 'true' }}"
+                    @if(!$hasSubjectsForGeneration) aria-describedby="generateCODisabledHint" @endif
+                    title="{{ $hasSubjectsForGeneration ? 'Generate course outcomes for available subjects.' : $generateDisabledReason }}"
+                >
+                    <i class="bi bi-magic me-1"></i>Generate COs
                 </button>
+                @if(!$hasSubjectsForGeneration)
+                    <p id="generateCODisabledHint" class="mb-0 mt-2 text-muted small d-flex align-items-start" style="gap: 0.4rem; max-width: 360px; line-height: 1.35;">
+                        <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+                        <span>{{ $generateDisabledReason }}</span>
+                    </p>
+                @endif
             </div>
             @endif
         </div>
@@ -87,6 +108,9 @@
                                             style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                                             <h5 class="mb-0 text-white fw-bold">{{ $subjectItem->subject_code }}</h5>
                                         </div>
+                                        <span class="co-count-badge position-absolute">
+                                            {{ $subjectItem->course_outcomes_count ?? 0 }} CO{{ ($subjectItem->course_outcomes_count ?? 0) === 1 ? '' : 's' }}
+                                        </span>
                                     </div>
                                     <div class="card-body pt-5 text-center">
                                         <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $subjectItem->subject_description }}">
@@ -112,7 +136,7 @@
             title="No Courses Found"
             :message="$emptyMessage"
         >
-            @if(Auth::user()->role === 1 || Auth::user()->role === 4)
+            @if($isChairpersonOrGE)
                 <div class="alert alert-light border border-success text-start">
                     <div class="d-flex align-items-start">
                         <i class="bi bi-info-circle text-success me-3 mt-1"></i>
@@ -139,7 +163,7 @@
 </div>
 
 {{-- Generate Course Outcomes Modal --}}
-@if(Auth::user()->role === 1 || Auth::user()->role === 4)
+@if($isChairpersonOrGE)
 <div class="modal fade" id="generateCOModal" tabindex="-1" aria-labelledby="generateCOModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
@@ -215,7 +239,7 @@
                                             <div>
                                                 <strong class="text-danger">Override all existing COs</strong>
                                                 <br><small class="text-muted">Replace all existing course outcomes with fresh set of 6 COs (CO1-CO6)</small>
-                                                <br><small class="text-danger"><i class="bi bi-shield-exclamation me-1"></i>⚠️ This will permanently delete existing COs!</small>
+                                                <br><small class="text-danger"><i class="bi bi-shield-exclamation me-1"></i> This will permanently delete existing COs!</small>
                                             </div>
                                         </div>
                                     </label>
@@ -288,50 +312,58 @@
                     {{-- Preview Section --}}
                     <div class="card border shadow-sm" style="background: #f8f9fa; border-color: #e9ecef !important;">
                         <div class="card-body p-3">
-                            <h6 class="fw-semibold mb-2" style="color: #198754;">
-                                <i class="bi bi-eye me-1"></i>Preview: Course Outcomes to be Generated
-                            </h6>
-                            <div class="mb-2">
-                                <small class="text-muted">Course outcomes will be generated to fill missing CO positions (maximum 6 per subject):</small>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="list-group list-group-flush">
-                                        <div class="list-group-item border-0 px-0 py-1">
-                                            <small><strong>SubjectCode.1:</strong> Students have achieved 75% of the course outcomes</small>
+                            <details class="preview-details">
+                                <summary class="fw-semibold d-flex align-items-center justify-content-between w-100 px-0 mb-2 preview-toggle-btn">
+                                    <span style="color: #198754;">
+                                        <i class="bi bi-eye me-1"></i>Preview: Course Outcomes to be Generated
+                                    </span>
+                                    <i class="bi bi-chevron-down preview-toggle-icon"></i>
+                                </summary>
+
+                                <div class="preview-content">
+                                <div class="mb-2">
+                                    <small class="text-muted">Course outcomes will be generated to fill missing CO positions (maximum 6 per subject):</small>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="list-group list-group-flush">
+                                            <div class="list-group-item border-0 px-0 py-1">
+                                                <small><strong>SubjectCode.1:</strong> Students have achieved 75% of the course outcomes</small>
+                                            </div>
+                                            <div class="list-group-item border-0 px-0 py-1">
+                                                <small><strong>SubjectCode.2:</strong> Students have achieved 75% of the course outcomes</small>
+                                            </div>
+                                            <div class="list-group-item border-0 px-0 py-1">
+                                                <small><strong>SubjectCode.3:</strong> Students have achieved 75% of the course outcomes</small>
+                                            </div>
                                         </div>
-                                        <div class="list-group-item border-0 px-0 py-1">
-                                            <small><strong>SubjectCode.2:</strong> Students have achieved 75% of the course outcomes</small>
-                                        </div>
-                                        <div class="list-group-item border-0 px-0 py-1">
-                                            <small><strong>SubjectCode.3:</strong> Students have achieved 75% of the course outcomes</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="list-group list-group-flush">
+                                            <div class="list-group-item border-0 px-0 py-1">
+                                                <small><strong>SubjectCode.4:</strong> Students have achieved 75% of the course outcomes</small>
+                                            </div>
+                                            <div class="list-group-item border-0 px-0 py-1">
+                                                <small><strong>SubjectCode.5:</strong> Students have achieved 75% of the course outcomes</small>
+                                            </div>
+                                            <div class="list-group-item border-0 px-0 py-1">
+                                                <small><strong>SubjectCode.6:</strong> Students have achieved 75% of the course outcomes</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="list-group list-group-flush">
-                                        <div class="list-group-item border-0 px-0 py-1">
-                                            <small><strong>SubjectCode.4:</strong> Students have achieved 75% of the course outcomes</small>
-                                        </div>
-                                        <div class="list-group-item border-0 px-0 py-1">
-                                            <small><strong>SubjectCode.5:</strong> Students have achieved 75% of the course outcomes</small>
-                                        </div>
-                                        <div class="list-group-item border-0 px-0 py-1">
-                                            <small><strong>SubjectCode.6:</strong> Students have achieved 75% of the course outcomes</small>
+                                <div class="alert border border-success-subtle bg-success bg-opacity-10 mt-3 mb-0">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-info-circle text-success me-2 mt-1"></i>
+                                        <div>
+                                            <small class="text-success">
+                                                <strong>Smart Generation:</strong> The system will automatically identify which CO numbers (1-6) are missing for each subject and generate only those COs. Subjects that already have 6 COs will be skipped.
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="alert border border-success-subtle bg-success bg-opacity-10 mt-3 mb-0">
-                                <div class="d-flex align-items-start">
-                                    <i class="bi bi-info-circle text-success me-2 mt-1"></i>
-                                    <div>
-                                        <small class="text-success">
-                                            <strong>Smart Generation:</strong> The system will automatically identify which CO numbers (1-6) are missing for each subject and generate only those COs. Subjects that already have 6 COs will be skipped.
-                                        </small>
-                                    </div>
                                 </div>
-                            </div>
+                            </details>
                         </div>
                     </div>
                 </form>
@@ -339,7 +371,7 @@
             <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 1rem 1rem;">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-success fw-semibold px-4" onclick="submitGenerateForm()" id="generateSubmitBtn">
-                    <i class="bi bi-magic me-2"></i>Generate Course Outcomes
+                    Generate Course Outcomes
                 </button>
             </div>
         </div>
@@ -355,7 +387,8 @@
 <script>
     window.pageData = {
         userRole: {{ Auth::user()->role }},
-        isChairpersonOrGE: {{ (Auth::user()->role === 1 || Auth::user()->role === 4) ? 'true' : 'false' }},
+        isChairpersonOrGE: {{ $isChairpersonOrGE ? 'true' : 'false' }},
+        canGenerateCOs: {{ $hasSubjectsForGeneration ? 'true' : 'false' }},
         hasValidationErrors: {{ $errors->any() ? 'true' : 'false' }},
         hasErrors: {{ $errors->any() ? 'true' : 'false' }},
         oldGenerationMode: '{{ old('generation_mode', '') }}',
@@ -364,7 +397,7 @@
         @else
         oldYearLevels: null,
         @endif
-        @if(Auth::user()->role === 1 || Auth::user()->role === 4)
+        @if($isChairpersonOrGE)
         validatePasswordUrl: '{{ route($routePrefix . ".course_outcomes.validate_password") }}'
         @else
         validatePasswordUrl: ''
@@ -415,6 +448,43 @@
     
     #yearTabs .nav-link .badge {
         font-size: 0.75rem;
+    }
+
+    .co-count-badge {
+        top: calc(100% - 16px);
+        right: 1rem;
+        z-index: 2;
+        background: #ffffff;
+        color: #198754;
+        border: 1px solid rgba(25, 135, 84, 0.35);
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 1;
+        padding: 0.3rem 0.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .preview-toggle-btn {
+        color: inherit;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .preview-toggle-btn::-webkit-details-marker {
+        display: none;
+    }
+
+    .preview-toggle-btn .preview-toggle-icon {
+        color: #198754;
+        transition: transform 0.2s ease;
+        transform: rotate(0deg);
+    }
+
+    .preview-details[open] .preview-toggle-icon {
+        transform: rotate(180deg);
     }
 </style>
 @endpush

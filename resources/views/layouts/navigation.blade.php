@@ -6,13 +6,52 @@
             @php
                 $activePeriod = \App\Models\AcademicPeriod::find(session('active_academic_period_id'));
                 $user = Auth::user();
+                $isDean = $user->role === 2;
+                $isVpaa = $user->role === 5;
+                $showPeriodDropdown = $isDean || $isVpaa;
+                $availablePeriods = collect();
                 
-                // For VPAA and other roles without active period, get the latest/current period
+                // For roles without a selected period, fall back to the latest/current period
                 if (!$activePeriod && in_array($user->role, [2, 3, 5])) { // Dean, Admin, VPAA
                     $activePeriod = \App\Models\AcademicPeriod::orderBy('created_at', 'desc')->first();
                 }
+
+                if ($showPeriodDropdown) {
+                    $availablePeriods = \App\Models\AcademicPeriod::where('is_deleted', false)
+                        ->orderByDesc('academic_year')
+                        ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
+                        ->get();
+                }
             @endphp
-            @if($activePeriod && !in_array($user->role, [2, 3, 5])) <!-- Exclude Dean, Admin, VPAA -->
+            @if($showPeriodDropdown)
+                <form action="{{ route('set.academicPeriod') }}" method="POST" class="d-inline-flex align-items-center m-0">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="{{ request()->getRequestUri() }}">
+                    <div class="position-relative">
+                        <select
+                            name="academic_period_id"
+                            class="form-select form-select-sm border-0 bg-success bg-opacity-25 text-white rounded-pill"
+                            style="min-width: 290px; height: 32px; font-size: 0.8125rem; font-weight: 500; padding-top: 0; padding-bottom: 0; padding-left: 12px; padding-right: 42px; text-align: center; text-align-last: center; appearance: none; -webkit-appearance: none; -moz-appearance: none;"
+                            onchange="this.form.submit()"
+                            aria-label="Select academic period"
+                            title="Academic period dropdown"
+                        >
+                            @foreach($availablePeriods as $period)
+                                <option
+                                    value="{{ $period->id }}"
+                                    {{ (int) optional($activePeriod)->id === (int) $period->id ? 'selected' : '' }}
+                                    style="color: #1f2937; text-align: center;"
+                                >
+                                    AY {{ $period->academic_year }} - {{ $period->semester === 'Summer' ? 'Summer' : $period->semester . ' Semester' }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="position-absolute top-50 end-0 translate-middle-y pe-3 text-white-50" style="pointer-events: none;">
+                            <i class="bi bi-chevron-down"></i>
+                        </span>
+                    </div>
+                </form>
+            @elseif($activePeriod && !in_array($user->role, [3, 5])) <!-- Exclude Admin, VPAA from badge mode -->
                 @php
                     $semesterLabel = '';
                     $academicYear = $activePeriod->academic_year;

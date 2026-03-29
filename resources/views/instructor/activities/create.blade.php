@@ -7,6 +7,10 @@
     <script>document.addEventListener('DOMContentLoaded', () => window.notify?.error(@json(session('error'))));</script>
   @endif
 
+    @if (session('success'))
+        <script>document.addEventListener('DOMContentLoaded', () => window.notify?.success(@json(session('success'))));</script>
+    @endif
+
   @if ($errors->any())
     <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert" style="border-left: 4px solid #dc3545 !important;">
       <div class="d-flex align-items-start">
@@ -528,9 +532,20 @@
     </div>
 
     <!-- Create Activity Modal -->
+        @php
+            $selectedComponentTerm = $selectedTerm && isset($componentOptionsByTerm[$selectedTerm]) ? $selectedTerm : null;
+            $selectedComponentOptions = $selectedComponentTerm ? ($componentOptionsByTerm[$selectedComponentTerm] ?? []) : [];
+        @endphp
     <div class="modal fade" id="createActivityModal" tabindex="-1" aria-labelledby="createActivityModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
-        <form method="POST" action="{{ route('instructor.activities.store') }}" class="modal-content border-0 shadow-lg needs-validation" novalidate>
+                <form
+                    method="POST"
+                    action="{{ route('instructor.activities.store') }}"
+                    class="modal-content border-0 shadow-lg needs-validation"
+                    novalidate
+                    data-component-options-by-term='@json($componentOptionsByTerm ?? [])'
+                    data-component-options-subject-id="{{ optional($selectedSubject)->id }}"
+                >
           @csrf
           <input type="hidden" name="create_single" value="1">
           <div class="modal-header bg-success border-0 pb-0">
@@ -576,30 +591,33 @@
                 <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
                   <i class="bi bi-diagram-3 me-1"></i>Component Type
                 </label>
-                <select name="type" class="form-select shadow-sm" required style="border: 2px solid #e9ecef;">
+                                <select name="type" class="form-select shadow-sm" required style="border: 2px solid #e9ecef;" data-component-type-select>
                   <option value="">Select Component</option>
-                  @php
-                    $groupedSelect = collect($structureDetails ?? [])->groupBy(function($d) { $parts = explode('.', $d['activity_type']); return $parts[0] ?? $d['activity_type']; });
-                  @endphp
-                  @foreach ($groupedSelect as $groupKey => $children)
-                    <optgroup label="{{ \App\Support\Grades\FormulaStructure::formatLabel($groupKey) }}">
-                      @foreach ($children as $detail)
-                        <option value="{{ $detail['activity_type'] }}">
-                          {{-- Show relative weight as primary, with effective overall percent for clarity --}}
-                          {{ $detail['label'] }} · {{ number_format($detail['relative_weight_percent'] ?? $detail['weight_percent'], 1) }}% (Overall {{ number_format($detail['weight_percent'], 1) }}% / {{ number_format(($detail['weight_percent'] ?? 0) / 100, 2) }})
-                          @if ($detail['max_assessments'])
-                            (Max {{ $detail['max_assessments'] }})
-                          @endif
-                        </option>
-                      @endforeach
-                    </optgroup>
-                  @endforeach
-                  @if (empty($groupedSelect) || $groupedSelect->isEmpty())
+                                    @forelse ($selectedComponentOptions as $option)
+                                        @php
+                                            $isDisabled = $option['max'] !== null && $option['available'] === 0;
+                                        @endphp
+                                        <option
+                                            value="{{ $option['value'] }}"
+                                            {{ $isDisabled ? 'disabled' : '' }}
+                                            data-label="{{ $option['label'] }}"
+                                            data-count="{{ $option['count'] }}"
+                                            data-max="{{ $option['max'] ?? '' }}"
+                                            data-available="{{ $option['available'] ?? '' }}"
+                                            data-status="{{ $option['status'] }}"
+                                        >
+                                            {{ $option['label'] }} — {{ $option['helper'] }}
+                                        </option>
+                                    @empty
                     @foreach ($activityTypes as $type)
                       <option value="{{ $type }}">{{ \App\Support\Grades\FormulaStructure::formatLabel($type) }}</option>
                     @endforeach
-                  @endif
+                                    @endforelse
                 </select>
+                                <div class="small text-muted d-none mt-2" data-component-notice></div>
+                                <div class="alert alert-warning d-none mt-2 mb-0 py-2" data-component-empty>
+                                    All components for this term are at capacity. Please manage activities to free up slots.
+                                </div>
                 <div class="invalid-feedback">
                   <i class="bi bi-exclamation-circle me-1"></i>Select the activity component type.
                 </div>
@@ -661,7 +679,7 @@
             </div>
           </div>
           <div class="modal-footer border-0 bg-light">
-            <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;">
+                        <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;" data-component-save>
               <i class="bi bi-check-circle me-1"></i>Save Activity
             </button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>            

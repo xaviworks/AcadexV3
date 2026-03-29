@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\CourseOutcomeAttainment;
+use App\Models\SubjectAttainmentLevel;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 use App\Traits\CourseOutcomeTrait;
@@ -21,6 +21,16 @@ class CourseOutcomeAttainmentController extends Controller
     {
         // Get the selected subject with course and academicPeriod relationships
         $selectedSubject = \App\Models\Subject::with(['course', 'academicPeriod'])->findOrFail($subjectId);
+
+        $savedTargetLevels = SubjectAttainmentLevel::query()
+            ->where('subject_id', $subjectId)
+            ->first();
+
+        $targetLevelThresholds = [
+            'level_3' => (float) ($savedTargetLevels->level_3 ?? 75),
+            'level_2' => (float) ($savedTargetLevels->level_2 ?? 50),
+            'level_1' => (float) ($savedTargetLevels->level_1 ?? 25),
+        ];
 
         // Get students enrolled in the subject - order by last_name, first_name for consistent display
         $students = \App\Models\Student::whereHas('subjects', function($q) use ($subjectId) {
@@ -168,7 +178,7 @@ class CourseOutcomeAttainmentController extends Controller
                     $studentTermCoScores[$student->id][$term][$coId] = [
                         'raw' => $rawScore,
                         'max' => $maxScore,
-                        'percent' => ceil($percent),
+                        'percent' => (int) round($percent, 0),
                     ];
                 }
             }
@@ -178,7 +188,7 @@ class CourseOutcomeAttainmentController extends Controller
         $coSummaryStats = [];
         foreach ($finalCOs as $coId) {
             $attempted = 0;
-            $passed = 0;
+            $metTargetCount = 0;
             $threshold = (int) (optional($coDetails->get($coId))->target_percentage ?? 75);
             
             foreach ($students as $student) {
@@ -189,17 +199,19 @@ class CourseOutcomeAttainmentController extends Controller
                 if ($percent !== null) {
                     $attempted++;
                     if ($percent >= $threshold) {
-                        $passed++;
+                        $metTargetCount++;
                     }
                 }
             }
+
+            $metTargetPercentage = $attempted > 0 ? round(($metTargetCount / $attempted) * 100, 1) : null;
             
             $coSummaryStats[$coId] = [
                 'attempted' => $attempted,
-                'passed' => $passed,
-                'failed' => $attempted - $passed,
-                'pass_percentage' => $attempted > 0 ? round(($passed / $attempted) * 100, 2) : 0,
-                'fail_percentage' => $attempted > 0 ? round((($attempted - $passed) / $attempted) * 100, 1) : 0,
+                'met_target_count' => $metTargetCount,
+                'met_target_percentage' => $metTargetPercentage,
+                'target_percentage' => $threshold,
+                'target_level_achieved' => $this->resolveTargetLevelAchieved($metTargetPercentage, $targetLevelThresholds),
             ];
         }
         
@@ -208,7 +220,7 @@ class CourseOutcomeAttainmentController extends Controller
         foreach ($terms as $term) {
             foreach ($coColumnsByTerm[$term] ?? [] as $coId) {
                 $attempted = 0;
-                $passed = 0;
+                $metTargetCount = 0;
                 $threshold = (int) (optional($coDetails->get($coId))->target_percentage ?? 75);
                 
                 foreach ($students as $student) {
@@ -216,17 +228,19 @@ class CourseOutcomeAttainmentController extends Controller
                     if ($data && $data['max'] > 0) {
                         $attempted++;
                         if ($data['percent'] >= $threshold) {
-                            $passed++;
+                            $metTargetCount++;
                         }
                     }
                 }
+
+                $metTargetPercentage = $attempted > 0 ? round(($metTargetCount / $attempted) * 100, 1) : null;
                 
                 $termCoSummaryStats[$term][$coId] = [
                     'attempted' => $attempted,
-                    'passed' => $passed,
-                    'failed' => $attempted - $passed,
-                    'pass_percentage' => $attempted > 0 ? round(($passed / $attempted) * 100, 1) : 0,
-                    'fail_percentage' => $attempted > 0 ? round((($attempted - $passed) / $attempted) * 100, 1) : 0,
+                    'met_target_count' => $metTargetCount,
+                    'met_target_percentage' => $metTargetPercentage,
+                    'target_percentage' => $threshold,
+                    'target_level_achieved' => $this->resolveTargetLevelAchieved($metTargetPercentage, $targetLevelThresholds),
                 ];
             }
         }
@@ -291,7 +305,72 @@ class CourseOutcomeAttainmentController extends Controller
             'studentTermCoScores' => $studentTermCoScores,
             'coSummaryStats' => $coSummaryStats,
             'termCoSummaryStats' => $termCoSummaryStats,
+            'targetLevelThresholds' => $targetLevelThresholds,
         ]);
+    }
+
+    public function updateTargetLevels(Request $request, $subjectId)
+    {
+        \App\Models\Subject::findOrFail($subjectId);
+
+        $validated = $request->validate([
+            'level_3' => ['required', 'numeric', 'min:0', 'max:100'],
+            'level_2' => ['required', 'numeric', 'min:0', 'max:100'],
+            'level_1' => ['required', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $level3 = (float) $validated['level_3'];
+        $level2 = (float) $validated['level_2'];
+        $level1 = (float) $validated['level_1'];
+
+        if (!($level3 >= $level2 && $level2 >= $level1)) {
+            return redirect()
+                ->route('instructor.course-outcome-attainments.subject', [
+                    'subject' => $subjectId,
+                    'view' => 'copasssummary',
+                ])
+                ->withInput()
+                ->withErrors([
+                    'level_3' => 'Target levels must follow Level 3 >= Level 2 >= Level 1.',
+                ]);
+        }
+
+        SubjectAttainmentLevel::updateOrCreate(
+            ['subject_id' => $subjectId],
+            [
+                'level_3' => $level3,
+                'level_2' => $level2,
+                'level_1' => $level1,
+            ]
+        );
+
+        return redirect()
+            ->route('instructor.course-outcome-attainments.subject', [
+                'subject' => $subjectId,
+                'view' => 'copasssummary',
+            ])
+            ->with('success', 'Target level thresholds updated successfully.');
+    }
+
+    private function resolveTargetLevelAchieved(?float $metTargetPercentage, array $targetLevelThresholds): ?float
+    {
+        if ($metTargetPercentage === null) {
+            return null;
+        }
+
+        if ($metTargetPercentage >= $targetLevelThresholds['level_3']) {
+            return 3.0;
+        }
+
+        if ($metTargetPercentage >= $targetLevelThresholds['level_2']) {
+            return 2.0;
+        }
+
+        if ($metTargetPercentage >= $targetLevelThresholds['level_1']) {
+            return 1.0;
+        }
+
+        return 0.0;
     }
 
     public function index(Request $request)

@@ -2,50 +2,116 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-        <h1 class="text-2xl font-bold mb-6">
-            <i class="bi bi-person-lines-fill text-success me-2"></i>
-            Students in Department
-        </h1>
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-people-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Students List</span>
+    </h1>
+    <p class="text-muted mb-4">View all students under your department and filter by year level.</p>
 
-        @if($students->isEmpty())
-            <div class="alert alert-warning bg-warning bg-opacity-25 border border-warning text-warning rounded-4 shadow-sm">
-                No students found under your department.
-            </div>
-        @else
-            <div class="mb-4">
-                <form action="{{ route('dean.students') }}" method="GET" class="d-flex align-items-center gap-3">
-                    <label for="courseFilter" class="form-label mb-0">Filter by Course:</label>
-                    <select name="course_id" id="courseFilter" class="form-select" style="width: auto;" onchange="this.form.submit()">
-                        <option value="">All Courses</option>
-                        @foreach($courses as $course)
-                            <option value="{{ $course->id }}" {{ $selectedCourseId == $course->id ? 'selected' : '' }}>
-                                {{ $course->course_code }}
-                            </option>
-                        @endforeach
-                    </select>
-                </form>
+    <div class="mb-4">
+        <form action="{{ route('dean.students') }}" method="GET" class="d-flex flex-wrap align-items-center gap-3">
+            <label for="courseFilter" class="form-label mb-0 fw-semibold">Filter by Course:</label>
+            <select name="course_id" id="courseFilter" class="form-select" style="width: auto;" onchange="this.form.submit()">
+                <option value="">All Courses</option>
+                @foreach($courses as $course)
+                    <option value="{{ $course->id }}" {{ $selectedCourseId == $course->id ? 'selected' : '' }}>
+                        {{ $course->course_code }}
+                    </option>
+                @endforeach
+            </select>
+        </form>
+    </div>
+
+    @if($students->isEmpty())
+        <x-empty-state
+            icon="bi-people"
+            title="No Students Found"
+            message="No students were found for the selected course and department."
+        />
+    @else
+        <ul class="nav nav-tabs mb-0" id="yearTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active"
+                   id="all-years-tab"
+                   data-bs-toggle="tab"
+                   href="#all-years"
+                   role="tab"
+                   aria-controls="all-years"
+                   aria-selected="true">
+                    All Years
+                </a>
+            </li>
+            @for ($level = 1; $level <= 4; $level++)
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link"
+                       id="year-{{ $level }}-tab"
+                       data-bs-toggle="tab"
+                       href="#year-{{ $level }}"
+                       role="tab"
+                       aria-controls="year-{{ $level }}"
+                       aria-selected="false">
+                        {{ $level == 1 ? '1st' : ($level == 2 ? '2nd' : ($level == 3 ? '3rd' : '4th')) }} Year
+                    </a>
+                </li>
+            @endfor
+        </ul>
+
+        <style>
+            #yearTabs {
+                background: transparent !important;
+            }
+
+            #yearTabs .nav-link {
+                background-color: transparent !important;
+                color: #6c757d !important;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            #yearTabs .nav-link:not(.active):hover {
+                background-color: rgba(25, 135, 84, 0.08) !important;
+                color: var(--dark-green) !important;
+            }
+
+            #yearTabs .nav-link.active {
+                background-color: rgba(25, 135, 84, 0.12) !important;
+                color: var(--dark-green) !important;
+                border-bottom: 3px solid var(--dark-green) !important;
+                margin-bottom: -2px;
+                z-index: 1;
+            }
+
+            #yearTabsContent {
+                background: transparent !important;
+                padding-top: 1.5rem;
+            }
+
+            #yearTabsContent .tab-pane {
+                background: transparent !important;
+            }
+        </style>
+
+        <div class="tab-content" id="yearTabsContent" style="background: transparent;">
+            <div class="tab-pane fade show active" id="all-years" role="tabpanel" aria-labelledby="all-years-tab">
+                @include('chairperson.partials.student-table', [
+                    'students' => $students,
+                    'showCourse' => true,
+                    'showYearLevel' => true,
+                    'emptyMessage' => 'No students found'
+                ])
             </div>
 
-            <div class="bg-white shadow-lg rounded-4 overflow-x-auto">
-                <table class="table table-bordered align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Course</th>
-                            <th>Year Level</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($students as $student)
-                            <tr>
-                                <td>{{ $student->last_name }}, {{ $student->first_name }}</td>
-                                <td>{{ $student->course->course_code ?? 'N/A' }}</td>
-                                <td>{{ $student->year_level ?? 'N/A' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
+            @for ($level = 1; $level <= 4; $level++)
+                <div class="tab-pane fade" id="year-{{ $level }}" role="tabpanel" aria-labelledby="year-{{ $level }}-tab">
+                    @include('chairperson.partials.student-table', [
+                        'students' => $students->where('year_level', $level),
+                        'showCourse' => true,
+                        'showYearLevel' => true,
+                        'emptyMessage' => 'No students found for this year level'
+                    ])
+                </div>
+            @endfor
+        </div>
+    @endif
 </div>
 @endsection

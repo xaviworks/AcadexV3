@@ -109,8 +109,28 @@ Route::middleware('auth')->group(function () {
         $request->validate([
             'academic_period_id' => 'required|exists:academic_periods,id',
         ]);
+
         session(['active_academic_period_id' => $request->academic_period_id]);
-        return redirect()->intended('/dashboard');
+
+        $redirectTo = $request->input('redirect_to');
+        if (is_string($redirectTo) && str_starts_with($redirectTo, '/')) {
+            return redirect($redirectTo);
+        }
+
+        $storedRedirect = $request->session()->pull('academic_period_redirect_url');
+        if (
+            is_string($storedRedirect) &&
+            str_starts_with($storedRedirect, '/') &&
+            !in_array($storedRedirect, ['/select-academic-period', '/set-academic-period'], true)
+        ) {
+            return redirect($storedRedirect);
+        }
+
+        $defaultDashboard = Auth::user()?->isVPAA()
+            ? route('vpaa.dashboard', absolute: false)
+            : route('dashboard', absolute: false);
+
+        return redirect()->intended($defaultDashboard);
     })->name('set.academicPeriod');
 });
 
@@ -338,6 +358,7 @@ Route::prefix('instructor')
         // Course Outcome Attainments
         Route::get('/course-outcome-attainments', [CourseOutcomeAttainmentController::class,    'index'])->name('course-outcome-attainments.index');
         Route::get('/course-outcome-attainments/subject/{subject}', [CourseOutcomeAttainmentController::class, 'subject'])->name('course-outcome-attainments.subject');
+        Route::put('/course-outcome-attainments/subject/{subject}/target-levels', [CourseOutcomeAttainmentController::class, 'updateTargetLevels'])->name('course-outcome-attainments.target-levels.update');
         Route::post('/course-outcome-attainments', [CourseOutcomeAttainmentController::class,   'store'])->name('course-outcome-attainments.store');
         Route::get('/course-outcome-attainments/{id}',  [CourseOutcomeAttainmentController::class, 'show'])->name('course-outcome-attainments.show');
         Route::put('/course-outcome-attainments/{id}',  [CourseOutcomeAttainmentController::class, 'update'])->name('course-outcome-attainments. update');
@@ -471,12 +492,11 @@ Route::prefix('vpaa')
     ->middleware(['auth', 'academic.period.set'])
     ->name('vpaa.')
     ->group(function () {
-        // Course Outcome Attainment
-        Route::get('/course-outcome-attainment', [VPAAController::class, 'viewCourseOutcomeAttainment'])
-            ->name('course-outcome-attainment');
-        Route::get('/course-outcome-attainment/subject/{subject}', [VPAAController::class, 'subject'])
-            ->name('course-outcome-attainment.subject');
         // CO Reports
+        Route::get('/reports/attainment', [VPAAController::class, 'viewCourseOutcomeAttainment'])
+            ->name('reports.attainment');
+        Route::get('/reports/attainment/subject/{subject}', [VPAAController::class, 'subject'])
+            ->name('reports.attainment.subject');
         Route::get('/reports/co-student', [CourseOutcomeReportsController::class, 'vpaaStudent'])
             ->name('reports.co-student');
         Route::get('/reports/co-course', [CourseOutcomeReportsController::class, 'vpaaCourse'])

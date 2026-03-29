@@ -29,11 +29,7 @@ class HelpGuideController extends Controller
             ->ordered()
             ->get();
 
-        $availableRoles = array_filter(
-            HelpGuide::availableRoles(),
-            fn($label, $roleId) => $roleId !== HelpGuide::ROLE_ADMIN,
-            ARRAY_FILTER_USE_BOTH
-        );
+        $availableRoles = HelpGuide::availableRoles();
 
         return view('admin.help-guides.index', compact('guides', 'availableRoles'));
     }
@@ -57,17 +53,11 @@ class HelpGuideController extends Controller
     {
         Gate::authorize('admin');
 
-        $filteredRoles = array_filter(
-            HelpGuide::availableRoles(),
-            fn($label, $roleId) => $roleId !== HelpGuide::ROLE_ADMIN,
-            ARRAY_FILTER_USE_BOTH
-        );
-
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'visible_roles' => 'required|array|min:1',
-            'visible_roles.*' => ['integer', Rule::in(array_keys($filteredRoles))],
+            'visible_roles.*' => ['integer', Rule::in(array_keys(HelpGuide::availableRoles()))],
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'attachment' => 'nullable|file|max:10240|mimes:pdf',
@@ -147,17 +137,11 @@ class HelpGuideController extends Controller
     {
         Gate::authorize('admin');
 
-        $filteredRoles = array_filter(
-            HelpGuide::availableRoles(),
-            fn($label, $roleId) => $roleId !== HelpGuide::ROLE_ADMIN,
-            ARRAY_FILTER_USE_BOTH
-        );
-
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'visible_roles' => 'required|array|min:1',
-            'visible_roles.*' => ['integer', Rule::in(array_keys($filteredRoles))],
+            'visible_roles.*' => ['integer', Rule::in(array_keys(HelpGuide::availableRoles()))],
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'attachment' => 'nullable|file|max:10240|mimes:pdf',

@@ -323,6 +323,8 @@ class DashboardController extends Controller
 
     private function deanDashboard()
     {
+        $this->resolveLatestAcademicPeriodIdForDean();
+
         $studentsPerDepartment = Student::join('departments', 'students.department_id', '=', 'departments.id')
             ->select('departments.department_description as department_name', DB::raw('count(*) as total'))
             ->groupBy('students.department_id', 'departments.department_description')
@@ -338,6 +340,27 @@ class DashboardController extends Controller
             'totalInstructors' => User::where('role', 'instructor')->count(),
             'studentsPerCourse' => $studentsPerCourse
         ]);
+    }
+
+    private function resolveLatestAcademicPeriodIdForDean(): ?int
+    {
+        $sessionPeriodId = session('active_academic_period_id');
+        if ($sessionPeriodId) {
+            return (int) $sessionPeriodId;
+        }
+
+        $latestPeriod = \App\Models\AcademicPeriod::where('is_deleted', false)
+            ->orderByDesc('academic_year')
+            ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
+            ->first();
+
+        if ($latestPeriod) {
+            session(['active_academic_period_id' => $latestPeriod->id]);
+
+            return (int) $latestPeriod->id;
+        }
+
+        return null;
     }
 
     private function geCoordinatorDashboard()

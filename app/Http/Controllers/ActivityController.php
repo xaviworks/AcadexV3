@@ -60,6 +60,7 @@ class ActivityController extends Controller
         $activityTypes = [];
         $formulaSettings = null;
         $componentStatuses = [];
+        $componentOptionsByTerm = [];
         $structureDetails = collect();
         $courseOutcomes = collect();
         $alignmentSummary = [
@@ -113,6 +114,26 @@ class ActivityController extends Controller
             $componentSnapshot = $this->buildComponentAlignmentSnapshot($selectedSubject, $termLabels);
             $structureDetails = $componentSnapshot['structure_details'];
             $componentStatuses = $componentSnapshot['terms'];
+            $componentOptionsByTerm = collect($componentStatuses)
+                ->map(function ($termStatus) {
+                    return collect($termStatus['components'] ?? [])->map(function ($component) {
+                        $maxLabel = $component['max_allowed'] ?? null;
+                        $available = (int) ($component['available_slots'] ?? 0);
+
+                        return [
+                            'value' => $component['type'],
+                            'label' => $component['label'],
+                            'count' => (int) ($component['count'] ?? 0),
+                            'max' => $component['max_allowed'],
+                            'available' => $available,
+                            'status' => $component['status'] ?? 'ok',
+                            'helper' => $maxLabel !== null
+                                ? sprintf('%d/%d used%s', (int) ($component['count'] ?? 0), $maxLabel, ($available === 0 ? ' • Full' : ''))
+                                : sprintf('%d scheduled', (int) ($component['count'] ?? 0)),
+                        ];
+                    })->values()->all();
+                })
+                ->all();
             $alignmentSummary = $componentSnapshot['alignment_summary'];
 
             $activities = Activity::where('subject_id', $selectedSubject->id)
@@ -139,6 +160,7 @@ class ActivityController extends Controller
             'structureDetails' => $structureDetails,
             'termLabels' => $termLabels,
             'componentStatuses' => $componentStatuses,
+            'componentOptionsByTerm' => $componentOptionsByTerm,
             'alignmentSummary' => $alignmentSummary,
             'isAligned' => $isAligned,
             'courseOutcomes' => $courseOutcomes,
@@ -317,6 +339,13 @@ class ActivityController extends Controller
         $message = $createCount > 1
             ? sprintf('%d %s activities created successfully.', $createCount, $typeLabel)
             : 'Activity created successfully.';
+
+        if ($request->input('return_to') === 'grades') {
+            return redirect()->route('instructor.grades.index', [
+                'subject_id' => $subject->id,
+                'term' => $request->term,
+            ])->with('success', $message);
+        }
 
         return redirect()->route('instructor.activities.create', [
             'subject_id' => $subject->id,

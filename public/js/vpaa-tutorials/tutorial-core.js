@@ -59,12 +59,12 @@
             }
             
             // Course Outcome Attainment - Subject level
-            if (path.includes('/vpaa/course-outcome-attainment/subject/')) {
+            if (path.includes('/vpaa/reports/attainment/subject/')) {
                 return 'vpaa-co-attainment-subject';
             }
             
             // Course Outcome Attainment - Department selection or subject list
-            if (path.includes('/vpaa/course-outcome-attainment')) {
+            if (path.includes('/vpaa/reports/attainment')) {
                 if (urlParams.get('department_id')) {
                     return 'vpaa-co-attainment-subjects';
                 }

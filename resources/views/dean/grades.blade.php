@@ -2,10 +2,11 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-    <h1 class="text-2xl font-bold mb-6">
-        <i class="bi bi-card-checklist text-success me-2"></i>
-        View Grades
+    <h1 class="text-2xl font-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-bar-chart-fill text-success me-2" style="font-size: 2rem; line-height: 1; vertical-align: middle;"></i>
+        <span>Students' Final Grades</span>
     </h1>
+    <p class="text-muted mb-4">Select a course, instructor, and subject to view students' final grades.</p>
 
     {{-- Breadcrumb Navigation --}}
     @php
@@ -27,16 +28,18 @@
     {{-- Step 1: Course Selection --}}
     @if(empty(request('course_id')))
         @if($courses->isEmpty())
-            <div class="alert alert-warning text-center rounded-4 mt-5">
-                No data found for available courses.
-            </div>
+            <x-empty-state
+                icon="bi-journal-x"
+                title="No Courses Found"
+                message="No courses are available for your department in the selected academic period."
+            />
         @else
             <div class="row g-4 px-4 py-4">
                 @foreach($courses as $course)
                     <div class="col-md-4">
                         <a href="{{ route('dean.grades', ['course_id' => $course->id]) }}" class="text-decoration-none">
-                            <div class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden transform transition hover:scale-105 hover:shadow-xl hover:border-primary">
-                                <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
+                            <div class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                                <div class="position-relative" style="height: 80px;">
                                     <div class="subject-circle position-absolute start-50 translate-middle"
                                          style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                                         <h5 class="mb-0 text-white fw-bold">{{ $course->course_code }}</h5>
@@ -57,16 +60,18 @@
     {{-- Step 2: Instructor Selection --}}
     @elseif(empty(request('instructor_id')))
         @if($instructors->isEmpty())
-            <div class="alert alert-warning text-center rounded-4 mt-5">
-                No instructors found for this course.
-            </div>
+            <x-empty-state
+                icon="bi-people"
+                title="No Instructors Available"
+                message="No active instructors are teaching this course in the selected academic period."
+            />
         @else
             <div class="row g-4 px-4 py-4">
                 @foreach($instructors as $instructor)
                     <div class="col-md-4">
                         <a href="{{ route('dean.grades', ['course_id' => request('course_id'), 'instructor_id' => $instructor->id]) }}" class="text-decoration-none">
-                            <div class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden transform transition hover:scale-105 hover:shadow-xl hover:border-primary">
-                                <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
+                            <div class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                                <div class="position-relative" style="height: 80px;">
                                     <div class="subject-circle position-absolute start-50 translate-middle"
                                          style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 10%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                                         <i class="bi bi-person-circle text-white" style="font-size: 40px;"></i>
@@ -90,16 +95,18 @@
     {{-- Step 3: Course Selection --}}
     @elseif(empty(request('subject_id')))
         @if($subjects->isEmpty())
-            <div class="alert alert-warning text-center rounded-4 mt-5">
-                No courses found for this instructor.
-            </div>
+            <x-empty-state
+                icon="bi-journal-x"
+                title="No Courses Found"
+                message="This instructor has no assigned subjects for the selected academic period."
+            />
         @else
             <div class="row g-4 px-4 py-4">
                 @foreach($subjects as $subject)
                     <div class="col-md-4">
                         <a href="{{ route('dean.grades', ['course_id' => request('course_id'), 'instructor_id' => request('instructor_id'), 'subject_id' => $subject->id]) }}" class="text-decoration-none">
-                            <div class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden transform transition hover:scale-105 hover:shadow-xl hover:border-primary">
-                                <div class="position-relative" style="height: 80px; background-color: #4ecd85;">
+                            <div class="subject-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                                <div class="position-relative" style="height: 80px;">
                                     <div class="subject-circle position-absolute start-50 translate-middle"
                                          style="top: 100%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: linear-gradient(135deg, #4da674, #023336); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                                         <h5 class="mb-0 text-white fw-bold">{{ $subject->subject_code }}</h5>
@@ -120,7 +127,7 @@
     {{-- Step 4: Final Grades --}}
     @else
         @if ($students->count())
-            <div class="bg-white shadow-lg rounded-4 overflow-x-auto mt-6">
+            <div class="bg-white shadow-lg rounded-4 overflow-x-auto mt-4">
                 <table class="table table-bordered align-middle mb-0">
                     <thead class="table-success">
                         <tr>
@@ -167,9 +174,11 @@
                 </table>
             </div>
         @else
-            <div class="alert alert-warning text-center rounded-4 mt-5">
-                No students or grades found for the selected course.
-            </div>
+            <x-empty-state
+                icon="bi-person-x"
+                title="No Students Found"
+                message="No students or grades were found for the selected subject."
+            />
         @endif
     @endif
 </div>

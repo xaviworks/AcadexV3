@@ -29,8 +29,19 @@
         'terms' => $terms,
         'subjectId' => $subjectId,
         'selectedSubject' => $selectedSubject,
+        'incompleteCOs' => $incompleteCOs ?? [],
+        'maxScoresByTermCo' => $maxScoresByTermCo ?? [],
+        'totalMaxByCoId' => $totalMaxByCoId ?? [],
+        'studentTermCoScores' => $studentTermCoScores ?? [],
+        'coSummaryStats' => $coSummaryStats ?? [],
+        'termCoSummaryStats' => $termCoSummaryStats ?? [],
+        'targetLevelThresholds' => $targetLevelThresholds ?? [
+            'level_3' => 75,
+            'level_2' => 50,
+            'level_1' => 25,
+        ],
         'resultsHomeRoute' => route('vpaa.dashboard'),
-        'resultsIndexRoute' => route('vpaa.course-outcome-attainment'),
+        'resultsIndexRoute' => route('vpaa.reports.attainment'),
         'resultsIndexLabel' => 'Course Outcome Attainment',
     ])
     </div>

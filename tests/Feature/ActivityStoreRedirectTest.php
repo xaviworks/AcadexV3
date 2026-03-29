@@ -57,4 +57,51 @@ class ActivityStoreRedirectTest extends TestCase
             'is_deleted' => false,
         ]);
     }
+
+    public function test_store_redirects_back_to_manage_grades_when_requested(): void
+    {
+        /** @var User $instructor */
+        $instructor = User::factory()->createOne([
+            'role' => 0,
+        ]);
+
+        $period = AcademicPeriod::create([
+            'academic_year' => '2025-2026',
+            'semester' => '1st',
+            'is_deleted' => false,
+        ]);
+
+        $subject = Subject::create([
+            'subject_code' => 'TEST-102',
+            'subject_description' => 'Test Subject 2',
+            'academic_period_id' => $period->id,
+            'instructor_id' => $instructor->id,
+            'is_deleted' => false,
+        ]);
+
+        $response = $this->actingAs($instructor)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->post(route('instructor.activities.store'), [
+                'subject_id' => $subject->id,
+                'term' => 'midterm',
+                'type' => 'exam',
+                'title' => 'Midterm Exam',
+                'number_of_items' => 60,
+                'create_single' => 1,
+                'return_to' => 'grades',
+            ]);
+
+        $response->assertRedirect(route('instructor.grades.index', [
+            'subject_id' => $subject->id,
+            'term' => 'midterm',
+        ], false));
+
+        $this->assertDatabaseHas('activities', [
+            'subject_id' => $subject->id,
+            'term' => 'midterm',
+            'type' => 'exam',
+            'title' => 'Midterm Exam',
+            'is_deleted' => false,
+        ]);
+    }
 }
