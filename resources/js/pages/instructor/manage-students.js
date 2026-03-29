@@ -59,58 +59,21 @@ function ensureManageFormActionSet(form) {
  * @param {number} duration - How long to show the alert in ms
  */
 function showAlert(message, type = 'success', duration = 3000) {
-  const alertContainer = document.getElementById('alertContainer');
-  if (!alertContainer) return;
+  const notificationType =
+    {
+      success: 'success',
+      danger: 'error',
+      error: 'error',
+      warning: 'warning',
+      info: 'info',
+    }[type] || 'info';
 
-  const alertId = 'alert-' + Date.now();
-  const alert = document.createElement('div');
-  alert.className = `alert-floating alert alert-${type} alert-dismissible fade`;
-  alert.id = alertId;
+  if (typeof window.notify !== 'undefined' && typeof window.notify[notificationType] === 'function') {
+    window.notify[notificationType](message, duration);
+    return;
+  }
 
-  // Set icon based on type
-  const icons = {
-    success: 'bi-check-circle-fill',
-    danger: 'bi-x-circle-fill',
-    warning: 'bi-exclamation-circle-fill',
-    info: 'bi-info-circle-fill',
-  };
-  const icon = icons[type] || icons.info;
-
-  alert.innerHTML = `
-        <div class="d-flex align-items-center">
-            <span class="alert-icon">
-                <i class="bi ${icon}"></i>
-            </span>
-            <div class="flex-grow-1">${message}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div class="alert-progress">
-            <div class="alert-progress-bar"></div>
-        </div>
-    `;
-
-  alertContainer.appendChild(alert);
-
-  setTimeout(() => {
-    alert.classList.add('show');
-    const progressBar = alert.querySelector('.alert-progress-bar');
-    if (progressBar) {
-      progressBar.style.width = '100%';
-      progressBar.style.transitionDuration = duration + 'ms';
-      setTimeout(() => {
-        progressBar.style.width = '0%';
-      }, 50);
-    }
-  }, 10);
-
-  const dismissTimeout = setTimeout(() => {
-    alert.classList.remove('show');
-    setTimeout(() => alert.remove(), 300);
-  }, duration);
-
-  alert.querySelector('.btn-close')?.addEventListener('click', () => {
-    clearTimeout(dismissTimeout);
-  });
+  window.alert(message);
 }
 
 // Alias for backwards compatibility

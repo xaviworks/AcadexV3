@@ -10,6 +10,8 @@ use App\Models\Subject;
 use App\Traits\ActivityManagementTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException as LaravelValidationException;
+use Maatwebsite\Excel\Exceptions\NoTypeDetectedException;
 use Maatwebsite\Excel\Facades\Excel;
 
 class StudentImportController extends Controller
@@ -29,11 +31,18 @@ class StudentImportController extends Controller
 public function upload(Request $request)
 {
     $request->validate([
-        'file'       => 'required|file|mimes:xlsx,xls',
+        'file'       => 'required|file|mimes:xlsx,xls|max:5120',
         'list_name'  => 'nullable|string|max:255',
+    ], [
+        'file.required' => 'Please choose an Excel file to upload.',
+        'file.file' => 'The selected upload is not a valid file.',
+        'file.mimes' => 'Please upload a valid Excel file in .xlsx or .xls format.',
+        'file.max' => 'The Excel file is too large. Please keep it under 5 MB.',
+        'list_name.max' => 'The uploaded list name is too long.',
     ]);
 
-    $listName = $request->list_name ?? pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME);
+    $listName = trim((string) ($request->list_name ?? pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME)));
+    $redirectParams = $this->importRedirectParams($request, $listName);
 
     // ✅ Check if list_name already exists
     $exists = ReviewStudent::where('list_name', $listName)
@@ -41,19 +50,57 @@ public function upload(Request $request)
         ->exists();
 
     if ($exists) {
-        return redirect()
-            ->route('instructor.students.index', ['tab' => 'import'])
-            ->withErrors(['file' => "❌ A file with the name '{$listName}' already exists."]);
+        return $this->uploadFailureResponse(
+            $request,
+            ["A file with the name '{$listName}' already exists. Please rename the file or remove the old upload first."],
+            $redirectParams
+        );
     }
 
-    Excel::import(
-        new StudentReviewImport(null, $listName),
-        $request->file('file')
-    );
+    try {
+        $import = new StudentReviewImport(null, $listName);
+
+        Excel::import($import, $request->file('file'));
+
+        if ($import->importedCount() < 1) {
+            throw LaravelValidationException::withMessages([
+                'file' => 'No valid student rows were found in the uploaded Excel file.',
+            ]);
+        }
+    } catch (LaravelValidationException $exception) {
+        return $this->uploadFailureResponse(
+            $request,
+            $exception->errors()['file'] ?? [$exception->getMessage()],
+            $redirectParams
+        );
+    } catch (NoTypeDetectedException $exception) {
+        return $this->uploadFailureResponse(
+            $request,
+            ['Invalid Excel file. Please upload a real .xlsx or .xls file using the student import template.'],
+            $redirectParams
+        );
+    } catch (\Throwable $exception) {
+        report($exception);
+
+        return $this->uploadFailureResponse(
+            $request,
+            ['The uploaded Excel file could not be processed. Please check the file format and try again.'],
+            $redirectParams
+        );
+    }
+
+    if ($request->expectsJson() || $request->ajax()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Student list uploaded for review.',
+            'redirect_url' => route('instructor.students.index', $redirectParams),
+            'list_name' => $listName,
+        ]);
+    }
 
     return redirect()
-        ->route('instructor.students.index', ['tab' => 'import'])
-        ->with('status', '📥 Student list uploaded for review.');
+        ->route('instructor.students.index', $redirectParams)
+        ->with('status', 'Student list uploaded for review.');
 }
 
     /**
@@ -169,6 +216,43 @@ public function upload(Request $request)
 
         return response()->json($students);
     }
+
+    protected function importRedirectParams(Request $request, ?string $listName = null): array
+    {
+        $params = ['tab' => 'import'];
+
+        if ($listName) {
+            $params['list_name'] = $listName;
+        }
+
+        if ($request->filled('compare_subject_id')) {
+            $params['compare_subject_id'] = $request->input('compare_subject_id');
+        }
+
+        return $params;
+    }
+
+    protected function uploadFailureResponse(Request $request, array|string $messages, array $redirectParams, int $status = 422)
+    {
+        $messageList = collect(is_array($messages) ? $messages : [$messages])
+            ->flatten()
+            ->filter(fn ($message) => is_string($message) && trim($message) !== '')
+            ->values();
+
+        $primaryMessage = $messageList->first() ?? 'The Excel upload failed. Please review the file and try again.';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => $primaryMessage,
+                'errors' => $messageList->all(),
+            ], $status);
+        }
+
+        return redirect()
+            ->route('instructor.students.index', $redirectParams)
+            ->withErrors(['file' => $primaryMessage])
+            ->with('import_error_details', $messageList->all())
+            ->withInput();
+    }
 }
-
-

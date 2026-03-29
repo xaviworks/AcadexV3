@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@extends('layouts.app')
-
 {{-- Styles: resources/css/instructor/common.css --}}
 
 @section('content')
@@ -12,19 +10,19 @@
     <div class="row">
         <div class="col-12">
             @if(session('status'))
-                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-                    {{ session('status') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        window.notify?.success(@json(session('status')));
+                    });
+                </script>
             @endif
 
             @if($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-                    @foreach($errors->all() as $error)
-                        <div>{{ $error }}</div>
-                    @endforeach
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        window.notify?.error(@json($errors->first()));
+                    });
+                </script>
             @endif
 
             <!-- Main Card Container -->
@@ -34,8 +32,10 @@
                       action="{{ route('instructor.students.import.upload') }}" 
                       enctype="multipart/form-data" 
                       id="uploadForm" 
+                      data-no-page-loader="true"
                       class="d-flex align-items-center gap-2">
                     @csrf
+                    <input type="hidden" name="compare_subject_id" value="{{ request('compare_subject_id') }}">
                     <div class="input-group input-group-sm">
                         <input type="file" 
                                name="file" 
@@ -50,6 +50,9 @@
                         </button>
                     </div>
                 </form>
+            </div>
+            <div class="small text-muted mb-3">
+                Accepted Excel template columns: <span class="fw-semibold">Last Name, First Name, Middle Name, Year Level, Course Code</span>.
             </div>
 
             <div class="card shadow border-0 rounded-4 hover-card">

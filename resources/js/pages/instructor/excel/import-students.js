@@ -5,72 +5,21 @@
 
 // Enhanced Alert System
 export function showAlert(message, type = 'success', duration = 3000) {
-  const alertContainer = document.getElementById('alertContainer');
-  if (!alertContainer) return;
+  const notificationType =
+    {
+      success: 'success',
+      danger: 'error',
+      error: 'error',
+      warning: 'warning',
+      info: 'info',
+    }[type] || 'info';
 
-  const alertId = 'alert-' + Date.now();
-
-  // Create alert element
-  const alert = document.createElement('div');
-  alert.className = `alert-floating alert alert-${type} alert-dismissible fade`;
-  alert.id = alertId;
-
-  // Set icon based on type
-  let icon = '';
-  switch (type) {
-    case 'success':
-      icon = 'bi-check-circle-fill';
-      break;
-    case 'danger':
-      icon = 'bi-x-circle-fill';
-      break;
-    case 'warning':
-      icon = 'bi-exclamation-circle-fill';
-      break;
-    default:
-      icon = 'bi-info-circle-fill';
+  if (typeof window.notify !== 'undefined' && typeof window.notify[notificationType] === 'function') {
+    window.notify[notificationType](message, duration);
+    return;
   }
 
-  // Create alert content
-  alert.innerHTML = `
-        <div class="d-flex align-items-center">
-            <span class="alert-icon">
-                <i class="bi ${icon}"></i>
-            </span>
-            <div class="flex-grow-1">${message}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <div class="alert-progress">
-            <div class="alert-progress-bar"></div>
-        </div>
-    `;
-
-  // Add to container
-  alertContainer.appendChild(alert);
-
-  // Show alert with animation
-  setTimeout(() => {
-    alert.classList.add('show');
-    const progressBar = alert.querySelector('.alert-progress-bar');
-    if (progressBar) {
-      progressBar.style.width = '100%';
-      progressBar.style.transitionDuration = duration + 'ms';
-      setTimeout(() => {
-        progressBar.style.width = '0%';
-      }, 50);
-    }
-  }, 10);
-
-  // Auto dismiss
-  const dismissTimeout = setTimeout(() => {
-    alert.classList.remove('show');
-    setTimeout(() => alert.remove(), 300);
-  }, duration);
-
-  // Clear timeout if manually closed
-  alert.querySelector('.btn-close')?.addEventListener('click', () => {
-    clearTimeout(dismissTimeout);
-  });
+  window.alert(message);
 }
 
 // Replace the old showToast function with showAlert
