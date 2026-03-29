@@ -3,7 +3,16 @@
  * Modifies the instructor view for VPAA read-only context
  */
 
+function isVpaaCourseOutcomeResultsPage() {
+  return Boolean(
+    document.querySelector('.vpaa-readonly [data-page="instructor.course-outcome-results"]') ||
+    window.location.pathname.includes('/vpaa/reports/attainment/subject/')
+  );
+}
+
 export function initVpaaCourseOutcomeResultsPage() {
+  if (!isVpaaCourseOutcomeResultsPage()) return;
+
   // Mark body so global CSS can target instructor links in included template
   document.body.classList.add('vpaa-view');
 

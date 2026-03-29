@@ -99,7 +99,7 @@
 }
 
 /* VPAA Read-Only Styles */
-.vpaa-readonly form {
+.vpaa-readonly form:not(#summary-target-level-form) {
   display: none !important;
 }
 
