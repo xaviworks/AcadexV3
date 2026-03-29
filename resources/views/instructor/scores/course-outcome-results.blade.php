@@ -698,7 +698,7 @@
                                                 ? 'text-muted'
                                                 : ($metTargetPercentage >= 75 ? 'text-success' : 'text-danger');
                                         @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? $metTargetPercentage . '%' : '--' }}</td>
+                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? number_format((float) $metTargetPercentage, 0) . '%' : '--' }}</td>
                                     @endif
                                 @endforeach
                             </tr>
@@ -1233,7 +1233,7 @@
                                                 ? 'text-muted'
                                                 : ($metTargetPercentage >= 75 ? 'text-success' : 'text-danger');
                                         @endphp
-                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? $metTargetPercentage . '%' : '--' }}</td>
+                                        <td class="fw-bold {{ $textClass }}">{{ $metTargetPercentage !== null ? number_format((float) $metTargetPercentage, 0) . '%' : '--' }}</td>
                                     @endforeach
                                 </tr>
                                 <tr style="background:#fff;">
