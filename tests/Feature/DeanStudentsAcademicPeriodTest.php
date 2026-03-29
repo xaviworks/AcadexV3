@@ -156,4 +156,64 @@ class DeanStudentsAcademicPeriodTest extends TestCase
         $response->assertSee('current-instructor@example.test');
         $response->assertDontSee('legacy-instructor@example.test');
     }
+
+    public function test_dean_grades_lists_primary_assigned_instructor_for_selected_course(): void
+    {
+        $department = Department::create([
+            'department_code' => 'DGR-' . Str::upper(Str::random(4)),
+            'department_description' => 'Dean Grades Department',
+            'is_deleted' => false,
+        ]);
+
+        $course = Course::create([
+            'course_code' => 'DGC-' . Str::upper(Str::random(5)),
+            'course_description' => 'Dean Grades Course',
+            'department_id' => $department->id,
+            'is_deleted' => false,
+        ]);
+
+        $academicPeriod = AcademicPeriod::create([
+            'academic_year' => '2030-2031',
+            'semester' => '1st',
+            'is_deleted' => false,
+        ]);
+
+        $dean = User::factory()->createOne([
+            'role' => 2,
+            'department_id' => $department->id,
+        ]);
+
+        $instructor = User::factory()->createOne([
+            'role' => 0,
+            'first_name' => 'Primary',
+            'last_name' => 'Instructor',
+            'department_id' => $department->id,
+            'is_active' => true,
+            'email' => 'dean-grades-primary@example.test',
+        ]);
+
+        // This intentionally uses only subjects.instructor_id (no instructor_subject pivot)
+        // to cover the Dean grades regression where primary instructors were omitted.
+        Subject::create([
+            'subject_code' => 'DGS-' . Str::upper(Str::random(6)),
+            'subject_description' => 'Dean Grades Subject',
+            'year_level' => 1,
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'academic_period_id' => $academicPeriod->id,
+            'instructor_id' => $instructor->id,
+            'is_deleted' => false,
+        ]);
+
+        $response = $this->actingAs($dean)
+            ->withSession(['active_academic_period_id' => $academicPeriod->id])
+            ->get(route('dean.grades', ['course_id' => $course->id]));
+
+        $response->assertOk();
+        $response->assertViewHas('instructors', function ($instructors) use ($instructor) {
+            return $instructors->pluck('id')->contains($instructor->id);
+        });
+        $response->assertSeeText('Instructor, Primary');
+        $response->assertDontSeeText('No Instructors Available');
+    }
 }
