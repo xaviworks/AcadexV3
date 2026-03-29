@@ -392,10 +392,14 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     Route::get('/courses', [AdminController::class, 'courses'])->name('courses');
     Route::get('/courses/create', [AdminController::class, 'createCourse'])->name('createCourse');
     Route::post('/courses/store', [AdminController::class, 'storeCourse'])->name('storeCourse');
+    Route::put('/courses/{course}', [AdminController::class, 'updateCourse'])->name('updateCourse');
+    Route::delete('/courses/{course}', [AdminController::class, 'destroyCourse'])->name('destroyCourse');
 
     Route::get('/subjects', [AdminController::class, 'subjects'])->name('subjects');
     Route::get('/subjects/create', [AdminController::class, 'createSubject'])->name('createSubject');
     Route::post('/subjects/store', [AdminController::class, 'storeSubject'])->name('storeSubject');
+    Route::put('/subjects/{subject}', [AdminController::class, 'updateSubject'])->name('updateSubject');
+    Route::delete('/subjects/{subject}', [AdminController::class, 'destroySubject'])->name('destroySubject');
 
     Route::get('/academic-periods', [AcademicPeriodController::class, 'index'])->name('academicPeriods');
     Route::post('/academic-periods/generate', [AcademicPeriodController::class, 'generate'])->name('academicPeriods.generate');

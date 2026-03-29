@@ -221,7 +221,6 @@
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="submit" class="btn btn-success" id="confirmPasswordBtn">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelPasswordConfirm()">Cancel</button>    
                         <span id="confirmPasswordBtnText">
                             <i class="bi bi-check-lg me-1"></i>Confirm
                         </span>
@@ -229,6 +228,7 @@
                             <span class="spinner-border spinner-border-sm me-1"></span>Verifying...
                         </span>
                     </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelPasswordConfirm()">Cancel</button>    
                 </div>
             </form>
         </div>
