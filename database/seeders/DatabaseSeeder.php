@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AcademicPeriodsTableSeeder::class,
             TermsTableSeeder::class,
             UserSeeder::class,
+            AdminAccountsSeeder::class,
             CurriculumSeeder::class,
             GradesFormulaSeeder::class,
             DepartmentBaselineFormulaSeeder::class,
