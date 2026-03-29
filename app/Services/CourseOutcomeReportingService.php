@@ -375,7 +375,7 @@ class CourseOutcomeReportingService
      * Aggregate per course within a department for a given period.
      * Returns: [course_id => ['course' => Course, 'co' => [num => ['raw','max','percent']]]]
      */
-    public function aggregateDepartmentByCourse(int $departmentId, ?int $academicPeriodId = null): array
+    public function aggregateDepartmentByCourse(int $departmentId, int $academicPeriodId): array
     {
         // Optimized: Eager load courses with their subjects to avoid N+1 queries
         $courses = Course::where('department_id', $departmentId)
@@ -383,9 +383,7 @@ class CourseOutcomeReportingService
             ->select('id', 'course_code', 'course_description', 'department_id')
             ->with(['subjects' => function ($query) use ($academicPeriodId) {
                 $query->where('is_deleted', false)
-                    ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
-                        $q->where('academic_period_id', $academicPeriodId);
-                    })
+                    ->where('academic_period_id', $academicPeriodId)
                     ->select('id', 'course_id', 'subject_code', 'academic_period_id');
             }])
             ->get();

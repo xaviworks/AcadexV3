@@ -9,6 +9,7 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class DeanController extends Controller
@@ -26,9 +27,36 @@ class DeanController extends Controller
     {
         Gate::authorize('dean');
 
+        $departmentId = Auth::user()->department_id;
+        $academicPeriodId = session('active_academic_period_id');
+
         $instructors = User::where('role', 0) // Instructor role
             ->where('department_id', Auth::user()->department_id)
             ->where('is_active', true)
+            ->where(function ($teachingQuery) use ($academicPeriodId, $departmentId) {
+                if (! $academicPeriodId) {
+                    $teachingQuery->whereRaw('1 = 0');
+
+                    return;
+                }
+
+                $teachingQuery->whereExists(function ($subQuery) use ($academicPeriodId, $departmentId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('subjects')
+                        ->whereColumn('subjects.instructor_id', 'users.id')
+                        ->where('subjects.department_id', $departmentId)
+                        ->where('subjects.academic_period_id', $academicPeriodId)
+                        ->where('subjects.is_deleted', false);
+                })->orWhereExists(function ($subQuery) use ($academicPeriodId, $departmentId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('instructor_subject')
+                        ->join('subjects', 'subjects.id', '=', 'instructor_subject.subject_id')
+                        ->whereColumn('instructor_subject.instructor_id', 'users.id')
+                        ->where('subjects.department_id', $departmentId)
+                        ->where('subjects.academic_period_id', $academicPeriodId)
+                        ->where('subjects.is_deleted', false);
+                });
+            })
             ->orderBy('last_name')
             ->get();
 
@@ -44,12 +72,19 @@ class DeanController extends Controller
         Gate::authorize('dean');
 
         $selectedCourseId = $request->input('course_id');
+        $academicPeriodId = session('active_academic_period_id');
         
         $query = Student::with('course')
             ->where('department_id', Auth::user()->department_id)
             ->where('is_deleted', false)
             ->orderBy('last_name')
             ->orderBy('first_name');
+
+        if ($academicPeriodId) {
+            $query->where('academic_period_id', $academicPeriodId);
+        } else {
+            $query->whereRaw('1 = 0');
+        }
 
         if ($selectedCourseId) {
             $query->where('course_id', $selectedCourseId);

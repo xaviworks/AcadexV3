@@ -25,8 +25,8 @@ class ProgramReportsController extends Controller
     public function vpaaDepartment(Request $request, CourseOutcomeReportingService $service)
     {
         $departmentId = (int)$request->input('department_id', 0);
-        $periodId = session('active_academic_period_id');
-        $period = $periodId ? AcademicPeriod::find($periodId) : null;
+        $periodId = $this->resolveRequiredAcademicPeriodId();
+        $period = AcademicPeriod::find($periodId);
 
         // If no department selected, show departments list to choose from
         if (!$departmentId) {
@@ -273,8 +273,8 @@ class ProgramReportsController extends Controller
      */
     public function deanProgram(Request $request, CourseOutcomeReportingService $service)
     {
-        $periodId = session('active_academic_period_id');
-        $period = $periodId ? AcademicPeriod::find($periodId) : null;
+        $periodId = $this->resolveRequiredAcademicPeriodId();
+        $period = AcademicPeriod::find($periodId);
         $user = auth()->user();
         $departmentId = $user?->department_id;
 
@@ -302,5 +302,26 @@ class ProgramReportsController extends Controller
         }
 
         return Course::with('department')->findOrFail($courseId);
+    }
+
+    private function resolveRequiredAcademicPeriodId(): int
+    {
+        $sessionPeriodId = session('active_academic_period_id');
+        if ($sessionPeriodId && AcademicPeriod::where('id', $sessionPeriodId)->where('is_deleted', false)->exists()) {
+            return (int) $sessionPeriodId;
+        }
+
+        $latestPeriod = AcademicPeriod::where('is_deleted', false)
+            ->orderByDesc('academic_year')
+            ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
+            ->first();
+
+        if ($latestPeriod) {
+            session(['active_academic_period_id' => $latestPeriod->id]);
+
+            return (int) $latestPeriod->id;
+        }
+
+        abort(403, 'No active academic period is available.');
     }
 }
