@@ -372,7 +372,7 @@
                         <a href="{{ route('admin.help-guides.index') }}" 
                            class="nav-link {{ request()->routeIs('admin.help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
                             <i class="bi bi-question-circle me-3"></i>
-                            <span>Help Guides</span>
+                            <span>Manage Help Guides</span>
                         </a>
                     </li>
                 </ul>
@@ -547,38 +547,36 @@
         @endif
 
         {{-- Help Guides (All Users) --}}
-        @if($role !== 3) {{-- Admins have their own management link --}}
-            <div class="sidebar-section">
-                <h6 class="px-3 mb-2 sidebar-heading">User Guides</h6>
-                <ul class="nav nav-pills flex-column">
+        <div class="sidebar-section">
+            <h6 class="px-3 mb-2 sidebar-heading">User Guides</h6>
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a href="{{ route('help-guides.index') }}" 
+                       class="nav-link {{ request()->routeIs('help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                        <i class="bi bi-question-circle me-3"></i>
+                        <span>Help Guides</span>
+                    </a>
+                </li>
+                @if($role === 1)
                     <li class="nav-item">
-                        <a href="{{ route('help-guides.index') }}" 
-                           class="nav-link {{ request()->routeIs('help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-question-circle me-3"></i>
-                            <span>Help Guides</span>
+                        <a href="{{ route('chairperson.help-guides.index') }}" 
+                           class="nav-link {{ request()->routeIs('chairperson.help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-pencil-square me-3"></i>
+                            <span>Manage Help Guides</span>
                         </a>
                     </li>
-                    @if($role === 1)
-                        <li class="nav-item">
-                            <a href="{{ route('chairperson.help-guides.index') }}" 
-                               class="nav-link {{ request()->routeIs('chairperson.help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                                <i class="bi bi-pencil-square me-3"></i>
-                                <span>Manage Help Guides</span>
-                            </a>
-                        </li>
-                    @endif
-                    @if($role === 4)
-                        <li class="nav-item">
-                            <a href="{{ route('gecoordinator.help-guides.index') }}" 
-                               class="nav-link {{ request()->routeIs('gecoordinator.help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                                <i class="bi bi-pencil-square me-3"></i>
-                                <span>Manage Help Guides</span>
-                            </a>
-                        </li>
-                    @endif
-                </ul>
-            </div>
-        @endif
+                @endif
+                @if($role === 4)
+                    <li class="nav-item">
+                        <a href="{{ route('gecoordinator.help-guides.index') }}" 
+                           class="nav-link {{ request()->routeIs('gecoordinator.help-guides.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
+                            <i class="bi bi-pencil-square me-3"></i>
+                            <span>Manage Help Guides</span>
+                        </a>
+                    </li>
+                @endif
+            </ul>
+        </div>
     </div>
     
     <!-- Version Display -->
