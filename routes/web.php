@@ -117,7 +117,20 @@ Route::middleware('auth')->group(function () {
             return redirect($redirectTo);
         }
 
-        return redirect()->back();
+        $storedRedirect = $request->session()->pull('academic_period_redirect_url');
+        if (
+            is_string($storedRedirect) &&
+            str_starts_with($storedRedirect, '/') &&
+            !in_array($storedRedirect, ['/select-academic-period', '/set-academic-period'], true)
+        ) {
+            return redirect($storedRedirect);
+        }
+
+        $defaultDashboard = Auth::user()?->isVPAA()
+            ? route('vpaa.dashboard', absolute: false)
+            : route('dashboard', absolute: false);
+
+        return redirect()->intended($defaultDashboard);
     })->name('set.academicPeriod');
 });
 

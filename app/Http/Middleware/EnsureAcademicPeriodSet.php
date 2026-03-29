@@ -27,6 +27,10 @@ class EnsureAcademicPeriodSet
                 return response()->json(['error' => 'Academic period not selected'], 403);
             }
 
+            if ($request->isMethod('get')) {
+                $request->session()->put('academic_period_redirect_url', $request->getRequestUri());
+            }
+
             return redirect()->route('select.academicPeriod');
         }
 
