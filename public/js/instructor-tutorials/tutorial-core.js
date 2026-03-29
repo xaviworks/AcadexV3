@@ -51,6 +51,13 @@
         getCurrentPageId: function() {
             const path = window.location.pathname;
 
+            // Prefer explicit page markers when available
+            const pageRoot = document.querySelector('[data-page]');
+            const pageKey = pageRoot ? pageRoot.getAttribute('data-page') : null;
+            if (pageKey === 'instructor.final-grades') {
+                return 'instructor-scores';
+            }
+
             // Map URL paths to tutorial IDs - Order matters (more specific first)
 
             // Course Outcome Attainment (check before general course outcomes)

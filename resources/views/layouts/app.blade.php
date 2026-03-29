@@ -66,7 +66,7 @@
     <!-- Tutorial System Scripts (Instructor, Admin, VPAA, Dean, Chairperson, and GE Coordinator users) -->
     @auth
         @if(Auth::user()->role === 0)
-            <script src="{{ asset('js/instructor-tutorial.js') }}" defer></script>
+            <script src="{{ asset('js/instructor-tutorial.js') }}?v={{ filemtime(public_path('js/instructor-tutorial.js')) }}" defer></script>
         @elseif(Auth::user()->role === 3)
             <script src="{{ asset('js/admin-tutorial.js') }}" defer></script>
         @elseif(Auth::user()->role === 5)

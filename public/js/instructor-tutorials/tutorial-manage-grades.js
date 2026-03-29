@@ -15,78 +15,56 @@
     // Register the manage grades tutorial
     window.InstructorTutorial.registerTutorial('instructor-manage-grades', {
         title: 'Manage Grades',
-        description: 'Learn how to enter and manage student grades for each term',
+        description: 'Learn how to select a subject, manage term grades, and save updates',
         steps: [
             {
-                target: 'select[name="subject_id"], .subject-selector',
-                title: 'Select Your Subject',
-                content: 'Start by selecting the subject you want to enter grades for. The page will load the grading interface for that subject.',
+                target: '#instructor-subject-selection, .subject-card, .stepper',
+                title: 'Start on Manage Grades',
+                content: 'This page lets you manage student grades by subject and term. If subject cards are shown, choose one to open the grading workspace.',
                 position: 'bottom'
             },
             {
-                target: '.term-stepper, .btn-group:has([data-term]), .nav-tabs',
-                title: 'Select Term',
-                content: 'Choose which term you want to enter grades for: Prelim, Midterm, Pre-Final, or Finals. Each term has its own set of grades.',
-                position: 'bottom',
-                optional: true
+                target: '.subject-card, .term-step[data-term]',
+                title: 'Choose Subject or Term',
+                content: 'From the subject cards, open the course you want. Inside the workspace, use the term stepper to switch grading periods.',
+                position: 'bottom'
             },
             {
-                target: '.grading-formula, .formula-display, .card:contains("Formula")',
-                title: 'Grading Formula',
-                content: 'This shows the grading formula configured for this subject (e.g., Written Work 30%, Performance Task 40%, Exam 30%). All grades must follow this formula.',
-                position: 'bottom',
-                optional: true
+                target: '#componentUsageSummary, .term-step[data-term]',
+                title: 'Review Activity Slot Status',
+                content: 'Check the activity slot summary for the selected term so you can see component limits, required items, and formula scope at a glance.',
+                position: 'bottom'
             },
             {
-                target: 'table thead, .grades-table thead',
+                target: 'button[data-bs-target="#addActivityModal"], .btn-success:contains("Add Activity")',
+                title: 'Add Activity (If Needed)',
+                content: 'Use Add Activity to create a missing assessment component before entering grades.',
+                position: 'left'
+            },
+            {
+                target: '#gradeForm table thead, .table thead',
                 title: 'Grades Table',
-                content: 'The table displays all students with columns for each grade component. You can enter scores directly in the table cells.',
-                position: 'bottom',
-                optional: true
+                content: 'The table shows students as rows and activities as columns. You can update item counts, outcome links, and student scores here.',
+                position: 'bottom'
             },
             {
-                target: 'input[type="number"], .grade-input, td input',
-                title: 'Enter Grades',
-                content: 'Click on any cell to enter a grade. The system auto-saves your entries and automatically calculates the final grade based on the formula.',
-                position: 'top',
-                optional: true,
-                requiresData: true
+                target: '#gradeForm .grade-input, input.grade-input',
+                title: 'Enter Student Scores',
+                content: 'Type each score directly in the input cells. The system recalculates term grades as scores are updated.',
+                position: 'top'
             },
             {
-                target: '.btn-primary:contains("Save"), button:contains("Save Grades")',
+                target: '#saveGradesBtn, button[type="submit"]:contains("Save Grades")',
                 title: 'Save Grades',
-                content: 'Although grades auto-save, you can manually save using this button. The system will validate all entries before saving.',
-                position: 'left',
-                optional: true
-            },
-            {
-                target: '.total-column, td:last-child, .final-grade',
-                title: 'Calculated Total',
-                content: 'This column shows the automatically calculated final grade based on the grading formula. It updates in real-time as you enter component scores.',
-                position: 'left',
-                optional: true,
-                requiresData: true
-            },
-            {
-                target: '.btn-info:contains("Import"), button:contains("Excel")',
-                title: 'Import from Excel',
-                content: 'For faster entry, you can import grades from an Excel file. Download the template first, fill it out, then upload it here.',
-                position: 'left',
-                optional: true
-            },
-            {
-                target: '.validation-error, .text-danger, .alert',
-                title: 'Validation Messages',
-                content: 'The system will show validation messages if you enter invalid grades (e.g., negative numbers, grades exceeding maximum). Fix these before proceeding.',
-                position: 'bottom',
-                optional: true
+                content: 'Click Save Grades to persist your updates for the selected subject and term.',
+                position: 'left'
             }
         ],
         tableDataCheck: {
-            selector: 'table tbody tr, .grades-table tbody tr',
-            emptySelectors: ['.dataTables_empty', '.no-data', 'td[colspan]'],
+            selector: '#gradeForm table tbody tr, table tbody tr',
+            emptySelectors: ['.dataTables_empty', '.no-data', 'td[colspan]', '.empty-state'],
             entityName: 'students',
-            addButtonSelector: null
+            addButtonSelector: 'button[data-bs-target="#addActivityModal"], .btn-success:contains("Add Activity")'
         }
     });
 })();

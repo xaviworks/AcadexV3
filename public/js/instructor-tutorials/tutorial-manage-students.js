@@ -18,63 +18,82 @@
         description: 'Learn how to view and manage students in your subjects',
         steps: [
             {
+                target: '#list-tab, button[data-bs-target="#list"]',
+                title: 'Manage Students Tab',
+                content: 'Use this tab to handle subject enrollment, update student details, and drop students from a selected course.',
+                position: 'bottom'
+            },
+            {
                 target: 'select[name="subject_id"], .subject-selector',
                 title: 'Select Your Subject',
                 content: 'First, select a subject from this dropdown to view its enrolled students. The page will update to show only students from the selected subject.',
                 position: 'bottom'
             },
             {
-                target: '.btn-success:contains("Add"), button:contains("Add Student")',
-                title: 'Add Students',
-                content: 'Click this button to add new students to your subject. You can add students individually or import them from an Excel file.',
+                target: 'button[data-bs-target="#enrollStudentModal"], .btn-success:contains("Enroll Student")',
+                title: 'Enroll Student',
+                content: 'After selecting a subject, use this button to enroll a student manually. It opens the enrollment form modal.',
                 position: 'left',
                 optional: true
             },
             {
-                target: '#studentsTable thead, .table thead, table tr:first-child',
+                target: '#list .table thead, .table thead',
                 title: 'Students Table',
-                content: 'This table displays all students enrolled in the selected subject with their Student ID, Name, Course/Year/Section, and available actions.',
+                content: 'This table lists enrolled students for the selected subject, including year level, status, and available actions.',
                 position: 'bottom',
                 optional: true
             },
             {
-                target: '.dataTables_filter input, input[type="search"]',
-                title: 'Search Students',
-                content: 'Use the search box to quickly find students by name, student ID, or any visible field. Results filter in real-time as you type.',
+                target: 'button[data-bs-target="#manageStudentModal"], .btn-success.btn-sm:contains("Edit")',
+                title: 'Edit Student',
+                content: 'Use Edit to update student details such as first name, last name, year level, and enrollment status for this subject.',
+                position: 'left',
+                optional: true,
+                requiresData: true
+            },
+            {
+                target: 'button[data-bs-target="#confirmDropModal"], .btn-danger.btn-sm:contains("Drop")',
+                title: 'Drop Student',
+                content: 'Use Drop to remove a student from the selected subject. This does not delete the student account from the system.',
+                position: 'left',
+                optional: true,
+                requiresData: true
+            },
+            {
+                target: '#import-tab, button[data-bs-target="#import"]',
+                title: 'Import Students Tab',
+                content: 'Switch to this tab when you want to upload student lists from Excel and import multiple students at once.',
+                position: 'bottom'
+            },
+            {
+                target: '#uploadForm input[type="file"], #uploadForm button[type="submit"]',
+                title: 'Upload Excel File',
+                content: 'Choose a valid Excel file, then click Upload Excel to load student records for review before final import.',
                 position: 'left',
                 optional: true
             },
             {
-                target: '.btn-info:contains("View"), .action-btn',
-                title: 'View Student Details',
-                content: 'Click the eye icon to view detailed information about a student, including their grades across all terms.',
-                position: 'left',
-                optional: true,
-                requiresData: true
+                target: '#crossCheckBtn, #compareSubjectSelect',
+                title: 'Cross Check Data',
+                content: 'Use Compare with Course and Cross Check Data to identify which uploaded students are already enrolled and which are new.',
+                position: 'top',
+                optional: true
             },
             {
-                target: '.btn-danger:contains("Remove"), button[onclick*="remove"]',
-                title: 'Remove Student',
-                content: 'Use the trash icon to remove a student from this subject. Note: This only removes them from this specific subject, not from the system.',
-                position: 'left',
-                optional: true,
-                requiresData: true
-            },
-            {
-                target: '.badge:contains("Prelim"), .badge:contains("Midterm"), .term-badge',
-                title: 'Term Grade Status',
-                content: 'Color-coded badges show the status of grades for each term: Green = Completed, Yellow = In Progress, Gray = Not Started.',
-                position: 'left',
+                target: '#importBtn, #selectedCount',
+                title: 'Import Selected Students',
+                content: 'Select students from the uploaded list, then click Import Selected to confirm and add them to your target subject.',
+                position: 'top',
                 optional: true,
                 requiresData: true
             }
         ],
         // Config for checking if students table has data
         tableDataCheck: {
-            selector: '#studentsTable tbody tr, .table tbody tr',
+            selector: '#list .table tbody tr, .table tbody tr',
             emptySelectors: ['.dataTables_empty', 'td[colspan]'],
             entityName: 'students',
-            addButtonSelector: '.btn-success:contains("Add"), button:contains("Add Student")'
+            addButtonSelector: '.btn-success:contains("Enroll Student"), button[data-bs-target="#enrollStudentModal"]'
         }
     });
 })();

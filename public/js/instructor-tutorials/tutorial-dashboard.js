@@ -53,6 +53,13 @@
                 content: 'Visual charts showing grade distribution and term completion progress for each of your subjects. Use these to track student performance trends.',
                 position: 'top',
                 optional: true
+            },
+            {
+                target: '.card:has(.bi-graph-up-arrow), .col-lg-5 .card',
+                title: 'Grading Progress',
+                content: 'This section tracks grading completion for each term. Use it to see how many grades have already been submitted and which term still needs attention.',
+                position: 'right',
+                optional: true
             }
         ]
     });

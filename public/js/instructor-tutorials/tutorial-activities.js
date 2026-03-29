@@ -15,132 +15,107 @@
     // Register the activities tutorial
     window.InstructorTutorial.registerTutorial('instructor-activities', {
         title: 'Manage Activities',
-        description: 'Learn how to create and manage graded activities for your subjects',
+        description: 'Learn how to manage activity setup, filtering, and formula alignment',
         steps: [
             {
-                target: 'select[name="subject_id"], .subject-selector',
-                title: 'Select Your Subject',
-                content: 'Choose the subject you want to create activities for. Each subject can have different activities and assessment types.',
+                target: '#activities-tab, button[data-bs-target="#activities"]',
+                title: 'My Activities Tab',
+                content: 'Use this tab to manage your class activities, including filtering, creating new activities, and reviewing current records.',
                 position: 'bottom'
             },
             {
-                target: '.btn-success:contains("Add"), .btn-primary:contains("Create"), button:contains("New Activity")',
+                target: '#activityFilters select[name="subject_id"], select[name="subject_id"]',
+                title: 'Select Course',
+                content: 'Choose the course you want to manage. Activity records and formula alignment are based on this selected subject.',
+                position: 'bottom'
+            },
+            {
+                target: '#activityFilters select[name="term"], select[name="term"]',
+                title: 'Filter by Period',
+                content: 'Use this filter to focus on one grading period or view all periods.',
+                position: 'bottom',
+                
+            },
+            {
+                target: '#activityFilters .badge, .badge.bg-success, .badge.bg-warning',
+                title: 'Alignment Status',
+                content: 'This badge shows whether your current activity setup is aligned with the grading formula for the selected subject and term.',
+                position: 'bottom',
+                
+            },
+            {
+                target: 'button[data-bs-target="#createActivityModal"], .btn-success:contains("New Activity")',
                 title: 'Create New Activity',
-                content: 'Click this button to create a new graded activity. You can add quizzes, assignments, projects, exams, and more.',
-                position: 'left',
-                optional: true
+                content: 'Click this button to open the create activity modal and add a new assessment component.',
+                position: 'left'
             },
             {
-                target: '.term-selector, select[name="term"], .btn-group:has([data-term])',
-                title: 'Filter by Term',
-                content: 'Use this to filter activities by term (Prelim, Midterm, Pre-Final, Finals). You can organize activities by when they occur in the semester.',
-                position: 'bottom',
-                optional: true
+                target: '#alignment-tab, button[data-bs-target="#alignment"]',
+                title: 'Formula Alignment Tab',
+                content: 'Switch here to review activity distribution and realign components based on the formula structure.',
+                position: 'bottom'
             },
             {
-                target: '#activitiesTable thead, table thead',
-                title: 'Activities Table',
-                content: 'This table shows all your activities with their Title, Type (Quiz, Assignment, etc.), Term, Total Points, and Status.',
-                position: 'bottom',
-                optional: true
-            },
-            {
-                target: '.activity-type-badge, .badge',
-                title: 'Activity Types',
-                content: 'Each activity is color-coded by type: Written Work (blue), Performance Task (purple), Exam (red), and others. This helps you track assessment balance.',
-                position: 'left',
-                optional: true,
-                requiresData: true
-            },
-            {
-                target: '.btn-primary:contains("View"), .btn-info',
-                title: 'View & Enter Scores',
-                content: 'Click to view activity details and enter student scores. You can grade students and see completion statistics.',
-                position: 'left',
-                optional: true,
-                requiresData: true
-            },
-            {
-                target: '.btn-warning:contains("Edit"), button[onclick*="edit"]',
-                title: 'Edit Activity',
-                content: 'Modify activity details like title, description, total points, or attached course outcomes. Be careful when editing after students have been graded.',
-                position: 'left',
-                optional: true,
-                requiresData: true
-            },
-            {
-                target: '.btn-danger:contains("Delete"), button[onclick*="delete"]',
-                title: 'Delete Activity',
-                content: 'Remove an activity from your subject. Warning: This will delete all associated student scores. Use with caution!',
-                position: 'left',
-                optional: true,
-                requiresData: true
-            },
-            {
-                target: '.progress, .completion-bar',
-                title: 'Grading Progress',
-                content: 'Progress bars show how many students have been graded for each activity. Track your grading workflow at a glance.',
-                position: 'left',
-                optional: true,
-                requiresData: true
+                target: '#formula-tab, button[data-bs-target="#formula"]',
+                title: 'Formula Info Tab',
+                content: 'Open this tab to view formula details and component weight guidance while planning activities.',
+                position: 'bottom'
             }
         ],
         tableDataCheck: {
             selector: '#activitiesTable tbody tr, .table tbody tr',
-            emptySelectors: ['.dataTables_empty', '.no-data', 'td[colspan]'],
+            emptySelectors: ['.dataTables_empty', '.no-data', 'td[colspan]', '.empty-state', '.card .card-body .text-muted'],
             entityName: 'activities',
-            addButtonSelector: '.btn-success:contains("Add"), .btn-primary:contains("Create")'
+            addButtonSelector: '.btn-success:contains("Save Activity"), .btn-success:contains("New Activity"), button[data-bs-target="#createActivityModal"]'
         }
     });
 
     // Also register the create activity tutorial
     window.InstructorTutorial.registerTutorial('instructor-activities-create', {
         title: 'Create Activity',
-        description: 'Learn how to create a new graded activity',
+        description: 'Learn the complete activity page workflow without skipped steps',
         steps: [
             {
-                target: 'input[name="title"], #activity-title',
-                title: 'Activity Title',
-                content: 'Enter a descriptive title for your activity (e.g., "Quiz 1 - Cell Biology", "Midterm Exam").',
+                target: '#activities-tab, button[data-bs-target="#activities"]',
+                title: 'My Activities Tab',
+                content: 'Start here to manage your activities list, create new entries, and monitor setup for each course.',
                 position: 'bottom'
             },
             {
-                target: 'select[name="type"], #activity-type',
-                title: 'Activity Type',
-                content: 'Select the type of activity: Written Work (quizzes, exercises), Performance Task (projects, labs), or Exam (major assessments).',
+                target: '#activityFilters select[name="subject_id"], select[name="subject_id"]',
+                title: 'Select Course',
+                content: 'Choose your target course before creating or reviewing activities.',
                 position: 'bottom'
             },
             {
-                target: 'select[name="term"], #activity-term',
-                title: 'Select Term',
-                content: 'Choose which term this activity belongs to. This helps organize activities throughout the semester.',
+                target: '#activityFilters select[name="term"], select[name="term"]',
+                title: 'Period Filter',
+                content: 'Filter the list to one period or keep all periods visible while planning assessments.',
                 position: 'bottom'
             },
             {
-                target: 'input[name="total_points"], #total-points',
-                title: 'Total Points',
-                content: 'Set the maximum points/score for this activity. Student scores will be entered out of this total.',
+                target: '#activityFilters .badge, .badge.bg-success, .badge.bg-warning',
+                title: 'Check Alignment Status',
+                content: 'Use this status indicator to quickly verify whether your setup needs formula alignment updates.',
                 position: 'bottom'
             },
             {
-                target: 'textarea[name="description"], #activity-description',
-                title: 'Description (Optional)',
-                content: 'Add any additional details about the activity - instructions, topics covered, special requirements, etc.',
-                position: 'bottom',
-                optional: true
-            },
-            {
-                target: 'select[name="course_outcomes[]"], .course-outcomes-select',
-                title: 'Link Course Outcomes',
-                content: 'Select which course outcomes this activity assesses. This helps track student progress on learning objectives.',
-                position: 'bottom',
-                optional: true
-            },
-            {
-                target: '.btn-primary:contains("Create"), button[type="submit"]',
-                title: 'Create Activity',
-                content: 'Click to create the activity. You can then start entering student scores for this activity.',
+                target: 'button[data-bs-target="#createActivityModal"], .btn-success:contains("New Activity")',
+                title: 'Open Create Activity Modal',
+                content: 'Click this to open the form for adding a new activity to the selected course.',
                 position: 'left'
+            },
+            {
+                target: '#alignment-tab, button[data-bs-target="#alignment"]',
+                title: 'Formula Alignment Tab',
+                content: 'Switch to this tab to inspect component counts by term and realign when needed.',
+                position: 'bottom'
+            },
+            {
+                target: '#formula-tab, button[data-bs-target="#formula"]',
+                title: 'Formula Info Tab',
+                content: 'Review formula structure details here to guide how you distribute activities.',
+                position: 'bottom'
             }
         ]
     });

@@ -108,9 +108,9 @@
         <div class="col-md-3">
             <form method="GET" action="{{ route('instructor.activities.create') }}">
                 <input type="hidden" name="subject_id" value="{{ optional($selectedSubject)->id }}">
-                <label class="form-label fw-medium mb-2">Filter by Term</label>
+                <label class="form-label fw-medium mb-2">Filter by Period</label>
                 <select name="term" class="form-select" onchange="this.form.submit()">
-                    <option value="">All Terms</option>
+                    <option value="">All Periods</option>
                     @foreach ($termLabels as $key => $label)
                         <option value="{{ $key }}" {{ $selectedTerm === $key ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
@@ -184,7 +184,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <p class="text-muted mb-0">
                     @if ($selectedSubject)
-                        {{ $selectedSubject->subject_code }} • {{ $selectedTerm ? $termLabels[$selectedTerm] : 'All Terms' }}
+                        {{ $selectedSubject->subject_code }} • {{ $selectedTerm ? $termLabels[$selectedTerm] : 'All Periods' }}
                     @else
                         Select a subject to view activities
                     @endif
@@ -208,7 +208,7 @@
                                     <th class="text-center" style="width: 60px;">#</th>
                                     <th>Title</th>
                                     <th>Component</th>
-                                    <th class="text-center">Term</th>
+                                    <th class="text-center">Period</th>
                                     <th class="text-center">Items</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
@@ -283,7 +283,7 @@
         {{-- Tab 2: Formula Alignment --}}
         <div class="tab-pane fade" id="alignment" role="tabpanel" aria-labelledby="alignment-tab">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <p class="text-muted mb-0">Track assessment distribution across all terms</p>
+                <p class="text-muted mb-0">Track assessment distribution across all periods</p>
                 @if ($selectedSubject)
                     <form method="POST" action="{{ route('instructor.activities.realign') }}" class="d-inline">
                         @csrf
@@ -309,7 +309,7 @@
                             <tr>
                                 <th>Component</th>
                                 <th class="text-center">Weight</th>
-                                <th class="text-center">Max/Term</th>
+                                <th class="text-center">Max/Period</th>
                                 @foreach ($termLabels as $key => $label)
                                     <th class="text-center">{{ $label }}</th>
                                 @endforeach
@@ -574,16 +574,16 @@
               
               <div class="col-md-6">
                 <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
-                  <i class="bi bi-calendar3 me-1"></i>Term
+                                    <i class="bi bi-calendar3 me-1"></i>Period
                 </label>
                 <select name="term" class="form-select shadow-sm" required style="border: 2px solid #e9ecef;">
-                  <option value="">Select Term</option>
+                                    <option value="">Select Period</option>
                   @foreach ($termLabels as $key => $label)
                     <option value="{{ $key }}" {{ $selectedTerm === $key ? 'selected' : '' }}>{{ $label }}</option>
                   @endforeach
                 </select>
                 <div class="invalid-feedback">
-                  <i class="bi bi-exclamation-circle me-1"></i>Please select a grading term.
+                                    <i class="bi bi-exclamation-circle me-1"></i>Please select a grading period.
                 </div>
               </div>
               
@@ -616,7 +616,7 @@
                 </select>
                                 <div class="small text-muted d-none mt-2" data-component-notice></div>
                                 <div class="alert alert-warning d-none mt-2 mb-0 py-2" data-component-empty>
-                                    All components for this term are at capacity. Please manage activities to free up slots.
+                                    All components for this period are at capacity. Please manage activities to free up slots.
                                 </div>
                 <div class="invalid-feedback">
                   <i class="bi bi-exclamation-circle me-1"></i>Select the activity component type.

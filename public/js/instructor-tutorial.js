@@ -41,6 +41,27 @@
     }
 
     /**
+     * Resolve cache-busting version from current loader script src
+     */
+    function getScriptVersion() {
+        try {
+            const scripts = document.querySelectorAll('script[src*="instructor-tutorial.js"]');
+            for (const script of scripts) {
+                const src = script.getAttribute('src');
+                if (!src) continue;
+                const url = new URL(src, window.location.origin);
+                const version = url.searchParams.get('v');
+                if (version) return version;
+            }
+        } catch (e) {
+            // Fallback below
+        }
+
+        // Fallback ensures module updates are still fetched when no version query is present
+        return String(Date.now());
+    }
+
+    /**
      * Load a script and return a promise
      */
     function loadScript(src) {
@@ -69,19 +90,23 @@
     function loadTutorialSystem() {
         const basePath = getScriptBasePath();
         const tutorialsPath = basePath + 'instructor-tutorials/';
+        const version = getScriptVersion() + '-' + Date.now();
+        const withVersion = function(fileName) {
+            return tutorialsPath + fileName + '?v=' + encodeURIComponent(version);
+        };
 
         // Load core first, then all tutorial modules
-        loadScript(tutorialsPath + 'tutorial-core.js')
+        loadScript(withVersion('tutorial-core.js'))
             .then(function() {
                 // Load all tutorial modules in parallel
                 return Promise.all([
-                    loadScript(tutorialsPath + 'tutorial-dashboard.js'),
-                    loadScript(tutorialsPath + 'tutorial-manage-students.js'),
-                    loadScript(tutorialsPath + 'tutorial-manage-grades.js'),
-                    loadScript(tutorialsPath + 'tutorial-activities.js'),
-                    loadScript(tutorialsPath + 'tutorial-course-outcomes.js'),
-                    loadScript(tutorialsPath + 'tutorial-course-outcome-attainment.js'),
-                    loadScript(tutorialsPath + 'tutorial-scores.js')
+                    loadScript(withVersion('tutorial-dashboard.js')),
+                    loadScript(withVersion('tutorial-manage-students.js')),
+                    loadScript(withVersion('tutorial-manage-grades.js')),
+                    loadScript(withVersion('tutorial-activities.js')),
+                    loadScript(withVersion('tutorial-course-outcomes.js')),
+                    loadScript(withVersion('tutorial-course-outcome-attainment.js')),
+                    loadScript(withVersion('tutorial-scores.js'))
                 ]);
             })
             .then(function() {
