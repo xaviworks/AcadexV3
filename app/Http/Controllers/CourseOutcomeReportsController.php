@@ -22,8 +22,8 @@ class CourseOutcomeReportsController extends Controller
     // VPAA: Per-course CO summary - can view any course
     public function vpaaCourse(Request $request, CourseOutcomeReportingService $service)
     {
-        $periodId = session('active_academic_period_id');
-        $period = $periodId ? AcademicPeriod::find($periodId) : null;
+        $periodId = $this->resolveRequiredAcademicPeriodId();
+        $period = AcademicPeriod::find($periodId);
         $courseId = (int)$request->input('course_id', 0);
 
         if (!$courseId) {
@@ -45,7 +45,7 @@ class CourseOutcomeReportsController extends Controller
         // Get all subjects for this course in the active period
         $subjects = Subject::where('course_id', $courseId)
             ->where('is_deleted', false)
-            ->when($periodId, fn($q) => $q->where('academic_period_id', $periodId))
+            ->where('academic_period_id', $periodId)
             ->orderBy('subject_code')
             ->get();
 
@@ -69,8 +69,8 @@ class CourseOutcomeReportsController extends Controller
     // VPAA: Per-student CO report - can view any subject/student
     public function vpaaStudent(Request $request, CourseOutcomeReportingService $service)
     {
-        $periodId = session('active_academic_period_id');
-        $period = $periodId ? AcademicPeriod::find($periodId) : null;
+        $periodId = $this->resolveRequiredAcademicPeriodId();
+        $period = AcademicPeriod::find($periodId);
 
         $subjectId = (int)$request->input('subject_id', 0);
         $studentId = (int)$request->input('student_id', 0);
@@ -82,6 +82,11 @@ class CourseOutcomeReportsController extends Controller
             $enrolledSubjects = collect();
             $studentSuggestions = Student::with('course')
                 ->where('students.is_deleted', false)
+                ->whereHas('subjects', function ($q) use ($periodId) {
+                    $q->where('subjects.is_deleted', false)
+                        ->where('student_subjects.is_deleted', false)
+                        ->where('subjects.academic_period_id', $periodId);
+                })
                 ->orderBy('students.last_name')
                 ->orderBy('students.first_name')
                 ->limit(40)
@@ -97,11 +102,19 @@ class CourseOutcomeReportsController extends Controller
             if ($studentQuery !== '') {
                 $searchTerm = '%' . $studentQuery . '%';
                 $searchedStudents = Student::with('course')
-                    ->where('students.is_deleted', false);
-
-                $this->applyStudentNameSearch($searchedStudents, $searchTerm);
-
-                $searchedStudents = $searchedStudents
+                    ->where('students.is_deleted', false)
+                    ->where(function ($q) use ($searchTerm) {
+                        $q->where('students.first_name', 'like', $searchTerm)
+                            ->orWhere('students.last_name', 'like', $searchTerm)
+                            ->orWhere('students.middle_name', 'like', $searchTerm)
+                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, '')) like ?", [$searchTerm])
+                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name) like ?", [$searchTerm]);
+                    })
+                    ->whereHas('subjects', function ($q) use ($periodId) {
+                        $q->where('subjects.is_deleted', false)
+                            ->where('student_subjects.is_deleted', false)
+                            ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
+                    })
                     ->orderBy('students.last_name')
                     ->orderBy('students.first_name')
                     ->limit(25)
@@ -112,11 +125,16 @@ class CourseOutcomeReportsController extends Controller
                 $selectedStudent = Student::with('course')
                     ->where('students.id', $studentId)
                     ->where('students.is_deleted', false)
+                    ->whereHas('subjects', function ($q) use ($periodId) {
+                        $q->where('subjects.is_deleted', false)
+                            ->where('student_subjects.is_deleted', false)
+                            ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
+                    })
                     ->firstOrFail();
 
                 $enrolledSubjects = Subject::with('course')
                     ->where('subjects.is_deleted', false)
-                    ->when($periodId, fn($q) => $q->where('subjects.academic_period_id', $periodId))
+                    ->where('subjects.academic_period_id', $periodId)
                     ->whereHas('students', function ($q) use ($selectedStudent) {
                         $q->where('students.id', $selectedStudent->id)
                             ->where('student_subjects.is_deleted', false);
@@ -138,6 +156,7 @@ class CourseOutcomeReportsController extends Controller
 
         $subject = Subject::with(['course','academicPeriod'])
             ->where('id', $subjectId)
+            ->where('academic_period_id', $periodId)
             ->where('is_deleted', false)
             ->firstOrFail();
             
@@ -509,8 +528,8 @@ class CourseOutcomeReportsController extends Controller
     // Dean: Per-course CO summary - their department only
     public function deanCourse(Request $request, CourseOutcomeReportingService $service)
     {
-        $periodId = session('active_academic_period_id');
-        $period = $periodId ? AcademicPeriod::find($periodId) : null;
+        $periodId = $this->resolveRequiredAcademicPeriodId();
+        $period = AcademicPeriod::find($periodId);
         $courseId = (int)$request->input('course_id', 0);
         $user = Auth::user();
         $departmentId = $user?->department_id;
@@ -541,7 +560,7 @@ class CourseOutcomeReportsController extends Controller
         // Get all subjects for this course in the active period
         $subjects = Subject::where('course_id', $courseId)
             ->where('is_deleted', false)
-            ->when($periodId, fn($q) => $q->where('academic_period_id', $periodId))
+            ->where('academic_period_id', $periodId)
             ->orderBy('subject_code')
             ->get();
 
@@ -565,8 +584,8 @@ class CourseOutcomeReportsController extends Controller
     // Dean: Per-student CO report - their department only
     public function deanStudent(Request $request, CourseOutcomeReportingService $service)
     {
-        $periodId = session('active_academic_period_id');
-        $period = $periodId ? AcademicPeriod::find($periodId) : null;
+        $periodId = $this->resolveRequiredAcademicPeriodId();
+        $period = AcademicPeriod::find($periodId);
 
         $subjectId = (int)$request->input('subject_id', 0);
         $studentId = (int)$request->input('student_id', 0);
@@ -588,7 +607,7 @@ class CourseOutcomeReportsController extends Controller
                     $q->where('subjects.department_id', $departmentId)
                         ->where('subjects.is_deleted', false)
                         ->where('student_subjects.is_deleted', false)
-                        ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
+                        ->where('subjects.academic_period_id', $periodId);
                 })
                 ->orderBy('students.last_name')
                 ->orderBy('students.first_name')
@@ -614,7 +633,7 @@ class CourseOutcomeReportsController extends Controller
                         $q->where('subjects.department_id', $departmentId)
                             ->where('subjects.is_deleted', false)
                             ->where('student_subjects.is_deleted', false)
-                            ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
+                            ->where('subjects.academic_period_id', $periodId);
                     })
                     ->orderBy('students.last_name')
                     ->orderBy('students.first_name')
@@ -630,14 +649,14 @@ class CourseOutcomeReportsController extends Controller
                         $q->where('subjects.department_id', $departmentId)
                             ->where('subjects.is_deleted', false)
                             ->where('student_subjects.is_deleted', false)
-                            ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
+                            ->where('subjects.academic_period_id', $periodId);
                     })
                     ->firstOrFail();
 
                 $enrolledSubjects = Subject::with('course')
                     ->where('subjects.department_id', $departmentId)
                     ->where('subjects.is_deleted', false)
-                    ->when($periodId, fn($q) => $q->where('subjects.academic_period_id', $periodId))
+                    ->where('subjects.academic_period_id', $periodId)
                     ->whereHas('students', function ($q) use ($selectedStudent) {
                         $q->where('students.id', $selectedStudent->id)
                             ->where('student_subjects.is_deleted', false);
@@ -661,6 +680,7 @@ class CourseOutcomeReportsController extends Controller
         $subject = Subject::with(['course','academicPeriod'])
             ->where('department_id', $departmentId)
             ->where('id', $subjectId)
+            ->where('academic_period_id', $periodId)
             ->where('is_deleted', false)
             ->firstOrFail();
             
@@ -677,31 +697,5 @@ class CourseOutcomeReportsController extends Controller
             'selectedSubject' => $subject,
             'student' => $student,
         ]));
-    }
-
-    private function applyStudentNameSearch(Builder $query, string $searchTerm): void
-    {
-        $query->where(function (Builder $builder) use ($searchTerm) {
-            $builder->where('students.first_name', 'like', $searchTerm)
-                ->orWhere('students.last_name', 'like', $searchTerm)
-                ->orWhere('students.middle_name', 'like', $searchTerm)
-                ->orWhereRaw($this->studentFormattedNameExpression(true) . ' like ?', [$searchTerm])
-                ->orWhereRaw($this->studentFormattedNameExpression(false) . ' like ?', [$searchTerm]);
-        });
-    }
-
-    private function studentFormattedNameExpression(bool $includeMiddleName): string
-    {
-        $driver = Student::query()->getConnection()->getDriverName();
-
-        if (in_array($driver, ['sqlite', 'pgsql'], true)) {
-            return $includeMiddleName
-                ? "students.last_name || ', ' || students.first_name || ' ' || COALESCE(students.middle_name, '')"
-                : "students.last_name || ', ' || students.first_name";
-        }
-
-        return $includeMiddleName
-            ? "CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, ''))"
-            : "CONCAT(students.last_name, ', ', students.first_name)";
     }
 }

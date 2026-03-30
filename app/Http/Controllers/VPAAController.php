@@ -44,8 +44,8 @@ class VPAAController extends Controller
         // Department-first flow: if no department selected, show department cards; otherwise show subjects for that department
         $departmentId = $request->input('department_id');
 
-        $academicPeriodId = session('active_academic_period_id');
-        $period = $academicPeriodId ? \App\Models\AcademicPeriod::find($academicPeriodId) : null;
+        $academicPeriodId = $this->resolveRequiredAcademicPeriodId();
+        $period = \App\Models\AcademicPeriod::find($academicPeriodId);
 
         if (!$departmentId) {
             // Show department wildcards with chairperson and GE coordinator (optimized with eager loading)
@@ -79,9 +79,7 @@ class VPAAController extends Controller
             ->join('courses', 'courses.id', '=', 'subjects.course_id')
             ->where('subjects.is_deleted', false)
             ->where('courses.department_id', $departmentId)
-            ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
-                $q->where('subjects.academic_period_id', $academicPeriodId);
-            })
+            ->where('subjects.academic_period_id', $academicPeriodId)
             ->select('subjects.*')
             ->orderBy('subjects.subject_code')
             ->get();
@@ -119,6 +117,7 @@ class VPAAController extends Controller
             'coSummaryStats',
             'termCoSummaryStats',
             'targetLevelThresholds',
+            'coThresholdPreviewData',
         ]));
 
         return view('vpaa.scores.course-outcome-results', $viewData);
@@ -131,7 +130,7 @@ class VPAAController extends Controller
      */
     public function index()
     {
-        $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+        $academicPeriodId = $this->resolveRequiredAcademicPeriodId();
 
         $departmentsCount = Department::where('is_deleted', false)
             ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
@@ -182,7 +181,7 @@ class VPAAController extends Controller
      */
     public function pollData(): \Illuminate\Http\JsonResponse
     {
-        $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+        $academicPeriodId = $this->resolveRequiredAcademicPeriodId();
 
         $departmentsCount = Department::where('is_deleted', false)
             ->when($academicPeriodId, function ($q) use ($academicPeriodId) {
@@ -251,23 +250,28 @@ class VPAAController extends Controller
         return null;
     }
 
+    private function resolveRequiredAcademicPeriodId(): int
+    {
+        $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+
+        if ($academicPeriodId) {
+            return $academicPeriodId;
+        }
+
+        abort(403, 'No active academic period is available.');
+    }
+
     // ============================
     // View All Departments
     // ============================
 
     public function viewDepartments()
     {
+        $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+
         // Get all non-deleted departments with optimized eager loading
         $departments = Department::where('is_deleted', false)
             ->select('id', 'department_code', 'department_description')
-            ->withCount([
-                'users as instructor_count' => function ($query) {
-                    $query->where('role', 0)->where('is_active', true);
-                },
-                'students as student_count' => function ($query) {
-                    $query->where('is_deleted', false);
-                }
-            ])
             ->with([
                 'users' => function ($query) {
                     $query->whereIn('role', [1, 4]) // Chairperson and GE Coordinator
@@ -277,8 +281,34 @@ class VPAAController extends Controller
             ->orderBy('department_description')
             ->get();
 
+        $studentCountsByDepartment = collect();
+        $instructorCountsByDepartment = collect();
+
+        if ($academicPeriodId) {
+            $studentCountsByDepartment = Student::where('is_deleted', false)
+                ->where('academic_period_id', $academicPeriodId)
+                ->whereNotNull('department_id')
+                ->selectRaw('department_id, COUNT(*) as total')
+                ->groupBy('department_id')
+                ->pluck('total', 'department_id');
+
+            $instructorCountQuery = User::query()
+                ->selectRaw('users.department_id, COUNT(DISTINCT users.id) as total')
+                ->where('users.role', 0)
+                ->where('users.is_active', true)
+                ->whereNotNull('users.department_id');
+
+            $this->applyTeachingScope($instructorCountQuery, $academicPeriodId);
+
+            $instructorCountsByDepartment = $instructorCountQuery
+                ->groupBy('users.department_id')
+                ->pluck('total', 'users.department_id');
+        }
+
         // Map chairperson and GE coordinator from the loaded users
-        $departments->each(function ($department) {
+        $departments->each(function ($department) use ($studentCountsByDepartment, $instructorCountsByDepartment) {
+            $department->student_count = (int) ($studentCountsByDepartment[$department->id] ?? 0);
+            $department->instructor_count = (int) ($instructorCountsByDepartment[$department->id] ?? 0);
             $department->chairperson = $department->users->firstWhere('role', 1);
             $department->gecoordinator = $department->users->firstWhere('role', 4);
             // Remove the users collection to avoid passing unnecessary data to the view
@@ -375,6 +405,8 @@ class VPAAController extends Controller
 
     public function viewInstructors(Request $request, $departmentId = null)
     {
+        $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+
         // Check if department_id is passed as a URL parameter or as a request parameter
         $departmentId = $departmentId ?: $request->input('department_id');
         
@@ -390,6 +422,8 @@ class VPAAController extends Controller
         if ($departmentId) {
             $query->where('department_id', $departmentId);
         }
+
+        $this->applyTeachingScope($query, $academicPeriodId, $departmentId ? (int) $departmentId : null);
         
         $instructors = $query->get();
 
@@ -462,6 +496,8 @@ class VPAAController extends Controller
 
     public function viewStudents(Request $request)
     {
+        $academicPeriodId = $this->resolveActiveAcademicPeriodId();
+
         $departments = Department::select('id', 'department_code', 'department_description')
             ->where('is_deleted', false)
             ->orderBy('department_description')
@@ -475,6 +511,12 @@ class VPAAController extends Controller
                 ->where('is_deleted', false)
                 ->select('id', 'first_name', 'middle_name', 'last_name', 'department_id', 'course_id', 'year_level')
                 ->orderBy('last_name');
+
+            if ($academicPeriodId) {
+                $query->where('academic_period_id', $academicPeriodId);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
 
             if ($selectedCourseId) {
                 $query->where('course_id', $selectedCourseId);
@@ -495,6 +537,40 @@ class VPAAController extends Controller
 
         // Show department wildcards first
         return view('vpaa.students-departments', compact('departments'));
+    }
+
+    private function applyTeachingScope($query, ?int $academicPeriodId, ?int $departmentId = null): void
+    {
+        if (! $academicPeriodId) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $query->where(function ($teachingQuery) use ($academicPeriodId, $departmentId) {
+            $teachingQuery->whereExists(function ($subQuery) use ($academicPeriodId, $departmentId) {
+                $subQuery->select(DB::raw(1))
+                    ->from('subjects')
+                    ->whereColumn('subjects.instructor_id', 'users.id')
+                    ->where('subjects.academic_period_id', $academicPeriodId)
+                    ->where('subjects.is_deleted', false);
+
+                if ($departmentId) {
+                    $subQuery->where('subjects.department_id', $departmentId);
+                }
+            })->orWhereExists(function ($subQuery) use ($academicPeriodId, $departmentId) {
+                $subQuery->select(DB::raw(1))
+                    ->from('instructor_subject')
+                    ->join('subjects', 'subjects.id', '=', 'instructor_subject.subject_id')
+                    ->whereColumn('instructor_subject.instructor_id', 'users.id')
+                    ->where('subjects.academic_period_id', $academicPeriodId)
+                    ->where('subjects.is_deleted', false);
+
+                if ($departmentId) {
+                    $subQuery->where('subjects.department_id', $departmentId);
+                }
+            });
+        });
     }
 // (Stray code removed)
 }

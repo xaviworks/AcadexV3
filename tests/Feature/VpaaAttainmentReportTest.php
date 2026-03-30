@@ -21,6 +21,12 @@ class VpaaAttainmentReportTest extends TestCase
             'role' => 5,
         ]);
 
+        $period = AcademicPeriod::create([
+            'academic_year' => '2028-2029',
+            'semester' => '1st',
+            'is_deleted' => false,
+        ]);
+
         $department = Department::create([
             'department_code' => 'BSIT',
             'department_description' => 'BSIT Department',
@@ -28,6 +34,7 @@ class VpaaAttainmentReportTest extends TestCase
         ]);
 
         $response = $this->actingAs($vpaa)
+            ->withSession(['active_academic_period_id' => $period->id])
             ->get(route('vpaa.reports.attainment'));
 
         $response->assertOk();

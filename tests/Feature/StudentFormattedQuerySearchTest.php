@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AcademicPeriod;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\Student;
@@ -17,7 +18,7 @@ class StudentFormattedQuerySearchTest extends TestCase
 
     public function test_vpaa_student_search_matches_formatted_last_first_middle_query(): void
     {
-        [$department, $course, $student] = $this->seedStudentWithSubject();
+        [$department, $course, $student, $period] = $this->seedStudentWithSubject();
 
         /** @var User $vpaa */
         $vpaa = User::factory()->create([
@@ -28,6 +29,7 @@ class StudentFormattedQuerySearchTest extends TestCase
 
         $response = $this
             ->actingAs($vpaa)
+            ->withSession(['active_academic_period_id' => $period->id])
             ->get(route('vpaa.reports.co-student', [
                 'student_query' => 'Aquino, Carlos Torres',
             ]));
@@ -40,7 +42,7 @@ class StudentFormattedQuerySearchTest extends TestCase
 
     public function test_dean_student_search_matches_formatted_last_first_middle_query(): void
     {
-        [$department, $course, $student] = $this->seedStudentWithSubject();
+        [$department, $course, $student, $period] = $this->seedStudentWithSubject();
 
         /** @var User $dean */
         $dean = User::factory()->create([
@@ -51,6 +53,7 @@ class StudentFormattedQuerySearchTest extends TestCase
 
         $response = $this
             ->actingAs($dean)
+            ->withSession(['active_academic_period_id' => $period->id])
             ->get(route('dean.reports.co-student', [
                 'student_query' => 'Aquino, Carlos Torres',
             ]));
@@ -82,7 +85,18 @@ class StudentFormattedQuerySearchTest extends TestCase
             'last_name' => 'Aquino',
             'department_id' => $department->id,
             'course_id' => $course->id,
+            'academic_period_id' => null,
             'is_deleted' => false,
+        ]);
+
+        $period = AcademicPeriod::create([
+            'academic_year' => '2028-2029',
+            'semester' => '1st',
+            'is_deleted' => false,
+        ]);
+
+        $student->update([
+            'academic_period_id' => $period->id,
         ]);
 
         $subject = Subject::create([
@@ -90,6 +104,7 @@ class StudentFormattedQuerySearchTest extends TestCase
             'subject_description' => 'Introduction to Computing',
             'department_id' => $department->id,
             'course_id' => $course->id,
+            'academic_period_id' => $period->id,
             'is_deleted' => false,
         ]);
 
@@ -99,6 +114,6 @@ class StudentFormattedQuerySearchTest extends TestCase
             'is_deleted' => false,
         ]);
 
-        return [$department, $course, $student];
+        return [$department, $course, $student, $period];
     }
 }

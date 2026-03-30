@@ -599,28 +599,15 @@ function initAdminUsersPage() {
       e.preventDefault();
       const formData = new FormData(this);
       const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-      const actionUrl = this.getAttribute('action') || window.confirmUserCreationUrl;
-      const submitBtn = this.querySelector('button[type="submit"]');
-      const passwordInput = this.querySelector('input[name="confirm_password"]');
-      const defaultSubmitText = submitBtn?.dataset.defaultText || submitBtn?.innerHTML || '';
+      const explicitAction = this.getAttribute('action');
+      const confirmEndpoint = explicitAction && explicitAction !== '#' ? explicitAction : window.confirmUserCreationUrl;
 
-      if (submitBtn) {
-        submitBtn.dataset.defaultText = defaultSubmitText;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming...';
-      }
-
-      if (!actionUrl || actionUrl === '#') {
-        document.body.classList.add('loaded');
-        notify.error('Unable to verify your password right now. Please refresh the page and try again.');
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = defaultSubmitText;
-        }
+      if (!confirmEndpoint) {
+        notify.error('Unable to verify password endpoint. Please refresh and try again.');
         return;
       }
 
-      fetch(actionUrl, {
+      fetch(confirmEndpoint, {
         method: 'POST',
         body: formData,
         headers: {
