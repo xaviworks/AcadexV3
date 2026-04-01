@@ -54,14 +54,14 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
             <h6 class="fw-bold mb-3 d-flex align-items-center">
-                <i class="bi bi-table text-success me-2"></i>Course Outcome Scores by Term
+                <i class="bi bi-table text-success me-2"></i>Course Outcome Scores by Period    
             </h6>
             <div class="table-responsive">
                 <table class="table table-bordered align-middle mb-0">
                     <thead>
                         <tr class="table-light">
                             <th style="width: 15%;">
-                                <i class="bi bi-calendar-week text-muted me-1"></i>Term
+                                <i class="bi bi-calendar-week text-muted me-1"></i>Period
                             </th>
                             @foreach($coColumnsByTerm as $coCode)
                                 <th class="text-center">

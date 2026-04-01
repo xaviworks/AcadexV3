@@ -361,7 +361,7 @@
                             <div>
                                 <h5 class="fw-bold mb-1">Course Outcome Attainment Results</h5>
                                 <p class="text-muted mb-0">
-                                    Subject: {{ $selectedSubject->subject_code ?? 'N/A' }} - {{ $selectedSubject->subject_description ?? 'N/A' }}
+                                    Course: {{ $selectedSubject->subject_code ?? 'N/A' }} - {{ $selectedSubject->subject_description ?? 'N/A' }}
                                     @if(isset($selectedSubject) && $selectedSubject->academicPeriod)
                                         | {{ $selectedSubject->academicPeriod->academic_year }} - {{ $selectedSubject->academicPeriod->semester }}
                                     @endif
@@ -465,14 +465,14 @@
                                             <option value="copasssummary">Summary</option>
                                         </select>
                                     </div>
-                                    <span id="current-view" class="badge bg-success">All Terms</span>
+                                    <span id="current-view" class="badge bg-success">All Periods</span>
                                 </div>
                             </div>
                             <div class="col-md-6 text-end">
                                 <div id="term-navigation-container" class="d-flex align-items-center justify-content-end gap-2 flex-nowrap">
-                                    <small class="text-muted text-nowrap">Term Navigation:</small>
+                                    <small class="text-muted text-nowrap">Period Navigation:</small>
                                     <div class="compact-stepper">
-                                        {{-- All Terms Button First --}}
+                                        {{-- All Periods Button First --}}
                                         <button type="button"
                                                 class="compact-step active"
                                                 onclick="showAllTerms()" 
@@ -483,7 +483,7 @@
                                             <div class="compact-label">All</div>
                                         </button>
                                         
-                                        {{-- Individual Terms --}}
+                                        {{-- Individual Periods --}}
                                         @foreach($terms as $index => $termSlug)
                                             @php
                                                 $step = $index + 1;
@@ -492,7 +492,7 @@
                                                     class="compact-step upcoming"
                                                     data-term="{{ $termSlug }}"
                                                     onclick="switchTerm('{{ $termSlug }}', {{ $index }})"
-                                                    title="{{ ucfirst($termSlug) }} Term">
+                                                    title="{{ ucfirst($termSlug) }} Period">
                                                 <div class="compact-circle">{{ $step }}</div>
                                                 <div class="compact-label">{{ ucfirst($termSlug) }}</div>
                                             </button>
@@ -584,7 +584,7 @@
                                     <div class="co-target-preview-panel p-3 mt-3">
                                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                                             <h6 class="mb-0 fw-bold text-success">CO Target (%) Temporary Preview</h6>
-                                            <small class="text-muted">One threshold per CO applies to combined and all term summaries.</small>
+                                            <small class="text-muted">One threshold per CO applies to combined and all period summaries.</small>
                                         </div>
                                         <div class="row g-2">
                                             @foreach($finalCOs as $coId)
@@ -852,7 +852,7 @@
                                     <thead class="table-warning">
                                         <tr>
                                             <th>Course Outcome</th>
-                                            <th>Term</th>
+                                            <th>Period</th>
                                             <th>Missing Scores</th>
                                             <th>Completion Status</th>
                                         </tr>
@@ -981,7 +981,7 @@
                                 @if(isset($coDetails[$coId]) && empty($coDetails[$coId]->is_deleted))
                                     @foreach($terms as $term)
                                         @php
-                                            // Check if this CO exists in this term
+                                            // Check if this CO exists in this period
                                             $coExistsInTerm = isset($coColumnsByTerm[$term]) && in_array($coId, $coColumnsByTerm[$term]);
                                             $max = $maxScoresByTermCo[$term][$coId] ?? 0;
                                         @endphp
@@ -1053,11 +1053,11 @@
             </div>
         </div>
         
-        {{-- Individual Term Tables (shown when stepper is used) --}}
+        {{-- Individual Period Tables (shown when stepper is used) --}}
         @foreach($terms as $term)
             <div class="results-card term-table" id="term-{{ $term }}" style="display:none;">
                 <div class="card-header-custom card-header-primary">
-                    <i class="bi bi-calendar-event me-2"></i>{{ strtoupper($term) }} Term Results
+                    <i class="bi bi-calendar-event me-2"></i>{{ strtoupper($term) }} Period Results
                 </div>
                 <div class="table-responsive p-3">
                     @if(!empty($coColumnsByTerm[$term]))
@@ -1168,18 +1168,18 @@
             </div>
         </div>
         
-        {{-- Individual Term Pass/Fail Tables --}}
+        {{-- Individual Period Pass/Fail Tables --}}
         @foreach($terms as $term)
             <div class="results-card passfail-term-table" id="passfail-term-{{ $term }}" style="display:none;">
                 <div class="card-header-custom">
-                    <i class="bi bi-check-circle me-2"></i>{{ strtoupper($term) }} Term - Pass/Fail Analysis
+                    <i class="bi bi-check-circle me-2"></i>{{ strtoupper($term) }} Period - Pass/Fail Analysis
                 </div>
                 <div class="table-responsive p-3">
                     @if(!empty($coColumnsByTerm[$term]))
                         <table class="table co-table table-bordered align-middle mb-0">
                             <thead>
                                 <tr>
-                                    <th class="text-start">👤 Students</th>
+                                    <th class="text-start">Students</th>
                                     @foreach($coColumnsByTerm[$term] as $coId)
                                         <th class="text-center">{{ $coDetails[$coId]->co_code ?? 'CO'.$coId }}</th>
                                     @endforeach
@@ -1210,7 +1210,7 @@
                         <x-empty-state
                             icon="bi-inbox"
                             title="No Data Available"
-                            :message="'No course outcomes or activities have been set up for the ' . strtoupper($term) . ' term yet.'"
+                            :message="'No course outcomes or activities have been set up for the ' . strtoupper($term) . ' period yet.'"
                             :compact="true"
                         />
                     @endif
@@ -1218,11 +1218,11 @@
             </div>
         @endforeach
         
-        {{-- Individual Term Course Outcome Summary Tables --}}
+        {{-- Individual Period Course Outcome Summary Tables --}}
         @foreach($terms as $term)
             <div class="results-card summary-term-table" id="summary-term-{{ $term }}" style="display:none;">
                 <div class="card-header-custom card-header-info">
-                    <i class="bi bi-graph-up me-2"></i>{{ strtoupper($term) }} Term - Course Outcome Summary
+                    <i class="bi bi-graph-up me-2"></i>{{ strtoupper($term) }} Period - Course Outcome Summary
                 </div>
                 <div class="table-responsive p-3">
                     @if(!empty($coColumnsByTerm[$term]))
@@ -1371,7 +1371,7 @@
                         <x-empty-state
                             icon="bi-inbox"
                             title="No Data Available"
-                            :message="'No course outcomes or activities have been set up for the ' . strtoupper($term) . ' term yet.'"
+                            :message="'No course outcomes or activities have been set up for the ' . strtoupper($term) . ' period yet.'"
                             :compact="true"
                         />
                     @endif
@@ -1508,7 +1508,7 @@
                         </div>
                         <div class="print-info-text mt-3 mb-2">
                             <i class="bi bi-calendar2-week"></i>
-                            <strong>Summary Per Term:</strong> Print dashboard metrics for a single term
+                            <strong>Summary Per Period:</strong> Print dashboard metrics for a single period
                         </div>
                         <div class="print-btn-list">
                             <button class="print-btn print-btn-outline" onclick="coPrintSpecificTable('summary-prelim'); coClosePrintModal();">
@@ -1526,13 +1526,13 @@
                         </div>
                         <div class="print-info-text">
                             <i class="bi bi-info-circle"></i>
-                            <strong>Combined Table:</strong> Shows all terms in one view<br>
+                            <strong>Combined Table:</strong> Shows all periods in one view<br>
                             <i class="bi bi-info-circle"></i>
                             <strong>Pass/Fail Analysis:</strong> Student performance analysis<br>
                             <i class="bi bi-info-circle"></i>
                             <strong>Course Outcomes Summary:</strong> Dashboard overview<br>
                             <i class="bi bi-info-circle"></i>
-                            <strong>Term Summary:</strong> Dashboard metrics for a selected term<br>
+                            <strong>Period Summary:</strong> Dashboard metrics for a selected period<br>
                             <i class="bi bi-info-circle"></i>
                             <strong>Print Everything:</strong> Includes all tables and analysis
                         </div>

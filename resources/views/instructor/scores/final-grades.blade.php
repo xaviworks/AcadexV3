@@ -162,21 +162,21 @@
             <div class="print-options-grid">
                 <div class="print-option-card">
                     <div class="print-option-card-header">
-                        <h6><i class="bi bi-calendar-event"></i>Individual Terms</h6>
+                        <h6><i class="bi bi-calendar-event"></i>Individual Periods</h6>
                     </div>
                     <div class="print-option-card-body">
                         <div class="print-btn-list">
                             <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('prelim'); fgClosePrintModal();">
-                                <i class="bi bi-printer"></i>Print Prelim Term Sheet
+                                <i class="bi bi-printer"></i>Print Prelim Period Sheet
                             </button>
                             <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('midterm'); fgClosePrintModal();">
-                                <i class="bi bi-printer"></i>Print Midterm Term Sheet
+                                <i class="bi bi-printer"></i>Print Midterm Period Sheet
                             </button>
                             <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('prefinal'); fgClosePrintModal();">
-                                <i class="bi bi-printer"></i>Print Prefinal Term Sheet
+                                <i class="bi bi-printer"></i>Print Prefinal Period Sheet
                             </button>
                             <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('final'); fgClosePrintModal();">
-                                <i class="bi bi-printer"></i>Print Final Term Sheet
+                                <i class="bi bi-printer"></i>Print Final Period Sheet
                             </button>
                         </div>
                     </div>
@@ -193,9 +193,9 @@
                         </div>
                         <div class="print-info-text">
                             <i class="bi bi-info-circle"></i>
-                            <strong>Final Summary:</strong> Shows all term grades and final averages<br>
+                            <strong>Final Summary:</strong> Shows all period grades and final averages<br>
                             <i class="bi bi-info-circle"></i>
-                            <strong>Term Sheets:</strong> Detailed activities and scores per term<br><br>
+                            <strong>Period Sheets:</strong> Detailed activities and scores per period<br><br>
                              To remove URL or headers/footers in printout, uncheck <em>Headers &amp; footers</em> in your browser's print dialog.
                         </div>
                     </div>

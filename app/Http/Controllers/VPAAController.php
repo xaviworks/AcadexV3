@@ -24,7 +24,7 @@ class VPAAController extends Controller
         
         // Check if user is VPAA (role 5)
         $this->middleware(function ($request, $next) {
-            if (auth()->check() && auth()->user()->role === 5) {
+            if (Auth::check() && Auth::user()?->role === 5) {
                 return $next($request);
             }
             
@@ -421,9 +421,10 @@ class VPAAController extends Controller
         // Apply department filter if selected
         if ($departmentId) {
             $query->where('department_id', $departmentId);
-        }
 
-        $this->applyTeachingScope($query, $academicPeriodId, $departmentId ? (int) $departmentId : null);
+            // Department-specific instructor views remain period-scoped to active teaching assignments.
+            $this->applyTeachingScope($query, $academicPeriodId, (int) $departmentId);
+        }
         
         $instructors = $query->get();
 

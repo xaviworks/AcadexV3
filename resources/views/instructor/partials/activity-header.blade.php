@@ -245,7 +245,7 @@
 
                         <div class="col-md-6">
                             <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
-                                <i class="bi bi-calendar3 me-1"></i>Term
+                                <i class="bi bi-calendar3 me-1"></i>Period
                             </label>
                             <input
                                 type="text"
@@ -290,7 +290,7 @@
                             </select>
                             <div class="small text-muted d-none mt-2" data-component-notice></div>
                             <div class="alert alert-warning d-none mt-2 mb-0 py-2" data-component-empty>
-                                All components for this term are at capacity. Please manage activities to free up slots.
+                                All components for this period are at capacity. Please manage activities to free up slots.
                             </div>
                         </div>
 

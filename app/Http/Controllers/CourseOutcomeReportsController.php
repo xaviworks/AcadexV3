@@ -11,6 +11,7 @@ use App\Services\CourseOutcomeReportingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CourseOutcomeReportsController extends Controller
 {
@@ -102,14 +103,11 @@ class CourseOutcomeReportsController extends Controller
             if ($studentQuery !== '') {
                 $searchTerm = '%' . $studentQuery . '%';
                 $searchedStudents = Student::with('course')
-                    ->where('students.is_deleted', false)
-                    ->where(function ($q) use ($searchTerm) {
-                        $q->where('students.first_name', 'like', $searchTerm)
-                            ->orWhere('students.last_name', 'like', $searchTerm)
-                            ->orWhere('students.middle_name', 'like', $searchTerm)
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, '')) like ?", [$searchTerm])
-                            ->orWhereRaw("CONCAT(students.last_name, ', ', students.first_name) like ?", [$searchTerm]);
-                    })
+                    ->where('students.is_deleted', false);
+
+                $this->applyStudentNameSearch($searchedStudents, $searchTerm);
+
+                $searchedStudents = $searchedStudents
                     ->whereHas('subjects', function ($q) use ($periodId) {
                         $q->where('subjects.is_deleted', false)
                             ->where('student_subjects.is_deleted', false)
@@ -697,5 +695,54 @@ class CourseOutcomeReportsController extends Controller
             'selectedSubject' => $subject,
             'student' => $student,
         ]));
+    }
+
+    private function applyStudentNameSearch(Builder $query, string $searchTerm): void
+    {
+        [$formattedNameWithMiddle, $formattedNameWithoutMiddle] = $this->studentNameSearchExpressions();
+
+        $query->where(function (Builder $nameQuery) use ($searchTerm, $formattedNameWithMiddle, $formattedNameWithoutMiddle) {
+            $nameQuery->where('students.first_name', 'like', $searchTerm)
+                ->orWhere('students.last_name', 'like', $searchTerm)
+                ->orWhere('students.middle_name', 'like', $searchTerm)
+                ->orWhereRaw($formattedNameWithMiddle . ' like ?', [$searchTerm])
+                ->orWhereRaw($formattedNameWithoutMiddle . ' like ?', [$searchTerm]);
+        });
+    }
+
+    private function studentNameSearchExpressions(): array
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return [
+                "students.last_name || ', ' || students.first_name || ' ' || COALESCE(students.middle_name, '')",
+                "students.last_name || ', ' || students.first_name",
+            ];
+        }
+
+        return [
+            "CONCAT(students.last_name, ', ', students.first_name, ' ', COALESCE(students.middle_name, ''))",
+            "CONCAT(students.last_name, ', ', students.first_name)",
+        ];
+    }
+
+    private function resolveRequiredAcademicPeriodId(): int
+    {
+        $sessionPeriodId = session('active_academic_period_id');
+        if ($sessionPeriodId && AcademicPeriod::where('id', $sessionPeriodId)->where('is_deleted', false)->exists()) {
+            return (int) $sessionPeriodId;
+        }
+
+        $latestPeriod = AcademicPeriod::where('is_deleted', false)
+            ->orderByDesc('academic_year')
+            ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
+            ->first();
+
+        if ($latestPeriod) {
+            session(['active_academic_period_id' => $latestPeriod->id]);
+
+            return (int) $latestPeriod->id;
+        }
+
+        abort(403, 'No active academic period is available.');
     }
 }
