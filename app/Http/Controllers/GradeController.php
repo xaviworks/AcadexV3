@@ -143,7 +143,10 @@ class GradeController extends Controller
                 abort(403, 'Subject does not belong to the current academic period.');
             }
 
-            $students = Student::whereHas('subjects', fn($q) => $q->where('subject_id', $subject->id))
+            $students = Student::whereHas('subjects', function ($q) use ($subject) {
+                    $q->where('subject_id', $subject->id)
+                        ->where('student_subjects.is_deleted', false);
+                })
                 ->where('is_deleted', false)
                 ->get();
 
@@ -264,7 +267,13 @@ class GradeController extends Controller
         }
 
         $studentsGraded = 0; // Track students who actually had grades saved
+        $activeStudentIds = $subject->students()->pluck('students.id')->map(fn($id) => (int) $id)->all();
+
         foreach ($request->scores as $studentId => $activityScores) {
+            if (! in_array((int) $studentId, $activeStudentIds, true)) {
+                continue;
+            }
+
             $hasNewOrChangedScores = false; // Track if this student has any new or changed scores
             
             // Save individual scores
@@ -389,6 +398,17 @@ class GradeController extends Controller
         $studentId = $request->student_id;
         $subject = Subject::findOrFail($request->subject_id);
         $termId = $this->getTermId($request->term);
+
+        $hasActiveEnrollment = $subject->students()
+            ->where('students.id', $studentId)
+            ->exists();
+
+        if (! $hasActiveEnrollment) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cannot update score for a dropped student.',
+            ], 422);
+        }
     
         // Save the individual score
         Score::updateOrCreate(
@@ -421,7 +441,10 @@ class GradeController extends Controller
         $subject = Subject::findOrFail($request->subject_id);
         $term = $request->term;
     
-        $students = Student::whereHas('subjects', fn($q) => $q->where('subject_id', $subject->id))
+        $students = Student::whereHas('subjects', function ($q) use ($subject) {
+                $q->where('subject_id', $subject->id)
+                    ->where('student_subjects.is_deleted', false);
+            })
             ->where('is_deleted', false)
             ->get();
 

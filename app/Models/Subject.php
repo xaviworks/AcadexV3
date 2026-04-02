@@ -61,8 +61,18 @@ class Subject extends Model
     public function students()
     {   
         return $this->belongsToMany(Student::class, 'student_subjects', 'subject_id', 'student_id')
+            ->withPivot('is_deleted')
             ->withTimestamps()
             ->wherePivot('is_deleted', false)
+            ->orderBy('last_name')
+            ->orderBy('first_name');
+    }
+
+    public function studentsWithEnrollmentStatus()
+    {
+        return $this->belongsToMany(Student::class, 'student_subjects', 'subject_id', 'student_id')
+            ->withPivot('is_deleted')
+            ->withTimestamps()
             ->orderBy('last_name')
             ->orderBy('first_name');
     }

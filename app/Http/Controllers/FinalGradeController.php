@@ -6,6 +6,7 @@ use App\Models\AcademicPeriod;
 use App\Models\FinalGrade;
 use App\Models\Score;
 use App\Models\Student;
+use App\Models\StudentSubject;
 use App\Models\Subject;
 use App\Models\TermGrade;
 use App\Services\GradesFormulaService;
@@ -36,7 +37,13 @@ class FinalGradeController extends Controller
 
         if ($request->filled('subject_id')) {
             $subjectId = $request->subject_id;
-            $students = Student::whereHas('subjects', fn($q) => $q->where('subject_id', $subjectId))
+
+            $studentIds = StudentSubject::where('subject_id', $subjectId)
+                ->pluck('student_id')
+                ->unique()
+                ->values();
+
+            $students = Student::whereIn('id', $studentIds)
                 ->where('is_deleted', false)
                 ->orderBy('last_name')
                 ->orderBy('first_name')
@@ -66,14 +73,14 @@ class FinalGradeController extends Controller
                     'prefinal' => data_get($termGrades, "prefinal.{$student->id}.term_grade"),
                     'final' => data_get($termGrades, "final.{$student->id}.term_grade"),
                     'final_average' => null,
-                    'remarks' => null,
+                    'remarks' => $finalGradeRecord->remarks ?? null,
                     'notes' => $finalGradeRecord->notes ?? '',
                     'has_notes' => !empty($finalGradeRecord->notes ?? ''),
                 ];                
 
-                if (
-                    isset($row['prelim'], $row['midterm'], $row['prefinal'], $row['final'])
-                ) {
+                if (strtolower((string) ($row['remarks'] ?? '')) === 'dropped') {
+                    $row['final_average'] = null;
+                } elseif (isset($row['prelim'], $row['midterm'], $row['prefinal'], $row['final'])) {
                     $avg = round(array_sum([
                         $row['prelim'],
                         $row['midterm'],
@@ -109,7 +116,12 @@ class FinalGradeController extends Controller
             ->firstOrFail();
         $subjectId = $subject->id;
 
-        $students = Student::whereHas('subjects', fn($q) => $q->where('subject_id', $subjectId))->get();
+        $students = Student::whereHas('subjects', function ($q) use ($subjectId) {
+            $q->where('subject_id', $subjectId)
+                ->where('student_subjects.is_deleted', false);
+            })
+            ->where('is_deleted', false)
+            ->get();
 
         $terms = ['prelim', 'midterm', 'prefinal', 'final'];
         $gradesByTerm = [];
@@ -177,7 +189,12 @@ class FinalGradeController extends Controller
             })
             ->firstOrFail();
 
-        $students = Student::whereHas('subjects', fn ($query) => $query->where('subject_id', $subject->id))
+        $studentIds = StudentSubject::where('subject_id', $subject->id)
+            ->pluck('student_id')
+            ->unique()
+            ->values();
+
+        $students = Student::whereIn('id', $studentIds)
             ->where('is_deleted', false)
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -193,6 +210,12 @@ class FinalGradeController extends Controller
             ->get()
             ->groupBy('student_id');
 
+        $termId = $this->getTermId($validated['term']);
+        $savedTermGrades = TermGrade::where('subject_id', $subject->id)
+            ->where('term_id', $termId)
+            ->get()
+            ->keyBy('student_id');
+
         $formulaSettings = GradesFormulaService::getSettings(
             $subject->id,
             $subject->course_id,
@@ -201,7 +224,7 @@ class FinalGradeController extends Controller
             session('active_academic_period_id')
         );
 
-        $rows = $students->map(function ($student) use ($scores, $activities, $subject, $formulaSettings) {
+        $rows = $students->map(function ($student) use ($scores, $activities, $savedTermGrades) {
             $studentScores = [];
             $studentScoreGroup = $scores->get($student->id, collect());
 
@@ -211,13 +234,8 @@ class FinalGradeController extends Controller
                 )?->score;
             }
 
-            $termComputation = $activities->isNotEmpty()
-                ? $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings)
-                : ['grade' => null, 'allScored' => false];
-
-            $termGrade = $termComputation['allScored'] && $termComputation['grade'] !== null
-                ? round($termComputation['grade'], 2)
-                : null;
+            $termGrade = optional($savedTermGrades->get($student->id))->term_grade;
+            $termGrade = $termGrade !== null ? round((float) $termGrade, 2) : null;
 
             return [
                 'student' => $student,

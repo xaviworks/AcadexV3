@@ -208,8 +208,8 @@
                 </div>
                 <div>
                     <h6>Print Settings</h6>
-                    <p>All printouts are optimized for <strong>A4 portrait</strong> format with professional styling.</p>
-                    <small>Make sure your printer is set to A4 paper size for best results.</small>
+                    <p>All printouts are optimized for <strong>Letter (8.5 x 11 inch) portrait</strong> format with professional styling.</p>
+                    <small>Make sure your printer is set to Letter paper size for best results.</small>
                 </div>
             </div>
         </div>
@@ -268,6 +268,7 @@
     // Count passed and failed students
     $passedStudents = 0;
     $failedStudents = 0;
+    $droppedStudents = 0;
     if (!empty($finalData)) {
         foreach ($finalData as $data) {
             if (isset($data['remarks'])) {
@@ -275,12 +276,13 @@
                     $passedStudents++;
                 } elseif (strtolower($data['remarks']) === 'failed') {
                     $failedStudents++;
+                } elseif (strtolower($data['remarks']) === 'dropped') {
+                    $droppedStudents++;
                 }
             }
         }
     }
     $totalStudents = $passedStudents + $failedStudents;
-    $passRate = $totalStudents > 0 ? round(($passedStudents / $totalStudents) * 100, 1) : 0;
     
     // Get academic period info
     $activePeriod = \App\Models\AcademicPeriod::find(session('active_academic_period_id'));
@@ -311,8 +313,8 @@
         subjectDesc: @json($subjectDesc),
         passedStudents: @json($passedStudents),
         failedStudents: @json($failedStudents),
+        droppedStudents: @json($droppedStudents),
         totalStudents: @json($totalStudents),
-        passRate: @json($passRate),
         academicPeriod: @json($activePeriod?->academic_year ?? ''),
         semester: @json($semesterLabel),
         units: @json($currentSubject?->units ?? 'N/A'),

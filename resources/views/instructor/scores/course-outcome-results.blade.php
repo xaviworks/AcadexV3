@@ -1546,8 +1546,8 @@
                 </div>
                 <div>
                     <h6>Print Settings</h6>
-                    <p>All printouts are optimized for <strong>A4 portrait</strong> format with professional styling.</p>
-                    <small>Make sure your printer is set to A4 paper size for best results.</small>
+                    <p>All printouts are optimized for <strong>Letter (8.5 x 11 inch) portrait</strong> format with professional styling.</p>
+                    <small>Make sure your printer is set to Letter paper size for best results.</small>
                 </div>
             </div>
         </div>

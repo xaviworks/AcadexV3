@@ -420,7 +420,7 @@ function printSpecificTable(tableType) {
                 <style>
                     @media print {
                         @page {
-                            size: A4 portrait;
+                            size: Letter portrait;
                             margin: 0.75in 0.5in;
                         }
                         

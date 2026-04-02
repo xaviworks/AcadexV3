@@ -936,7 +936,10 @@ function coPrintSpecificTable(tableType) {
                 <title>${reportTitle}</title>
                 <style>
                     @media print {
-                        @page { size: A4 portrait; margin: 0.75in 0.5in; }
+                    @page {
+                      size: Letter portrait;
+                      margin: 0.75in 0.5in;
+                    }
                         body { font-size: 10px; }
                         table { font-size: 9px; }
                         .banner { max-height: 100px; }

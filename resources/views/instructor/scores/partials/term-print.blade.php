@@ -6,7 +6,7 @@
     <style>
         @media print {
             @page {
-                size: portrait;
+                size: Letter portrait;
                 margin: 0.5in;
             }
         }
