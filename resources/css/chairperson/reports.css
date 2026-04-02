@@ -563,6 +563,10 @@
   box-shadow: inset -1px 0 0 #cad7cf;
 }
 
+.table-responsive.po-matrix-wrap {
+  background-color: #ffffff;
+}
+
 .po-matrix-workspace.is-table-expanded .po-matrix-wrap {
   position: fixed;
   top: 50%;
@@ -600,8 +604,6 @@
   position: fixed;
   inset: 0;
   background: rgba(19, 33, 27, 0.42);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
   z-index: 1080;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -645,6 +647,10 @@ body.po-matrix-expanded-lock {
   box-shadow: none;
 }
 
+.po-matrix-table.table tbody tr:hover {
+  background-color: transparent;
+}
+
 .po-matrix-table > :not(caption) > * > * {
   border-color: #b7c4bd;
 }
@@ -654,7 +660,6 @@ body.po-matrix-expanded-lock {
   top: 0;
   z-index: 30;
   background: #f2f6f3 !important;
-  contain: paint;
   vertical-align: middle;
   font-size: 0.69rem;
   text-transform: uppercase;
@@ -776,11 +781,13 @@ body.po-matrix-expanded-lock {
 .po-matrix-sticky-col,
 .po-matrix-sticky-col-secondary {
   position: sticky;
-  background: #fff;
+  background-color: #ffffff;
+  background-image: none;
   z-index: 20;
-  background-clip: padding-box;
-  overflow: hidden;
-  contain: paint;
+  opacity: 1;
+  filter: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .po-matrix-sticky-col {
@@ -796,9 +803,7 @@ body.po-matrix-expanded-lock {
   width: var(--po-matrix-row-col-width);
   min-width: var(--po-matrix-row-col-width);
   max-width: var(--po-matrix-row-col-width);
-  box-shadow:
-    1px 0 0 #95ab9f,
-    12px 0 14px -13px rgba(27, 55, 42, 0.45);
+  box-shadow: 1px 0 0 #95ab9f;
 }
 
 .po-matrix-table thead .po-matrix-sticky-col,
