@@ -41,6 +41,10 @@
         })
         ->unique('code')
         ->values();
+    $matrixSubjectCounts = collect($availableCourseOutcomeRows)
+        ->countBy(function (array $row) {
+            return strtolower((string) ($row['subject_code'] ?? 'Unknown Subject'));
+        });
     $mappedCourseOutcomeIds = collect($selectedMappings)
         ->flatMap(fn ($mappingIds) => collect($mappingIds))
         ->map(fn ($id) => (string) $id)
@@ -174,8 +178,8 @@
 </div>
 
 <div class="modal fade" id="configurePloModal" tabindex="-1" aria-labelledby="configurePloModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable plo-config-modal-dialog">
-        <div class="modal-content rounded-4 shadow border-0">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable plo-config-modal-dialog" data-ui="co-plo-modal-workspace">
+        <div class="modal-content rounded-4 shadow border-0 plo-config-modal-content">
             <div class="modal-header bg-success text-white">
                 <div>
                     <h4 class="modal-title fw-bold" id="configurePloModalLabel">Configure Program Learning Outcomes</h4>
@@ -184,7 +188,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body modal-plo-body">
+            <div class="modal-body modal-plo-body plo-config-modal-body">
                 <div class="plo-workflow-guide mb-4" aria-label="PLO configuration workflow">
                     <div class="plo-guide-step">
                         <span class="plo-guide-badge">Step 1</span>
@@ -233,9 +237,9 @@
                     </li>
                 </ul>
 
-                <div class="tab-content pt-4" id="ploConfigTabContent">
+                <div class="tab-content pt-4 plo-config-tab-content" id="ploConfigTabContent">
                     <div
-                        class="tab-pane fade {{ $activePloTab === 'definitions' ? 'show active' : '' }}"
+                        class="tab-pane fade {{ $activePloTab === 'definitions' ? 'show active' : '' }} plo-config-pane"
                         id="plo-definitions-panel"
                         role="tabpanel"
                         aria-labelledby="plo-definitions-tab"
@@ -310,15 +314,15 @@
                     </div>
 
                     <div
-                        class="tab-pane fade {{ $activePloTab === 'mapping' ? 'show active' : '' }}"
+                        class="tab-pane fade {{ $activePloTab === 'mapping' ? 'show active' : '' }} plo-config-pane plo-config-pane-mapping"
                         id="plo-mapping-panel"
                         role="tabpanel"
                         aria-labelledby="plo-mapping-tab"
                     >
-                        <form method="POST" action="{{ route('chairperson.reports.co-program.plos.mappings.save') }}">
+                        <form method="POST" action="{{ route('chairperson.reports.co-program.plos.mappings.save') }}" class="h-100 d-flex flex-column">
                             @csrf
 
-                            <div class="border rounded-4 bg-white p-3 p-lg-4 plo-mapping-card">
+                            <div class="border rounded-4 bg-white p-3 p-lg-4 plo-mapping-card po-matrix-workspace">
                                 <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
                                     <div>
                                         <h5 class="fw-semibold mb-1">CO to PLO Mapping</h5>
@@ -345,8 +349,32 @@
                                     <div class="plo-mapping-toolbar mb-3" role="region" aria-label="Mapping tools">
                                         <div class="po-matrix-toolbar-head">
                                             <small class="text-muted po-matrix-toolbar-hint">Use the matrix checkboxes to link each course outcome row to one or more program outcomes. Computation still uses average values of selected mapped outcomes.</small>
-                                            <div class="po-matrix-context-chip" id="poMatrixContextChip" aria-live="polite">
-                                                Viewing: All subjects
+                                            <div class="po-matrix-toolbar-actions">
+                                                <div class="po-matrix-context-chip" id="poMatrixContextChip" aria-live="polite">
+                                                    Viewing: All subjects
+                                                </div>
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-success btn-sm po-matrix-save-btn"
+                                                    id="poMatrixSaveTop"
+                                                    data-ui="co-plo-save-top"
+                                                >
+                                                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                                                    <span>Save Mapping</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-outline-secondary btn-sm po-matrix-expand-btn"
+                                                    id="poMatrixExpandToggle"
+                                                    data-ui="co-plo-expand-toggle"
+                                                    data-default-label="Expand table"
+                                                    data-expanded-label="Exit expanded table view"
+                                                    aria-pressed="false"
+                                                    aria-label="Expand mapping table"
+                                                >
+                                                    <i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>
+                                                    <span class="po-matrix-expand-label">Expand table</span>
+                                                </button>
                                             </div>
                                         </div>
 
@@ -388,22 +416,55 @@
                                                 </button>
                                             </div>
                                         </div>
+
+                                        <div class="po-matrix-subject-jump" role="group" aria-label="Quick jump to subject rows" data-ui="co-plo-subject-jump">
+                                            <span class="po-matrix-subject-jump-label">Quick jump:</span>
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm po-matrix-subject-jump-btn is-active"
+                                                data-subject=""
+                                                data-total-count="{{ count($availableCourseOutcomeRows) }}"
+                                                aria-pressed="true"
+                                            >
+                                                <span class="po-matrix-subject-jump-text">All</span>
+                                                <span class="po-matrix-subject-jump-count">{{ count($availableCourseOutcomeRows) }}</span>
+                                            </button>
+                                            @foreach($matrixSubjectOptions as $subjectOption)
+                                                @php($subjectKey = strtolower((string) $subjectOption['code']))
+                                                @php($subjectTotal = (int) ($matrixSubjectCounts[$subjectKey] ?? 0))
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm po-matrix-subject-jump-btn"
+                                                    data-subject="{{ strtolower($subjectOption['code']) }}"
+                                                    data-total-count="{{ $subjectTotal }}"
+                                                    aria-pressed="false"
+                                                    title="{{ $subjectOption['label'] }}"
+                                                >
+                                                    <span class="po-matrix-subject-jump-text">{{ $subjectOption['code'] }}</span>
+                                                    <span class="po-matrix-subject-jump-count">{{ $subjectTotal }}</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+
+                                        <small class="po-matrix-keyboard-hint">Tip: use arrow keys to move between matrix checkboxes while mapping.</small>
                                     </div>
 
-                                    <div class="table-responsive po-matrix-wrap">
-                                        <table class="table table-bordered align-middle mb-0 po-matrix-table" aria-describedby="poMatrixLegend">
+                                    <div class="table-responsive po-matrix-wrap" style="--po-matrix-outcome-count: {{ max(1, $visiblePloDefinitions->count()) }};" data-ui="co-plo-matrix-wrap">
+                                        <table class="table table-bordered align-middle mb-0 po-matrix-table po-matrix-table--dense" aria-describedby="poMatrixLegend">
                                             <caption class="visually-hidden">Matrix mapping course outcome rows to program learning outcomes.</caption>
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th class="text-start po-matrix-sticky-col" style="min-width: 130px;">
-                                                        Course
+                                                    <th class="text-start po-matrix-sticky-col po-matrix-header-label">
+                                                        <span>Course</span>
                                                     </th>
-                                                    <th class="text-start po-matrix-sticky-col-secondary" style="min-width: 220px;">
-                                                        Course Outcome Row
+                                                    <th class="text-start po-matrix-sticky-col-secondary po-matrix-header-label">
+                                                        <span>Course Outcome Row</span>
                                                     </th>
                                                     @foreach($visiblePloDefinitions as $plo)
-                                                        <th class="text-center po-matrix-outcome-col" style="min-width: 110px;" title="{{ $plo->title }}" data-plo-key="{{ strtolower($plo->plo_code) }}">
-                                                            <span class="po-matrix-code">{{ $plo->plo_code }}</span>
+                                                        <th class="text-center po-matrix-outcome-col" title="{{ $plo->title }}" data-plo-key="{{ strtolower($plo->plo_code) }}" data-ui="co-plo-column-header">
+                                                            <span class="po-matrix-outcome-head">
+                                                                <span class="po-matrix-code">{{ $plo->plo_code }}</span>
+                                                            </span>
                                                         </th>
                                                     @endforeach
                                                 </tr>
@@ -444,7 +505,7 @@
                                                         </td>
                                                         <td class="text-start po-matrix-sticky-col-secondary">
                                                             <div class="fw-semibold po-row-identifier">{{ $coIdentifier }}</div>
-                                                            <div class="text-muted small">{{ $row['co_code'] }} | Target {{ number_format((float) ($row['target_percentage'] ?? 75), 2) }}%</div>
+                                                            <div class="text-muted po-row-meta">{{ $row['co_code'] }} | Target {{ number_format((float) ($row['target_percentage'] ?? 75), 2) }}%</div>
                                                             <div class="small text-muted mt-1 po-row-description">{{ $row['description'] }}</div>
                                                         </td>
                                                         @foreach($visiblePloDefinitions as $plo)
@@ -466,6 +527,18 @@
                                             </tbody>
                                         </table>
                                     </div>
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-light btn-sm po-matrix-overlay-close"
+                                        id="poMatrixOverlayClose"
+                                        data-ui="co-plo-overlay-close"
+                                        aria-label="Close expanded table view"
+                                        title="Close expanded table view (Esc)"
+                                    >
+                                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                        <span>Close</span>
+                                    </button>
 
                                     <div class="po-matrix-legend mt-3" id="poMatrixLegend">
                                         <div class="po-matrix-legend-title"><i class="bi bi-bookmark-star-fill me-2" aria-hidden="true"></i>PLO Legend Reference</div>
@@ -536,10 +609,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const matrixSearchInput = document.getElementById('poMatrixSearch');
     const matrixStateFilter = document.getElementById('poMatrixStateFilter');
     const matrixClearButton = document.getElementById('poMatrixClearFilters');
+    const matrixExpandButton = document.getElementById('poMatrixExpandToggle');
+    const matrixOverlayCloseButton = document.getElementById('poMatrixOverlayClose');
     const matrixContextChip = document.getElementById('poMatrixContextChip');
+    const matrixWrap = document.querySelector('.po-matrix-wrap');
     const matrixRows = Array.from(document.querySelectorAll('.po-matrix-data-row'));
     const matrixGroupRows = Array.from(document.querySelectorAll('.po-matrix-group-row'));
     const matrixInputs = Array.from(document.querySelectorAll('.po-matrix-input'));
+    const matrixSubjectJumpButtons = Array.from(document.querySelectorAll('.po-matrix-subject-jump-btn'));
     const matrixOutcomeHeaders = Array.from(document.querySelectorAll('.po-matrix-outcome-col[data-plo-key]'));
     const matrixLegendItems = Array.from(document.querySelectorAll('.po-matrix-legend-item[data-plo-key]'));
     const outcomePrefix = @json($outcomeCodePrefix);
@@ -548,12 +625,130 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
+    const matrixWorkspace = modalElement.querySelector('.po-matrix-workspace');
     const bootstrapModal = window.bootstrap ? bootstrap.Modal.getOrCreateInstance(modalElement) : null;
     const shouldOpen = @json($shouldOpenPloModal);
+    const matrixBackdropId = 'poMatrixExpandBackdrop';
+    let hasShownExpandHint = false;
+
+    const removeMatrixBackdrop = () => {
+        const existingBackdrop = document.getElementById(matrixBackdropId);
+        if (!existingBackdrop) {
+            return;
+        }
+
+        existingBackdrop.classList.remove('is-visible');
+
+        const removeAfterTransition = () => {
+            existingBackdrop.remove();
+        };
+
+        existingBackdrop.addEventListener('transitionend', removeAfterTransition, { once: true });
+        window.setTimeout(removeAfterTransition, 220);
+    };
+
+    const createMatrixBackdrop = () => {
+        if (document.getElementById(matrixBackdropId)) {
+            return;
+        }
+
+        const backdrop = document.createElement('div');
+        backdrop.id = matrixBackdropId;
+        backdrop.className = 'po-matrix-expand-backdrop';
+        backdrop.addEventListener('click', function () {
+            setMatrixExpandedState(false, { silent: true });
+        });
+
+        document.body.appendChild(backdrop);
+        requestAnimationFrame(function () {
+            backdrop.classList.add('is-visible');
+        });
+    };
+
+    const isMatrixExpanded = () => Boolean(
+        matrixWorkspace && matrixWorkspace.classList.contains('is-table-expanded')
+    );
+
+    const setMatrixExpandedState = (isExpanded, options = {}) => {
+        if (!matrixWorkspace || !matrixExpandButton) {
+            return;
+        }
+
+        const wasExpanded = matrixWorkspace.classList.contains('is-table-expanded');
+
+        matrixWorkspace.classList.toggle('is-table-expanded', isExpanded);
+        matrixExpandButton.setAttribute('aria-pressed', isExpanded ? 'true' : 'false');
+        document.body.classList.toggle('po-matrix-expanded-lock', isExpanded);
+
+        if (isExpanded) {
+            createMatrixBackdrop();
+        } else {
+            removeMatrixBackdrop();
+        }
+
+        const label = matrixExpandButton.querySelector('.po-matrix-expand-label');
+        const icon = matrixExpandButton.querySelector('i');
+        const defaultLabel = matrixExpandButton.dataset.defaultLabel || 'Expand table';
+        const expandedLabel = matrixExpandButton.dataset.expandedLabel || 'Exit expanded table view';
+
+        if (label) {
+            label.textContent = isExpanded ? expandedLabel : defaultLabel;
+        }
+
+        if (icon) {
+            icon.classList.toggle('bi-arrows-angle-expand', !isExpanded);
+            icon.classList.toggle('bi-arrows-angle-contract', isExpanded);
+        }
+
+        if (isExpanded && !wasExpanded && !options.silent && !hasShownExpandHint) {
+            hasShownExpandHint = true;
+            window.notify?.info('Press "Esc" to exit expanded table view');
+        }
+    };
 
     if (shouldOpen && bootstrapModal) {
         bootstrapModal.show();
     }
+
+    if (matrixExpandButton && matrixWorkspace) {
+        matrixExpandButton.addEventListener('click', function () {
+            setMatrixExpandedState(!isMatrixExpanded());
+        });
+    }
+
+    if (matrixOverlayCloseButton) {
+        matrixOverlayCloseButton.addEventListener('click', function () {
+            setMatrixExpandedState(false, { silent: true });
+        });
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Escape') {
+            return;
+        }
+
+        if (!modalElement.classList.contains('show') || !isMatrixExpanded()) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        setMatrixExpandedState(false, { silent: true });
+    }, true);
+
+    const tabButtons = Array.from(modalElement.querySelectorAll('#ploConfigTabs [data-bs-toggle="tab"]'));
+    tabButtons.forEach((tabButton) => {
+        tabButton.addEventListener('shown.bs.tab', function (event) {
+            const selectedTarget = event.target ? event.target.getAttribute('data-bs-target') : '';
+            if (selectedTarget !== '#plo-mapping-panel') {
+                setMatrixExpandedState(false, { silent: true });
+            }
+        });
+    });
+
+    modalElement.addEventListener('hidden.bs.modal', function () {
+        setMatrixExpandedState(false, { silent: true });
+    });
 
     const getVisibleRows = () => Array.from(rowsContainer.querySelectorAll('.plo-definition-row'))
         .filter((row) => !row.classList.contains('d-none'));
@@ -655,6 +850,105 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    const getVisibleMatrixRows = () => matrixRows.filter((row) => !row.classList.contains('d-none'));
+
+    const focusMatrixInput = (targetRowIndex, targetColIndex) => {
+        const visibleRows = getVisibleMatrixRows();
+        if (visibleRows.length === 0) {
+            return;
+        }
+
+        const boundedRowIndex = Math.min(Math.max(targetRowIndex, 0), visibleRows.length - 1);
+        const rowInputs = Array.from(visibleRows[boundedRowIndex].querySelectorAll('.po-matrix-input'));
+        if (rowInputs.length === 0) {
+            return;
+        }
+
+        const boundedColIndex = Math.min(Math.max(targetColIndex, 0), rowInputs.length - 1);
+        rowInputs[boundedColIndex].focus();
+    };
+
+    const initializeMatrixNavigation = () => {
+        matrixRows.forEach((row) => {
+            const rowInputs = Array.from(row.querySelectorAll('.po-matrix-input'));
+            rowInputs.forEach((input, columnIndex) => {
+                input.dataset.matrixColIndex = String(columnIndex);
+            });
+        });
+    };
+
+    const updateSubjectJumpState = () => {
+        if (matrixSubjectJumpButtons.length === 0) {
+            return;
+        }
+
+        const selectedSubject = normalize(matrixSubjectFilter ? matrixSubjectFilter.value : '');
+        const visibleCountsBySubject = matrixRows.reduce((carry, row) => {
+            if (row.classList.contains('d-none')) {
+                return carry;
+            }
+
+            const subjectKey = normalize(row.dataset.subject);
+            carry[subjectKey] = (carry[subjectKey] || 0) + 1;
+            return carry;
+        }, {});
+        const visibleTotal = Object.values(visibleCountsBySubject)
+            .reduce((total, count) => total + Number(count), 0);
+
+        matrixSubjectJumpButtons.forEach((button) => {
+            const buttonSubject = normalize(button.dataset.subject);
+            const isActive = buttonSubject === selectedSubject;
+            const totalCountRaw = Number.parseInt(button.dataset.totalCount || '0', 10);
+            const totalCount = Number.isNaN(totalCountRaw)
+                ? (buttonSubject === '' ? matrixRows.length : 0)
+                : totalCountRaw;
+            const visibleCount = buttonSubject === ''
+                ? visibleTotal
+                : Number(visibleCountsBySubject[buttonSubject] || 0);
+            const countElement = button.querySelector('.po-matrix-subject-jump-count');
+
+            if (countElement) {
+                countElement.textContent = visibleCount === totalCount
+                    ? String(totalCount)
+                    : `${visibleCount}/${totalCount}`;
+            }
+
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            button.disabled = totalCount <= 0;
+        });
+    };
+
+    const jumpToSubject = (subjectValue) => {
+        const selectedSubject = normalize(subjectValue);
+
+        if (matrixSubjectFilter) {
+            matrixSubjectFilter.value = selectedSubject;
+        }
+
+        applyMatrixFilters();
+
+        if (!matrixWrap) {
+            return;
+        }
+
+        if (selectedSubject === '') {
+            matrixWrap.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        const targetGroupRow = matrixGroupRows.find((groupRow) => {
+            return !groupRow.classList.contains('d-none') && normalize(groupRow.dataset.subject) === selectedSubject;
+        });
+
+        if (targetGroupRow) {
+            matrixWrap.scrollTo({
+                top: Math.max(0, targetGroupRow.offsetTop - 8),
+                behavior: 'smooth',
+            });
+        }
+    };
+
     const applyMatrixFilters = () => {
         if (matrixRows.length === 0) {
             return;
@@ -700,6 +994,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 ? `Viewing: ${firstVisibleRow.dataset.subjectLabel || firstVisibleRow.dataset.subject || 'All subjects'} (${visibleRows.length}/${matrixRows.length})`
                 : 'Viewing: No matching course outcomes';
         }
+
+        updateSubjectJumpState();
+
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.classList && activeElement.classList.contains('po-matrix-input')) {
+            const activeRow = activeElement.closest('.po-matrix-data-row');
+            if (activeRow && activeRow.classList.contains('d-none')) {
+                const firstVisibleInput = matrixRows
+                    .find((row) => !row.classList.contains('d-none'))
+                    ?.querySelector('.po-matrix-input');
+
+                if (firstVisibleInput) {
+                    firstVisibleInput.focus();
+                }
+            }
+        }
     };
 
     if (matrixSubjectFilter) {
@@ -732,8 +1042,63 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    matrixSubjectJumpButtons.forEach((button) => {
+        button.addEventListener('click', function () {
+            jumpToSubject(button.dataset.subject || '');
+        });
+    });
+
     matrixInputs.forEach((input) => {
         input.addEventListener('change', applyMatrixFilters);
+
+        input.addEventListener('keydown', function (event) {
+            const allowedKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End']);
+            if (!allowedKeys.has(event.key)) {
+                return;
+            }
+
+            const currentRow = input.closest('.po-matrix-data-row');
+            if (!currentRow) {
+                return;
+            }
+
+            const visibleRows = getVisibleMatrixRows();
+            const currentVisibleRowIndex = visibleRows.indexOf(currentRow);
+            if (currentVisibleRowIndex === -1) {
+                return;
+            }
+
+            const currentColumnIndex = Number.parseInt(input.dataset.matrixColIndex || '0', 10);
+            const rowInputs = Array.from(currentRow.querySelectorAll('.po-matrix-input'));
+            let targetRowIndex = currentVisibleRowIndex;
+            let targetColumnIndex = Number.isNaN(currentColumnIndex) ? 0 : currentColumnIndex;
+
+            switch (event.key) {
+                case 'ArrowRight':
+                    targetColumnIndex += 1;
+                    break;
+                case 'ArrowLeft':
+                    targetColumnIndex -= 1;
+                    break;
+                case 'ArrowDown':
+                    targetRowIndex += 1;
+                    break;
+                case 'ArrowUp':
+                    targetRowIndex -= 1;
+                    break;
+                case 'Home':
+                    targetColumnIndex = 0;
+                    break;
+                case 'End':
+                    targetColumnIndex = rowInputs.length - 1;
+                    break;
+                default:
+                    return;
+            }
+
+            event.preventDefault();
+            focusMatrixInput(targetRowIndex, targetColumnIndex);
+        });
     });
 
     matrixLegendItems.forEach((item) => {
@@ -774,6 +1139,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    initializeMatrixNavigation();
     refreshAddButtonState();
     applyMatrixFilters();
 });

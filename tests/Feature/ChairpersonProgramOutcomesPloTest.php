@@ -34,6 +34,7 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $response->assertSee('IT01');
         $response->assertSee('IT13');
         $response->assertSee('Configure PLOs');
+        $response->assertSee('data-ui="co-plo-modal-workspace"', false);
 
         $this->assertDatabaseCount('program_learning_outcomes', 13);
         $this->assertDatabaseHas('program_learning_outcomes', [
@@ -70,9 +71,21 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
             'is_deleted' => false,
         ]);
 
-        $this->actingAs($chairperson)
+        $pageResponse = $this->actingAs($chairperson)
             ->withSession(['active_academic_period_id' => $period->id])
             ->get(route('chairperson.reports.co-program'));
+
+        $pageResponse->assertOk();
+        $pageResponse->assertSee('data-ui="co-plo-matrix-wrap"', false);
+        $pageResponse->assertSee('data-ui="co-plo-save-top"', false);
+        $pageResponse->assertSee('data-ui="co-plo-expand-toggle"', false);
+        $pageResponse->assertSee('data-ui="co-plo-overlay-close"', false);
+        $pageResponse->assertSee('data-default-label="Expand table"', false);
+        $pageResponse->assertSee('data-expanded-label="Exit expanded table view"', false);
+        $pageResponse->assertSee('data-ui="co-plo-subject-jump"', false);
+        $pageResponse->assertSee('po-matrix-subject-jump-count', false);
+        $pageResponse->assertSee('data-ui="co-plo-column-header"', false);
+        $pageResponse->assertSee('po-matrix-outcome-head', false);
 
         $programOutcome = ProgramLearningOutcome::where('course_id', $course->id)
             ->where('plo_code', 'IT01')
