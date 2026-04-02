@@ -31,17 +31,69 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Program');
-        $response->assertSee('PLO1');
-        $response->assertSee('PLO5');
+        $response->assertSee('IT01');
+        $response->assertSee('IT13');
         $response->assertSee('Configure PLOs');
 
-        $this->assertDatabaseCount('program_learning_outcomes', 5);
+        $this->assertDatabaseCount('program_learning_outcomes', 13);
         $this->assertDatabaseHas('program_learning_outcomes', [
             'course_id' => $course->id,
-            'plo_code' => 'PLO1',
-            'title' => 'Program Learning Outcome 1',
+            'plo_code' => 'IT01',
+            'title' => 'Apply knowledge of computing, science, and mathematics appropriate to the discipline',
             'is_active' => true,
             'is_deleted' => false,
+        ]);
+    }
+
+    public function test_mapping_save_persists_course_outcome_row_links_for_program_outcomes(): void
+    {
+        [$chairperson, $period, $course, $department] = $this->createChairpersonContext();
+
+        $subject = Subject::create([
+            'subject_code' => 'IT101',
+            'subject_description' => 'Introduction to IT',
+            'academic_period_id' => $period->id,
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'is_deleted' => false,
+        ]);
+
+        $courseOutcome = CourseOutcomes::create([
+            'subject_id' => $subject->id,
+            'academic_period_id' => $period->id,
+            'co_code' => 'CO1',
+            'co_identifier' => 'IT101.1',
+            'description' => 'Explain fundamental IT concepts',
+            'target_percentage' => 75,
+            'created_by' => $chairperson->id,
+            'updated_by' => $chairperson->id,
+            'is_deleted' => false,
+        ]);
+
+        $this->actingAs($chairperson)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->get(route('chairperson.reports.co-program'));
+
+        $programOutcome = ProgramLearningOutcome::where('course_id', $course->id)
+            ->where('plo_code', 'IT01')
+            ->firstOrFail();
+
+        $response = $this->actingAs($chairperson)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->post(route('chairperson.reports.co-program.plos.mappings.save'), [
+                'mappings' => [
+                    $programOutcome->id => [$courseOutcome->id],
+                ],
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('program_learning_outcome_mappings', [
+            'course_id' => $course->id,
+            'program_learning_outcome_id' => $programOutcome->id,
+            'course_outcome_id' => $courseOutcome->id,
+            'co_code' => 'CO1',
         ]);
     }
 
@@ -343,6 +395,151 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $response->assertSee('75.00%');
         $response->assertSee('Target 80.00%');
         $response->assertSee('Met Expected Outcome');
+    }
+
+    public function test_program_outcome_rollup_uses_row_level_mapping_when_multiple_subjects_share_same_co_code(): void
+    {
+        [$chairperson, $period, $course, $department] = $this->createChairpersonContext();
+
+        $it01 = ProgramLearningOutcome::create([
+            'course_id' => $course->id,
+            'plo_code' => 'IT01',
+            'title' => 'Apply knowledge of computing, science, and mathematics appropriate to the discipline',
+            'display_order' => 1,
+            'is_active' => true,
+            'is_deleted' => false,
+        ]);
+
+        $subjectOne = Subject::create([
+            'subject_code' => 'IT101',
+            'subject_description' => 'Intro to IT',
+            'academic_period_id' => $period->id,
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'is_deleted' => false,
+        ]);
+
+        $subjectTwo = Subject::create([
+            'subject_code' => 'IT102',
+            'subject_description' => 'Programming 1',
+            'academic_period_id' => $period->id,
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'is_deleted' => false,
+        ]);
+
+        $coSubjectOne = CourseOutcomes::create([
+            'subject_id' => $subjectOne->id,
+            'academic_period_id' => $period->id,
+            'co_code' => 'CO1',
+            'co_identifier' => 'IT101.1',
+            'description' => 'Understand concepts',
+            'target_percentage' => 80,
+            'created_by' => $chairperson->id,
+            'updated_by' => $chairperson->id,
+            'is_deleted' => false,
+        ]);
+
+        $coSubjectTwo = CourseOutcomes::create([
+            'subject_id' => $subjectTwo->id,
+            'academic_period_id' => $period->id,
+            'co_code' => 'CO1',
+            'co_identifier' => 'IT102.1',
+            'description' => 'Apply concepts',
+            'target_percentage' => 80,
+            'created_by' => $chairperson->id,
+            'updated_by' => $chairperson->id,
+            'is_deleted' => false,
+        ]);
+
+        ProgramLearningOutcomeMapping::create([
+            'course_id' => $course->id,
+            'program_learning_outcome_id' => $it01->id,
+            'course_outcome_id' => $coSubjectOne->id,
+            'co_code' => 'CO1',
+        ]);
+
+        $studentOne = Student::create([
+            'first_name' => 'Ana',
+            'last_name' => 'Lopez',
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'academic_period_id' => $period->id,
+            'year_level' => 1,
+            'is_deleted' => false,
+        ]);
+
+        $studentTwo = Student::create([
+            'first_name' => 'Ben',
+            'last_name' => 'Reyes',
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'academic_period_id' => $period->id,
+            'year_level' => 1,
+            'is_deleted' => false,
+        ]);
+
+        DB::table('student_subjects')->insert([
+            [
+                'student_id' => $studentOne->id,
+                'subject_id' => $subjectOne->id,
+                'section' => 'A',
+                'is_deleted' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'student_id' => $studentTwo->id,
+                'subject_id' => $subjectTwo->id,
+                'section' => 'A',
+                'is_deleted' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $activityOne = Activity::create([
+            'subject_id' => $subjectOne->id,
+            'term' => 'prelim',
+            'type' => 'quiz',
+            'title' => 'IT101 Quiz',
+            'course_outcome_id' => $coSubjectOne->id,
+            'number_of_items' => 100,
+            'is_deleted' => false,
+        ]);
+
+        $activityTwo = Activity::create([
+            'subject_id' => $subjectTwo->id,
+            'term' => 'prelim',
+            'type' => 'quiz',
+            'title' => 'IT102 Quiz',
+            'course_outcome_id' => $coSubjectTwo->id,
+            'number_of_items' => 100,
+            'is_deleted' => false,
+        ]);
+
+        Score::create([
+            'activity_id' => $activityOne->id,
+            'student_id' => $studentOne->id,
+            'score' => 90,
+            'is_deleted' => false,
+        ]);
+
+        Score::create([
+            'activity_id' => $activityTwo->id,
+            'student_id' => $studentTwo->id,
+            'score' => 40,
+            'is_deleted' => false,
+        ]);
+
+        $response = $this->actingAs($chairperson)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->get(route('chairperson.reports.co-program'));
+
+        $response->assertOk();
+        $response->assertSee('90.00%');
+        $response->assertSee('IT101.1');
+        $response->assertDontSee('65.00%');
     }
 
     private function createChairpersonContext(): array

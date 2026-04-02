@@ -25,8 +25,24 @@ class CourseOutcomeReportingService
 {
     use CourseOutcomeTrait;
 
-    public const DEFAULT_PLO_COUNT = 5;
+    public const DEFAULT_PLO_COUNT = 13;
     public const MAX_PLO_COUNT = 20;
+
+    private const IT_PROGRAM_OUTCOME_DESCRIPTIONS = [
+        1 => 'Apply knowledge of computing, science, and mathematics appropriate to the discipline',
+        2 => 'Understand best practices and standards and their applications',
+        3 => 'Analyze complex problems, and identify and define the computing requirements appropriate to its solution',
+        4 => 'Identify and analyze user needs and take them into account in the selection, creation, evaluation and administration of computer-based systems',
+        5 => 'Design, implement, and evaluate computer-based systems, processes, components, or programs to meet desired needs and requirements under various constraints',
+        6 => 'Integrate IT-based solutions into the user environment effectively',
+        7 => 'Apply knowledge through the use of current techniques, skills, tools and practices necessary for the IT profession',
+        8 => 'Function effectively as a member or leader of a development team recognizing the different roles within a team to accomplish a common goal',
+        9 => 'Assist in the creation of an effective IT project plan',
+        10 => 'Communicate effectively with the computing community and with society at large about complex computing activities through logical writing, presentations, and clear instructions',
+        11 => 'Analyze the local and global impact of computing information technology on individuals, organizations, and society',
+        12 => 'Understand professional, ethical, legal, security and social issues and responsibilities in the utilization of information technology',
+        13 => 'Recognize the need for and engage in planning self-learning and improving performance as a foundation for continuing professional development.',
+    ];
     /**
      * Compute CO attainment for a single student in a specific subject across terms.
      * Returns structure compatible with computeCoAttainment plus term/column helpers.
@@ -268,6 +284,127 @@ class CourseOutcomeReportingService
             ->all();
 
         return $this->aggregateSubjects($subjects);
+    }
+
+    /**
+     * Aggregate attainment per concrete course outcome row in a program.
+     * Returns: [course_outcome_id => ['raw','max','percent','target_percentage','co_code','co_identifier']]
+     */
+    public function aggregateCourseOutcomeRows(
+        int $courseId,
+        ?int $academicPeriodId = null,
+        bool $excludeGE = false
+    ): array {
+        $subjectIds = Subject::where('course_id', $courseId)
+            ->where('is_deleted', false)
+            ->when($excludeGE, function ($query) {
+                $query->where('department_id', '!=', 1);
+            })
+            ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
+                $query->where('academic_period_id', $academicPeriodId);
+            })
+            ->pluck('id')
+            ->all();
+
+        return $this->aggregateCourseOutcomeRowsBySubjects($subjectIds);
+    }
+
+    /**
+     * Aggregate attainment for concrete course outcome rows across a subject set.
+     */
+    public function aggregateCourseOutcomeRowsBySubjects(array $subjectIds): array
+    {
+        if (empty($subjectIds)) {
+            return [];
+        }
+
+        $merged = [];
+
+        $activities = Activity::whereIn('subject_id', $subjectIds)
+            ->where('is_deleted', false)
+            ->whereNotNull('course_outcome_id')
+            ->with(['courseOutcome' => function ($query) {
+                $query->select('id', 'co_code', 'co_identifier', 'target_percentage', 'is_deleted');
+            }])
+            ->select('id', 'subject_id', 'course_outcome_id', 'number_of_items')
+            ->get();
+
+        if ($activities->isEmpty()) {
+            return [];
+        }
+
+        $subjectStudentMap = \DB::table('student_subjects')
+            ->join('students', 'students.id', '=', 'student_subjects.student_id')
+            ->whereIn('student_subjects.subject_id', $subjectIds)
+            ->where('student_subjects.is_deleted', false)
+            ->where('students.is_deleted', false)
+            ->select('student_subjects.subject_id', 'student_subjects.student_id')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(fn ($rows) => $rows->pluck('student_id')->unique()->values()->all());
+
+        if ($subjectStudentMap->isEmpty()) {
+            return [];
+        }
+
+        $studentIds = $subjectStudentMap->flatten()->unique()->values()->all();
+        $activityIds = $activities->pluck('id')->all();
+
+        $scores = Score::whereIn('activity_id', $activityIds)
+            ->whereIn('student_id', $studentIds)
+            ->select('activity_id', 'student_id', 'score')
+            ->get()
+            ->groupBy(function ($score) {
+                return $score->activity_id . '::' . $score->student_id;
+            });
+
+        foreach ($activities as $activity) {
+            $courseOutcome = $activity->courseOutcome;
+            if (!$courseOutcome || $courseOutcome->is_deleted) {
+                continue;
+            }
+
+            $courseOutcomeId = (int) $courseOutcome->id;
+
+            if (!isset($merged[$courseOutcomeId])) {
+                $merged[$courseOutcomeId] = [
+                    'raw' => 0,
+                    'max' => 0,
+                    'target_percentage' => (int) ($courseOutcome->target_percentage ?? 75),
+                    'co_code' => (string) $courseOutcome->co_code,
+                    'co_identifier' => (string) ($courseOutcome->co_identifier ?? ''),
+                ];
+            }
+
+            $enrolledStudentIds = $subjectStudentMap->get($activity->subject_id, []);
+
+            foreach ($enrolledStudentIds as $studentId) {
+                $key = $activity->id . '::' . $studentId;
+                $score = $scores->get($key)?->first();
+                $merged[$courseOutcomeId]['raw'] += $score ? (int) $score->score : 0;
+                $merged[$courseOutcomeId]['max'] += (int) $activity->number_of_items;
+            }
+        }
+
+        $result = [];
+        foreach ($merged as $courseOutcomeId => $totals) {
+            $percent = $totals['max'] > 0
+                ? round(($totals['raw'] / $totals['max']) * 100, 2)
+                : 0.0;
+
+            $result[$courseOutcomeId] = [
+                'raw' => $totals['raw'],
+                'max' => $totals['max'],
+                'percent' => $percent,
+                'target_percentage' => $totals['target_percentage'],
+                'co_code' => $totals['co_code'],
+                'co_identifier' => $totals['co_identifier'],
+            ];
+        }
+
+        ksort($result);
+
+        return $result;
     }
 
     /**
@@ -516,8 +653,34 @@ class CourseOutcomeReportingService
         return $out;
     }
 
+    public function deriveProgramOutcomePrefix(string $courseCode): string
+    {
+        $lettersOnly = strtoupper((string) preg_replace('/[^A-Za-z]/', '', $courseCode));
+
+        if ($lettersOnly === '') {
+            return 'PO';
+        }
+
+        if (
+            strlen($lettersOnly) > 2
+            && in_array(substr($lettersOnly, 0, 2), ['BS', 'AB', 'BE'], true)
+        ) {
+            $lettersOnly = substr($lettersOnly, 2);
+        }
+
+        if ($lettersOnly === '') {
+            return 'PO';
+        }
+
+        if (strlen($lettersOnly) === 1) {
+            return $lettersOnly . 'X';
+        }
+
+        return substr($lettersOnly, 0, 2);
+    }
+
     /**
-     * Ensure the program has a default PLO scaffold the first time the report is opened.
+     * Ensure the program has a default outcome scaffold the first time the report is opened.
      */
     public function ensureDefaultProgramLearningOutcomes(int $courseId): Collection
     {
@@ -530,12 +693,15 @@ class CourseOutcomeReportingService
             return $existing;
         }
 
+        $course = Course::select('id', 'course_code')->findOrFail($courseId);
+        $outcomePrefix = $this->deriveProgramOutcomePrefix((string) $course->course_code);
+
         $defaults = collect();
         for ($i = 1; $i <= self::DEFAULT_PLO_COUNT; $i++) {
             $defaults->push(ProgramLearningOutcome::create([
                 'course_id' => $courseId,
-                'plo_code' => 'PLO' . $i,
-                'title' => 'Program Learning Outcome ' . $i,
+                'plo_code' => $this->buildProgramOutcomeCode($outcomePrefix, $i),
+                'title' => $this->buildDefaultProgramOutcomeTitle($outcomePrefix, $i),
                 'display_order' => $i,
                 'is_active' => true,
                 'is_deleted' => false,
@@ -576,26 +742,66 @@ class CourseOutcomeReportingService
             ->values();
 
         $coAggregates = $this->aggregateCourse($courseId, $academicPeriodId, $excludeGE);
-        $mappings = ProgramLearningOutcomeMapping::where('course_id', $courseId)
+        $courseOutcomeAggregates = $this->aggregateCourseOutcomeRows($courseId, $academicPeriodId, $excludeGE);
+        $availableCourseOutcomeRows = collect($this->getAvailableCourseOutcomeRows($courseId, $academicPeriodId, $excludeGE));
+        $availableCourseOutcomeRowsById = $availableCourseOutcomeRows->keyBy('id');
+        $availableCourseOutcomeIdsByCode = $availableCourseOutcomeRows
+            ->groupBy('co_code')
+            ->map(fn ($items) => $items->pluck('id')->map(fn ($id) => (int) $id)->values()->all());
+
+        $mappingRecords = ProgramLearningOutcomeMapping::where('course_id', $courseId)
             ->whereIn('program_learning_outcome_id', $allPlos->pluck('id'))
+            ->with('courseOutcome:id,co_code,co_identifier')
             ->get()
             ->groupBy('program_learning_outcome_id');
 
         $results = [];
 
         foreach ($activePlos as $plo) {
-            $mappedCoCodes = $mappings->get($plo->id, collect())
+            $records = $mappingRecords->get($plo->id, collect());
+
+            $mappedCourseOutcomeIds = $records
+                ->pluck('course_outcome_id')
+                ->filter()
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values();
+
+            $mappedMetrics = $mappedCourseOutcomeIds
+                ->map(fn ($courseOutcomeId) => $courseOutcomeAggregates[$courseOutcomeId] ?? null)
+                ->filter()
+                ->values();
+
+            $mappedLabels = $mappedCourseOutcomeIds
+                ->map(function ($courseOutcomeId) use ($availableCourseOutcomeRowsById) {
+                    $row = $availableCourseOutcomeRowsById->get($courseOutcomeId);
+                    if (!$row) {
+                        return null;
+                    }
+
+                    $identifier = trim((string) ($row['co_identifier'] ?? ''));
+                    return $identifier !== '' ? $identifier : (string) $row['co_code'];
+                })
+                ->filter()
+                ->values();
+
+            $legacyMappedCoCodes = $records
+                ->filter(fn ($mapping) => empty($mapping->course_outcome_id))
                 ->pluck('co_code')
+                ->filter()
                 ->unique()
                 ->sortBy(fn ($code) => $this->extractOutcomeNumber($code))
                 ->values();
 
-            $mappedMetrics = $mappedCoCodes
+            $legacyMappedMetrics = $legacyMappedCoCodes
                 ->map(function ($code) use ($coAggregates) {
                     $coNumber = $this->extractOutcomeNumber($code);
                     return $coAggregates[$coNumber] ?? null;
                 })
                 ->filter();
+
+            $mappedMetrics = $mappedMetrics->concat($legacyMappedMetrics)->values();
+            $mappedLabels = $mappedLabels->concat($legacyMappedCoCodes)->filter()->unique()->values();
 
             if ($mappedMetrics->isEmpty()) {
                 $results[$plo->id] = null;
@@ -603,19 +809,110 @@ class CourseOutcomeReportingService
             }
 
             $metrics = $this->computeProgramLearningOutcomeMetrics($mappedMetrics);
-            $metrics['co_codes'] = $mappedCoCodes->all();
+            $metrics['co_codes'] = $mappedLabels->all();
             $metrics['level'] = $this->resolveAttainmentLevel($metrics['percent']);
             $results[$plo->id] = $metrics;
         }
 
+        $mappingCourseOutcomeIds = $mappingRecords
+            ->map(function ($items) {
+                return collect($items)
+                    ->pluck('course_outcome_id')
+                    ->filter()
+                    ->map(fn ($id) => (int) $id)
+                    ->unique()
+                    ->values()
+                    ->all();
+            })
+            ->all();
+
+        $mappingExpandedCourseOutcomeIds = $mappingRecords
+            ->map(function ($items) use ($availableCourseOutcomeIdsByCode) {
+                $explicitRows = collect($items)
+                    ->pluck('course_outcome_id')
+                    ->filter()
+                    ->map(fn ($id) => (int) $id);
+
+                $expandedLegacyRows = collect($items)
+                    ->filter(fn ($item) => empty($item->course_outcome_id) && !empty($item->co_code))
+                    ->flatMap(function ($item) use ($availableCourseOutcomeIdsByCode) {
+                        return $availableCourseOutcomeIdsByCode->get($item->co_code, []);
+                    })
+                    ->map(fn ($id) => (int) $id);
+
+                return $explicitRows
+                    ->concat($expandedLegacyRows)
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->all();
+            })
+            ->all();
+
+        $courseCode = (string) optional(Course::select('course_code')->find($courseId))->course_code;
+
         return [
             'definitions' => $allPlos->values(),
             'activeDefinitions' => $activePlos,
-            'mappings' => $mappings->map(fn ($items) => $items->pluck('co_code')->unique()->values()->all())->all(),
+            'mappings' => $mappingRecords->map(fn ($items) => $items->pluck('co_code')->filter()->unique()->values()->all())->all(),
+            'mappingCourseOutcomeIds' => $mappingCourseOutcomeIds,
+            'mappingExpandedCourseOutcomeIds' => $mappingExpandedCourseOutcomeIds,
             'availableCoCodes' => $this->getAvailableCoCodes($courseId, $academicPeriodId, $excludeGE),
+            'availableCourseOutcomeRows' => $availableCourseOutcomeRows->all(),
             'coAggregates' => $coAggregates,
+            'courseOutcomeAggregates' => $courseOutcomeAggregates,
+            'outcomeCodePrefix' => $this->deriveProgramOutcomePrefix($courseCode),
             'results' => $results,
         ];
+    }
+
+    public function getAvailableCourseOutcomeRows(
+        int $courseId,
+        ?int $academicPeriodId = null,
+        bool $excludeGE = false
+    ): array {
+        return CourseOutcomes::query()
+            ->select(
+                'course_outcomes.id',
+                'course_outcomes.co_code',
+                'course_outcomes.co_identifier',
+                'course_outcomes.description',
+                'course_outcomes.target_percentage',
+                'subjects.subject_code',
+                'subjects.subject_description'
+            )
+            ->join('subjects', 'subjects.id', '=', 'course_outcomes.subject_id')
+            ->where('course_outcomes.is_deleted', false)
+            ->where('subjects.is_deleted', false)
+            ->where('subjects.course_id', $courseId)
+            ->when($excludeGE, function ($query) {
+                $query->where('subjects.department_id', '!=', 1);
+            })
+            ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
+                $query->where('subjects.academic_period_id', $academicPeriodId);
+            })
+            ->get()
+            ->sortBy(function ($row) {
+                return sprintf(
+                    '%s-%03d-%s',
+                    (string) $row->subject_code,
+                    $this->extractOutcomeNumber((string) $row->co_code),
+                    (string) $row->co_identifier
+                );
+            })
+            ->values()
+            ->map(function ($row) {
+                return [
+                    'id' => (int) $row->id,
+                    'subject_code' => (string) $row->subject_code,
+                    'subject_description' => (string) ($row->subject_description ?? ''),
+                    'co_code' => (string) $row->co_code,
+                    'co_identifier' => (string) ($row->co_identifier ?? ''),
+                    'description' => (string) ($row->description ?? ''),
+                    'target_percentage' => (int) ($row->target_percentage ?? 75),
+                ];
+            })
+            ->all();
     }
 
     public function getAvailableCoCodes(
@@ -678,5 +975,20 @@ class CourseOutcomeReportingService
     private function extractOutcomeNumber(string $code): int
     {
         return (int) preg_replace('/[^0-9]/', '', $code);
+    }
+
+    private function buildProgramOutcomeCode(string $prefix, int $index): string
+    {
+        return $prefix . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+    }
+
+    private function buildDefaultProgramOutcomeTitle(string $prefix, int $index): string
+    {
+        if ($prefix === 'IT') {
+            return self::IT_PROGRAM_OUTCOME_DESCRIPTIONS[$index]
+                ?? ('Information Technology Program Outcome ' . $index);
+        }
+
+        return 'Program Outcome ' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
     }
 }

@@ -138,7 +138,12 @@ class ProgramReportsController extends Controller
             'ploDefinitions' => $ploSummary['definitions'],
             'activePloDefinitions' => $ploSummary['activeDefinitions'],
             'ploMappings' => $ploSummary['mappings'],
+            'ploMappingCourseOutcomeIds' => $ploSummary['mappingExpandedCourseOutcomeIds'] ?? [],
             'availableCoCodes' => $ploSummary['availableCoCodes'],
+            'availableCourseOutcomeRows' => $ploSummary['availableCourseOutcomeRows'] ?? [],
+            'outcomeCodePrefix' => $ploSummary['outcomeCodePrefix']
+                ?? $service->deriveProgramOutcomePrefix((string) $course->course_code),
+            'defaultOutcomeCount' => CourseOutcomeReportingService::DEFAULT_PLO_COUNT,
             'academicYear' => $period?->academic_year,
             'semester' => $period?->semester,
         ]);
@@ -148,6 +153,7 @@ class ProgramReportsController extends Controller
     {
         $course = $this->resolveChairpersonCourse();
         $service->ensureDefaultProgramLearningOutcomes($course->id);
+        $outcomePrefix = $service->deriveProgramOutcomePrefix((string) $course->course_code);
 
         $validator = Validator::make($request->all(), [
             'plos' => ['required', 'array'],
@@ -158,7 +164,7 @@ class ProgramReportsController extends Controller
             'plos.*.delete' => ['nullable', 'boolean'],
         ]);
 
-        $validator->after(function ($validator) use ($request) {
+        $validator->after(function ($validator) use ($request, $outcomePrefix) {
             $submitted = collect($request->input('plos', []));
             $activeRows = $submitted->filter(function ($plo) {
                 return !filter_var($plo['delete'] ?? false, FILTER_VALIDATE_BOOL);
@@ -174,12 +180,16 @@ class ProgramReportsController extends Controller
             }
 
             $codes = [];
+            $codePattern = '/^' . preg_quote($outcomePrefix, '/') . '(0[1-9]|1[0-9]|20)$/';
             foreach ($activeRows as $index => $plo) {
                 $code = strtoupper(trim((string) ($plo['code'] ?? '')));
                 $title = trim((string) ($plo['title'] ?? ''));
 
-                if ($code === '' || !preg_match('/^PLO([1-9]|1[0-9]|20)$/', $code)) {
-                    $validator->errors()->add("plos.$index.code", 'PLO code must be between PLO1 and PLO20.');
+                if ($code === '' || !preg_match($codePattern, $code)) {
+                    $validator->errors()->add(
+                        "plos.$index.code",
+                        sprintf('Outcome code must follow %s01 to %s20.', $outcomePrefix, $outcomePrefix)
+                    );
                 }
 
                 if ($title === '') {
@@ -245,31 +255,44 @@ class ProgramReportsController extends Controller
         $course = $this->resolveChairpersonCourse();
         $periodId = session('active_academic_period_id');
         $ploIds = $service->getProgramLearningOutcomes($course->id)->pluck('id')->all();
-        $availableCoCodes = $service->getAvailableCoCodes($course->id, $periodId, true);
+        $availableRows = collect($service->getAvailableCourseOutcomeRows($course->id, $periodId, true));
+        $availableRowsById = $availableRows->keyBy('id');
+        $availableCourseOutcomeIds = $availableRows->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $availableCoCodes = $availableRows->pluck('co_code')->filter()->map(fn ($code) => strtoupper((string) $code))->unique()->values()->all();
 
         $validator = Validator::make($request->all(), [
             'mappings' => ['nullable', 'array'],
         ]);
 
-        $validator->after(function ($validator) use ($request, $ploIds, $availableCoCodes) {
+        $validator->after(function ($validator) use ($request, $ploIds, $availableCourseOutcomeIds, $availableCoCodes) {
             $allowedPloIds = collect($ploIds)->map(fn ($id) => (int) $id)->all();
 
-             if (empty($availableCoCodes) && !empty($request->input('mappings', []))) {
+             if (empty($availableCourseOutcomeIds) && !empty($request->input('mappings', []))) {
                 $validator->errors()->add('mappings', 'No course outcomes are available to link for this program yet.');
                 return;
             }
 
-            foreach ($request->input('mappings', []) as $ploId => $coCodes) {
+            foreach ($request->input('mappings', []) as $ploId => $mappings) {
                 if (!in_array((int) $ploId, $allowedPloIds, true)) {
                     $validator->errors()->add('mappings', 'Invalid PLO selected for mapping.');
                     continue;
                 }
 
-                foreach ((array) $coCodes as $index => $coCode) {
-                    if (!in_array($coCode, $availableCoCodes, true)) {
+                foreach ((array) $mappings as $index => $mappingValue) {
+                    $normalizedValue = is_string($mappingValue)
+                        ? trim($mappingValue)
+                        : $mappingValue;
+
+                    $isCourseOutcomeId = is_numeric($normalizedValue)
+                        && in_array((int) $normalizedValue, $availableCourseOutcomeIds, true);
+
+                    $isLegacyCoCode = is_string($normalizedValue)
+                        && in_array(strtoupper($normalizedValue), $availableCoCodes, true);
+
+                    if (!$isCourseOutcomeId && !$isLegacyCoCode) {
                         $validator->errors()->add(
                             "mappings.$ploId.$index",
-                            'Mappings can only use the available CO slots for this program.'
+                            'Mappings can only use available course outcomes for this program.'
                         );
                     }
                 }
@@ -286,13 +309,45 @@ class ProgramReportsController extends Controller
 
         ProgramLearningOutcomeMapping::where('course_id', $course->id)->delete();
 
-        foreach ($request->input('mappings', []) as $ploId => $coCodes) {
-            foreach (collect((array) $coCodes)->unique()->values() as $coCode) {
-                ProgramLearningOutcomeMapping::create([
-                    'course_id' => $course->id,
-                    'program_learning_outcome_id' => (int) $ploId,
-                    'co_code' => $coCode,
-                ]);
+        foreach ($request->input('mappings', []) as $ploId => $mappings) {
+            $normalizedMappings = collect((array) $mappings)
+                ->map(fn ($value) => is_string($value) ? trim($value) : $value)
+                ->filter(fn ($value) => $value !== null && $value !== '')
+                ->unique()
+                ->values();
+
+            foreach ($normalizedMappings as $mappingValue) {
+                if (is_numeric($mappingValue) && in_array((int) $mappingValue, $availableCourseOutcomeIds, true)) {
+                    $courseOutcomeId = (int) $mappingValue;
+                    $courseOutcomeRow = $availableRowsById->get($courseOutcomeId);
+
+                    if (!$courseOutcomeRow) {
+                        continue;
+                    }
+
+                    ProgramLearningOutcomeMapping::create([
+                        'course_id' => $course->id,
+                        'program_learning_outcome_id' => (int) $ploId,
+                        'course_outcome_id' => $courseOutcomeId,
+                        'co_code' => $courseOutcomeRow['co_code'],
+                    ]);
+
+                    continue;
+                }
+
+                if (is_string($mappingValue)) {
+                    $coCode = strtoupper($mappingValue);
+
+                    if (!in_array($coCode, $availableCoCodes, true)) {
+                        continue;
+                    }
+
+                    ProgramLearningOutcomeMapping::create([
+                        'course_id' => $course->id,
+                        'program_learning_outcome_id' => (int) $ploId,
+                        'co_code' => $coCode,
+                    ]);
+                }
             }
         }
 
