@@ -186,15 +186,30 @@ class CourseOutcomeAttainmentController extends Controller
         
         // Pre-compute summary statistics per CO (all terms combined)
         $coSummaryStats = [];
+        $coThresholdPreviewData = [
+            'initial_targets' => [],
+            'combined_evaluations' => [],
+            'term_evaluations' => [],
+        ];
+
         foreach ($finalCOs as $coId) {
             $attempted = 0;
             $metTargetCount = 0;
             $threshold = (int) (optional($coDetails->get($coId))->target_percentage ?? 75);
+
+            $coKey = (string) $coId;
+            $coThresholdPreviewData['initial_targets'][$coKey] = $threshold;
+            $coThresholdPreviewData['combined_evaluations'][$coKey] = [];
             
             foreach ($students as $student) {
                 $raw = $coResults[$student->id]['semester_raw'][$coId] ?? null;
                 $max = $coResults[$student->id]['semester_max'][$coId] ?? null;
                 $percent = ($max > 0 && $raw !== null) ? ($raw / $max) * 100 : null;
+
+                $coThresholdPreviewData['combined_evaluations'][$coKey][] = [
+                    'attempted' => $percent !== null,
+                    'percent' => $percent !== null ? round($percent, 4) : null,
+                ];
                 
                 if ($percent !== null) {
                     $attempted++;
@@ -218,19 +233,37 @@ class CourseOutcomeAttainmentController extends Controller
         // Pre-compute summary statistics per term per CO
         $termCoSummaryStats = [];
         foreach ($terms as $term) {
+            if (!isset($coThresholdPreviewData['term_evaluations'][$term])) {
+                $coThresholdPreviewData['term_evaluations'][$term] = [];
+            }
+
             foreach ($coColumnsByTerm[$term] ?? [] as $coId) {
                 $attempted = 0;
                 $metTargetCount = 0;
                 $threshold = (int) (optional($coDetails->get($coId))->target_percentage ?? 75);
+
+                $coKey = (string) $coId;
+                $coThresholdPreviewData['term_evaluations'][$term][$coKey] = [];
                 
                 foreach ($students as $student) {
                     $data = $studentTermCoScores[$student->id][$term][$coId] ?? null;
+
+                    $attemptedInTerm = false;
+                    $studentPercent = null;
+
                     if ($data && $data['max'] > 0) {
+                        $attemptedInTerm = true;
+                        $studentPercent = (float) $data['percent'];
                         $attempted++;
-                        if ($data['percent'] >= $threshold) {
+                        if ($studentPercent >= $threshold) {
                             $metTargetCount++;
                         }
                     }
+
+                    $coThresholdPreviewData['term_evaluations'][$term][$coKey][] = [
+                        'attempted' => $attemptedInTerm,
+                        'percent' => $studentPercent,
+                    ];
                 }
 
                 $metTargetPercentage = $attempted > 0 ? round(($metTargetCount / $attempted) * 100, 1) : null;
@@ -306,6 +339,7 @@ class CourseOutcomeAttainmentController extends Controller
             'coSummaryStats' => $coSummaryStats,
             'termCoSummaryStats' => $termCoSummaryStats,
             'targetLevelThresholds' => $targetLevelThresholds,
+            'coThresholdPreviewData' => $coThresholdPreviewData,
         ]);
     }
 

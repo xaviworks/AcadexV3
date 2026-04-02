@@ -242,7 +242,7 @@ class FormulaStructure
             'label' => 'Period Grade',
             'children' => [
                 self::activityNode('quiz', 'Quizzes', 0.40, 5),
-                self::activityNode('exam', 'Exam', 0.40, 1),
+                self::activityNode('exam', 'Exam', 0.40, 2),
                 self::activityNode('ocr', 'Other Course Requirements', 0.20, 5),
             ],
         ];

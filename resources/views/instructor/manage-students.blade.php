@@ -170,6 +170,16 @@
                                                     data-student-status="{{ $student->pivot->is_deleted ? 'dropped' : 'enrolled' }}">
                                                 <i class="bi bi-pencil-square"></i> Edit
                                             </button>
+                                            @if($student->pivot->is_deleted)
+                                                <form method="POST" action="{{ route('instructor.students.reenroll', $student->id) }}" class="d-inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
+                                                    <button type="submit" class="btn btn-warning btn-sm text-dark">
+                                                        Re-enroll
+                                                    </button>
+                                                </form>
+                                            @else
                                                 <button type="button"
                                                     class="btn btn-danger btn-sm"
                                                     data-bs-toggle="modal"
@@ -179,6 +189,7 @@
                                                     data-student-name="{{ $student->first_name }} {{ $student->last_name }}">
                                                 Drop
                                             </button>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

@@ -22,7 +22,7 @@
                 </div>
 
                 <div class="modal-body row g-3">
-                    {{-- Hidden subject_id & term if coming from filtered --}}
+                    {{-- Hidden subject_id & period if coming from filtered --}}
                     @if(request('subject_id') && request('term'))
                         <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
                         <input type="hidden" name="term" value="{{ request('term') }}">
@@ -39,9 +39,9 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Select Term</label>
+                            <label class="form-label">Select Period</label>
                             <select name="term" class="form-select" required>
-                                <option value="">-- Select Term --</option>
+                                <option value="">-- Select Period --</option>
                                 @foreach(['prelim','midterm','prefinal','final'] as $termOption)
                                     <option value="{{ $termOption }}" {{ old('term') == $termOption ? 'selected' : '' }}>
                                         {{ ucfirst($termOption) }}

@@ -324,38 +324,77 @@ class DashboardController extends Controller
     private function deanDashboard()
     {
         $academicPeriodId = $this->resolveLatestAcademicPeriodIdForDean();
-        $departmentId = Auth::user()->department_id;
+        $deanDepartmentId = Auth::user()?->department_id;
+
+        if (! $academicPeriodId || ! $deanDepartmentId) {
+            return view('dashboard.dean', [
+                'studentsPerDepartment' => collect(),
+                'totalInstructors' => 0,
+                'studentsPerCourse' => collect(),
+            ]);
+        }
 
         $studentsPerDepartment = Student::join('departments', 'students.department_id', '=', 'departments.id')
             ->where('students.is_deleted', false)
-            ->where('students.department_id', $departmentId)
-            ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
-                $query->where('students.academic_period_id', $academicPeriodId);
-            })
             ->select('departments.department_description as department_name', DB::raw('count(*) as total'))
+            ->where('students.academic_period_id', $academicPeriodId)
+            ->where('students.department_id', $deanDepartmentId)
             ->groupBy('students.department_id', 'departments.department_description')
             ->pluck('total', 'department_name');
 
         $studentsPerCourse = Student::join('courses', 'students.course_id', '=', 'courses.id')
             ->where('students.is_deleted', false)
-            ->where('students.department_id', $departmentId)
             ->where('courses.is_deleted', false)
-            ->where('courses.department_id', $departmentId)
-            ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
-                $query->where('students.academic_period_id', $academicPeriodId);
-            })
+            ->where('courses.department_id', $deanDepartmentId)
             ->select('courses.course_code', 'courses.course_description', DB::raw('count(*) as total'))
+            ->where('students.academic_period_id', $academicPeriodId)
+            ->where('students.department_id', $deanDepartmentId)
             ->groupBy('students.course_id', 'courses.course_code', 'courses.course_description')
             ->pluck('total', 'courses.course_code');
 
+        $teachingInstructors = $this->countTeachingInstructorsForDepartment($academicPeriodId, $deanDepartmentId);
+        $totalInstructors = $teachingInstructors > 0
+            ? $teachingInstructors
+            : User::where('role', 0)
+                ->where('is_active', true)
+                ->where('department_id', $deanDepartmentId)
+                ->count();
+
         return view('dashboard.dean', [
             'studentsPerDepartment' => $studentsPerDepartment,
-            'totalInstructors' => User::where('role', 0)
-                ->where('is_active', true)
-                ->where('department_id', $departmentId)
-                ->count(),
+            'totalInstructors' => $totalInstructors,
             'studentsPerCourse' => $studentsPerCourse
         ]);
+    }
+
+    private function countTeachingInstructorsForDepartment(?int $academicPeriodId, ?int $departmentId): int
+    {
+        if (! $academicPeriodId || ! $departmentId) {
+            return 0;
+        }
+
+        return User::where('users.role', 0)
+            ->where('users.is_active', true)
+            ->where('users.department_id', $departmentId)
+            ->where(function ($teachingQuery) use ($academicPeriodId, $departmentId) {
+                $teachingQuery->whereExists(function ($subQuery) use ($academicPeriodId, $departmentId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('subjects')
+                        ->whereColumn('subjects.instructor_id', 'users.id')
+                        ->where('subjects.department_id', $departmentId)
+                        ->where('subjects.academic_period_id', $academicPeriodId)
+                        ->where('subjects.is_deleted', false);
+                })->orWhereExists(function ($subQuery) use ($academicPeriodId, $departmentId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('instructor_subject')
+                        ->join('subjects', 'subjects.id', '=', 'instructor_subject.subject_id')
+                        ->whereColumn('instructor_subject.instructor_id', 'users.id')
+                        ->where('subjects.department_id', $departmentId)
+                        ->where('subjects.academic_period_id', $academicPeriodId)
+                        ->where('subjects.is_deleted', false);
+                });
+            })
+            ->count();
     }
 
     private function resolveLatestAcademicPeriodIdForDean(): ?int
@@ -674,36 +713,48 @@ class DashboardController extends Controller
     private function pollDeanData(): \Illuminate\Http\JsonResponse
     {
         $academicPeriodId = $this->resolveLatestAcademicPeriodIdForDean();
-        $departmentId = Auth::user()->department_id;
+        $deanDepartmentId = Auth::user()?->department_id;
+
+        if (! $academicPeriodId || ! $deanDepartmentId) {
+            return response()->json([
+                'totalStudents' => 0,
+                'totalInstructors' => 0,
+                'totalCourses' => 0,
+                'totalDepartments' => 0,
+                'studentsPerDepartment' => collect(),
+                'studentsPerCourse' => collect(),
+            ]);
+        }
 
         $studentsPerDepartment = Student::join('departments', 'students.department_id', '=', 'departments.id')
             ->where('students.is_deleted', false)
-            ->where('students.department_id', $departmentId)
-            ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
-                $query->where('students.academic_period_id', $academicPeriodId);
-            })
             ->select('departments.department_description as department_name', DB::raw('count(*) as total'))
+            ->where('students.academic_period_id', $academicPeriodId)
+            ->where('students.department_id', $deanDepartmentId)
             ->groupBy('students.department_id', 'departments.department_description')
             ->pluck('total', 'department_name');
 
         $studentsPerCourse = Student::join('courses', 'students.course_id', '=', 'courses.id')
             ->where('students.is_deleted', false)
-            ->where('students.department_id', $departmentId)
             ->where('courses.is_deleted', false)
-            ->where('courses.department_id', $departmentId)
-            ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
-                $query->where('students.academic_period_id', $academicPeriodId);
-            })
+            ->where('courses.department_id', $deanDepartmentId)
             ->select('courses.course_code', 'courses.course_description', DB::raw('count(*) as total'))
+            ->where('students.academic_period_id', $academicPeriodId)
+            ->where('students.department_id', $deanDepartmentId)
             ->groupBy('students.course_id', 'courses.course_code', 'courses.course_description')
             ->pluck('total', 'courses.course_code');
 
+        $teachingInstructors = $this->countTeachingInstructorsForDepartment($academicPeriodId, $deanDepartmentId);
+        $totalInstructors = $teachingInstructors > 0
+            ? $teachingInstructors
+            : User::where('role', 0)
+                ->where('is_active', true)
+                ->where('department_id', $deanDepartmentId)
+                ->count();
+
         return response()->json([
             'totalStudents' => $studentsPerDepartment->sum(),
-            'totalInstructors' => User::where('role', 0)
-                ->where('is_active', true)
-                ->where('department_id', $departmentId)
-                ->count(),
+            'totalInstructors' => $totalInstructors,
             'totalCourses' => $studentsPerCourse->count(),
             'totalDepartments' => $studentsPerDepartment->count(),
             'studentsPerDepartment' => $studentsPerDepartment,

@@ -132,8 +132,13 @@
                             </table>
                             </div>
                         @else
-                            <div class="alert alert-warning shadow-sm rounded">
-                                No courses available for {{ ordinalSuffix($level) }} Year.
+                            <div class="bg-white shadow-sm rounded-4 p-3">
+                                <x-empty-state
+                                    compact="true"
+                                    icon="bi-journal-x"
+                                    title="No Courses Found"
+                                    message="No courses available for {{ ordinalSuffix($level) }} Year."
+                                />
                             </div>
                         @endif
                 </div>
@@ -202,11 +207,15 @@
                                     </table>
                                 </div>
                             @else
-                                <div class="text-center py-5">
-                                    <div class="text-muted mb-3">
-                                        <i class="bi bi-journal-x display-6"></i>
+                                <div class="p-3">
+                                    <div class="bg-white shadow-sm rounded-4">
+                                        <x-empty-state
+                                            compact="true"
+                                            icon="bi-journal-x"
+                                            title="No Courses Found"
+                                            message="No courses available for {{ ordinalSuffix($level) }} Year."
+                                        />
                                     </div>
-                                    <p class="text-muted mb-0">No courses available for {{ ordinalSuffix($level) }} Year.</p>
                                 </div>
                             @endif
                         </div>

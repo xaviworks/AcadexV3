@@ -162,21 +162,21 @@
             <div class="print-options-grid">
                 <div class="print-option-card">
                     <div class="print-option-card-header">
-                        <h6><i class="bi bi-calendar-event"></i>Individual Terms</h6>
+                        <h6><i class="bi bi-calendar-event"></i>Individual Periods</h6>
                     </div>
                     <div class="print-option-card-body">
                         <div class="print-btn-list">
                             <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('prelim'); fgClosePrintModal();">
-                                <i class="bi bi-printer"></i>Print Prelim Term Sheet
+                                <i class="bi bi-printer"></i>Print Prelim Period Sheet
                             </button>
                             <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('midterm'); fgClosePrintModal();">
-                                <i class="bi bi-printer"></i>Print Midterm Term Sheet
+                                <i class="bi bi-printer"></i>Print Midterm Period Sheet
                             </button>
                             <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('prefinal'); fgClosePrintModal();">
-                                <i class="bi bi-printer"></i>Print Prefinal Term Sheet
+                                <i class="bi bi-printer"></i>Print Prefinal Period Sheet
                             </button>
                             <button class="print-btn print-btn-outline" onclick="fgPrintSpecificTable('final'); fgClosePrintModal();">
-                                <i class="bi bi-printer"></i>Print Final Term Sheet
+                                <i class="bi bi-printer"></i>Print Final Period Sheet
                             </button>
                         </div>
                     </div>
@@ -193,9 +193,9 @@
                         </div>
                         <div class="print-info-text">
                             <i class="bi bi-info-circle"></i>
-                            <strong>Final Summary:</strong> Shows all term grades and final averages<br>
+                            <strong>Final Summary:</strong> Shows all period grades and final averages<br>
                             <i class="bi bi-info-circle"></i>
-                            <strong>Term Sheets:</strong> Detailed activities and scores per term<br><br>
+                            <strong>Period Sheets:</strong> Detailed activities and scores per period<br><br>
                              To remove URL or headers/footers in printout, uncheck <em>Headers &amp; footers</em> in your browser's print dialog.
                         </div>
                     </div>
@@ -208,8 +208,8 @@
                 </div>
                 <div>
                     <h6>Print Settings</h6>
-                    <p>All printouts are optimized for <strong>A4 portrait</strong> format with professional styling.</p>
-                    <small>Make sure your printer is set to A4 paper size for best results.</small>
+                    <p>All printouts are optimized for <strong>Letter (8.5 x 11 inch) portrait</strong> format with professional styling.</p>
+                    <small>Make sure your printer is set to Letter paper size for best results.</small>
                 </div>
             </div>
         </div>
@@ -268,6 +268,7 @@
     // Count passed and failed students
     $passedStudents = 0;
     $failedStudents = 0;
+    $droppedStudents = 0;
     if (!empty($finalData)) {
         foreach ($finalData as $data) {
             if (isset($data['remarks'])) {
@@ -275,12 +276,13 @@
                     $passedStudents++;
                 } elseif (strtolower($data['remarks']) === 'failed') {
                     $failedStudents++;
+                } elseif (strtolower($data['remarks']) === 'dropped') {
+                    $droppedStudents++;
                 }
             }
         }
     }
     $totalStudents = $passedStudents + $failedStudents;
-    $passRate = $totalStudents > 0 ? round(($passedStudents / $totalStudents) * 100, 1) : 0;
     
     // Get academic period info
     $activePeriod = \App\Models\AcademicPeriod::find(session('active_academic_period_id'));
@@ -311,8 +313,8 @@
         subjectDesc: @json($subjectDesc),
         passedStudents: @json($passedStudents),
         failedStudents: @json($failedStudents),
+        droppedStudents: @json($droppedStudents),
         totalStudents: @json($totalStudents),
-        passRate: @json($passRate),
         academicPeriod: @json($activePeriod?->academic_year ?? ''),
         semester: @json($semesterLabel),
         units: @json($currentSubject?->units ?? 'N/A'),

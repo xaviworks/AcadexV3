@@ -463,7 +463,7 @@
                 <h5 class="modal-title" id="confirmModalLabel">Confirm Your Password</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="confirm-form" action="{{ route('admin.confirmUserCreationWithPassword') }}" method="POST" data-no-page-loader="true">
+            <form id="confirm-form" action="{{ route('admin.confirmUserCreationWithPassword') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <p>To make sure this is you, you will need to re-enter your password for safety purposes.</p>

@@ -14,10 +14,11 @@
     @if(empty($selectedSubjectId))
         {{-- Course Selection Cards --}}
         @if($subjects->isEmpty())
-            <div class="alert alert-warning shadow-sm">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                No GE courses found with assigned instructors.
-            </div>
+            <x-empty-state
+                icon="bi-exclamation-triangle"
+                title="No GE Courses Found"
+                message="No GE courses found with assigned instructors."
+            />
         @else
             <div class="row g-4 px-4 py-4">
                 @foreach($subjects as $subject)
@@ -63,11 +64,11 @@
         </nav>
 
     @if($students->isEmpty())
-        <div class="alert alert-info shadow-sm text-center py-5">
-            <i class="bi bi-inbox fs-1 text-muted mb-3 d-block" style="font-size: 4rem;"></i>
-            <h5 class="text-muted mb-2">No Students Enrolled</h5>
-            <p class="text-muted mb-0">There are currently no students enrolled in this course.</p>
-        </div>
+        <x-empty-state
+            icon="bi-inbox"
+            title="No Students Enrolled"
+            message="There are currently no students enrolled in this course."
+        />
     @else
         <div class="filter-section">
             <div class="d-flex align-items-center gap-3">

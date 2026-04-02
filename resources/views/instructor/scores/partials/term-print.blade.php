@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{ $subject->subject_code }} {{ $termLabel }} Term Sheet</title>
+    <title>{{ $subject->subject_code }} {{ $termLabel }} Period Sheet</title>
     <style>
         @media print {
             @page {
-                size: portrait;
+                size: Letter portrait;
                 margin: 0.5in;
             }
         }
@@ -155,7 +155,7 @@
     <img src="{{ asset('images/banner-header.png') }}" alt="Banner Header" class="banner">
     
     <div class="header-content">
-        <div class="report-title">Report of Grades - {{ $termLabel }} Term</div>
+        <div class="report-title">Report of Grades - {{ $termLabel }} Period</div>
         
         <table class="header-table">
             <tr>
@@ -190,7 +190,7 @@
                             <div class="activity-header">Max: {{ $activity->number_of_items }}</div>
                         </th>
                     @endforeach
-                <th>TERM GRADE</th>
+                <th>PERIOD GRADE</th>
             </tr>
         </thead>
         <tbody>
@@ -217,7 +217,7 @@
             @empty
                 <tr>
                     <td colspan="{{ $activities->count() + 2 }}" style="text-align:center; font-style:italic;">
-                        No student data available for this term.
+                        No student data available for this period.
                     </td>
                 </tr>
             @endforelse

@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Student;
 use App\Models\StudentSubject;
 use App\Models\Subject;
+use App\Models\FinalGrade;
 use App\Models\ReviewStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,7 @@ class StudentController extends Controller
                 })
                 ->firstOrFail();
     
-            $students = $subject->students()
+            $students = $subject->studentsWithEnrollmentStatus()
                 ->where('students.is_deleted', 0)
                 ->orderBy('last_name')
                 ->orderBy('first_name')
@@ -149,11 +150,84 @@ class StudentController extends Controller
             'subject_id' => 'required|exists:subjects,id',
         ]);
 
-        StudentSubject::where('student_id', $studentId)
-            ->where('subject_id', $request->subject_id)
-            ->delete();
+        $academicPeriodId = session('active_academic_period_id');
+
+        $subject = Subject::where('id', $request->subject_id)
+            ->when($academicPeriodId, fn($query) => $query->where('academic_period_id', $academicPeriodId))
+            ->where(function ($query) {
+                $query->where('instructor_id', Auth::id())
+                    ->orWhereHas('instructors', function ($q) {
+                        $q->where('instructor_id', Auth::id());
+                    });
+            })
+            ->firstOrFail();
+
+        $enrollment = StudentSubject::where('student_id', $studentId)
+            ->where('subject_id', $subject->id)
+            ->firstOrFail();
+
+        if (! $enrollment->is_deleted) {
+            $enrollment->is_deleted = true;
+            $enrollment->save();
+        }
+
+        $finalGrade = FinalGrade::firstOrNew([
+            'student_id' => $studentId,
+            'subject_id' => $subject->id,
+            'academic_period_id' => $subject->academic_period_id,
+        ]);
+
+        if (! $finalGrade->exists) {
+            $finalGrade->created_by = Auth::id();
+        }
+
+        $finalGrade->remarks = 'Dropped';
+        $finalGrade->is_deleted = false;
+        $finalGrade->updated_by = Auth::id();
+        $finalGrade->save();
 
         return redirect()->back()->with('success', 'Student dropped from subject.');
+    }
+
+    public function reenroll(Request $request, $studentId)
+    {
+        Gate::authorize('instructor');
+
+        $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+        ]);
+
+        $academicPeriodId = session('active_academic_period_id');
+
+        $subject = Subject::where('id', $request->subject_id)
+            ->when($academicPeriodId, fn($query) => $query->where('academic_period_id', $academicPeriodId))
+            ->where(function ($query) {
+                $query->where('instructor_id', Auth::id())
+                    ->orWhereHas('instructors', function ($q) {
+                        $q->where('instructor_id', Auth::id());
+                    });
+            })
+            ->firstOrFail();
+
+        $enrollment = StudentSubject::where('student_id', $studentId)
+            ->where('subject_id', $subject->id)
+            ->firstOrFail();
+
+        if ($enrollment->is_deleted) {
+            $enrollment->is_deleted = false;
+            $enrollment->save();
+        }
+
+        FinalGrade::where('student_id', $studentId)
+            ->where('subject_id', $subject->id)
+            ->where('academic_period_id', $subject->academic_period_id)
+            ->where('remarks', 'Dropped')
+            ->update([
+                'remarks' => null,
+                'updated_by' => Auth::id(),
+            ]);
+
+        return redirect()->back()->with('success', 'Student re-enrolled successfully.');
     }
 
     // 📝 Update Student Details and Status

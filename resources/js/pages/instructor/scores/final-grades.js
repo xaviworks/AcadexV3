@@ -220,8 +220,8 @@ export function fgPrintFinalSummary() {
 
   const passedStudents = pageData.passedStudents || 0;
   const failedStudents = pageData.failedStudents || 0;
+  const droppedStudents = pageData.droppedStudents || 0;
   const totalStudents = pageData.totalStudents || 0;
-  const passRate = pageData.passRate || 0;
   const academicPeriod = pageData.academicPeriod || '';
   const semester = pageData.semester || '';
   const units = pageData.units || 'N/A';
@@ -240,10 +240,10 @@ export function fgPrintFinalSummary() {
                 <title>Grade Report - ${subject}</title>
                 <style>
                     @media print {
-                        @page {
-                            size: portrait;
-                            margin: 0.5in;
-                        }
+                      @page {
+                        size: Letter portrait;
+                        margin: 0.5in;
+                      }
                     }
                     
                     body {
@@ -508,8 +508,8 @@ export function fgPrintFinalSummary() {
                                             <div class="stat-value failed-count">${failedStudents}</div>
                                         </div>
                                         <div class="stat-item">
-                                            <div class="stat-label">PASSING RATE</div>
-                                            <div class="stat-value total-count">${passRate}%</div>
+                                          <div class="stat-label">DROPPED STUDENTS</div>
+                                          <div class="stat-value total-count">${droppedStudents}</div>
                                         </div>
                                     </div>
                                 </div>

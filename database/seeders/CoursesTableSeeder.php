@@ -49,8 +49,13 @@ class CoursesTableSeeder extends Seeder
                 'department_id' => $ase->id,
             ],
             [
-                'course_code' => 'BSEd',
-                'course_description' => 'Bachelor of Science in Education',
+                'course_code' => 'BSED',
+                'course_description' => 'Bachelor of Secondary Education',
+                'department_id' => $ase->id,
+            ],            
+            [
+                'course_code' => 'BEED',
+                'course_description' => 'Bachelor of Elementary Education',
                 'department_id' => $ase->id,
             ],
             // Nursing Course

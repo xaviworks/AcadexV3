@@ -323,6 +323,7 @@ Route::prefix('instructor')
         Route::post('/students', [StudentController::class, 'store'])->name('students.store');
         Route::put('/students/{student}/update', [StudentController::class, 'update'])->name('students.update');
         Route::delete('/students/{student}/drop', [StudentController::class, 'drop'])->name('students.drop');
+        Route::patch('/students/{student}/reenroll', [StudentController::class, 'reenroll'])->name('students.reenroll');
 
         // ✅ Student Import Routes
         Route::get('/students/import', [StudentImportController::class, 'showUploadForm'])->name('students.import');

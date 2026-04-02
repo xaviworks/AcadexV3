@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4">
     <h1 class="text-2xl font-bold mb-6">Manage Grades</h1>
 
-    {{-- Course and Term Selection --}}
+    {{-- Course and Period Selection --}}
     <form method="GET" action="{{ route('grades.index') }}">
         <div class="mb-6 flex items-center space-x-4">
             <div>
@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium mb-2">Term:</label>
+                <label class="block text-sm font-medium mb-2">Period:</label>
                 <select name="term" class="border rounded px-3 py-2" onchange="this.form.submit()">
                     @foreach(['prelim', 'midterm', 'prefinal', 'final'] as $termOption)
                         <option value="{{ $termOption }}" {{ request('term', 'prelim') == $termOption ? 'selected' : '' }}>

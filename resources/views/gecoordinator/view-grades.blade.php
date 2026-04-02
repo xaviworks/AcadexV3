@@ -29,11 +29,11 @@
     {{-- Step 1: Instructor Selection --}}
     @if (empty($selectedInstructorId) && empty($selectedSubjectId))
         @if($instructors->isEmpty())
-            <div class="text-center py-5">
-                <i class="bi bi-inbox fs-1 text-muted mb-3 d-block" style="font-size: 4rem;"></i>
-                <h5 class="text-muted mb-2">No Data Available</h5>
-                <p class="text-muted">There are currently no instructors with assigned courses.</p>
-            </div>
+            <x-empty-state
+                icon="bi-inbox"
+                title="No Data Available"
+                message="There are currently no instructors with assigned courses."
+            />
         @else
         <div class="row g-4 px-4 py-4">
             @foreach($instructors as $instructor)
@@ -99,9 +99,11 @@
                 @endforeach
             </div>
         @else
-            <div class="text-center text-muted mt-8 bg-warning bg-opacity-25 border border-warning px-6 py-4 rounded-4">
-                No courses found for this instructor.
-            </div>
+            <x-empty-state
+                icon="bi-journal-x"
+                title="No Courses Found"
+                message="No courses found for this instructor."
+            />
         @endif
     @else
         {{-- Step 3: Display Students' Grades --}}
@@ -159,9 +161,11 @@
                 </table>
             </div>
         @elseif(!empty($selectedSubjectId))
-            <div class="text-center text-muted mt-8 bg-warning bg-opacity-25 border border-warning px-6 py-4 rounded-4">
-                No students found for this course.
-            </div>
+            <x-empty-state
+                icon="bi-people-x"
+                title="No Students Found"
+                message="No students found for this course."
+            />
         @endif
     @endif
 </div>
