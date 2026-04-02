@@ -636,6 +636,13 @@ body.po-matrix-expanded-lock {
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
+  isolation: isolate;
+}
+
+.po-matrix-table tbody tr,
+.po-matrix-table tbody tr:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .po-matrix-table > :not(caption) > * > * {
@@ -645,8 +652,9 @@ body.po-matrix-expanded-lock {
 .po-matrix-table thead th {
   position: sticky;
   top: 0;
-  z-index: 7;
-  background: #f2f6f3;
+  z-index: 30;
+  background: #f2f6f3 !important;
+  contain: paint;
   vertical-align: middle;
   font-size: 0.69rem;
   text-transform: uppercase;
@@ -714,7 +722,7 @@ body.po-matrix-expanded-lock {
 .po-matrix-group-row td {
   position: sticky;
   left: 0;
-  z-index: 5;
+  z-index: 24;
   background: #ddebe2;
   border-top: 3px solid #8fa996;
   border-bottom: 1px solid #b7c4bd;
@@ -745,6 +753,8 @@ body.po-matrix-expanded-lock {
   padding: 0.38rem 0.4rem;
   vertical-align: top;
   background: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .po-row-identifier {
@@ -767,7 +777,10 @@ body.po-matrix-expanded-lock {
 .po-matrix-sticky-col-secondary {
   position: sticky;
   background: #fff;
-  z-index: 4;
+  z-index: 20;
+  background-clip: padding-box;
+  overflow: hidden;
+  contain: paint;
 }
 
 .po-matrix-sticky-col {
@@ -790,26 +803,26 @@ body.po-matrix-expanded-lock {
 
 .po-matrix-table thead .po-matrix-sticky-col,
 .po-matrix-table thead .po-matrix-sticky-col-secondary {
-  z-index: 9;
-  background: #f2f6f3;
+  z-index: 36;
+  background: #f2f6f3 !important;
 }
 
 .po-matrix-data-row.is-mapped td {
-  background: rgba(77, 166, 116, 0.1);
+  background: #edf5f0;
 }
 
 .po-matrix-data-row:hover td {
-  background: rgba(77, 166, 116, 0.14);
+  background: #e9f3ed;
 }
 
 .po-matrix-data-row.is-mapped .po-matrix-sticky-col,
 .po-matrix-data-row.is-mapped .po-matrix-sticky-col-secondary {
-  background: rgba(77, 166, 116, 0.12);
+  background: #e7f1eb;
 }
 
 .po-matrix-data-row:hover .po-matrix-sticky-col,
 .po-matrix-data-row:hover .po-matrix-sticky-col-secondary {
-  background: rgba(77, 166, 116, 0.16);
+  background: #deece3;
 }
 
 .po-matrix-cell {
