@@ -615,6 +615,15 @@ body.po-matrix-expanded-lock {
   overflow: hidden !important;
 }
 
+.modal.po-matrix-modal-expanded {
+  z-index: 1100 !important;
+}
+
+.modal.po-matrix-modal-expanded .modal-dialog,
+.modal.po-matrix-modal-expanded .modal-content {
+  z-index: 1101 !important;
+}
+
 .po-matrix-table {
   width: max(
     calc(

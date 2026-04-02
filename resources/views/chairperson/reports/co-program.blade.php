@@ -677,6 +677,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const wasExpanded = matrixWorkspace.classList.contains('is-table-expanded');
 
         matrixWorkspace.classList.toggle('is-table-expanded', isExpanded);
+        modalElement.classList.toggle('po-matrix-modal-expanded', isExpanded);
         matrixExpandButton.setAttribute('aria-pressed', isExpanded ? 'true' : 'false');
         document.body.classList.toggle('po-matrix-expanded-lock', isExpanded);
 
