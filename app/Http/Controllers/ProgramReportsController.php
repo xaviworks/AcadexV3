@@ -208,7 +208,6 @@ class ProgramReportsController extends Controller
             return back()
                 ->withErrors($validator)
                 ->withInput()
-                ->with('openPloModal', true)
                 ->with('ploTab', 'definitions');
         }
 
@@ -247,7 +246,9 @@ class ProgramReportsController extends Controller
             }
         }
 
-        return back()->with('success', 'Program Learning Outcomes updated successfully.');
+        return back()
+            ->with('ploTab', 'definitions')
+            ->with('success', 'Program Learning Outcomes updated successfully.');
     }
 
     public function saveChairProgramPloMappings(Request $request, CourseOutcomeReportingService $service)
@@ -303,7 +304,6 @@ class ProgramReportsController extends Controller
             return back()
                 ->withErrors($validator)
                 ->withInput()
-                ->with('openPloModal', true)
                 ->with('ploTab', 'mapping');
         }
 
@@ -352,7 +352,6 @@ class ProgramReportsController extends Controller
         }
 
         return back()
-            ->with('openPloModal', true)
             ->with('ploTab', 'mapping')
             ->with('success', 'CO to PLO mapping updated successfully.');
     }

@@ -85,20 +85,11 @@
   overflow: hidden;
 }
 
-.plo-config-modal-dialog {
-  max-width: min(99vw, 1880px);
-  height: calc(100vh - 0.9rem);
-  margin: 0.45rem auto;
-}
-
-.plo-config-modal-content {
-  height: 100%;
-  max-height: calc(100vh - 0.9rem);
-  display: flex;
+.co-program-tabs-shell {
   overflow: hidden;
 }
 
-.plo-config-modal-body {
+.co-program-tabs-body {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
@@ -162,10 +153,22 @@
 }
 
 .plo-config-tabs .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
   border: 0;
   color: #52606d;
   font-weight: 600;
   padding: 0.7rem 1rem;
+}
+
+.plo-tab-dirty-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #f0ad4e;
+  box-shadow: 0 0 0 1px rgba(240, 173, 78, 0.28);
+  flex: 0 0 auto;
 }
 
 .plo-config-tabs .nav-link.active {
@@ -582,24 +585,6 @@
   box-shadow: 0 20px 56px rgba(14, 28, 23, 0.34);
 }
 
-.po-matrix-overlay-close {
-  display: none;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  border-color: #ced7d1;
-  color: #2f3d35;
-}
-
-.po-matrix-workspace.is-table-expanded .po-matrix-overlay-close {
-  display: inline-flex;
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1090;
-}
-
 .po-matrix-expand-backdrop {
   position: fixed;
   inset: 0;
@@ -615,15 +600,6 @@
 
 body.po-matrix-expanded-lock {
   overflow: hidden !important;
-}
-
-.modal.po-matrix-modal-expanded {
-  z-index: 1100 !important;
-}
-
-.modal.po-matrix-modal-expanded .modal-dialog,
-.modal.po-matrix-modal-expanded .modal-content {
-  z-index: 1101 !important;
 }
 
 .po-matrix-table {
@@ -725,13 +701,16 @@ body.po-matrix-expanded-lock {
 }
 
 .po-matrix-group-row td {
-  position: sticky;
-  left: 0;
-  z-index: 24;
+  position: relative;
+  z-index: 8;
   background: #ddebe2;
   border-top: 3px solid #8fa996;
   border-bottom: 1px solid #b7c4bd;
   padding: 0.36rem 0.62rem;
+}
+
+.po-matrix-group-row.is-first-visible td {
+  border-top: 1px solid #b7c4bd;
 }
 
 .po-matrix-group-label {
@@ -947,11 +926,6 @@ body.po-matrix-expanded-lock {
 }
 
 @media (max-width: 1199.98px) {
-  .plo-config-modal-dialog {
-    max-width: calc(100vw - 0.9rem);
-    height: calc(100vh - 0.9rem);
-  }
-
   .po-matrix-toolbar-head {
     align-items: center;
     flex-wrap: wrap;
@@ -1001,16 +975,6 @@ body.po-matrix-expanded-lock {
 }
 
 @media (max-width: 991.98px) {
-  .plo-config-modal-dialog {
-    max-width: calc(100vw - 0.6rem);
-    height: calc(100vh - 0.6rem);
-    margin: 0.3rem auto;
-  }
-
-  .plo-config-modal-content {
-    border-radius: 0.75rem;
-  }
-
   .po-matrix-toolbar-head {
     flex-direction: column;
     align-items: flex-start;
@@ -1164,10 +1128,5 @@ body.po-matrix-expanded-lock {
     min-height: 100vh;
     max-height: 100vh;
     border-radius: 0;
-  }
-
-  .po-matrix-workspace.is-table-expanded .po-matrix-overlay-close {
-    top: 0.75rem;
-    right: 0.75rem;
   }
 }

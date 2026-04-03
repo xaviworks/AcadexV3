@@ -33,8 +33,13 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $response->assertSee('Program');
         $response->assertSee('IT01');
         $response->assertSee('IT13');
-        $response->assertSee('Configure PLOs');
-        $response->assertSee('data-ui="co-plo-modal-workspace"', false);
+        $response->assertSee('Program Outcome Reports');
+        $response->assertSee('PLO Definitions');
+        $response->assertSee('CO to PLO Mapping');
+        $response->assertSee('data-ui="co-plo-page-tabs"', false);
+        $response->assertSee('id="plo-reports-tab"', false);
+        $response->assertDontSee('Configure PLOs');
+        $response->assertDontSee('configurePloModal');
 
         $this->assertDatabaseCount('program_learning_outcomes', 13);
         $this->assertDatabaseHas('program_learning_outcomes', [
@@ -44,6 +49,98 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
             'is_active' => true,
             'is_deleted' => false,
         ]);
+    }
+
+    public function test_co_program_defaults_to_reports_tab_when_no_tab_session_value(): void
+    {
+        [$chairperson, $period] = $this->createChairpersonContext();
+
+        $response = $this->actingAs($chairperson)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->get(route('chairperson.reports.co-program'));
+
+        $response->assertOk();
+
+        $html = (string) $response->getContent();
+
+        $this->assertTagHasClass($html, 'plo-reports-tab', 'active');
+        $this->assertTagLacksClass($html, 'plo-definitions-tab', 'active');
+        $this->assertTagLacksClass($html, 'plo-mapping-tab', 'active');
+        $this->assertTagHasClass($html, 'plo-reports-panel', 'show');
+        $this->assertTagHasClass($html, 'plo-reports-panel', 'active');
+    }
+
+    public function test_co_program_honors_mapping_tab_session_value_and_invalid_falls_back_to_reports(): void
+    {
+        [$chairperson, $period] = $this->createChairpersonContext();
+
+        $mappingResponse = $this->actingAs($chairperson)
+            ->withSession([
+                'active_academic_period_id' => $period->id,
+                'ploTab' => 'mapping',
+            ])
+            ->get(route('chairperson.reports.co-program'));
+
+        $mappingResponse->assertOk();
+
+        $mappingHtml = (string) $mappingResponse->getContent();
+
+        $this->assertTagHasClass($mappingHtml, 'plo-mapping-tab', 'active');
+        $this->assertTagHasClass($mappingHtml, 'plo-mapping-panel', 'show');
+        $this->assertTagHasClass($mappingHtml, 'plo-mapping-panel', 'active');
+        $this->assertTagLacksClass($mappingHtml, 'plo-reports-tab', 'active');
+
+        $fallbackResponse = $this->actingAs($chairperson)
+            ->withSession([
+                'active_academic_period_id' => $period->id,
+                'ploTab' => 'unsupported-tab',
+            ])
+            ->get(route('chairperson.reports.co-program'));
+
+        $fallbackResponse->assertOk();
+
+        $fallbackHtml = (string) $fallbackResponse->getContent();
+
+        $this->assertTagHasClass($fallbackHtml, 'plo-reports-tab', 'active');
+        $this->assertTagHasClass($fallbackHtml, 'plo-reports-panel', 'show');
+        $this->assertTagHasClass($fallbackHtml, 'plo-reports-panel', 'active');
+    }
+
+    public function test_definitions_save_returns_to_definitions_tab(): void
+    {
+        [$chairperson, $period, $course] = $this->createChairpersonContext();
+
+        $this->actingAs($chairperson)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->get(route('chairperson.reports.co-program'))
+            ->assertOk();
+
+        $payloadRows = ProgramLearningOutcome::where('course_id', $course->id)
+            ->where('is_deleted', false)
+            ->orderBy('display_order')
+            ->get()
+            ->values()
+            ->map(function (ProgramLearningOutcome $plo) {
+                return [
+                    'id' => $plo->id,
+                    'code' => $plo->plo_code,
+                    'title' => $plo->title,
+                    'is_active' => $plo->is_active ? '1' : '0',
+                    'delete' => '0',
+                ];
+            })
+            ->all();
+
+        $response = $this->actingAs($chairperson)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->post(route('chairperson.reports.co-program.plos.save'), [
+                'plos' => $payloadRows,
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $response->assertSessionHas('ploTab', 'definitions');
+        $response->assertSessionMissing('openPloModal');
     }
 
     public function test_mapping_save_persists_course_outcome_row_links_for_program_outcomes(): void
@@ -79,13 +176,13 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $pageResponse->assertSee('data-ui="co-plo-matrix-wrap"', false);
         $pageResponse->assertSee('data-ui="co-plo-save-top"', false);
         $pageResponse->assertSee('data-ui="co-plo-expand-toggle"', false);
-        $pageResponse->assertSee('data-ui="co-plo-overlay-close"', false);
         $pageResponse->assertSee('data-default-label="Expand table"', false);
         $pageResponse->assertSee('data-expanded-label="Exit expanded table view"', false);
         $pageResponse->assertSee('data-ui="co-plo-subject-jump"', false);
         $pageResponse->assertSee('po-matrix-subject-jump-count', false);
         $pageResponse->assertSee('data-ui="co-plo-column-header"', false);
         $pageResponse->assertSee('po-matrix-outcome-head', false);
+        $pageResponse->assertSee('data-ui="co-plo-page-tabs"', false);
 
         $programOutcome = ProgramLearningOutcome::where('course_id', $course->id)
             ->where('plo_code', 'IT01')
@@ -101,6 +198,8 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
+        $response->assertSessionHas('ploTab', 'mapping');
+        $response->assertSessionMissing('openPloModal');
 
         $this->assertDatabaseHas('program_learning_outcome_mappings', [
             'course_id' => $course->id,
@@ -553,6 +652,50 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $response->assertSee('90.00%');
         $response->assertSee('IT101.1');
         $response->assertDontSee('65.00%');
+    }
+
+    private function assertTagHasClass(string $html, string $id, string $expectedClass): void
+    {
+        $classList = $this->extractClassListById($html, $id);
+
+        $this->assertContains(
+            $expectedClass,
+            $classList,
+            sprintf('Expected element #%s to include class "%s".', $id, $expectedClass)
+        );
+    }
+
+    private function assertTagLacksClass(string $html, string $id, string $unexpectedClass): void
+    {
+        $classList = $this->extractClassListById($html, $id);
+
+        $this->assertNotContains(
+            $unexpectedClass,
+            $classList,
+            sprintf('Expected element #%s to exclude class "%s".', $id, $unexpectedClass)
+        );
+    }
+
+    private function extractClassListById(string $html, string $id): array
+    {
+        $idPattern = '/<[^>]*\bid="' . preg_quote($id, '/') . '"[^>]*>/i';
+        $found = preg_match($idPattern, $html, $tagMatches);
+
+        if ($found !== 1) {
+            $this->fail(sprintf('Unable to find element with id "%s" in response HTML.', $id));
+        }
+
+        $tag = (string) ($tagMatches[0] ?? '');
+
+        $classFound = preg_match('/\bclass="([^"]*)"/i', $tag, $classMatches);
+
+        if ($classFound !== 1) {
+            $this->fail(sprintf('Element with id "%s" does not include a class attribute.', $id));
+        }
+
+        $classList = preg_split('/\s+/', trim((string) ($classMatches[1] ?? '')));
+
+        return array_values(array_filter($classList, fn ($className) => $className !== ''));
     }
 
     private function createChairpersonContext(): array

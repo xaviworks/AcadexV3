@@ -21,14 +21,16 @@
     }
 
     $selectedMappings = old('mappings', $ploMappingCourseOutcomeIds ?? []);
-    $shouldOpenPloModal = session('openPloModal') || $errors->any();
     $availableCoSummary = match (count($availableCourseOutcomeRows)) {
         0 => 'No course outcomes available',
         1 => '1 course outcome available',
         default => count($availableCourseOutcomeRows) . ' course outcomes available',
     };
     $defaultOutcomeEnd = str_pad((string) $defaultOutcomeCount, 2, '0', STR_PAD_LEFT);
-    $activePloTab = session('ploTab', 'definitions');
+    $requestedPloTab = (string) session('ploTab', 'reports');
+    $activePloTab = in_array($requestedPloTab, ['reports', 'definitions', 'mapping'], true)
+        ? $requestedPloTab
+        : 'reports';
     $matrixSubjectOptions = collect($availableCourseOutcomeRows)
         ->map(function (array $row) {
             $code = (string) ($row['subject_code'] ?? 'Unknown Subject');
@@ -74,170 +76,174 @@
         </div>
     @endif
 
-    <div class="card border-0 shadow-sm rounded-4 mt-4">
-        <div class="card-body p-4">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-                <div>
-                    <div class="text-uppercase text-muted small fw-semibold mb-1">Assigned Program</div>
-                    <div class="fw-semibold text-dark">{{ $program->course_code ?? 'N/A' }}</div>
-                    <div class="text-muted small">{{ $program->course_description ?? 'No program description available.' }}</div>
-                </div>
-
-                <div class="d-flex flex-wrap gap-2">
-                    <div class="badge text-bg-light px-3 py-2 rounded-pill">
-                        {{ collect($activePloDefinitions ?? [])->count() }} active PLO{{ collect($activePloDefinitions ?? [])->count() === 1 ? '' : 's' }}
+    <div class="card border-0 shadow-sm rounded-4 mt-4 co-program-tabs-shell" id="coProgramPloWorkspace" data-ui="co-plo-page-workspace">
+        <div class="card-body p-4 modal-plo-body co-program-tabs-body">
+            <div class="plo-workflow-guide mb-4" aria-label="PLO configuration workflow">
+                <div class="plo-guide-step">
+                    <span class="plo-guide-badge">Step 1</span>
+                    <div>
+                        <div class="fw-semibold text-dark">Review program-level attainment</div>
+                        <small class="text-muted">Use the report tab to monitor current Program Learning Outcome results.</small>
                     </div>
-                    <button type="button" class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#configurePloModal">
-                        <i class="bi bi-sliders2 me-2"></i>Configure PLOs
-                    </button>
+                </div>
+                <div class="plo-guide-step">
+                    <span class="plo-guide-badge">Step 2</span>
+                    <div>
+                        <div class="fw-semibold text-dark">Define and map outcomes</div>
+                        <small class="text-muted">Maintain PLO definitions and CO mappings in the tabs beside the report.</small>
+                    </div>
                 </div>
             </div>
 
-            @if (collect($activePloDefinitions ?? [])->isEmpty())
-                <div class="text-center py-5">
-                    <i class="bi bi-diagram-3 text-muted fs-1 d-block mb-3"></i>
-                    <h5 class="fw-semibold">No active PLOs configured yet</h5>
-                    <p class="text-muted mb-4">Set up your Program Learning Outcomes to start viewing the summary table.</p>
-                    <button type="button" class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#configurePloModal">
-                        Configure PLOs
+            <ul class="nav nav-tabs plo-config-tabs mb-0" id="ploConfigTabs" role="tablist" data-ui="co-plo-page-tabs">
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link {{ $activePloTab === 'reports' ? 'active' : '' }}"
+                        id="plo-reports-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#plo-reports-panel"
+                        type="button"
+                        role="tab"
+                        aria-controls="plo-reports-panel"
+                        aria-selected="{{ $activePloTab === 'reports' ? 'true' : 'false' }}"
+                    >
+                        Program Outcome Reports
                     </button>
-                </div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-bordered align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="text-start align-middle" style="min-width: 280px;">
-                                    <i class="bi bi-mortarboard text-primary me-2"></i>Program
-                                </th>
-                                @foreach($activePloDefinitions as $plo)
-                                    <th class="text-center align-middle" style="min-width: 170px;" title="{{ $plo->title }}">
-                                        <div class="fw-semibold">{{ $plo->plo_code }}</div>
-                                        <small class="text-muted d-block mt-1">{{ \Illuminate\Support\Str::limit($plo->title, 80) }}</small>
-                                    </th>
-                                @endforeach
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($byProgram as $programId => $row)
-                                <tr>
-                                    <td class="text-start">
-                                        <div class="fw-semibold">{{ $row['program']->course_code ?? 'N/A' }}</div>
-                                        <small class="text-muted">{{ $row['program']->course_description ?? '' }}</small>
-                                    </td>
-                                    @foreach($activePloDefinitions as $plo)
-                                        @php($value = $row['plos'][$plo->id] ?? null)
-                                        <td class="text-center">
-                                            @if($value)
-                                                @php($threshold = (float) ($value['target_percentage'] ?? 0))
-                                                @php($level = $value['level'] ?? ['label' => '', 'tone' => 'success'])
-                                                @php($toneClass = match($level['tone'] ?? 'success') {
-                                                    'danger' => 'bg-danger-subtle text-danger-emphasis',
-                                                    'warning' => 'bg-warning-subtle text-warning-emphasis',
-                                                    default => 'bg-success-subtle text-success-emphasis',
-                                                })
-                                                @php($levelBannerClass = match($level['tone'] ?? 'success') {
-                                                    'danger' => 'plo-level-banner-danger',
-                                                    'warning' => 'plo-level-banner-warning',
-                                                    default => 'plo-level-banner-success',
-                                                })
-                                                <span class="badge {{ $toneClass }} px-3 py-2 rounded-pill">
-                                                    {{ number_format((float) $value['percent'], 2) }}%
-                                                </span>
-                                                <div class="mt-2 plo-result-meta">
-                                                    <div class="plo-result-chips">
-                                                        @foreach($value['co_codes'] as $coCode)
-                                                            <span class="plo-result-chip">{{ $coCode }}</span>
-                                                        @endforeach
-                                                    </div>
-                                                    <div class="plo-target-text">Target {{ number_format($threshold, 2) }}%</div>
-                                                    @if(!empty($level['label']))
-                                                        <div class="plo-level-banner {{ $levelBannerClass }}">{{ $level['label'] }}</div>
-                                                    @endif
-                                                </div>
-                                            @else
-                                                <span class="text-muted fs-5">—</span>
-                                            @endif
-                                        </td>
-                                    @endforeach
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="{{ collect($activePloDefinitions)->count() + 1 }}" class="text-center py-5">
-                                        <i class="bi bi-inbox text-muted fs-1 d-block mb-2"></i>
-                                        <p class="text-muted mb-0">No assessed program outcomes found for this academic period.</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-        </div>
-    </div>
-</div>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link {{ $activePloTab === 'definitions' ? 'active' : '' }}"
+                        id="plo-definitions-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#plo-definitions-panel"
+                        type="button"
+                        role="tab"
+                        aria-controls="plo-definitions-panel"
+                        aria-selected="{{ $activePloTab === 'definitions' ? 'true' : 'false' }}"
+                    >
+                        PLO Definitions
+                        <span class="plo-tab-dirty-dot d-none" id="ploDefinitionsTabDirtyDot" aria-hidden="true"></span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link {{ $activePloTab === 'mapping' ? 'active' : '' }}"
+                        id="plo-mapping-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#plo-mapping-panel"
+                        type="button"
+                        role="tab"
+                        aria-controls="plo-mapping-panel"
+                        aria-selected="{{ $activePloTab === 'mapping' ? 'true' : 'false' }}"
+                    >
+                        CO to PLO Mapping
+                        <span class="plo-tab-dirty-dot d-none" id="ploMappingTabDirtyDot" aria-hidden="true"></span>
+                    </button>
+                </li>
+            </ul>
 
-<div class="modal fade" id="configurePloModal" tabindex="-1" aria-labelledby="configurePloModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable plo-config-modal-dialog" data-ui="co-plo-modal-workspace">
-        <div class="modal-content rounded-4 shadow border-0 plo-config-modal-content">
-            <div class="modal-header bg-success text-white">
-                <div>
-                    <h4 class="modal-title fw-bold" id="configurePloModalLabel">Configure Program Learning Outcomes</h4>
-                    <p class="mb-0 text-white-50">Set up the PLOs for <span class="fw-semibold text-white">{{ $program->course_code }}</span> and choose which CO slots contribute to each one.</p>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+            <div class="tab-content pt-4 plo-config-tab-content" id="ploConfigTabContent">
+                <div
+                    class="tab-pane fade {{ $activePloTab === 'reports' ? 'show active' : '' }} plo-config-pane"
+                    id="plo-reports-panel"
+                    role="tabpanel"
+                    aria-labelledby="plo-reports-tab"
+                >
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                                <div>
+                                    <div class="text-uppercase text-muted small fw-semibold mb-1">Assigned Program</div>
+                                    <div class="fw-semibold text-dark">{{ $program->course_code ?? 'N/A' }}</div>
+                                    <div class="text-muted small">{{ $program->course_description ?? 'No program description available.' }}</div>
+                                </div>
 
-            <div class="modal-body modal-plo-body plo-config-modal-body">
-                <div class="plo-workflow-guide mb-4" aria-label="PLO configuration workflow">
-                    <div class="plo-guide-step">
-                        <span class="plo-guide-badge">Step 1</span>
-                        <div>
-                            <div class="fw-semibold text-dark">Define outcomes for the summary table</div>
-                            <small class="text-muted">First define the PLOs you want to show in the summary table.</small>
+                                <div class="badge text-bg-light px-3 py-2 rounded-pill">
+                                    {{ collect($activePloDefinitions ?? [])->count() }} active PLO{{ collect($activePloDefinitions ?? [])->count() === 1 ? '' : 's' }}
+                                </div>
+                            </div>
+
+                            @if (collect($activePloDefinitions ?? [])->isEmpty())
+                                <div class="text-center py-5">
+                                    <i class="bi bi-diagram-3 text-muted fs-1 d-block mb-3"></i>
+                                    <h5 class="fw-semibold">No active PLOs configured yet</h5>
+                                    <p class="text-muted mb-0">Open the PLO Definitions tab to set up outcomes for this report.</p>
+                                </div>
+                            @else
+                                <div class="table-responsive">
+                                    <table class="table table-bordered align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-start align-middle" style="min-width: 280px;">
+                                                    <i class="bi bi-mortarboard text-primary me-2"></i>Program
+                                                </th>
+                                                @foreach($activePloDefinitions as $plo)
+                                                    <th class="text-center align-middle" style="min-width: 170px;" title="{{ $plo->title }}">
+                                                        <div class="fw-semibold">{{ $plo->plo_code }}</div>
+                                                        <small class="text-muted d-block mt-1">{{ \Illuminate\Support\Str::limit($plo->title, 80) }}</small>
+                                                    </th>
+                                                @endforeach
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($byProgram as $programId => $row)
+                                                <tr>
+                                                    <td class="text-start">
+                                                        <div class="fw-semibold">{{ $row['program']->course_code ?? 'N/A' }}</div>
+                                                        <small class="text-muted">{{ $row['program']->course_description ?? '' }}</small>
+                                                    </td>
+                                                    @foreach($activePloDefinitions as $plo)
+                                                        @php($value = $row['plos'][$plo->id] ?? null)
+                                                        <td class="text-center">
+                                                            @if($value)
+                                                                @php($threshold = (float) ($value['target_percentage'] ?? 0))
+                                                                @php($level = $value['level'] ?? ['label' => '', 'tone' => 'success'])
+                                                                @php($toneClass = match($level['tone'] ?? 'success') {
+                                                                    'danger' => 'bg-danger-subtle text-danger-emphasis',
+                                                                    'warning' => 'bg-warning-subtle text-warning-emphasis',
+                                                                    default => 'bg-success-subtle text-success-emphasis',
+                                                                })
+                                                                @php($levelBannerClass = match($level['tone'] ?? 'success') {
+                                                                    'danger' => 'plo-level-banner-danger',
+                                                                    'warning' => 'plo-level-banner-warning',
+                                                                    default => 'plo-level-banner-success',
+                                                                })
+                                                                <span class="badge {{ $toneClass }} px-3 py-2 rounded-pill">
+                                                                    {{ number_format((float) $value['percent'], 2) }}%
+                                                                </span>
+                                                                <div class="mt-2 plo-result-meta">
+                                                                    <div class="plo-result-chips">
+                                                                        @foreach($value['co_codes'] as $coCode)
+                                                                            <span class="plo-result-chip">{{ $coCode }}</span>
+                                                                        @endforeach
+                                                                    </div>
+                                                                    <div class="plo-target-text">Target {{ number_format($threshold, 2) }}%</div>
+                                                                    @if(!empty($level['label']))
+                                                                        <div class="plo-level-banner {{ $levelBannerClass }}">{{ $level['label'] }}</div>
+                                                                    @endif
+                                                                </div>
+                                                            @else
+                                                                <span class="text-muted fs-5">—</span>
+                                                            @endif
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="{{ collect($activePloDefinitions)->count() + 1 }}" class="text-center py-5">
+                                                        <i class="bi bi-inbox text-muted fs-1 d-block mb-2"></i>
+                                                        <p class="text-muted mb-0">No assessed program outcomes found for this academic period.</p>
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
                         </div>
                     </div>
-                    <div class="plo-guide-step">
-                        <span class="plo-guide-badge">Step 2</span>
-                        <div>
-                            <div class="fw-semibold text-dark">Link CO rows to each PLO</div>
-                            <small class="text-muted">Acadex automatically computes each PLO by averaging only the COs linked to that PLO.</small>
-                        </div>
-                    </div>
                 </div>
 
-                <ul class="nav nav-tabs plo-config-tabs mb-0" id="ploConfigTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button
-                            class="nav-link {{ $activePloTab === 'definitions' ? 'active' : '' }}"
-                            id="plo-definitions-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#plo-definitions-panel"
-                            type="button"
-                            role="tab"
-                            aria-controls="plo-definitions-panel"
-                            aria-selected="{{ $activePloTab === 'definitions' ? 'true' : 'false' }}"
-                        >
-                            PLO Definitions
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button
-                            class="nav-link {{ $activePloTab === 'mapping' ? 'active' : '' }}"
-                            id="plo-mapping-tab"
-                            data-bs-toggle="tab"
-                            data-bs-target="#plo-mapping-panel"
-                            type="button"
-                            role="tab"
-                            aria-controls="plo-mapping-panel"
-                            aria-selected="{{ $activePloTab === 'mapping' ? 'true' : 'false' }}"
-                        >
-                            CO to PLO Mapping
-                        </button>
-                    </li>
-                </ul>
-
-                <div class="tab-content pt-4 plo-config-tab-content" id="ploConfigTabContent">
                     <div
                         class="tab-pane fade {{ $activePloTab === 'definitions' ? 'show active' : '' }} plo-config-pane"
                         id="plo-definitions-panel"
@@ -253,9 +259,14 @@
                                         <h5 class="fw-semibold mb-1">PLO Definitions</h5>
                                         <p class="text-muted mb-0">Keep the codes short and use titles that are easy to recognize in the report.</p>
                                     </div>
-                                    <button type="button" class="btn btn-outline-success rounded-pill" id="addPloRowButton">
-                                        <i class="bi bi-plus-circle me-2"></i>Add PLO
-                                    </button>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge text-bg-warning rounded-pill px-3 py-2 d-none" id="ploDefinitionsDirtyIndicator" aria-live="polite">
+                                            Unsaved changes
+                                        </span>
+                                        <button type="button" class="btn btn-outline-success rounded-pill" id="addPloRowButton">
+                                            <i class="bi bi-plus-circle me-2"></i>Add PLO
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="plo-definition-guidance mb-3" role="note" aria-label="PLO definition reminders">
@@ -319,7 +330,7 @@
                         role="tabpanel"
                         aria-labelledby="plo-mapping-tab"
                     >
-                        <form method="POST" action="{{ route('chairperson.reports.co-program.plos.mappings.save') }}" class="h-100 d-flex flex-column">
+                        <form method="POST" action="{{ route('chairperson.reports.co-program.plos.mappings.save') }}" class="h-100 d-flex flex-column" id="ploMappingForm">
                             @csrf
 
                             <div class="border rounded-4 bg-white p-3 p-lg-4 plo-mapping-card po-matrix-workspace">
@@ -353,6 +364,9 @@
                                                 <div class="po-matrix-context-chip" id="poMatrixContextChip" aria-live="polite">
                                                     Viewing: All subjects
                                                 </div>
+                                                <span class="badge text-bg-warning rounded-pill px-3 py-2 d-none" id="ploMappingDirtyIndicator" aria-live="polite">
+                                                    Unsaved changes
+                                                </span>
                                                 <button
                                                     type="submit"
                                                     class="btn btn-success btn-sm po-matrix-save-btn"
@@ -528,18 +542,6 @@
                                         </table>
                                     </div>
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-light btn-sm po-matrix-overlay-close"
-                                        id="poMatrixOverlayClose"
-                                        data-ui="co-plo-overlay-close"
-                                        aria-label="Close expanded table view"
-                                        title="Close expanded table view (Esc)"
-                                    >
-                                        <i class="bi bi-x-lg" aria-hidden="true"></i>
-                                        <span>Close</span>
-                                    </button>
-
                                     <div class="po-matrix-legend mt-3" id="poMatrixLegend">
                                         <div class="po-matrix-legend-title"><i class="bi bi-bookmark-star-fill me-2" aria-hidden="true"></i>PLO Legend Reference</div>
                                         <div class="po-matrix-legend-subtitle">Use these labels as quick references for matrix headers while mapping rows.</div>
@@ -565,10 +567,6 @@
                     </div>
 
                 </div>
-            </div>
-
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -601,7 +599,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const modalElement = document.getElementById('configurePloModal');
+    const workspaceElement = document.getElementById('coProgramPloWorkspace');
     const rowsContainer = document.getElementById('ploDefinitionRows');
     const addButton = document.getElementById('addPloRowButton');
     const template = document.getElementById('ploDefinitionRowTemplate');
@@ -610,7 +608,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const matrixStateFilter = document.getElementById('poMatrixStateFilter');
     const matrixClearButton = document.getElementById('poMatrixClearFilters');
     const matrixExpandButton = document.getElementById('poMatrixExpandToggle');
-    const matrixOverlayCloseButton = document.getElementById('poMatrixOverlayClose');
     const matrixContextChip = document.getElementById('poMatrixContextChip');
     const matrixWrap = document.querySelector('.po-matrix-wrap');
     const matrixRows = Array.from(document.querySelectorAll('.po-matrix-data-row'));
@@ -619,17 +616,73 @@ document.addEventListener('DOMContentLoaded', function () {
     const matrixSubjectJumpButtons = Array.from(document.querySelectorAll('.po-matrix-subject-jump-btn'));
     const matrixOutcomeHeaders = Array.from(document.querySelectorAll('.po-matrix-outcome-col[data-plo-key]'));
     const matrixLegendItems = Array.from(document.querySelectorAll('.po-matrix-legend-item[data-plo-key]'));
+    const definitionsForm = document.getElementById('ploDefinitionsForm');
+    const mappingForm = document.getElementById('ploMappingForm');
+    const definitionsDirtyIndicator = document.getElementById('ploDefinitionsDirtyIndicator');
+    const mappingDirtyIndicator = document.getElementById('ploMappingDirtyIndicator');
+    const definitionsTabDirtyDot = document.getElementById('ploDefinitionsTabDirtyDot');
+    const mappingTabDirtyDot = document.getElementById('ploMappingTabDirtyDot');
     const outcomePrefix = @json($outcomeCodePrefix);
 
-    if (!modalElement || !rowsContainer || !addButton || !template) {
+    if (!workspaceElement || !rowsContainer || !addButton || !template) {
         return;
     }
 
-    const matrixWorkspace = modalElement.querySelector('.po-matrix-workspace');
-    const bootstrapModal = window.bootstrap ? bootstrap.Modal.getOrCreateInstance(modalElement) : null;
-    const shouldOpen = @json($shouldOpenPloModal);
+    const matrixWorkspace = workspaceElement.querySelector('.po-matrix-workspace');
     const matrixBackdropId = 'poMatrixExpandBackdrop';
     let hasShownExpandHint = false;
+    const serializeFormState = (form) => {
+        if (!form) {
+            return '';
+        }
+
+        const entries = [];
+        const formData = new FormData(form);
+        formData.forEach((value, key) => {
+            entries.push([String(key), String(value)]);
+        });
+
+        entries.sort((left, right) => {
+            if (left[0] === right[0]) {
+                return left[1].localeCompare(right[1]);
+            }
+
+            return left[0].localeCompare(right[0]);
+        });
+
+        return JSON.stringify(entries);
+    };
+
+    const setDirtyIndicatorState = (isDirty, indicatorElement, dotElement) => {
+        if (indicatorElement) {
+            indicatorElement.classList.toggle('d-none', !isDirty);
+        }
+
+        if (dotElement) {
+            dotElement.classList.toggle('d-none', !isDirty);
+        }
+    };
+
+    const initialDefinitionsSnapshot = serializeFormState(definitionsForm);
+    const initialMappingSnapshot = serializeFormState(mappingForm);
+
+    const refreshDefinitionsDirtyState = () => {
+        if (!definitionsForm) {
+            return;
+        }
+
+        const isDirty = serializeFormState(definitionsForm) !== initialDefinitionsSnapshot;
+        setDirtyIndicatorState(isDirty, definitionsDirtyIndicator, definitionsTabDirtyDot);
+    };
+
+    const refreshMappingDirtyState = () => {
+        if (!mappingForm) {
+            return;
+        }
+
+        const isDirty = serializeFormState(mappingForm) !== initialMappingSnapshot;
+        setDirtyIndicatorState(isDirty, mappingDirtyIndicator, mappingTabDirtyDot);
+    };
 
     const removeMatrixBackdrop = () => {
         const existingBackdrop = document.getElementById(matrixBackdropId);
@@ -677,7 +730,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const wasExpanded = matrixWorkspace.classList.contains('is-table-expanded');
 
         matrixWorkspace.classList.toggle('is-table-expanded', isExpanded);
-        modalElement.classList.toggle('po-matrix-modal-expanded', isExpanded);
         matrixExpandButton.setAttribute('aria-pressed', isExpanded ? 'true' : 'false');
         document.body.classList.toggle('po-matrix-expanded-lock', isExpanded);
 
@@ -707,19 +759,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    if (shouldOpen && bootstrapModal) {
-        bootstrapModal.show();
-    }
-
     if (matrixExpandButton && matrixWorkspace) {
         matrixExpandButton.addEventListener('click', function () {
             setMatrixExpandedState(!isMatrixExpanded());
-        });
-    }
-
-    if (matrixOverlayCloseButton) {
-        matrixOverlayCloseButton.addEventListener('click', function () {
-            setMatrixExpandedState(false, { silent: true });
         });
     }
 
@@ -728,7 +770,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if (!modalElement.classList.contains('show') || !isMatrixExpanded()) {
+        if (!isMatrixExpanded()) {
             return;
         }
 
@@ -737,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setMatrixExpandedState(false, { silent: true });
     }, true);
 
-    const tabButtons = Array.from(modalElement.querySelectorAll('#ploConfigTabs [data-bs-toggle="tab"]'));
+    const tabButtons = Array.from(document.querySelectorAll('#ploConfigTabs [data-bs-toggle="tab"]'));
     tabButtons.forEach((tabButton) => {
         tabButton.addEventListener('shown.bs.tab', function (event) {
             const selectedTarget = event.target ? event.target.getAttribute('data-bs-target') : '';
@@ -745,10 +787,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 setMatrixExpandedState(false, { silent: true });
             }
         });
-    });
-
-    modalElement.addEventListener('hidden.bs.modal', function () {
-        setMatrixExpandedState(false, { silent: true });
     });
 
     const getVisibleRows = () => Array.from(rowsContainer.querySelectorAll('.plo-definition-row'))
@@ -798,6 +836,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         rowsContainer.insertAdjacentHTML('beforeend', html);
         refreshAddButtonState();
+        refreshDefinitionsDirtyState();
     });
 
     rowsContainer.addEventListener('click', function (event) {
@@ -824,7 +863,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         refreshAddButtonState();
+        refreshDefinitionsDirtyState();
     });
+
+    if (definitionsForm) {
+        definitionsForm.addEventListener('input', refreshDefinitionsDirtyState);
+        definitionsForm.addEventListener('change', refreshDefinitionsDirtyState);
+    }
+
+    if (mappingForm) {
+        mappingForm.addEventListener('change', refreshMappingDirtyState);
+    }
 
     const normalize = (value) => String(value || '').trim().toLowerCase();
 
@@ -983,10 +1032,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        const visibleGroupRows = [];
         matrixGroupRows.forEach((groupRow) => {
             const subjectKey = groupRow.dataset.subject || '';
-            groupRow.classList.toggle('d-none', visibleBySubject.get(subjectKey) !== true);
+            const isVisible = visibleBySubject.get(subjectKey) === true;
+            groupRow.classList.toggle('d-none', !isVisible);
+            groupRow.classList.remove('is-first-visible');
+
+            if (isVisible) {
+                visibleGroupRows.push(groupRow);
+            }
         });
+
+        if (visibleGroupRows.length > 0) {
+            visibleGroupRows[0].classList.add('is-first-visible');
+        }
 
         if (matrixContextChip) {
             const visibleRows = matrixRows.filter((row) => !row.classList.contains('d-none'));
@@ -1050,7 +1110,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     matrixInputs.forEach((input) => {
-        input.addEventListener('change', applyMatrixFilters);
+        input.addEventListener('change', function () {
+            applyMatrixFilters();
+            refreshMappingDirtyState();
+        });
 
         input.addEventListener('keydown', function (event) {
             const allowedKeys = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End']);
@@ -1142,6 +1205,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initializeMatrixNavigation();
     refreshAddButtonState();
+    refreshDefinitionsDirtyState();
+    refreshMappingDirtyState();
     applyMatrixFilters();
 });
 </script>
