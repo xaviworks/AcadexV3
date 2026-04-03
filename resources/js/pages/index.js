@@ -48,6 +48,7 @@ import './instructor/scores/course-outcome-results.js';
 import './chairperson/manage-instructors.js';
 import './chairperson/assign-subjects.js';
 import './chairperson/reports/co-course-chooser.js';
+import './chairperson/reports/co-program.js';
 import './chairperson/view-grades.js';
 import './chairperson/structure-template-create.js';
 
@@ -111,6 +112,7 @@ export function initPage(pageName) {
     'chairperson.manage-instructors': window.initChairpersonManageInstructorsPage,
     'chairperson.assign-subjects': window.initChairpersonAssignSubjectsPage,
     'chairperson.co-course-chooser': window.initCOCourseChooserPage,
+    'chairperson.co-program': window.initChairpersonCoProgramPage,
     'chairperson.view-grades': window.initChairpersonViewGradesPage,
     'chairperson.structure-template-create': window.initStructureTemplateCreatePage,
     'chairperson.select-curriculum-subjects': window.initSelectCurriculumSubjectsPage,
