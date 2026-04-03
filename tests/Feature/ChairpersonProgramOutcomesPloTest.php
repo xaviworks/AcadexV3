@@ -36,6 +36,7 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $response->assertSee('Program Outcome Reports');
         $response->assertSee('PLO Definitions');
         $response->assertSee('CO to PLO Mapping');
+        $response->assertDontSee('<i class="bi bi-mortarboard text-primary me-2"></i>Program', false);
         $response->assertSee('data-ui="co-plo-page-tabs"', false);
         $response->assertSee('id="plo-reports-tab"', false);
         $response->assertDontSee('Configure PLOs');
@@ -104,6 +105,53 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $this->assertTagHasClass($fallbackHtml, 'plo-reports-tab', 'active');
         $this->assertTagHasClass($fallbackHtml, 'plo-reports-panel', 'show');
         $this->assertTagHasClass($fallbackHtml, 'plo-reports-panel', 'active');
+    }
+
+    public function test_co_program_starts_clean_with_disabled_save_actions_until_edits(): void
+    {
+        [$chairperson, $period, $course, $department] = $this->createChairpersonContext();
+
+        $subject = Subject::create([
+            'subject_code' => 'IT101',
+            'subject_description' => 'Introduction to IT',
+            'academic_period_id' => $period->id,
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'is_deleted' => false,
+        ]);
+
+        CourseOutcomes::create([
+            'subject_id' => $subject->id,
+            'academic_period_id' => $period->id,
+            'co_code' => 'CO1',
+            'co_identifier' => 'IT101.1',
+            'description' => 'Explain fundamental IT concepts',
+            'target_percentage' => 75,
+            'created_by' => $chairperson->id,
+            'updated_by' => $chairperson->id,
+            'is_deleted' => false,
+        ]);
+
+        $response = $this->actingAs($chairperson)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->get(route('chairperson.reports.co-program'));
+
+        $response->assertOk();
+
+        $html = (string) $response->getContent();
+
+        $response->assertDontSee('id="ploDefinitionsDirtyIndicator"', false);
+        $response->assertDontSee('id="ploMappingDirtyIndicator"', false);
+        $response->assertDontSee('id="ploDefinitionsTabDirtyDot"', false);
+        $response->assertDontSee('id="ploMappingTabDirtyDot"', false);
+
+        $this->assertTagHasAttribute($html, 'ploDefinitionsSaveButton', 'disabled');
+        $this->assertTagHasAttribute($html, 'poMatrixSaveTop', 'disabled');
+        $this->assertTagHasAttribute($html, 'poMatrixSaveBottom', 'disabled');
+
+        $this->assertTagHasAttribute($html, 'ploDefinitionsSaveButton', 'aria-disabled', 'true');
+        $this->assertTagHasAttribute($html, 'poMatrixSaveTop', 'aria-disabled', 'true');
+        $this->assertTagHasAttribute($html, 'poMatrixSaveBottom', 'aria-disabled', 'true');
     }
 
     public function test_definitions_save_returns_to_definitions_tab(): void
@@ -182,6 +230,9 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $pageResponse->assertSee('po-matrix-subject-jump-count', false);
         $pageResponse->assertSee('data-ui="co-plo-column-header"', false);
         $pageResponse->assertSee('po-matrix-outcome-head', false);
+        $pageResponse->assertSee('data-ui="co-plo-resize-control"', false);
+        $pageResponse->assertSee('id="poMatrixResizeHandle"', false);
+        $pageResponse->assertSee('id="poMatrixResizeValue"', false);
         $pageResponse->assertSee('data-ui="co-plo-page-tabs"', false);
 
         $programOutcome = ProgramLearningOutcome::where('course_id', $course->id)
@@ -676,16 +727,51 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         );
     }
 
-    private function extractClassListById(string $html, string $id): array
+    private function assertTagHasAttribute(string $html, string $id, string $attribute, ?string $expectedValue = null): void
     {
-        $idPattern = '/<[^>]*\bid="' . preg_quote($id, '/') . '"[^>]*>/i';
+        $tag = $this->extractTagById($html, $id);
+
+        if ($expectedValue === null) {
+            $attributePattern = '/\\b' . preg_quote($attribute, '/') . '(?:\\s*=\\s*("[^"]*"|\'[^\']*\'))?/i';
+
+            $this->assertMatchesRegularExpression(
+                $attributePattern,
+                $tag,
+                sprintf('Expected element #%s to include attribute "%s".', $id, $attribute)
+            );
+
+            return;
+        }
+
+        $attributePattern = '/\\b' . preg_quote($attribute, '/') . '="' . preg_quote($expectedValue, '/') . '"/i';
+
+        $this->assertMatchesRegularExpression(
+            $attributePattern,
+            $tag,
+            sprintf(
+                'Expected element #%s to include attribute "%s" with value "%s".',
+                $id,
+                $attribute,
+                $expectedValue
+            )
+        );
+    }
+
+    private function extractTagById(string $html, string $id): string
+    {
+        $idPattern = '/<[^>]*\\bid="' . preg_quote($id, '/') . '"[^>]*>/i';
         $found = preg_match($idPattern, $html, $tagMatches);
 
         if ($found !== 1) {
             $this->fail(sprintf('Unable to find element with id "%s" in response HTML.', $id));
         }
 
-        $tag = (string) ($tagMatches[0] ?? '');
+        return (string) ($tagMatches[0] ?? '');
+    }
+
+    private function extractClassListById(string $html, string $id): array
+    {
+        $tag = $this->extractTagById($html, $id);
 
         $classFound = preg_match('/\bclass="([^"]*)"/i', $tag, $classMatches);
 

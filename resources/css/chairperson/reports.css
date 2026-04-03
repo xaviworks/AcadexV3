@@ -551,6 +551,103 @@
   letter-spacing: 0.01em;
 }
 
+.po-matrix-resize-control {
+  width: 100%;
+  margin: 0.55rem 0 0.75rem;
+}
+
+.po-matrix-resize-handle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  width: 100%;
+  min-height: 64px;
+  padding: 0.55rem 1rem;
+  border: 2px solid #1f5f42;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, #eaf7ef 0%, #d5ecdd 100%);
+  color: #1f4f39;
+  cursor: ns-resize;
+  user-select: none;
+  touch-action: none;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: 0.012em;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.po-matrix-resize-handle:hover {
+  border-color: #184a33;
+  background: linear-gradient(180deg, #dcf2e5 0%, #c8e6d4 100%);
+  color: #143f2c;
+}
+
+.po-matrix-resize-handle:focus-visible {
+  outline: none;
+  border-color: #184a33;
+  box-shadow: 0 0 0 3px rgba(77, 166, 116, 0.26);
+}
+
+.po-matrix-resize-handle.is-resizing {
+  border-color: #113624;
+  background: linear-gradient(180deg, #cbe8d7 0%, #bddfcf 100%);
+  color: #113624;
+}
+
+.po-matrix-resize-arrow {
+  flex: 1 1 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.po-matrix-resize-arrow i {
+  font-size: 1.42rem;
+  font-weight: 900;
+}
+
+.po-matrix-resize-primary {
+  flex: 1 1 100%;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.po-matrix-resize-label {
+  flex: 1 1 auto;
+  white-space: normal;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.po-matrix-resize-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  margin-left: 0.35rem;
+  padding: 0.14rem 0.48rem;
+  border-radius: 999px;
+  border: 1px solid #a8cdb8;
+  background: #fff;
+  color: #1e523a;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .po-matrix-wrap {
   --po-matrix-course-col-width: 130px;
   --po-matrix-row-col-width: 300px;
@@ -989,6 +1086,11 @@ body.po-matrix-expanded-lock {
     justify-content: center;
   }
 
+  .po-matrix-resize-handle {
+    min-height: 58px;
+    padding: 0.5rem 0.8rem;
+  }
+
   .po-matrix-subject-jump {
     gap: 0.3rem;
   }
@@ -1083,6 +1185,30 @@ body.po-matrix-expanded-lock {
 
   .po-matrix-keyboard-hint {
     line-height: 1.2;
+  }
+
+  .po-matrix-resize-handle {
+    gap: 0.24rem;
+    min-height: 62px;
+    padding: 0.46rem 0.56rem;
+  }
+
+  .po-matrix-resize-primary {
+    font-size: 0.82rem;
+  }
+
+  .po-matrix-resize-arrow i {
+    font-size: 1.24rem;
+  }
+
+  .po-matrix-resize-label {
+    white-space: normal;
+    text-align: center;
+    font-size: 0.72rem;
+  }
+
+  .po-matrix-resize-value {
+    margin-left: 0;
   }
 
   .po-matrix-table {

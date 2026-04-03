@@ -54,6 +54,78 @@
         ->all();
 @endphp
 
+@push('styles')
+<style>
+/* Fallback: keep resize control visibly button-like even if bundled CSS is stale. */
+#poMatrixResizeHandle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.28rem;
+    width: 100%;
+    min-height: 64px;
+    padding: 0.55rem 1rem;
+    border: 2px solid #1f5f42;
+    border-radius: 0.9rem;
+    background: linear-gradient(180deg, #eaf7ef 0%, #d5ecdd 100%);
+    color: #1f4f39;
+    cursor: ns-resize;
+    user-select: none;
+    touch-action: none;
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.18;
+    letter-spacing: 0.012em;
+}
+
+#poMatrixResizeHandle .po-matrix-resize-arrow {
+    flex: 1 1 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#poMatrixResizeHandle .po-matrix-resize-arrow i {
+    font-size: 1.42rem;
+    font-weight: 900;
+}
+
+#poMatrixResizeHandle .po-matrix-resize-primary {
+    flex: 1 1 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+#poMatrixResizeHandle .po-matrix-resize-label {
+    flex: 1 1 auto;
+    white-space: normal;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+#poMatrixResizeHandle .po-matrix-resize-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 56px;
+    margin-left: 0.35rem;
+    padding: 0.14rem 0.48rem;
+    border-radius: 999px;
+    border: 1px solid #a8cdb8;
+    background: #fff;
+    color: #1e523a;
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1;
+}
+</style>
+@endpush
+
 <div class="container-fluid px-4 py-5">
     @include('chairperson.partials.toast-notifications')
 
@@ -122,7 +194,6 @@
                         aria-selected="{{ $activePloTab === 'definitions' ? 'true' : 'false' }}"
                     >
                         PLO Definitions
-                        <span class="plo-tab-dirty-dot d-none" id="ploDefinitionsTabDirtyDot" aria-hidden="true"></span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -137,7 +208,6 @@
                         aria-selected="{{ $activePloTab === 'mapping' ? 'true' : 'false' }}"
                     >
                         CO to PLO Mapping
-                        <span class="plo-tab-dirty-dot d-none" id="ploMappingTabDirtyDot" aria-hidden="true"></span>
                     </button>
                 </li>
             </ul>
@@ -174,9 +244,6 @@
                                     <table class="table table-bordered align-middle mb-0">
                                         <thead class="table-light">
                                             <tr>
-                                                <th class="text-start align-middle" style="min-width: 280px;">
-                                                    <i class="bi bi-mortarboard text-primary me-2"></i>Program
-                                                </th>
                                                 @foreach($activePloDefinitions as $plo)
                                                     <th class="text-center align-middle" style="min-width: 170px;" title="{{ $plo->title }}">
                                                         <div class="fw-semibold">{{ $plo->plo_code }}</div>
@@ -188,10 +255,6 @@
                                         <tbody>
                                             @forelse($byProgram as $programId => $row)
                                                 <tr>
-                                                    <td class="text-start">
-                                                        <div class="fw-semibold">{{ $row['program']->course_code ?? 'N/A' }}</div>
-                                                        <small class="text-muted">{{ $row['program']->course_description ?? '' }}</small>
-                                                    </td>
                                                     @foreach($activePloDefinitions as $plo)
                                                         @php($value = $row['plos'][$plo->id] ?? null)
                                                         <td class="text-center">
@@ -230,7 +293,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="{{ collect($activePloDefinitions)->count() + 1 }}" class="text-center py-5">
+                                                    <td colspan="{{ collect($activePloDefinitions)->count() }}" class="text-center py-5">
                                                         <i class="bi bi-inbox text-muted fs-1 d-block mb-2"></i>
                                                         <p class="text-muted mb-0">No assessed program outcomes found for this academic period.</p>
                                                     </td>
@@ -260,9 +323,6 @@
                                         <p class="text-muted mb-0">Keep the codes short and use titles that are easy to recognize in the report.</p>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="badge text-bg-warning rounded-pill px-3 py-2 d-none" id="ploDefinitionsDirtyIndicator" aria-live="polite">
-                                            Unsaved changes
-                                        </span>
                                         <button type="button" class="btn btn-outline-success rounded-pill" id="addPloRowButton">
                                             <i class="bi bi-plus-circle me-2"></i>Add PLO
                                         </button>
@@ -292,10 +352,10 @@
                                                     <td>
                                                         <input type="hidden" name="plos[{{ $index }}][id]" value="{{ $row['id'] ?? '' }}">
                                                         <input type="hidden" name="plos[{{ $index }}][delete]" value="{{ $isDeleted ? 1 : 0 }}" class="plo-delete-input">
-                                                        <input type="text" name="plos[{{ $index }}][code]" value="{{ $row['code'] ?? '' }}" class="form-control form-control-sm" placeholder="{{ $outcomeCodePrefix }}01" aria-label="Program learning outcome code" required>
+                                                        <input type="text" name="plos[{{ $index }}][code]" value="{{ $row['code'] ?? '' }}" class="form-control form-control-sm" placeholder="{{ $outcomeCodePrefix }}01" aria-label="Program learning outcome code" autocomplete="off" required>
                                                     </td>
                                                     <td>
-                                                        <input type="text" name="plos[{{ $index }}][title]" value="{{ $row['title'] ?? '' }}" class="form-control form-control-sm" placeholder="Program Outcome description" aria-label="Program learning outcome title" required>
+                                                        <input type="text" name="plos[{{ $index }}][title]" value="{{ $row['title'] ?? '' }}" class="form-control form-control-sm" placeholder="Program Outcome description" aria-label="Program learning outcome title" autocomplete="off" required>
                                                     </td>
                                                     <td class="text-center">
                                                         <input type="hidden" name="plos[{{ $index }}][is_active]" value="0">
@@ -316,7 +376,15 @@
 
                                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mt-3">
                                     <small class="text-muted">Save definitions first before mapping newly added PLOs.</small>
-                                    <button type="submit" class="btn btn-success rounded-pill px-4">
+                                    <button
+                                        type="submit"
+                                        class="btn btn-success rounded-pill px-4"
+                                        id="ploDefinitionsSaveButton"
+                                        data-save-scope="definitions"
+                                        disabled
+                                        aria-disabled="true"
+                                        title="Make changes to enable saving."
+                                    >
                                         Save Definitions
                                     </button>
                                 </div>
@@ -364,14 +432,15 @@
                                                 <div class="po-matrix-context-chip" id="poMatrixContextChip" aria-live="polite">
                                                     Viewing: All subjects
                                                 </div>
-                                                <span class="badge text-bg-warning rounded-pill px-3 py-2 d-none" id="ploMappingDirtyIndicator" aria-live="polite">
-                                                    Unsaved changes
-                                                </span>
                                                 <button
                                                     type="submit"
                                                     class="btn btn-success btn-sm po-matrix-save-btn"
                                                     id="poMatrixSaveTop"
                                                     data-ui="co-plo-save-top"
+                                                    data-save-scope="mapping"
+                                                    disabled
+                                                    aria-disabled="true"
+                                                    title="Make changes to enable saving."
                                                 >
                                                     <i class="bi bi-check2-circle" aria-hidden="true"></i>
                                                     <span>Save Mapping</span>
@@ -542,6 +611,28 @@
                                         </table>
                                     </div>
 
+                                    <div class="po-matrix-resize-control" data-ui="co-plo-resize-control" aria-label="Table resize controls">
+                                        <div
+                                            class="po-matrix-resize-handle"
+                                            id="poMatrixResizeHandle"
+                                            role="separator"
+                                            aria-orientation="horizontal"
+                                            aria-label="Drag this bar to make the mapping table longer or shorter"
+                                            aria-valuemin="0"
+                                            aria-valuemax="0"
+                                            aria-valuenow="0"
+                                            tabindex="0"
+                                            title="Drag this bar to make the table longer or shorter for this page"
+                                        >
+                                            <span class="po-matrix-resize-arrow" aria-hidden="true">
+                                                <i class="bi bi-chevron-double-down" aria-hidden="true"></i>
+                                            </span>
+                                            <span class="po-matrix-resize-primary">DRAG THIS BAR TO RESIZE THE TABLE</span>
+                                            <span class="po-matrix-resize-label">Pull down for a longer table. Push up for a shorter table. (Page only)</span>
+                                            <span class="po-matrix-resize-value" id="poMatrixResizeValue" aria-hidden="true"></span>
+                                        </div>
+                                    </div>
+
                                     <div class="po-matrix-legend mt-3" id="poMatrixLegend">
                                         <div class="po-matrix-legend-title"><i class="bi bi-bookmark-star-fill me-2" aria-hidden="true"></i>PLO Legend Reference</div>
                                         <div class="po-matrix-legend-subtitle">Use these labels as quick references for matrix headers while mapping rows.</div>
@@ -557,7 +648,15 @@
 
                                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mt-4">
                                         <small class="text-muted">Review filters before saving to avoid missing hidden rows.</small>
-                                        <button type="submit" class="btn btn-success rounded-pill px-4">
+                                        <button
+                                            type="submit"
+                                            class="btn btn-success rounded-pill px-4"
+                                            id="poMatrixSaveBottom"
+                                            data-save-scope="mapping"
+                                            disabled
+                                            aria-disabled="true"
+                                            title="Make changes to enable saving."
+                                        >
                                             Save Mapping
                                         </button>
                                     </div>
@@ -577,10 +676,10 @@
         <td>
             <input type="hidden" name="plos[__INDEX__][id]" value="">
             <input type="hidden" name="plos[__INDEX__][delete]" value="0" class="plo-delete-input">
-            <input type="text" name="plos[__INDEX__][code]" value="__CODE__" class="form-control form-control-sm" placeholder="{{ $outcomeCodePrefix }}01" aria-label="Program learning outcome code" required>
+            <input type="text" name="plos[__INDEX__][code]" value="__CODE__" class="form-control form-control-sm" placeholder="{{ $outcomeCodePrefix }}01" aria-label="Program learning outcome code" autocomplete="off" required>
         </td>
         <td>
-            <input type="text" name="plos[__INDEX__][title]" value="Program Outcome __NUMBER__" class="form-control form-control-sm" placeholder="Program Outcome description" aria-label="Program learning outcome title" required>
+            <input type="text" name="plos[__INDEX__][title]" value="Program Outcome __NUMBER__" class="form-control form-control-sm" placeholder="Program Outcome description" aria-label="Program learning outcome title" autocomplete="off" required>
         </td>
         <td class="text-center">
             <input type="hidden" name="plos[__INDEX__][is_active]" value="0">
@@ -610,6 +709,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const matrixExpandButton = document.getElementById('poMatrixExpandToggle');
     const matrixContextChip = document.getElementById('poMatrixContextChip');
     const matrixWrap = document.querySelector('.po-matrix-wrap');
+    const matrixResizeHandle = document.getElementById('poMatrixResizeHandle');
+    const matrixResizeValue = document.getElementById('poMatrixResizeValue');
     const matrixRows = Array.from(document.querySelectorAll('.po-matrix-data-row'));
     const matrixGroupRows = Array.from(document.querySelectorAll('.po-matrix-group-row'));
     const matrixInputs = Array.from(document.querySelectorAll('.po-matrix-input'));
@@ -618,10 +719,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const matrixLegendItems = Array.from(document.querySelectorAll('.po-matrix-legend-item[data-plo-key]'));
     const definitionsForm = document.getElementById('ploDefinitionsForm');
     const mappingForm = document.getElementById('ploMappingForm');
-    const definitionsDirtyIndicator = document.getElementById('ploDefinitionsDirtyIndicator');
-    const mappingDirtyIndicator = document.getElementById('ploMappingDirtyIndicator');
-    const definitionsTabDirtyDot = document.getElementById('ploDefinitionsTabDirtyDot');
-    const mappingTabDirtyDot = document.getElementById('ploMappingTabDirtyDot');
+    const definitionsSaveButtons = definitionsForm
+        ? Array.from(definitionsForm.querySelectorAll('button[type="submit"][data-save-scope="definitions"]'))
+        : [];
+    const mappingSaveButtons = mappingForm
+        ? Array.from(mappingForm.querySelectorAll('button[type="submit"][data-save-scope="mapping"]'))
+        : [];
     const outcomePrefix = @json($outcomeCodePrefix);
 
     if (!workspaceElement || !rowsContainer || !addButton || !template) {
@@ -630,8 +733,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const matrixWorkspace = workspaceElement.querySelector('.po-matrix-workspace');
     const matrixBackdropId = 'poMatrixExpandBackdrop';
+    const definitionsFieldPattern = /^plos\[\d+]\[(id|delete|code|title|is_active)]$/;
+    const mappingFieldPattern = /^mappings\[\d+]\[\]$/;
     let hasShownExpandHint = false;
-    const serializeFormState = (form) => {
+    let hasUserInteractedWithPage = false;
+    let initialDefinitionsSnapshot = '';
+    let initialMappingSnapshot = '';
+    let definitionsDirtyStateReady = false;
+    let mappingDirtyStateReady = false;
+    let isDefinitionsDirty = false;
+    let isMappingDirty = false;
+    let matrixUserHeight = null;
+    let matrixResizeStartY = 0;
+    let matrixResizeStartHeight = 0;
+    let isMatrixResizing = false;
+
+    const serializeTrackedFormState = (form, includeKey) => {
         if (!form) {
             return '';
         }
@@ -639,6 +756,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const entries = [];
         const formData = new FormData(form);
         formData.forEach((value, key) => {
+            if (!includeKey(key)) {
+                return;
+            }
+
             entries.push([String(key), String(value)]);
         });
 
@@ -653,35 +774,169 @@ document.addEventListener('DOMContentLoaded', function () {
         return JSON.stringify(entries);
     };
 
-    const setDirtyIndicatorState = (isDirty, indicatorElement, dotElement) => {
-        if (indicatorElement) {
-            indicatorElement.classList.toggle('d-none', !isDirty);
-        }
+    const serializeDefinitionsState = () => serializeTrackedFormState(definitionsForm, (key) => {
+        return definitionsFieldPattern.test(String(key));
+    });
 
-        if (dotElement) {
-            dotElement.classList.toggle('d-none', !isDirty);
-        }
+    const serializeMappingState = () => serializeTrackedFormState(mappingForm, (key) => {
+        return mappingFieldPattern.test(String(key));
+    });
+
+    const setSaveButtonsDisabledState = (buttons, isDisabled) => {
+        buttons.forEach((button) => {
+            button.disabled = isDisabled;
+            button.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+        });
     };
 
-    const initialDefinitionsSnapshot = serializeFormState(definitionsForm);
-    const initialMappingSnapshot = serializeFormState(mappingForm);
+    const markUserInteraction = () => {
+        hasUserInteractedWithPage = true;
+    };
 
-    const refreshDefinitionsDirtyState = () => {
-        if (!definitionsForm) {
+    const clampValue = (value, minValue, maxValue) => {
+        return Math.min(Math.max(value, minValue), maxValue);
+    };
+
+    const getMatrixResizeBounds = () => {
+        if (!matrixWrap) {
+            return { minHeight: 220, maxHeight: 720 };
+        }
+
+        const computedStyles = window.getComputedStyle(matrixWrap);
+        const minHeight = Math.max(160, Math.round(Number.parseFloat(computedStyles.minHeight) || 220));
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 900;
+        const maxHeight = Math.max(minHeight + 80, Math.round(viewportHeight * 0.9));
+
+        return { minHeight, maxHeight };
+    };
+
+    const updateMatrixResizeMetadata = () => {
+        if (!matrixResizeHandle || !matrixWrap) {
             return;
         }
 
-        const isDirty = serializeFormState(definitionsForm) !== initialDefinitionsSnapshot;
-        setDirtyIndicatorState(isDirty, definitionsDirtyIndicator, definitionsTabDirtyDot);
+        const { minHeight, maxHeight } = getMatrixResizeBounds();
+        const currentHeight = Math.round(matrixWrap.getBoundingClientRect().height);
+
+        matrixResizeHandle.setAttribute('aria-valuemin', String(minHeight));
+        matrixResizeHandle.setAttribute('aria-valuemax', String(maxHeight));
+        matrixResizeHandle.setAttribute('aria-valuenow', String(currentHeight));
+
+        if (matrixResizeValue) {
+            matrixResizeValue.textContent = `${currentHeight}px`;
+        }
+    };
+
+    const resetMatrixUserHeightStyles = () => {
+        if (!matrixWrap) {
+            return;
+        }
+
+        matrixWrap.style.removeProperty('height');
+        matrixWrap.style.removeProperty('max-height');
+    };
+
+    const applyMatrixUserHeight = () => {
+        if (!matrixWrap || isMatrixExpanded() || matrixUserHeight === null) {
+            return;
+        }
+
+        const { minHeight, maxHeight } = getMatrixResizeBounds();
+        const nextHeight = clampValue(Math.round(matrixUserHeight), minHeight, maxHeight);
+        matrixUserHeight = nextHeight;
+        matrixWrap.style.height = `${nextHeight}px`;
+        matrixWrap.style.maxHeight = `${nextHeight}px`;
+        updateMatrixResizeMetadata();
+    };
+
+    const beginMatrixResize = (event) => {
+        if (!matrixWrap || !matrixResizeHandle || isMatrixExpanded()) {
+            return;
+        }
+
+        if (event.button !== undefined && event.button !== 0) {
+            return;
+        }
+
+        event.preventDefault();
+        markUserInteraction();
+
+        isMatrixResizing = true;
+        matrixResizeStartY = event.clientY;
+        matrixResizeStartHeight = matrixWrap.getBoundingClientRect().height;
+        matrixResizeHandle.classList.add('is-resizing');
+    };
+
+    const continueMatrixResize = (event) => {
+        if (!isMatrixResizing) {
+            return;
+        }
+
+        const deltaY = event.clientY - matrixResizeStartY;
+        matrixUserHeight = matrixResizeStartHeight + deltaY;
+        applyMatrixUserHeight();
+        event.preventDefault();
+    };
+
+    const endMatrixResize = () => {
+        if (!isMatrixResizing) {
+            return;
+        }
+
+        isMatrixResizing = false;
+        matrixResizeHandle?.classList.remove('is-resizing');
+    };
+
+    const isDirectFieldInteraction = (event, targetElement) => {
+        if (!event.isTrusted || !hasUserInteractedWithPage) {
+            return false;
+        }
+
+        if (!(targetElement instanceof HTMLElement)) {
+            return false;
+        }
+
+        return document.activeElement === targetElement;
+    };
+
+    const setDefinitionsDirtyState = (isDirty) => {
+        isDefinitionsDirty = isDirty;
+        setSaveButtonsDisabledState(definitionsSaveButtons, !isDirty);
+    };
+
+    const setMappingDirtyState = (isDirty) => {
+        isMappingDirty = isDirty;
+        setSaveButtonsDisabledState(mappingSaveButtons, !isDirty);
+    };
+
+    const initializeDefinitionsDirtyState = () => {
+        initialDefinitionsSnapshot = serializeDefinitionsState();
+        definitionsDirtyStateReady = true;
+        setDefinitionsDirtyState(false);
+    };
+
+    const initializeMappingDirtyState = () => {
+        initialMappingSnapshot = serializeMappingState();
+        mappingDirtyStateReady = true;
+        setMappingDirtyState(false);
+    };
+
+    const refreshDefinitionsDirtyState = () => {
+        if (!definitionsForm || !definitionsDirtyStateReady) {
+            return;
+        }
+
+        const isDirty = serializeDefinitionsState() !== initialDefinitionsSnapshot;
+        setDefinitionsDirtyState(isDirty);
     };
 
     const refreshMappingDirtyState = () => {
-        if (!mappingForm) {
+        if (!mappingForm || !mappingDirtyStateReady) {
             return;
         }
 
-        const isDirty = serializeFormState(mappingForm) !== initialMappingSnapshot;
-        setDirtyIndicatorState(isDirty, mappingDirtyIndicator, mappingTabDirtyDot);
+        const isDirty = serializeMappingState() !== initialMappingSnapshot;
+        setMappingDirtyState(isDirty);
     };
 
     const removeMatrixBackdrop = () => {
@@ -734,9 +989,15 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.classList.toggle('po-matrix-expanded-lock', isExpanded);
 
         if (isExpanded) {
+            endMatrixResize();
+            resetMatrixUserHeightStyles();
+        }
+
+        if (isExpanded) {
             createMatrixBackdrop();
         } else {
             removeMatrixBackdrop();
+            applyMatrixUserHeight();
         }
 
         const label = matrixExpandButton.querySelector('.po-matrix-expand-label');
@@ -764,6 +1025,59 @@ document.addEventListener('DOMContentLoaded', function () {
             setMatrixExpandedState(!isMatrixExpanded());
         });
     }
+
+    if (matrixResizeHandle && matrixWrap) {
+        matrixResizeHandle.addEventListener('pointerdown', beginMatrixResize);
+        matrixResizeHandle.addEventListener('keydown', function (event) {
+            if (isMatrixExpanded()) {
+                return;
+            }
+
+            const step = event.shiftKey ? 56 : 28;
+            const { minHeight, maxHeight } = getMatrixResizeBounds();
+
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                matrixUserHeight = (matrixUserHeight ?? matrixWrap.getBoundingClientRect().height) - step;
+                applyMatrixUserHeight();
+                return;
+            }
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                matrixUserHeight = (matrixUserHeight ?? matrixWrap.getBoundingClientRect().height) + step;
+                applyMatrixUserHeight();
+                return;
+            }
+
+            if (event.key === 'Home') {
+                event.preventDefault();
+                matrixUserHeight = minHeight;
+                applyMatrixUserHeight();
+                return;
+            }
+
+            if (event.key === 'End') {
+                event.preventDefault();
+                matrixUserHeight = maxHeight;
+                applyMatrixUserHeight();
+            }
+        });
+    }
+
+    document.addEventListener('pointermove', continueMatrixResize, true);
+    document.addEventListener('pointerup', endMatrixResize, true);
+    document.addEventListener('pointercancel', endMatrixResize, true);
+    window.addEventListener('resize', function () {
+        if (!isMatrixExpanded()) {
+            applyMatrixUserHeight();
+        }
+
+        updateMatrixResizeMetadata();
+    });
+
+    document.addEventListener('pointerdown', markUserInteraction, true);
+    document.addEventListener('keydown', markUserInteraction, true);
 
     document.addEventListener('keydown', function (event) {
         if (event.key !== 'Escape') {
@@ -867,12 +1181,52 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     if (definitionsForm) {
-        definitionsForm.addEventListener('input', refreshDefinitionsDirtyState);
-        definitionsForm.addEventListener('change', refreshDefinitionsDirtyState);
+        const handleDefinitionsDirtyEvent = (event) => {
+            const eventTarget = event.target;
+            if (!(eventTarget instanceof Element)) {
+                return;
+            }
+
+            if (!isDirectFieldInteraction(event, eventTarget)) {
+                return;
+            }
+
+            const fieldName = eventTarget.getAttribute('name') || '';
+            if (!definitionsFieldPattern.test(fieldName)) {
+                return;
+            }
+
+            const isCheckboxField = eventTarget instanceof HTMLInputElement && eventTarget.type === 'checkbox';
+            if (isCheckboxField && event.type !== 'change') {
+                return;
+            }
+
+            if (!isCheckboxField && event.type !== 'input') {
+                return;
+            }
+
+            refreshDefinitionsDirtyState();
+        };
+
+        definitionsForm.addEventListener('input', handleDefinitionsDirtyEvent);
+        definitionsForm.addEventListener('change', handleDefinitionsDirtyEvent);
+        definitionsForm.addEventListener('submit', function (event) {
+            if (isDefinitionsDirty) {
+                return;
+            }
+
+            event.preventDefault();
+        });
     }
 
     if (mappingForm) {
-        mappingForm.addEventListener('change', refreshMappingDirtyState);
+        mappingForm.addEventListener('submit', function (event) {
+            if (isMappingDirty) {
+                return;
+            }
+
+            event.preventDefault();
+        });
     }
 
     const normalize = (value) => String(value || '').trim().toLowerCase();
@@ -1110,7 +1464,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     matrixInputs.forEach((input) => {
-        input.addEventListener('change', function () {
+        input.addEventListener('change', function (event) {
+            if (!isDirectFieldInteraction(event, input)) {
+                return;
+            }
+
             applyMatrixFilters();
             refreshMappingDirtyState();
         });
@@ -1203,11 +1561,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    setSaveButtonsDisabledState(definitionsSaveButtons, true);
+    setSaveButtonsDisabledState(mappingSaveButtons, true);
     initializeMatrixNavigation();
     refreshAddButtonState();
-    refreshDefinitionsDirtyState();
-    refreshMappingDirtyState();
     applyMatrixFilters();
+    initializeDefinitionsDirtyState();
+    initializeMappingDirtyState();
+    updateMatrixResizeMetadata();
 });
 </script>
 @endpush
