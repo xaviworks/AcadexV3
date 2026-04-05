@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\AcademicPeriod;
 use App\Models\Course;
 use App\Models\Department;
+use App\Models\FinalGrade;
 use App\Models\Student;
+use App\Models\StudentSubject;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -215,5 +217,91 @@ class DeanStudentsAcademicPeriodTest extends TestCase
         });
         $response->assertSeeText('Instructor, Primary');
         $response->assertDontSeeText('No Instructors Available');
+    }
+
+    public function test_dean_final_grades_includes_dropped_students_with_dropped_remarks(): void
+    {
+        $department = Department::create([
+            'department_code' => 'DDG-' . Str::upper(Str::random(4)),
+            'department_description' => 'Dean Dropped Grades Department',
+            'is_deleted' => false,
+        ]);
+
+        $course = Course::create([
+            'course_code' => 'DDC-' . Str::upper(Str::random(5)),
+            'course_description' => 'Dean Dropped Grades Course',
+            'department_id' => $department->id,
+            'is_deleted' => false,
+        ]);
+
+        $academicPeriod = AcademicPeriod::create([
+            'academic_year' => '2031-2032',
+            'semester' => '1st',
+            'is_deleted' => false,
+        ]);
+
+        $dean = User::factory()->createOne([
+            'role' => 2,
+            'department_id' => $department->id,
+        ]);
+
+        $instructor = User::factory()->createOne([
+            'role' => 0,
+            'department_id' => $department->id,
+            'is_active' => true,
+        ]);
+
+        $subject = Subject::create([
+            'subject_code' => 'DDS-' . Str::upper(Str::random(6)),
+            'subject_description' => 'Dean Dropped Grades Subject',
+            'year_level' => 1,
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'academic_period_id' => $academicPeriod->id,
+            'instructor_id' => $instructor->id,
+            'is_deleted' => false,
+        ]);
+
+        $student = Student::create([
+            'first_name' => 'Dropped',
+            'last_name' => 'Student',
+            'department_id' => $department->id,
+            'course_id' => $course->id,
+            'academic_period_id' => $academicPeriod->id,
+            'year_level' => 1,
+            'is_deleted' => false,
+            'created_by' => $instructor->id,
+            'updated_by' => $instructor->id,
+        ]);
+
+        StudentSubject::create([
+            'student_id' => $student->id,
+            'subject_id' => $subject->id,
+            'is_deleted' => true,
+        ]);
+
+        FinalGrade::create([
+            'student_id' => $student->id,
+            'subject_id' => $subject->id,
+            'academic_period_id' => $academicPeriod->id,
+            'final_grade' => null,
+            'remarks' => 'Dropped',
+            'is_deleted' => false,
+            'created_by' => $instructor->id,
+            'updated_by' => $instructor->id,
+        ]);
+
+        $response = $this->actingAs($dean)
+            ->withSession(['active_academic_period_id' => $academicPeriod->id])
+            ->get(route('dean.grades', [
+                'course_id' => $course->id,
+                'instructor_id' => $instructor->id,
+                'subject_id' => $subject->id,
+            ]));
+
+        $response->assertOk();
+        $response->assertSeeText('Student, Dropped');
+        $response->assertSeeText('Dropped');
+        $response->assertDontSeeText('No Students Found');
     }
 }

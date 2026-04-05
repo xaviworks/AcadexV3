@@ -154,6 +154,19 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $this->assertTagHasAttribute($html, 'poMatrixSaveBottom', 'aria-disabled', 'true');
     }
 
+    public function test_co_program_uses_filled_delete_button_with_label_for_plo_definitions(): void
+    {
+        [$chairperson, $period] = $this->createChairpersonContext();
+
+        $response = $this->actingAs($chairperson)
+            ->withSession(['active_academic_period_id' => $period->id])
+            ->get(route('chairperson.reports.co-program'));
+
+        $response->assertOk();
+        $response->assertSee('class="btn btn-danger btn-sm rounded-pill remove-plo-row"', false);
+        $response->assertSee('<i class="bi bi-trash3 me-1"></i>Remove', false);
+    }
+
     public function test_definitions_save_returns_to_definitions_tab(): void
     {
         [$chairperson, $period, $course] = $this->createChairpersonContext();

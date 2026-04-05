@@ -148,9 +148,15 @@
                                 $midterm = $termGrades[2]->term_grade ?? null;
                                 $prefinal = $termGrades[3]->term_grade ?? null;
                                 $final = $termGrades[4]->term_grade ?? null;
+                                $finalGradeRecord = $finalGrades->get($student->id);
+                                $remarks = $finalGradeRecord->remarks ?? null;
+                                $isDropped = strtolower((string) $remarks) === 'dropped';
                                 $hasAll = !is_null($prelim) && !is_null($midterm) && !is_null($prefinal) && !is_null($final);
-                                $average = $hasAll ? round(($prelim + $midterm + $prefinal + $final) / 4) : null;
-                                $remarks = $average !== null ? ($average >= 75 ? 'Passed' : 'Failed') : null;
+                                $average = (! $isDropped && $hasAll) ? round(($prelim + $midterm + $prefinal + $final) / 4) : null;
+
+                                if ($remarks === null && $average !== null) {
+                                    $remarks = $average >= 75 ? 'Passed' : 'Failed';
+                                }
                             @endphp
                             <tr class="hover:bg-light">
                                 <td>{{ $student->last_name }}, {{ $student->first_name }}</td>
@@ -164,6 +170,8 @@
                                         <span class="badge bg-success-subtle text-success fw-medium px-3 py-2 rounded-pill">Passed</span>
                                     @elseif($remarks === 'Failed')
                                         <span class="badge bg-danger-subtle text-danger fw-medium px-3 py-2 rounded-pill">Failed</span>
+                                    @elseif(strtolower((string) $remarks) === 'dropped')
+                                        <span class="badge bg-secondary-subtle text-secondary fw-medium px-3 py-2 rounded-pill">Dropped</span>
                                     @else
                                         <span class="text-muted">–</span>
                                     @endif

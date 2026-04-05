@@ -197,18 +197,25 @@ class DeanController extends Controller
                         })
                         ->firstOrFail();
     
-                    $students = $subject->students()
+                    $students = $subject->studentsWithEnrollmentStatus()
                         ->where('students.department_id', $departmentId)
                         ->where('students.course_id', $courseId)
                         ->where('students.is_deleted', false)
-                        ->wherePivot('is_deleted', false)
                         ->orderBy('students.last_name')
                         ->orderBy('students.first_name')
                         ->get();
+
+                    $students->load([
+                        'termGrades' => function ($query) use ($subjectId) {
+                            $query->where('subject_id', $subjectId)
+                                ->where('is_deleted', false);
+                        },
+                    ]);
     
                     // Get final grades for the students in the selected subject
                     $finalGrades = FinalGrade::where('subject_id', $subjectId)
                         ->whereIn('student_id', $students->pluck('id'))
+                        ->where('is_deleted', false)
                         ->get()
                         ->keyBy('student_id');
                 }

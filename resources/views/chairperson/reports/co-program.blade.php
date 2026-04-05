@@ -323,7 +323,7 @@
                                         <p class="text-muted mb-0">Keep the codes short and use titles that are easy to recognize in the report.</p>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
-                                        <button type="button" class="btn btn-outline-success rounded-pill" id="addPloRowButton">
+                                        <button type="button" class="btn btn-success rounded-pill" id="addPloRowButton">
                                             <i class="bi bi-plus-circle me-2"></i>Add PLO
                                         </button>
                                     </div>
@@ -364,8 +364,8 @@
                                                         </div>
                                                     </td>
                                                     <td class="text-end">
-                                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill remove-plo-row">
-                                                            <i class="bi bi-trash3 me-1"></i>Remove
+                                                        <button type="button" class="btn btn-danger btn-sm rounded-pill remove-plo-row">
+                                                            <i class="bi bi-trash3 me-1">Remove</i>
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -688,7 +688,7 @@
             </div>
         </td>
         <td class="text-end">
-            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill remove-plo-row">
+            <button type="button" class="btn btn-danger btn-sm rounded-pill remove-plo-row">
                 <i class="bi bi-trash3 me-1"></i>Remove
             </button>
         </td>
