@@ -12,7 +12,7 @@ return new class extends Migration
             ->where('department_code', 'GE')
             ->where('department_description', 'General Education')
             ->update([
-                'department_description' => 'School of General Education',
+                'department_description' => 'General Education',
                 'updated_at' => now(),
             ]);
 
@@ -39,7 +39,7 @@ return new class extends Migration
     {
         DB::table('departments')
             ->where('department_code', 'GE')
-            ->where('department_description', 'School of General Education')
+            ->where('department_description', 'General Education')
             ->update([
                 'department_description' => 'General Education',
                 'updated_at' => now(),
