@@ -13,63 +13,103 @@
     }
 
     // ========== Student CO Report Tutorials ==========
-    
-    // Student CO Report - Chooser
+
+    // Student CO Report - Search/Selection
     window.VPAATutorial.registerTutorial('vpaa-reports-co-student', {
         title: 'Student CO Report - Selection',
-        description: 'Learn how to generate individual student course outcome reports',
+        description: 'Learn how to search for a student and open their outcome report',
         steps: [
             {
-                target: '.container-fluid h2',
+                target: '.container-fluid h2.fw-bold, .container-fluid h1, h1.h3',
                 title: 'Student CO Report',
-                content: 'This page allows you to generate detailed course outcome reports for individual students. Select a subject and student to view their performance.',
+                content: 'This page lets you search students and open individual Course Outcome reports.',
                 position: 'bottom'
             },
             {
-                target: '.badge.bg-success-subtle',
-                title: 'Academic Period',
-                content: 'The current academic year and semester are shown here. Reports are generated for this period.',
-                position: 'left',
+                target: '.container-fluid .text-muted.mb-0, .breadcrumb, nav[aria-label="breadcrumb"]',
+                title: 'Page Context',
+                content: 'Use the subtitle and breadcrumbs to confirm you are in the Student Outcomes report flow.',
+                position: 'bottom',
                 optional: true
             },
             {
-                target: 'a.btn-outline-secondary[href*="dashboard"]',
-                title: 'Back to Dashboard',
-                content: 'Click this button to return to the VPAA dashboard.',
-                position: 'left',
-                optional: true
-            },
-            {
-                target: '.col-lg-6:first-child .card',
-                title: 'Step 1: Select Subject',
-                content: 'First, choose a subject from the dropdown. This will load the list of students enrolled in that subject.',
-                position: 'right'
-            },
-            {
-                target: 'select#subject_id',
-                title: 'Subject Dropdown',
-                content: 'Select the subject you want to analyze. The page will refresh to show enrolled students.',
+                target: 'form[action*="co-student"], #student_query',
+                title: 'Search Student',
+                content: 'Enter a student name and choose from suggestions to select the correct student record.',
                 position: 'bottom'
             },
             {
-                target: '.col-lg-6:last-child .card',
-                title: 'Step 2: Select Student',
-                content: 'After selecting a subject, choose a student from this dropdown to generate their individual CO report.',
-                position: 'left'
-            },
-            {
-                target: 'select#student_id',
-                title: 'Student Dropdown',
-                content: 'Select a student to view their course outcome performance. This dropdown is enabled after selecting a subject.',
+                target: '#student_query',
+                title: 'Student Search Field',
+                content: 'Type first name, last name, or middle name. Suggestions appear while you type.',
                 position: 'bottom'
             },
             {
-                target: 'button[type="submit"]',
-                title: 'Generate Report',
-                content: 'Click this button to generate the selected student\'s course outcome report.',
+                target: '.student-fb-suggestions, .student-fb-item',
+                title: 'Suggestions List',
+                content: 'Pick the correct student from the suggestions to bind the selected student ID for report generation.',
+                position: 'bottom'
+            },
+            {
+                target: 'form[action*="co-student"] button[type="submit"], .btn.btn-success[type="submit"]',
+                title: 'Run Search',
+                content: 'Click Search to load the selected student and view their enrolled courses for this period.',
                 position: 'top'
+            },
+            {
+                target: '.enrolled-courses-card, .enrolled-courses-list',
+                title: 'Enrolled Courses',
+                content: 'After selecting a student, choose one enrolled course card to open the detailed outcome report.',
+                position: 'bottom',
+                optional: true
             }
         ]
+    });
+
+    // Student CO Report - Detail
+    window.VPAATutorial.registerTutorial('vpaa-reports-co-student-detail', {
+        title: 'Student CO Report - Details',
+        description: 'Learn how to read an individual student outcome report',
+        steps: [
+            {
+                target: '.container-fluid h2.fw-bold, .container-fluid h1, h1.h3',
+                title: 'Student Outcome Detail',
+                content: 'This page shows period-by-period and overall Course Outcome attainment for the selected student and subject.',
+                position: 'bottom'
+            },
+            {
+                target: '.card.border-0.shadow-sm.rounded-4.mb-4',
+                title: 'Student and Course Context',
+                content: 'This section confirms which student and course the report currently represents.',
+                position: 'bottom',
+                optional: true
+            },
+            {
+                target: '.table.table-bordered thead, .table thead',
+                title: 'Outcome Matrix',
+                content: 'Columns represent COs while rows show period-specific and overall results.',
+                position: 'bottom'
+            },
+            {
+                target: '.table.table-bordered tbody tr:first-child, .table tbody tr:first-child',
+                title: 'Period Row',
+                content: 'Each period row shows attainment percent and raw/max score against the configured target threshold.',
+                position: 'bottom',
+                optional: true
+            },
+            {
+                target: '.table-success, .badge.bg-success, .badge.bg-danger',
+                title: 'Overall and Performance Status',
+                content: 'The overall row summarizes performance across periods. Badge colors indicate whether targets are met.',
+                position: 'bottom',
+                optional: true
+            }
+        ],
+        tableDataCheck: {
+            selector: '.table tbody tr',
+            entityName: 'student outcome rows',
+            noAddButton: true
+        }
     });
 
     // ========== Course CO Report Tutorials ==========
@@ -80,27 +120,19 @@
         description: 'Learn how to view course outcome compliance by course',
         steps: [
             {
-                target: '.container-fluid h2',
+                target: '.container-fluid h2.fw-bold, .container-fluid h1, h1.h3',
                 title: 'Course CO Summary',
                 content: 'This page shows course outcome compliance across all subjects in a course. Select a course to view detailed CO performance.',
                 position: 'bottom'
             },
             {
-                target: '.badge.bg-success-subtle',
-                title: 'Academic Period',
-                content: 'Reports are generated for the current academic year and semester shown here.',
-                position: 'left',
-                optional: true
+                target: '.container-fluid .text-muted.mb-0, .breadcrumb, nav[aria-label="breadcrumb"], .container-fluid .mb-4',
+                title: 'Page Context',
+                content: 'Use the subtitle and breadcrumbs to confirm you are in the Course Outcomes report chooser.',
+                position: 'bottom'
             },
             {
-                target: 'a.btn-outline-secondary[href*="dashboard"]',
-                title: 'Back to Dashboard',
-                content: 'Return to the VPAA dashboard by clicking this button.',
-                position: 'left',
-                optional: true
-            },
-            {
-                target: '.row.g-4',
+                target: '.row.g-4, .container-fluid .row',
                 title: 'Course Cards',
                 content: 'Each card represents a course/program. Click on a course to view its subjects and their course outcome attainment data.',
                 position: 'bottom'
@@ -121,26 +153,25 @@
         description: 'Learn how to read the course outcome summary table',
         steps: [
             {
-                target: '.container-fluid h2',
+                target: '.container-fluid h2.fw-bold, .container-fluid h1, h1.h3',
                 title: 'Course CO Summary',
                 content: 'This page shows course outcome attainment for all subjects in the selected course. Each subject\'s performance is displayed in the table.',
                 position: 'bottom'
             },
             {
-                target: 'a.btn-outline-secondary[href*="co-course"]',
-                title: 'Choose Another Course',
-                content: 'Click this button to go back and select a different course.',
-                position: 'left',
-                optional: true
+                target: '.container-fluid .text-muted.mb-0, .breadcrumb, nav[aria-label="breadcrumb"], .card.border-0.shadow-sm.rounded-4',
+                title: 'Page Context',
+                content: 'The subtitle and breadcrumb indicate the selected course and where this report sits in the VPAA flow.',
+                position: 'bottom'
             },
             {
-                target: '.table thead',
+                target: '.table thead, .table.table-hover, .card.border-0.shadow-sm.rounded-4 .card-body',
                 title: 'CO Summary Table',
                 content: 'The table shows each subject and its performance across 6 course outcomes (CO1-CO6). Each cell shows the attainment percentage.',
                 position: 'bottom'
             },
             {
-                target: '.table thead th:has(.bi-mortarboard-fill)',
+                target: '.table thead th:has(.bi-mortarboard-fill), .table thead th:nth-child(2)',
                 title: 'Course Outcome Columns',
                 content: 'Each CO column (CO1 through CO6) shows the attainment percentage for that specific course outcome.',
                 position: 'bottom',
@@ -183,27 +214,19 @@
         description: 'Learn how to view course outcome compliance by program/department',
         steps: [
             {
-                target: '.container-fluid h2',
+                target: '.container-fluid h2.fw-bold, .container-fluid h1, h1.h3',
                 title: 'Program CO Summary',
                 content: 'This page allows you to view course outcome compliance at the program level. Select a department to see its students\' overall CO attainment.',
                 position: 'bottom'
             },
             {
-                target: '.badge.bg-success-subtle',
-                title: 'Academic Period',
-                content: 'Reports are generated for the academic year and semester shown here.',
-                position: 'left',
-                optional: true
+                target: '.container-fluid .text-muted.mb-0, .breadcrumb, nav[aria-label="breadcrumb"], .container-fluid .mb-4',
+                title: 'Page Context',
+                content: 'Use the subtitle and breadcrumbs to confirm this is the department-selection step for Program Outcomes reports.',
+                position: 'bottom'
             },
             {
-                target: 'a.btn-outline-secondary[href*="dashboard"]',
-                title: 'Back to Dashboard',
-                content: 'Return to the VPAA dashboard by clicking this button.',
-                position: 'left',
-                optional: true
-            },
-            {
-                target: '.row.g-4',
+                target: '.row.g-4, .container-fluid .row',
                 title: 'Department Cards',
                 content: 'Each card represents a department. Click on a department to view student-level course outcome data.',
                 position: 'bottom'
@@ -216,5 +239,50 @@
                 optional: true
             }
         ]
+    });
+
+    // Program CO Report - Program Selection and Summary
+    window.VPAATutorial.registerTutorial('vpaa-reports-co-program-detail', {
+        title: 'Program CO Summary - Details',
+        description: 'Learn how to select a program and read program outcome attainment',
+        steps: [
+            {
+                target: '.container-fluid h2.fw-bold, .container-fluid h1, h1.h3',
+                title: 'Program Outcomes',
+                content: 'This flow lets you choose a program under a department and review Program Learning Outcome attainment.',
+                position: 'bottom'
+            },
+            {
+                target: '.container-fluid .text-muted.mb-0, .breadcrumb, nav[aria-label="breadcrumb"], .card.border-0.shadow-sm.rounded-4',
+                title: 'Page Context',
+                content: 'Use this context to verify whether you are selecting a program or viewing the final summary matrix.',
+                position: 'bottom'
+            },
+            {
+                target: '.row.g-4 .course-card, .row.g-4, .card.border-0.shadow-sm.rounded-4.mt-4 .card-body',
+                title: 'Program Cards',
+                content: 'Select a program card to open the Program Outcomes summary for that program.',
+                position: 'bottom'
+            },
+            {
+                target: '.table.table-bordered thead, .table thead',
+                title: 'Program Outcomes Matrix',
+                content: 'This matrix maps each active PLO to its attainment percentage and linked CO evidence.',
+                position: 'bottom',
+                optional: true
+            },
+            {
+                target: '.plo-result-chip, .plo-level-banner, .badge.text-bg-light',
+                title: 'Evidence and Levels',
+                content: 'Chips show contributing COs, while level banners and tones indicate attainment level against configured thresholds.',
+                position: 'bottom',
+                optional: true
+            }
+        ],
+        tableDataCheck: {
+            selector: '.table tbody tr',
+            entityName: 'program outcome rows',
+            noAddButton: true
+        }
     });
 })();

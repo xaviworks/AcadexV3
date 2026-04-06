@@ -70,7 +70,7 @@
         @elseif(Auth::user()->role === 3)
             <script src="{{ asset('js/admin-tutorial.js') }}" defer></script>
         @elseif(Auth::user()->role === 5)
-            <script src="{{ asset('js/vpaa-tutorial.js') }}" defer></script>
+            <script src="{{ asset('js/vpaa-tutorial.js') }}?v={{ filemtime(public_path('js/vpaa-tutorial.js')) }}" defer></script>
         @elseif(Auth::user()->role === 2)
             <script src="{{ asset('js/dean-tutorial.js') }}" defer></script>
         @elseif(Auth::user()->role === 1)

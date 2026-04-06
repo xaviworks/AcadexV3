@@ -12,6 +12,19 @@
         </div>
     </div>
 
+    @php
+        $breadcrumbItems = [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Attainment Report', 'url' => route('vpaa.reports.attainment')],
+        ];
+
+        if (isset($selectedDepartment) && $selectedDepartment) {
+            $breadcrumbItems[] = ['label' => $selectedDepartment->department_code];
+        }
+    @endphp
+
+    <x-breadcrumbs :items="$breadcrumbItems" />
+
     {{-- Subject List Controls --}}
     @if(isset($subjects) && count($subjects))
         <div class="card border-0 shadow-sm rounded-4 mb-3">
