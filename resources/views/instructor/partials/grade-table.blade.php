@@ -166,12 +166,20 @@
                     </thead>
                     <tbody id="studentTableBody">
                         @foreach ($students as $student)
-                            <tr class="student-row">
-                                <td class="px-3 py-2 fw-medium text-dark" style="width: 200px;">
-                                    <div class="text-truncate" title="{{ $student->last_name }}, {{ $student->first_name }} @if($student->middle_name) {{ strtoupper(substr($student->middle_name, 0, 1)) }}. @endif">
-                                        {{ $student->last_name }}, {{ $student->first_name }} 
-                                        @if($student->middle_name)
-                                            {{ strtoupper(substr($student->middle_name, 0, 1)) }}.
+                            @php $isDropped = (bool) ($student->pivot->is_deleted ?? false); @endphp
+                            <tr class="student-row{{ $isDropped ? ' student-dropped' : '' }}" {{ $isDropped ? 'data-dropped="true"' : '' }}>
+                                <td class="px-3 py-2 fw-medium" style="width: 200px; {{ $isDropped ? 'border-left: 4px solid #dc3545;' : '' }}">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <div class="text-truncate {{ $isDropped ? 'text-muted' : 'text-dark' }}" title="{{ $student->last_name }}, {{ $student->first_name }} @if($student->middle_name) {{ strtoupper(substr($student->middle_name, 0, 1)) }}. @endif">
+                                            {{ $student->last_name }}, {{ $student->first_name }} 
+                                            @if($student->middle_name)
+                                                {{ strtoupper(substr($student->middle_name, 0, 1)) }}.
+                                            @endif
+                                        </div>
+                                        @if($isDropped)
+                                            <span class="badge d-inline-flex align-items-center gap-1" style="background-color:#dc3545; font-size:0.7rem; padding: 3px 7px; border-radius: 4px;">
+                                                <i class="bi bi-slash-circle" style="font-size:0.7rem;"></i> Dropped
+                                            </span>
                                         @endif
                                     </div>
                                 </td>
@@ -183,17 +191,18 @@
                                     <td class="px-2 py-2 text-center" style="width: 120px;">
                                         <input
                                             type="number"
-                                            class="form-control text-center grade-input"
+                                            class="form-control text-center grade-input{{ $isDropped ? ' grade-input-dropped' : '' }}"
                                             name="scores[{{ $student->id }}][{{ $activity->id }}]"
                                             value="{{ $score !== null ? (int) $score : '' }}"
                                             min="0"
                                             max="{{ $activity->number_of_items }}"
                                             step="1"
                                             placeholder="–"
-                                            title="Max: {{ $activity->number_of_items }}"
+                                            title="{{ $isDropped ? 'Student is dropped — scores are read-only' : 'Max: ' . $activity->number_of_items }}"
                                             data-student="{{ $student->id }}"
                                             data-activity="{{ $activity->id }}"
                                             style="width: 75px; margin: 0 auto; font-size: 0.95rem; height: 36px;"
+                                            {{ $isDropped ? 'disabled' : '' }}
                                         >
                                     </td>
                                 @endforeach
@@ -222,7 +231,7 @@
                                 
                                 <td class="px-2 py-2 text-center align-middle" style="width: 100px;">
                                     <div class="d-inline-block border rounded-2 {{ $gradeClass }} position-relative" 
-                                         style="min-width: 75px; padding: 8px 12px;">
+                                         style="min-width: 75px; padding: 8px 12px; {{ $isDropped ? 'opacity:0.6;' : '' }}">
                                         <div class="position-absolute top-50 start-0 translate-middle-y {{ $textClass }}" 
                                              style="margin-left: 8px;">
                                             <i class="bi {{ $icon }}"></i>
@@ -458,6 +467,21 @@ body:has(.grade-table-fullscreen) .grade-table-fullscreen {
 .grade-table-fullscreen-actions {
     max-width: calc(100vw - 32px);
     right: calc((100vw - min(95vw, 1800px)) / 2 + 16px);
+}
+
+/* Dropped student rows — visible but all editing locked */
+tr.student-dropped {
+    background-color: #f8f9fa !important;
+    opacity: 0.72;
+}
+tr.student-dropped td {
+    color: #6c757d !important;
+}
+.grade-input-dropped {
+    background-color: #e9ecef !important;
+    cursor: not-allowed !important;
+    border-color: #dee2e6 !important;
+    color: #6c757d !important;
 }
 
 /* Responsive adjustments */

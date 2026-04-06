@@ -43,6 +43,12 @@ class FinalGradeController extends Controller
                 ->unique()
                 ->values();
 
+            // Preload dropped status in one query — pivot is the single source of truth
+            $droppedStudentIds = StudentSubject::where('subject_id', $subjectId)
+                ->where('is_deleted', true)
+                ->pluck('student_id')
+                ->flip();
+
             $students = Student::whereIn('id', $studentIds)
                 ->where('is_deleted', false)
                 ->orderBy('last_name')
@@ -76,11 +82,12 @@ class FinalGradeController extends Controller
                     'remarks' => $finalGradeRecord->remarks ?? null,
                     'notes' => $finalGradeRecord->notes ?? '',
                     'has_notes' => !empty($finalGradeRecord->notes ?? ''),
+                    'is_dropped' => isset($droppedStudentIds[$student->id]),
                 ];                
 
-                if (strtolower((string) ($row['remarks'] ?? '')) === 'dropped') {
-                    $row['final_average'] = null;
-                } elseif (isset($row['prelim'], $row['midterm'], $row['prefinal'], $row['final'])) {
+                // Always calculate final_average if all 4 term grades exist,
+                // even for dropped students (show their earned average).
+                if (isset($row['prelim'], $row['midterm'], $row['prefinal'], $row['final'])) {
                     $avg = round(array_sum([
                         $row['prelim'],
                         $row['midterm'],
@@ -89,7 +96,11 @@ class FinalGradeController extends Controller
                     ]) / 4, 2);
 
                     $row['final_average'] = $avg;
-                    $row['remarks'] = $avg >= 75 ? 'Passed' : 'Failed';
+
+                    // Only override remarks for non-dropped students
+                    if (!$row['is_dropped']) {
+                        $row['remarks'] = $avg >= 75 ? 'Passed' : 'Failed';
+                    }
                 }
 
                 $finalData[] = $row;

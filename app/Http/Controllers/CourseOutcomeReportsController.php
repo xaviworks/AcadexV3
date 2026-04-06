@@ -85,7 +85,6 @@ class CourseOutcomeReportsController extends Controller
                 ->where('students.is_deleted', false)
                 ->whereHas('subjects', function ($q) use ($periodId) {
                     $q->where('subjects.is_deleted', false)
-                        ->where('student_subjects.is_deleted', false)
                         ->where('subjects.academic_period_id', $periodId);
                 })
                 ->orderBy('students.last_name')
@@ -110,7 +109,6 @@ class CourseOutcomeReportsController extends Controller
                 $searchedStudents = $searchedStudents
                     ->whereHas('subjects', function ($q) use ($periodId) {
                         $q->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
                     })
                     ->orderBy('students.last_name')
@@ -125,7 +123,6 @@ class CourseOutcomeReportsController extends Controller
                     ->where('students.is_deleted', false)
                     ->whereHas('subjects', function ($q) use ($periodId) {
                         $q->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
                     })
                     ->firstOrFail();
@@ -133,9 +130,8 @@ class CourseOutcomeReportsController extends Controller
                 $enrolledSubjects = Subject::with('course')
                     ->where('subjects.is_deleted', false)
                     ->where('subjects.academic_period_id', $periodId)
-                    ->whereHas('students', function ($q) use ($selectedStudent) {
-                        $q->where('students.id', $selectedStudent->id)
-                            ->where('student_subjects.is_deleted', false);
+                    ->whereHas('studentsWithEnrollmentStatus', function ($q) use ($selectedStudent) {
+                        $q->where('students.id', $selectedStudent->id);
                     })
                     ->orderBy('subjects.subject_code')
                     ->get();
@@ -161,15 +157,19 @@ class CourseOutcomeReportsController extends Controller
         $student = Student::where('students.id', $studentId)
             ->where('students.is_deleted', false)
             ->whereHas('subjects', function ($q) use ($subjectId) {
-                $q->where('subject_id', $subjectId)
-                    ->where('student_subjects.is_deleted', false);
+                $q->where('subject_id', $subjectId);
             })
             ->firstOrFail();
         $data = $service->computeStudentSubject($studentId, $subjectId);
+        $isDropped = (bool) DB::table('student_subjects')
+            ->where('student_id', $studentId)
+            ->where('subject_id', $subjectId)
+            ->value('is_deleted');
 
         return view('vpaa.reports.co-student', array_merge($data, [
             'selectedSubject' => $subject,
             'student' => $student,
+            'isDropped' => $isDropped,
         ]));
     }
 
@@ -250,7 +250,6 @@ class CourseOutcomeReportsController extends Controller
                 ->whereHas('subjects', function ($q) use ($periodId) {
                     $q->where('subjects.department_id', 1)
                         ->where('subjects.is_deleted', false)
-                        ->where('student_subjects.is_deleted', false)
                         ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
                 })
                 ->orderBy('students.last_name')
@@ -276,7 +275,6 @@ class CourseOutcomeReportsController extends Controller
                     ->whereHas('subjects', function ($q) use ($periodId) {
                         $q->where('subjects.department_id', 1)
                             ->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
                     })
                     ->orderBy('students.last_name')
@@ -292,7 +290,6 @@ class CourseOutcomeReportsController extends Controller
                     ->whereHas('subjects', function ($q) use ($periodId) {
                         $q->where('subjects.department_id', 1)
                             ->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
                     })
                     ->firstOrFail();
@@ -301,9 +298,8 @@ class CourseOutcomeReportsController extends Controller
                     ->where('subjects.department_id', 1)
                     ->where('subjects.is_deleted', false)
                     ->when($periodId, fn($q) => $q->where('subjects.academic_period_id', $periodId))
-                    ->whereHas('students', function ($q) use ($selectedStudent) {
-                        $q->where('students.id', $selectedStudent->id)
-                            ->where('student_subjects.is_deleted', false);
+                    ->whereHas('studentsWithEnrollmentStatus', function ($q) use ($selectedStudent) {
+                        $q->where('students.id', $selectedStudent->id);
                     })
                     ->orderBy('subjects.subject_code')
                     ->get();
@@ -330,15 +326,19 @@ class CourseOutcomeReportsController extends Controller
         $student = Student::where('students.id', $studentId)
             ->where('students.is_deleted', false)
             ->whereHas('subjects', function ($q) use ($subjectId) {
-                $q->where('subject_id', $subjectId)
-                    ->where('student_subjects.is_deleted', false);
+                $q->where('subject_id', $subjectId);
             })
             ->firstOrFail();
         $data = $service->computeStudentSubject($studentId, $subjectId);
+        $isDropped = (bool) DB::table('student_subjects')
+            ->where('student_id', $studentId)
+            ->where('subject_id', $subjectId)
+            ->value('is_deleted');
 
         return view('gecoordinator.reports.co-student', array_merge($data, [
             'selectedSubject' => $subject,
             'student' => $student,
+            'isDropped' => $isDropped,
         ]));
     }
 
@@ -426,7 +426,6 @@ class CourseOutcomeReportsController extends Controller
                     $q->where('subjects.course_id', $userCourseId)
                         ->where('subjects.department_id', '!=', 1)
                         ->where('subjects.is_deleted', false)
-                        ->where('student_subjects.is_deleted', false)
                         ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
                 })
                 ->orderBy('students.last_name')
@@ -453,7 +452,6 @@ class CourseOutcomeReportsController extends Controller
                         $q->where('subjects.course_id', $userCourseId)
                             ->where('subjects.department_id', '!=', 1)
                             ->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
                     })
                     ->orderBy('students.last_name')
@@ -470,7 +468,6 @@ class CourseOutcomeReportsController extends Controller
                         $q->where('subjects.course_id', $userCourseId)
                             ->where('subjects.department_id', '!=', 1)
                             ->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
                             ->when($periodId, fn($sq) => $sq->where('subjects.academic_period_id', $periodId));
                     })
                     ->firstOrFail();
@@ -480,9 +477,8 @@ class CourseOutcomeReportsController extends Controller
                     ->where('subjects.department_id', '!=', 1)
                     ->where('subjects.is_deleted', false)
                     ->when($periodId, fn($q) => $q->where('subjects.academic_period_id', $periodId))
-                    ->whereHas('students', function ($q) use ($selectedStudent) {
-                        $q->where('students.id', $selectedStudent->id)
-                            ->where('student_subjects.is_deleted', false);
+                    ->whereHas('studentsWithEnrollmentStatus', function ($q) use ($selectedStudent) {
+                        $q->where('students.id', $selectedStudent->id);
                     })
                     ->orderBy('subjects.subject_code')
                     ->get();
@@ -511,15 +507,19 @@ class CourseOutcomeReportsController extends Controller
         $student = Student::where('students.id', $studentId)
             ->where('students.is_deleted', false)
             ->whereHas('subjects', function ($q) use ($subjectId) {
-                $q->where('subject_id', $subjectId)
-                    ->where('student_subjects.is_deleted', false);
+                $q->where('subject_id', $subjectId);
             })
             ->firstOrFail();
         $data = $service->computeStudentSubject($studentId, $subjectId);
+        $isDropped = (bool) DB::table('student_subjects')
+            ->where('student_id', $studentId)
+            ->where('subject_id', $subjectId)
+            ->value('is_deleted');
 
         return view('chairperson.reports.co-student', array_merge($data, [
             'selectedSubject' => $subject,
             'student' => $student,
+            'isDropped' => $isDropped,
         ]));
     }
 
@@ -604,7 +604,6 @@ class CourseOutcomeReportsController extends Controller
                 ->whereHas('subjects', function ($q) use ($departmentId, $periodId) {
                     $q->where('subjects.department_id', $departmentId)
                         ->where('subjects.is_deleted', false)
-                        ->where('student_subjects.is_deleted', false)
                         ->where('subjects.academic_period_id', $periodId);
                 })
                 ->orderBy('students.last_name')
@@ -630,7 +629,6 @@ class CourseOutcomeReportsController extends Controller
                     ->whereHas('subjects', function ($q) use ($departmentId, $periodId) {
                         $q->where('subjects.department_id', $departmentId)
                             ->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
                             ->where('subjects.academic_period_id', $periodId);
                     })
                     ->orderBy('students.last_name')
@@ -646,7 +644,6 @@ class CourseOutcomeReportsController extends Controller
                     ->whereHas('subjects', function ($q) use ($departmentId, $periodId) {
                         $q->where('subjects.department_id', $departmentId)
                             ->where('subjects.is_deleted', false)
-                            ->where('student_subjects.is_deleted', false)
                             ->where('subjects.academic_period_id', $periodId);
                     })
                     ->firstOrFail();
@@ -655,9 +652,8 @@ class CourseOutcomeReportsController extends Controller
                     ->where('subjects.department_id', $departmentId)
                     ->where('subjects.is_deleted', false)
                     ->where('subjects.academic_period_id', $periodId)
-                    ->whereHas('students', function ($q) use ($selectedStudent) {
-                        $q->where('students.id', $selectedStudent->id)
-                            ->where('student_subjects.is_deleted', false);
+                    ->whereHas('studentsWithEnrollmentStatus', function ($q) use ($selectedStudent) {
+                        $q->where('students.id', $selectedStudent->id);
                     })
                     ->orderBy('subjects.subject_code')
                     ->get();
@@ -685,15 +681,19 @@ class CourseOutcomeReportsController extends Controller
         $student = Student::where('students.id', $studentId)
             ->where('students.is_deleted', false)
             ->whereHas('subjects', function ($q) use ($subjectId) {
-                $q->where('subject_id', $subjectId)
-                    ->where('student_subjects.is_deleted', false);
+                $q->where('subject_id', $subjectId);
             })
             ->firstOrFail();
         $data = $service->computeStudentSubject($studentId, $subjectId);
+        $isDropped = (bool) DB::table('student_subjects')
+            ->where('student_id', $studentId)
+            ->where('subject_id', $subjectId)
+            ->value('is_deleted');
 
         return view('dean.reports.co-student', array_merge($data, [
             'selectedSubject' => $subject,
             'student' => $student,
+            'isDropped' => $isDropped,
         ]));
     }
 

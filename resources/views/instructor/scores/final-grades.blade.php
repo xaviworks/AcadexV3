@@ -109,19 +109,22 @@
                     </thead>
                     <tbody>
                         @foreach($finalData as $data)
-                            <tr class="hover-shadow-sm">
-                                <td class="fw-semibold text-start">
+                            @php $isDropped = $data['is_dropped'] ?? false; @endphp
+                            <tr class="hover-shadow-sm{{ $isDropped ? ' student-dropped' : '' }}" style="{{ $isDropped ? 'opacity:0.75;background-color:#fff8f8;' : '' }}">
+                                <td class="fw-semibold text-start {{ $isDropped ? 'text-muted' : '' }}" style="{{ $isDropped ? 'border-left:4px solid #dc3545;' : '' }}">
                                     {{ $data['student']->last_name }}, {{ $data['student']->first_name }}
                                 </td>
                                 <td class="text-center">{{ isset($data['prelim']) ? (int) round($data['prelim']) : '–' }}</td>
                                 <td class="text-center">{{ isset($data['midterm']) ? (int) round($data['midterm']) : '–' }}</td>
                                 <td class="text-center">{{ isset($data['prefinal']) ? (int) round($data['prefinal']) : '–' }}</td>
                                 <td class="text-center">{{ isset($data['final']) ? (int) round($data['final']) : '–' }}</td>
-                                <td class="text-center fw-bold text-success">
+                                <td class="text-center fw-bold {{ $isDropped ? 'text-muted' : 'text-success' }}">
                                     {{ isset($data['final_average']) ? (int) round($data['final_average']) : '–' }}
                                 </td>
                                 <td class="text-center">
-                                    @if(isset($data['remarks']))
+                                    @if($isDropped)
+                                        <span class="badge bg-danger-subtle text-danger px-3 py-1">Dropped</span>
+                                    @elseif(isset($data['remarks']))
                                         @if(strtolower($data['remarks']) === 'passed')
                                             <span class="badge bg-success px-3 py-1">Passed</span>
                                         @elseif(strtolower($data['remarks']) === 'failed')

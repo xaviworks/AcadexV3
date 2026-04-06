@@ -99,8 +99,18 @@
                 </thead>
                 <tbody>
                     @foreach($students as $student)
-                        <tr data-year="{{ $student->year_level }}">
-                            <td>{{ $student->last_name }}, {{ $student->first_name }}</td>
+                        @php $isDropped = (bool) ($student->pivot->is_deleted ?? false); @endphp
+                        <tr data-year="{{ $student->year_level }}" class="{{ $isDropped ? 'student-dropped' : '' }}" style="{{ $isDropped ? 'opacity:0.75;background-color:#fff8f8;' : '' }}">
+                            <td style="{{ $isDropped ? 'border-left:4px solid #dc3545;' : '' }}">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="{{ $isDropped ? 'text-muted' : '' }}">{{ $student->last_name }}, {{ $student->first_name }}</span>
+                                    @if($isDropped)
+                                        <span class="badge d-inline-flex align-items-center gap-1" style="background-color:#dc3545;font-size:0.65rem;padding:2px 7px;border-radius:4px;">
+                                            <i class="bi bi-slash-circle" style="font-size:0.65rem;"></i> Dropped
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
                             <td>{{ $student->course->course_code ?? 'N/A' }}</td>
                             <td class="text-center">
                                 <span class="badge bg-success fw-semibold px-3 py-2 rounded-pill">

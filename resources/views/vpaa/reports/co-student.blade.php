@@ -28,7 +28,12 @@
                         </div>
                         <div class="ms-3">
                             <small class="text-muted text-uppercase fw-medium" style="font-size: 0.7rem; letter-spacing: 0.5px;">Student</small>
-                            <div class="fw-semibold text-dark">{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_name ?? '' }}</div>
+                            <div class="fw-semibold {{ $isDropped ? 'text-muted' : 'text-dark' }}">{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_name ?? '' }}</div>
+                            @if($isDropped)
+                                <span class="badge bg-danger-subtle text-danger px-2 py-1 mt-1 d-inline-flex align-items-center gap-1" style="font-size:0.72rem;">
+                                    <i class="bi bi-slash-circle"></i> Dropped
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>

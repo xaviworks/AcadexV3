@@ -12,6 +12,7 @@ use App\Models\UnverifiedUser;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -447,7 +448,8 @@ class ChairpersonController extends Controller
             }
             $subject = $subjectQuery->firstOrFail();
     
-            $students = $subject->students()
+            $students = $subject->studentsWithEnrollmentStatus()
+                ->where('students.is_deleted', false)
                 ->with([
                     'termGrades' => function ($q) use ($selectedSubjectId) {
                         $q->where('subject_id', $selectedSubjectId);
@@ -456,6 +458,8 @@ class ChairpersonController extends Controller
                         $q->where('subject_id', $selectedSubjectId);
                     }
                 ])
+                ->orderBy('students.last_name')
+                ->orderBy('students.first_name')
                 ->get();
         }
     
@@ -499,11 +503,19 @@ class ChairpersonController extends Controller
                 ->orderBy('first_name')
                 ->get();
         }
-        return view('chairperson.students-by-year', compact('students'));
-    }
 
-    // ============================
-    // Save Grade Notes
+        $academicPeriodId = session('active_academic_period_id');
+        $droppedStudentIds = $academicPeriodId
+            ? DB::table('student_subjects')
+                ->join('subjects', 'student_subjects.subject_id', '=', 'subjects.id')
+                ->where('subjects.academic_period_id', $academicPeriodId)
+                ->where('student_subjects.is_deleted', true)
+                ->pluck('student_subjects.student_id')
+                ->flip()
+            : collect();
+
+        return view('chairperson.students-by-year', compact('students', 'droppedStudentIds'));
+    }
     // ============================
 
     public function saveGradeNotes(Request $request)

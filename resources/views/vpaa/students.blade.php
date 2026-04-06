@@ -69,18 +69,21 @@
                             <th scope="col" class="px-4 py-3 fw-semibold">Program</th>
                         @endif
                         <th scope="col" class="px-4 py-3 fw-semibold">Year Level</th>
+                        <th scope="col" class="px-4 py-3 fw-semibold text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody>
+                    @php $droppedStudentIds = $droppedStudentIds ?? collect(); @endphp
                     @forelse($students as $student)
-                        <tr>
-                            <td class="px-4 py-3">
+                        @php $isDropped = isset($droppedStudentIds[$student->id]); @endphp
+                        <tr style="{{ $isDropped ? 'opacity:0.75;background-color:#fff8f8;' : '' }}">
+                            <td class="px-4 py-3" style="{{ $isDropped ? 'border-left:4px solid #dc3545;' : '' }}">
                                 <div class="d-flex align-items-center">
                                     <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
                                         <i class="bi bi-person-fill text-info"></i>
                                     </div>
                                     <div>
-                                        <div class="fw-semibold">{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_name }}</div>
+                                        <div class="fw-semibold {{ $isDropped ? 'text-muted' : '' }}">{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_name }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -96,10 +99,21 @@
                                     Year {{ $student->year_level }}
                                 </span>
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                @if($isDropped)
+                                    <span class="badge bg-danger-subtle text-danger fw-medium px-3 py-2 rounded-pill d-inline-flex align-items-center gap-1">
+                                        <i class="bi bi-slash-circle"></i> Dropped
+                                    </span>
+                                @else
+                                    <span class="badge bg-success-subtle text-success fw-medium px-3 py-2 rounded-pill d-inline-flex align-items-center gap-1">
+                                        <i class="bi bi-check-circle"></i> Enrolled
+                                    </span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $showCourseColumn ? 3 : 2 }}" class="text-center py-5">
+                            <td colspan="{{ $showCourseColumn ? 4 : 3 }}" class="text-center py-5">
                                 <x-empty-state
                                     compact="true"
                                     icon="bi-people-x"

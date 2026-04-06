@@ -548,10 +548,13 @@ class GECoordinatorController extends Controller
                 ->where('is_deleted', false)
                 ->firstOrFail();
     
-            $students = $subject->students()
+            $students = $subject->studentsWithEnrollmentStatus()
+                ->where('students.is_deleted', false)
                 ->with(['termGrades' => function ($q) use ($selectedSubjectId) {
                     $q->where('subject_id', $selectedSubjectId);
                 }])
+                ->orderBy('students.last_name')
+                ->orderBy('students.first_name')
                 ->get();
         }
     
@@ -594,10 +597,11 @@ class GECoordinatorController extends Controller
         if ($selectedSubjectId) {
             $subject = Subject::find($selectedSubjectId);
             if ($subject) {
-                $students = $subject->students()
+                $students = $subject->studentsWithEnrollmentStatus()
+                    ->where('students.is_deleted', false)
                     ->with(['course', 'department'])
-                    ->orderBy('last_name')
-                    ->orderBy('first_name')
+                    ->orderBy('students.last_name')
+                    ->orderBy('students.first_name')
                     ->get();
             }
         }

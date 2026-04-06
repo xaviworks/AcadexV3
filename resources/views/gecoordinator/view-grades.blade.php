@@ -125,6 +125,7 @@
                     <tbody>
                         @foreach($students as $student)
                             @php
+                                $isDropped = (bool) ($student->pivot->is_deleted ?? false);
                                 $termGrades = $student->termGrades->keyBy('term_id');
 
                                 $prelim = $termGrades[1]->term_grade ?? null;
@@ -137,8 +138,10 @@
 
                                 $remarks = $average !== null ? ($average >= 75 ? 'Passed' : 'Failed') : null;
                             @endphp
-                            <tr class="hover:bg-light">
-                                <td>{{ $student->last_name }}, {{ $student->first_name }}</td>
+                            <tr class="hover:bg-light{{ $isDropped ? ' student-dropped' : '' }}" style="{{ $isDropped ? 'opacity:0.75;background-color:#fff8f8;' : '' }}">
+                                <td style="{{ $isDropped ? 'border-left:4px solid #dc3545;' : '' }}">
+                                    <span class="{{ $isDropped ? 'text-muted' : '' }}">{{ $student->last_name }}, {{ $student->first_name }}</span>
+                                </td>
                                 <td class="text-center">{{ $prelim !== null ? round($prelim) : '-' }}</td>
                                 <td class="text-center">{{ $midterm !== null ? round($midterm) : '-' }}</td>
                                 <td class="text-center">{{ $prefinal !== null ? round($prefinal) : '-' }}</td>
@@ -147,7 +150,9 @@
                                     {{ $average !== null ? $average : '-' }}
                                 </td>
                                 <td class="text-center">
-                                    @if($remarks === 'Passed')
+                                    @if($isDropped)
+                                        <span class="badge bg-danger-subtle text-danger fw-medium px-3 py-2 rounded-pill">Dropped</span>
+                                    @elseif($remarks === 'Passed')
                                         <span class="badge bg-success-subtle text-success fw-medium px-3 py-2 rounded-pill">Passed</span>
                                     @elseif($remarks === 'Failed')
                                         <span class="badge bg-danger-subtle text-danger fw-medium px-3 py-2 rounded-pill">Failed</span>

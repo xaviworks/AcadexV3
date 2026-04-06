@@ -96,7 +96,16 @@ class DeanController extends Controller
             ->orderBy('course_code')
             ->get();
 
-        return view('dean.students', compact('students', 'courses', 'selectedCourseId'));
+        $droppedStudentIds = $academicPeriodId
+            ? DB::table('student_subjects')
+                ->join('subjects', 'student_subjects.subject_id', '=', 'subjects.id')
+                ->where('subjects.academic_period_id', $academicPeriodId)
+                ->where('student_subjects.is_deleted', true)
+                ->pluck('student_subjects.student_id')
+                ->flip()
+            : collect();
+
+        return view('dean.students', compact('students', 'courses', 'selectedCourseId', 'droppedStudentIds'));
     }
 
     // ============================
@@ -197,11 +206,10 @@ class DeanController extends Controller
                         })
                         ->firstOrFail();
     
-                    $students = $subject->students()
+                    $students = $subject->studentsWithEnrollmentStatus()
                         ->where('students.department_id', $departmentId)
                         ->where('students.course_id', $courseId)
                         ->where('students.is_deleted', false)
-                        ->wherePivot('is_deleted', false)
                         ->orderBy('students.last_name')
                         ->orderBy('students.first_name')
                         ->get();

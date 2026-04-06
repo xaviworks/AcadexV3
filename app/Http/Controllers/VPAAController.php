@@ -533,7 +533,17 @@ class VPAAController extends Controller
 
             $department = Department::select('id', 'department_code', 'department_description')
                 ->find($departmentId);
-            return view('vpaa.students', compact('students', 'department', 'departments', 'courses', 'selectedCourseId'));
+
+            $droppedStudentIds = $academicPeriodId
+                ? DB::table('student_subjects')
+                    ->join('subjects', 'student_subjects.subject_id', '=', 'subjects.id')
+                    ->where('subjects.academic_period_id', $academicPeriodId)
+                    ->where('student_subjects.is_deleted', true)
+                    ->pluck('student_subjects.student_id')
+                    ->flip()
+                : collect();
+
+            return view('vpaa.students', compact('students', 'department', 'departments', 'courses', 'selectedCourseId', 'droppedStudentIds'));
         }
 
         // Show department wildcards first

@@ -143,11 +143,10 @@ class GradeController extends Controller
                 abort(403, 'Subject does not belong to the current academic period.');
             }
 
-            $students = Student::whereHas('subjects', function ($q) use ($subject) {
-                    $q->where('subject_id', $subject->id)
-                        ->where('student_subjects.is_deleted', false);
-                })
-                ->where('is_deleted', false)
+            $students = $subject->studentsWithEnrollmentStatus()
+                ->where('students.is_deleted', false)
+                ->orderBy('students.last_name')
+                ->orderBy('students.first_name')
                 ->get();
 
             $activities = $this->getOrCreateDefaultActivities($subject->id, $term);
@@ -441,11 +440,10 @@ class GradeController extends Controller
         $subject = Subject::findOrFail($request->subject_id);
         $term = $request->term;
     
-        $students = Student::whereHas('subjects', function ($q) use ($subject) {
-                $q->where('subject_id', $subject->id)
-                    ->where('student_subjects.is_deleted', false);
-            })
-            ->where('is_deleted', false)
+        $students = $subject->studentsWithEnrollmentStatus()
+            ->where('students.is_deleted', false)
+            ->orderBy('students.last_name')
+            ->orderBy('students.first_name')
             ->get();
 
         $activities = $this->getOrCreateDefaultActivities($subject->id, $term);
