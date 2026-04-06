@@ -44,7 +44,7 @@ public function upload(Request $request)
     $listName = trim((string) ($request->list_name ?? pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME)));
     $redirectParams = $this->importRedirectParams($request, $listName);
 
-    // ✅ Check if list_name already exists
+    // Check if list_name already exists
     $exists = ReviewStudent::where('list_name', $listName)
         ->where('instructor_id', Auth::id())
         ->exists();
@@ -142,7 +142,7 @@ public function upload(Request $request)
                 ->first();
     
             if ($existingStudent) {
-                // ✅ Check if already linked to this subject
+                // Check if already linked to this subject
                 $alreadyEnrolled = StudentSubject::where('student_id', $existingStudent->id)
                     ->where('subject_id', $subject->id)
                     ->exists();
@@ -176,7 +176,7 @@ public function upload(Request $request)
             ]);
         }
     
-        // ✅ Check and create activities for all terms if missing
+        // Check and create activities for all terms if missing
         $terms = ['prelim', 'midterm', 'prefinal', 'final'];
         foreach ($terms as $term) {
             $this->getOrCreateDefaultActivities($subject->id, $term);

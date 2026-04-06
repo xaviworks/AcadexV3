@@ -317,7 +317,7 @@
                                 @endforeach
                             </tr>
                             <tr style="background:#fff;">
-                                <td class="fw-bold text-dark text-start">❌ Failed Percentage</td>
+                                <td class="fw-bold text-dark text-start">Failed Percentage</td>
                                 @foreach($finalCOs as $coId)
                                     @php
                                         $threshold = 75; // Fixed threshold
@@ -849,7 +849,7 @@
                                 @endforeach
                             </tr>
                             <tr style="background:#fff;">
-                                <td class="fw-bold text-dark text-start">❌ Failed Percentage</td>
+                                <td class="fw-bold text-dark text-start">Failed Percentage</td>
                                 @foreach($coColumnsByTerm[$term] as $coId)
                                     @php
                                         $attempted = 0;

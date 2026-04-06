@@ -479,7 +479,7 @@ class CourseOutcomesController extends Controller
             }
             $message .= "All affected subjects now have standardized course outcomes.";
         } else {
-            $message = "✅ Course outcomes generation completed! ";
+            $message = "Course outcomes generation completed! ";
             $message .= "Generated COs for {$generatedCount} subject(s). ";
             if ($skippedCount > 0) {
                 $message .= "Skipped {$skippedCount} subject(s) that already had COs. ";

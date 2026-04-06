@@ -132,7 +132,7 @@ class StudentController extends Controller
             'subject_id' => $subject->id,
         ]);
     
-        // ✅ Automatically insert default activities for all terms
+        // Automatically insert default activities for all terms
         foreach (['prelim', 'midterm', 'prefinal', 'final'] as $term) {
             $this->getOrCreateDefaultActivities($subject->id, $term);
         }
