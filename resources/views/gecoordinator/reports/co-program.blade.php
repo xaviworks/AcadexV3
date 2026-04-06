@@ -24,7 +24,7 @@
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
             <div class="table-responsive">
-                <table class="table table-bordered align-middle mb-0">
+                <table class="table table-bordered table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th class="text-start" style="width: 30%;">
@@ -37,7 +37,7 @@
                     </thead>
                     <tbody>
                         @forelse($byCourse as $courseId => $row)
-                            <tr class="hover:bg-light">
+                            <tr>
                                 <td class="text-start">
                                     <div class="fw-semibold">{{ $row['course']->course_code ?? 'N/A' }}</div>
                                     <small class="text-muted">{{ $row['course']->course_description ?? '' }}</small>

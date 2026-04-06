@@ -22,9 +22,9 @@
 
     $selectedMappings = old('mappings', $ploMappingCourseOutcomeIds ?? []);
     $availableCoSummary = match (count($availableCourseOutcomeRows)) {
-        0 => 'No course outcomes available',
-        1 => '1 course outcome available',
-        default => count($availableCourseOutcomeRows) . ' course outcomes available',
+        0 => '0 COs',
+        1 => '1 CO',
+        default => count($availableCourseOutcomeRows) . ' COs',
     };
     $defaultOutcomeEnd = str_pad((string) $defaultOutcomeCount, 2, '0', STR_PAD_LEFT);
     $requestedPloTab = (string) session('ploTab', 'reports');
@@ -150,23 +150,6 @@
 
     <div class="card border-0 shadow-sm rounded-4 mt-4 co-program-tabs-shell" id="coProgramPloWorkspace" data-ui="co-plo-page-workspace" data-outcome-prefix="{{ $outcomeCodePrefix }}">
         <div class="card-body p-4 modal-plo-body co-program-tabs-body">
-            <div class="plo-workflow-guide mb-4" aria-label="PLO configuration workflow">
-                <div class="plo-guide-step">
-                    <span class="plo-guide-badge">Step 1</span>
-                    <div>
-                        <div class="fw-semibold text-dark">Review program-level attainment</div>
-                        <small class="text-muted">Use the report tab to monitor current Program Learning Outcome results.</small>
-                    </div>
-                </div>
-                <div class="plo-guide-step">
-                    <span class="plo-guide-badge">Step 2</span>
-                    <div>
-                        <div class="fw-semibold text-dark">Define and map outcomes</div>
-                        <small class="text-muted">Maintain PLO definitions and CO mappings in the tabs beside the report.</small>
-                    </div>
-                </div>
-            </div>
-
             <ul class="nav nav-tabs plo-config-tabs mb-0" id="ploConfigTabs" role="tablist" data-ui="co-plo-page-tabs">
                 <li class="nav-item" role="presentation">
                     <button
@@ -179,7 +162,7 @@
                         aria-controls="plo-reports-panel"
                         aria-selected="{{ $activePloTab === 'reports' ? 'true' : 'false' }}"
                     >
-                        Program Outcome Reports
+                        <i class="bi bi-bar-chart-fill me-1"></i>Program Outcome Reports
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -193,7 +176,7 @@
                         aria-controls="plo-definitions-panel"
                         aria-selected="{{ $activePloTab === 'definitions' ? 'true' : 'false' }}"
                     >
-                        PLO Definitions
+                        <i class="bi bi-book me-1"></i>PLO Definitions
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -207,7 +190,7 @@
                         aria-controls="plo-mapping-panel"
                         aria-selected="{{ $activePloTab === 'mapping' ? 'true' : 'false' }}"
                     >
-                        CO to PLO Mapping
+                        <i class="bi bi-grid-3x3-gap-fill me-1"></i>CO to PLO Mapping
                     </button>
                 </li>
             </ul>
@@ -219,9 +202,8 @@
                     role="tabpanel"
                     aria-labelledby="plo-reports-tab"
                 >
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-4">
-                            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                    <div class="border rounded-4 bg-white p-3 p-lg-4">
+                        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
                                 <div>
                                     <div class="text-uppercase text-muted small fw-semibold mb-1">Assigned Program</div>
                                     <div class="fw-semibold text-dark">{{ $program->course_code ?? 'N/A' }}</div>
@@ -304,7 +286,6 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
                 </div>
 
                     <div
@@ -323,7 +304,7 @@
                                         <p class="text-muted mb-0">Keep the codes short and use titles that are easy to recognize in the report.</p>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
-                                        <button type="button" class="btn btn-outline-success rounded-pill" id="addPloRowButton">
+                                        <button type="button" class="btn btn-success rounded-pill shadow-sm" id="addPloRowButton">
                                             <i class="bi bi-plus-circle me-2"></i>Add PLO
                                         </button>
                                     </div>
@@ -364,9 +345,11 @@
                                                         </div>
                                                     </td>
                                                     <td class="text-end">
-                                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill remove-plo-row">
-                                                            <i class="bi bi-trash3 me-1"></i>Remove
-                                                        </button>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button type="button" class="btn btn-outline-danger btn-sm remove-plo-row" title="Remove this PLO">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -405,9 +388,9 @@
                                 <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-3">
                                     <div>
                                         <h5 class="fw-semibold mb-1">CO to PLO Mapping</h5>
-                                        <p class="text-muted mb-0">Choose which COs belong to each PLO. The system will automatically average the COs you select for that PLO.</p>
+                                        <p class="text-muted mb-0">Check each CO that maps to a PLO. The system averages mapped COs per outcome.</p>
                                     </div>
-                                    <div class="badge text-bg-light rounded-pill px-3 py-2 plo-co-summary-badge">Available COs: {{ $availableCoSummary }}</div>
+                                    <span class="badge text-bg-secondary text-white rounded-pill px-3 py-2 plo-co-summary-badge"><i class="bi bi-list-check me-1"></i>{{ $availableCoSummary }}</span>
                                 </div>
 
                                 @if(empty($availableCourseOutcomeRows))
@@ -421,87 +404,63 @@
                                     <div class="alert alert-light border rounded-4 mb-0">
                                         <div class="fw-semibold text-dark mb-1">No outcomes configured for mapping</div>
                                         <small class="text-muted">
-                                            Add or restore at least one program outcome in the definitions tab before setting matrix links.
+                                            Add or restore at least one program outcome in the PLO Definitions tab before mapping.
                                         </small>
                                     </div>
                                 @else
-                                    <div class="plo-mapping-toolbar mb-3" role="region" aria-label="Mapping tools">
-                                        <div class="po-matrix-toolbar-head">
-                                            <small class="text-muted po-matrix-toolbar-hint">Use the matrix checkboxes to link each course outcome row to one or more program outcomes. Computation still uses average values of selected mapped outcomes.</small>
-                                            <div class="po-matrix-toolbar-actions">
-                                                <div class="po-matrix-context-chip" id="poMatrixContextChip" aria-live="polite">
-                                                    Viewing: All subjects
-                                                </div>
-                                                <button
-                                                    type="submit"
-                                                    class="btn btn-success btn-sm po-matrix-save-btn"
-                                                    id="poMatrixSaveTop"
-                                                    data-ui="co-plo-save-top"
-                                                    data-save-scope="mapping"
-                                                    disabled
-                                                    aria-disabled="true"
-                                                    title="Make changes to enable saving."
-                                                >
-                                                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
-                                                    <span>Save Mapping</span>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-outline-secondary btn-sm po-matrix-expand-btn"
-                                                    id="poMatrixExpandToggle"
-                                                    data-ui="co-plo-expand-toggle"
-                                                    data-default-label="Expand table"
-                                                    data-expanded-label="Exit expanded table view"
-                                                    aria-pressed="false"
-                                                    aria-label="Expand mapping table"
-                                                >
-                                                    <i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>
-                                                    <span class="po-matrix-expand-label">Expand table</span>
-                                                </button>
-                                            </div>
-                                        </div>
+                                    {{-- Toolbar --}}
+                                    <div class="border rounded-3 bg-light p-3 mb-3" role="region" aria-label="Mapping filters">
+                                        {{-- Hidden select keeps JS subject-filter state in sync with quick-jump buttons --}}
+                                        <select id="poMatrixSubjectFilter" class="d-none" aria-hidden="true" tabindex="-1">
+                                            <option value="">All subjects</option>
+                                            @foreach($matrixSubjectOptions as $subjectOption)
+                                                <option value="{{ strtolower($subjectOption['code']) }}">{{ $subjectOption['label'] }}</option>
+                                            @endforeach
+                                        </select>
 
-                                        <div class="po-matrix-control-grid" role="group" aria-label="Course outcome matrix filters">
-                                            <div class="po-matrix-control">
-                                                <label for="poMatrixSubjectFilter" class="visually-hidden">Subject</label>
-                                                <select id="poMatrixSubjectFilter" class="form-select form-select-sm" aria-label="Filter by subject">
-                                                    <option value="">All subjects</option>
-                                                    @foreach($matrixSubjectOptions as $subjectOption)
-                                                        <option value="{{ strtolower($subjectOption['code']) }}">{{ $subjectOption['label'] }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-
-                                            <div class="po-matrix-control">
-                                                <label for="poMatrixSearch" class="visually-hidden">Search CO row</label>
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                                            <div class="input-group input-group-sm" style="max-width: 260px;">
+                                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
                                                 <input
                                                     type="search"
                                                     id="poMatrixSearch"
                                                     class="form-control form-control-sm"
-                                                    placeholder="Search subject, CO code, or description"
+                                                    placeholder="Search subject or CO..."
                                                     aria-label="Search course outcome rows"
                                                     autocomplete="off"
                                                 >
                                             </div>
 
-                                            <div class="po-matrix-control">
-                                                <label for="poMatrixStateFilter" class="visually-hidden">Row state</label>
-                                                <select id="poMatrixStateFilter" class="form-select form-select-sm" aria-label="Filter by row state">
-                                                    <option value="all">All rows</option>
-                                                    <option value="mapped">Mapped rows</option>
-                                                    <option value="unmapped">Unmapped rows</option>
-                                                </select>
-                                            </div>
+                                            <select id="poMatrixStateFilter" class="form-select form-select-sm" aria-label="Filter by row state" style="max-width: 140px;">
+                                                <option value="all">All rows</option>
+                                                <option value="mapped">Mapped</option>
+                                                <option value="unmapped">Unmapped</option>
+                                            </select>
 
-                                            <div class="po-matrix-control po-matrix-control-action">
-                                                <button type="button" class="btn btn-outline-secondary btn-sm w-100" id="poMatrixClearFilters">
-                                                    Clear filters
-                                                </button>
-                                            </div>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="poMatrixClearFilters" title="Clear all filters">
+                                                <i class="bi bi-x-lg me-1"></i>Clear
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-secondary btn-sm ms-auto po-matrix-expand-btn"
+                                                id="poMatrixExpandToggle"
+                                                data-ui="co-plo-expand-toggle"
+                                                data-default-label="Expand table"
+                                                data-expanded-label="Collapse table"
+                                                aria-pressed="false"
+                                                aria-label="Expand mapping table"
+                                            >
+                                                <i class="bi bi-arrows-angle-expand me-1" aria-hidden="true"></i>
+                                                <span class="po-matrix-expand-label">Expand table</span>
+                                            </button>
                                         </div>
 
-                                        <div class="po-matrix-subject-jump" role="group" aria-label="Quick jump to subject rows" data-ui="co-plo-subject-jump">
-                                            <span class="po-matrix-subject-jump-label">Quick jump:</span>
+                                        {{-- Quick jump --}}
+                                        <div class="d-flex align-items-center flex-wrap gap-1 po-matrix-subject-jump" role="group" aria-label="Quick jump to subject rows" data-ui="co-plo-subject-jump">
+                                            <span class="text-muted small fw-semibold me-1 po-matrix-subject-jump-label">
+                                                <i class="bi bi-arrow-right-circle me-1"></i>Jump to:
+                                            </span>
                                             <button
                                                 type="button"
                                                 class="btn btn-sm po-matrix-subject-jump-btn is-active"
@@ -528,8 +487,6 @@
                                                 </button>
                                             @endforeach
                                         </div>
-
-                                        <small class="po-matrix-keyboard-hint">Tip: use arrow keys to move between matrix checkboxes while mapping.</small>
                                     </div>
 
                                     <div class="table-responsive po-matrix-wrap" style="--po-matrix-outcome-count: {{ max(1, $visiblePloDefinitions->count()) }};" data-ui="co-plo-matrix-wrap">
@@ -617,25 +574,24 @@
                                             id="poMatrixResizeHandle"
                                             role="separator"
                                             aria-orientation="horizontal"
-                                            aria-label="Drag this bar to make the mapping table longer or shorter"
+                                            aria-label="Drag to resize the mapping table"
                                             aria-valuemin="0"
                                             aria-valuemax="0"
                                             aria-valuenow="0"
                                             tabindex="0"
-                                            title="Drag this bar to make the table longer or shorter for this page"
+                                            title="Drag to resize the table"
                                         >
                                             <span class="po-matrix-resize-arrow" aria-hidden="true">
-                                                <i class="bi bi-chevron-double-down" aria-hidden="true"></i>
+                                                <i class="bi bi-grip-horizontal" aria-hidden="true"></i>
                                             </span>
-                                            <span class="po-matrix-resize-primary">DRAG THIS BAR TO RESIZE THE TABLE</span>
-                                            <span class="po-matrix-resize-label">Pull down for a longer table. Push up for a shorter table. (Page only)</span>
+                                            <span class="po-matrix-resize-primary">Drag to resize</span>
                                             <span class="po-matrix-resize-value" id="poMatrixResizeValue" aria-hidden="true"></span>
                                         </div>
                                     </div>
 
                                     <div class="po-matrix-legend mt-3" id="poMatrixLegend">
-                                        <div class="po-matrix-legend-title"><i class="bi bi-bookmark-star-fill me-2" aria-hidden="true"></i>PLO Legend Reference</div>
-                                        <div class="po-matrix-legend-subtitle">Use these labels as quick references for matrix headers while mapping rows.</div>
+                                        <div class="po-matrix-legend-title"><i class="bi bi-book me-2 text-success" aria-hidden="true"></i>PLO Reference</div>
+                                        <div class="po-matrix-legend-subtitle">Column header reference while mapping.</div>
                                         <div class="po-matrix-legend-grid">
                                             @foreach($visiblePloDefinitions as $plo)
                                                 <div class="po-matrix-legend-item" data-plo-key="{{ strtolower($plo->plo_code) }}" tabindex="0" aria-label="Highlight {{ $plo->plo_code }} column">
@@ -647,17 +603,19 @@
                                     </div>
 
                                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mt-4">
-                                        <small class="text-muted">Review filters before saving to avoid missing hidden rows.</small>
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle me-1"></i>Clear any active filters before saving to avoid missing hidden rows.
+                                        </small>
                                         <button
                                             type="submit"
-                                            class="btn btn-success rounded-pill px-4"
+                                            class="btn btn-success rounded-pill px-4 shadow-sm"
                                             id="poMatrixSaveBottom"
                                             data-save-scope="mapping"
                                             disabled
                                             aria-disabled="true"
                                             title="Make changes to enable saving."
                                         >
-                                            Save Mapping
+                                            <i class="bi bi-check2-circle me-1"></i>Save Mapping
                                         </button>
                                     </div>
                                 @endif
@@ -688,9 +646,11 @@
             </div>
         </td>
         <td class="text-end">
-            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill remove-plo-row">
-                <i class="bi bi-trash3 me-1"></i>Remove
-            </button>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-plo-row" title="Remove this PLO">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
         </td>
     </tr>
 </template>

@@ -48,6 +48,7 @@
                                 @foreach($activePloDefinitions as $plo)
                                     <th class="text-center align-middle" style="min-width: 170px;" title="{{ $plo->title }}">
                                         <div class="fw-semibold">{{ $plo->plo_code }}</div>
+                                        <small class="text-muted d-block mt-1">{{ \Illuminate\Support\Str::limit($plo->title, 60) }}</small>
                                     </th>
                                 @endforeach
                             </tr>
