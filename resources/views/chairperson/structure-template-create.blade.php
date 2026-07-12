@@ -151,6 +151,7 @@
                     <i class="bi bi-x" style="font-size: 0.875rem;"></i>
                 </button>
             </div>
+            // Sub-component inputs
             <div class="row g-2">
                 <div class="col-md-3">
                     <input type="text" class="form-control form-control-sm activity-name-input" placeholder="e.g., Quiz" required>
