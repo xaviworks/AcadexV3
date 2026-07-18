@@ -2,14 +2,14 @@
 
 namespace App\Notifications;
 
-use App\Models\User;
 use App\Models\Subject;
+use App\Models\User;
 use Illuminate\Notifications\Messages\MailMessage;
 
 /**
  * Notification sent to Instructors when they are removed from a course/subject.
  * Supports both database and email channels.
- * 
+ *
  * Admin view: Full removal details with IDs
  * User view: Clear message about course removal
  */
@@ -30,7 +30,7 @@ class CourseRemoved extends BaseNotification
 
         // Check user preferences for email
         $prefs = $notifiable->notificationPreferences;
-        
+
         if ($prefs?->email_enabled ?? true) {
             $channels[] = 'mail';
         }
@@ -65,14 +65,14 @@ class CourseRemoved extends BaseNotification
     public function getAdminMessage(): string
     {
         $removerName = $this->removedBy->full_name;
-        $removerRole = match($this->removedBy->role) {
+        $removerRole = match ($this->removedBy->role) {
             1 => 'Chairperson',
             4 => 'GE Coordinator',
             default => 'User',
         };
         $subjectInfo = "{$this->subject->subject_code} - {$this->subject->subject_description}";
         $period = $this->academicPeriod ?? 'current period';
-        
+
         return "[Course Removal] {$removerName} ({$removerRole}, ID: {$this->removedBy->id}) removed assignment from subject {$subjectInfo} (ID: {$this->subject->id}) for {$period}";
     }
 
@@ -80,7 +80,7 @@ class CourseRemoved extends BaseNotification
     {
         $subjectCode = $this->subject->subject_code;
         $subjectName = $this->subject->subject_description;
-        
+
         return "You have been removed from {$subjectCode} ({$subjectName})";
     }
 
@@ -116,14 +116,14 @@ class CourseRemoved extends BaseNotification
         $subjectCode = $this->subject->subject_code;
         $subjectName = $this->subject->subject_description;
         $period = $this->academicPeriod ?? 'the current academic period';
-        
+
         return (new MailMessage)
             ->subject("Course Assignment Update: {$subjectCode} - Acadex")
             ->greeting("Hello {$notifiable->first_name},")
-            ->line("You have been removed from a course assignment.")
+            ->line('You have been removed from a course assignment.')
             ->line("**Subject:** {$subjectCode} - {$subjectName}")
             ->line("**Period:** {$period}")
-            ->line("If you have questions about this change, please contact your department chairperson.")
+            ->line('If you have questions about this change, please contact your department chairperson.')
             ->action('View Dashboard', $this->getActionUrl())
             ->salutation('Best regards, The Acadex Team');
     }

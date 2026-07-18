@@ -35,7 +35,7 @@ class UnverifiedVerifyEmailController extends Controller
                 ->where('department_code', 'GE')
                 ->exists();
 
-            $approvalMessage = $isGEDepartment 
+            $approvalMessage = $isGEDepartment
                 ? 'Your email is already verified! Your account request is pending GE Coordinator approval.'
                 : 'Your email is already verified! Your account request is pending Department Chairperson approval.';
 
@@ -45,7 +45,7 @@ class UnverifiedVerifyEmailController extends Controller
         // Mark email as verified
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
-            
+
             // Notify the appropriate approver (Chairperson or GE Coordinator) about the pending instructor
             // System notification only - no email
             NotificationService::notifyInstructorPending($user);
@@ -56,7 +56,7 @@ class UnverifiedVerifyEmailController extends Controller
             ->where('department_code', 'GE')
             ->exists();
 
-        $approvalMessage = $isGEDepartment 
+        $approvalMessage = $isGEDepartment
             ? 'Your email has been verified successfully! Your account request is now pending GE Coordinator approval.'
             : 'Your email has been verified successfully! Your account request is now pending Department Chairperson approval.';
 

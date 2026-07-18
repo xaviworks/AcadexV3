@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('backups', function (Blueprint $table) {
-            // We cannot easily revert this if there are null values, 
+            // We cannot easily revert this if there are null values,
             // so we might need to delete them or assign a default user.
             // For now, we'll just try to make it non-nullable again.
             $table->foreignId('created_by')->nullable(false)->change();

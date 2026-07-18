@@ -6,7 +6,7 @@ use Tests\TestCase;
 
 /**
  * BlockMobileDevicesTest
- * 
+ *
  * Tests mobile device blocking middleware functionality.
  * Verifies that mobile phones AND tablets are blocked while desktops can access.
  */
@@ -19,7 +19,7 @@ class BlockMobileDevicesTest extends TestCase
     {
         // Simulate a desktop user agent
         $response = $this->get('/', [
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         ]);
 
         // Desktop users should NOT be blocked (can be 200 or 302)
@@ -34,7 +34,7 @@ class BlockMobileDevicesTest extends TestCase
     {
         // Simulate an iPad user agent
         $response = $this->get('/', [
-            'User-Agent' => 'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1'
+            'User-Agent' => 'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
         ]);
 
         // Tablet users should be blocked with 403
@@ -49,7 +49,7 @@ class BlockMobileDevicesTest extends TestCase
     {
         // Simulate an iPhone user agent
         $response = $this->get('/', [
-            'User-Agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+            'User-Agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
         ]);
 
         // Mobile users should receive 403 Forbidden
@@ -64,7 +64,7 @@ class BlockMobileDevicesTest extends TestCase
     {
         // Simulate an Android phone user agent
         $response = $this->get('/', [
-            'User-Agent' => 'Mozilla/5.0 (Linux; Android 13; SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+            'User-Agent' => 'Mozilla/5.0 (Linux; Android 13; SM-S908B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
         ]);
 
         // Mobile users should receive 403 Forbidden
@@ -79,7 +79,7 @@ class BlockMobileDevicesTest extends TestCase
     {
         // Simulate an Android tablet user agent
         $response = $this->get('/', [
-            'User-Agent' => 'Mozilla/5.0 (Linux; Android 13; SM-X900) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'User-Agent' => 'Mozilla/5.0 (Linux; Android 13; SM-X900) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         ]);
 
         // Tablet users should be blocked with 403
@@ -94,7 +94,7 @@ class BlockMobileDevicesTest extends TestCase
     {
         // Simulate a mobile user
         $response = $this->get('/', [
-            'User-Agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+            'User-Agent' => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
         ]);
 
         $response->assertStatus(403);

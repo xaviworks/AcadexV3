@@ -67,6 +67,7 @@ class ReviewStudent extends Model
     public function getFullNameAttribute(): string
     {
         $middle = $this->middle_name ? " {$this->middle_name}" : '';
+
         return trim("{$this->first_name}{$middle} {$this->last_name}");
     }
 

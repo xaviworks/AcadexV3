@@ -22,13 +22,13 @@ class DeanVpaaCoCourseAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $department = Department::create([
-            'department_code' => 'VCC-' . Str::upper(Str::random(4)),
+            'department_code' => 'VCC-'.Str::upper(Str::random(4)),
             'department_description' => 'VPAA Co Course Department',
             'is_deleted' => false,
         ]);
 
         $course = Course::create([
-            'course_code' => 'VPC-' . Str::upper(Str::random(5)),
+            'course_code' => 'VPC-'.Str::upper(Str::random(5)),
             'course_description' => 'VPAA Program',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -47,7 +47,7 @@ class DeanVpaaCoCourseAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $inScope = Subject::create([
-            'subject_code' => 'VNEW-' . Str::upper(Str::random(6)),
+            'subject_code' => 'VNEW-'.Str::upper(Str::random(6)),
             'subject_description' => 'VPAA In Scope Subject',
             'department_id' => $department->id,
             'course_id' => $course->id,
@@ -56,7 +56,7 @@ class DeanVpaaCoCourseAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $outOfScope = Subject::create([
-            'subject_code' => 'VOLD-' . Str::upper(Str::random(6)),
+            'subject_code' => 'VOLD-'.Str::upper(Str::random(6)),
             'subject_description' => 'VPAA Out Of Scope Subject',
             'department_id' => $department->id,
             'course_id' => $course->id,
@@ -76,7 +76,7 @@ class DeanVpaaCoCourseAcademicPeriodIsolationTest extends TestCase
     public function test_dean_co_course_report_only_shows_subjects_from_selected_period(): void
     {
         $department = Department::create([
-            'department_code' => 'DCC-' . Str::upper(Str::random(4)),
+            'department_code' => 'DCC-'.Str::upper(Str::random(4)),
             'department_description' => 'Dean Co Course Department',
             'is_deleted' => false,
         ]);
@@ -87,7 +87,7 @@ class DeanVpaaCoCourseAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $course = Course::create([
-            'course_code' => 'DPC-' . Str::upper(Str::random(5)),
+            'course_code' => 'DPC-'.Str::upper(Str::random(5)),
             'course_description' => 'Dean Program',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -106,7 +106,7 @@ class DeanVpaaCoCourseAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $inScope = Subject::create([
-            'subject_code' => 'DNEW-' . Str::upper(Str::random(6)),
+            'subject_code' => 'DNEW-'.Str::upper(Str::random(6)),
             'subject_description' => 'Dean In Scope Subject',
             'department_id' => $department->id,
             'course_id' => $course->id,
@@ -115,7 +115,7 @@ class DeanVpaaCoCourseAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $outOfScope = Subject::create([
-            'subject_code' => 'DOLD-' . Str::upper(Str::random(6)),
+            'subject_code' => 'DOLD-'.Str::upper(Str::random(6)),
             'subject_description' => 'Dean Out Of Scope Subject',
             'department_id' => $department->id,
             'course_id' => $course->id,

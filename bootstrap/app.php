@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Register global middleware (applies to ALL requests)
         $middleware->prepend(\App\Http\Middleware\NoCacheHeaders::class);
-        
+
         // Block mobile phone access globally
         $middleware->prepend(\App\Http\Middleware\BlockMobileDevices::class);
 

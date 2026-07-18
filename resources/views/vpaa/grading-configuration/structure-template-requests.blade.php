@@ -8,7 +8,7 @@
             <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-clipboard-check-fill text-success me-2"></i>Structure Formula Requests</h1>
             <p class="text-muted mb-0">Review and approve chairperson formula submissions</p>
         </div>
-        <a href="{{ route('admin.gradesFormula', ['view' => 'formulas']) }}" class="btn btn-outline-secondary">
+        <a href="{{ route('vpaa.gradingConfiguration.index', ['view' => 'formulas']) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i>Back to Grades Formula
         </a>
     </div>
@@ -32,19 +32,19 @@
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body py-3">
             <div class="d-flex gap-2 flex-wrap justify-content-center">
-                <a href="{{ route('admin.structureTemplateRequests.index', ['status' => 'all']) }}" 
+                <a href="{{ route('vpaa.gradingConfiguration.templateRequests.index', ['status' => 'all']) }}" 
                    class="btn btn-sm {{ $status === 'all' ? 'btn-success' : 'btn-outline-success' }}">
                     All Requests
                 </a>
-                <a href="{{ route('admin.structureTemplateRequests.index', ['status' => 'pending']) }}" 
+                <a href="{{ route('vpaa.gradingConfiguration.templateRequests.index', ['status' => 'pending']) }}" 
                    class="btn btn-sm {{ $status === 'pending' ? 'btn-warning text-dark' : 'btn-outline-warning' }}">
                     Pending @if($pendingCount > 0)<span class="badge bg-dark ms-1">{{ $pendingCount }}</span>@endif
                 </a>
-                <a href="{{ route('admin.structureTemplateRequests.index', ['status' => 'approved']) }}" 
+                <a href="{{ route('vpaa.gradingConfiguration.templateRequests.index', ['status' => 'approved']) }}" 
                    class="btn btn-sm {{ $status === 'approved' ? 'btn-success' : 'btn-outline-success' }}">
                     Approved
                 </a>
-                <a href="{{ route('admin.structureTemplateRequests.index', ['status' => 'rejected']) }}" 
+                <a href="{{ route('vpaa.gradingConfiguration.templateRequests.index', ['status' => 'rejected']) }}" 
                    class="btn btn-sm {{ $status === 'rejected' ? 'btn-danger' : 'btn-outline-danger' }}">
                     Rejected
                 </a>
@@ -146,7 +146,7 @@
                                         <button type="button" class="btn btn-sm btn-success" 
                                                 onclick="approveRequest(this)"
                                                 data-template-name="{{ $request->label }}"
-                                                data-approve-url="{{ route('admin.structureTemplateRequests.approve', $request) }}"
+                                                data-approve-url="{{ route('vpaa.gradingConfiguration.templateRequests.approve', $request) }}"
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#approveModal"
                                                 title="Approve Request">
@@ -155,7 +155,7 @@
                                         <button type="button" class="btn btn-sm btn-danger" 
                                                 onclick="rejectRequest(this)"
                                                 data-template-name="{{ $request->label }}"
-                                                data-reject-url="{{ route('admin.structureTemplateRequests.reject', $request) }}"
+                                                data-reject-url="{{ route('vpaa.gradingConfiguration.templateRequests.reject', $request) }}"
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#rejectModal"
                                                 title="Reject Request">
@@ -278,4 +278,4 @@
 </div>
 @endsection
 
-{{-- JavaScript moved to: resources/js/pages/admin/structure-template-requests.js --}}
+{{-- JavaScript moved to: resources/js/pages/vpaa/grading-configuration/template-requests.js --}}

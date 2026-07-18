@@ -22,6 +22,7 @@ class UserLog extends Model
     use HasFactory;
 
     protected $table = 'user_logs';
+
     public $timestamps = true;
 
     protected $fillable = [
@@ -30,8 +31,8 @@ class UserLog extends Model
         'ip_address',
         'user_agent',
         'browser',
-        'device',     
-        'platform',   
+        'device',
+        'platform',
     ];
 
     public function user()

@@ -16,8 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->enum('event_type', ['login', 'logout', 'failed_login']);
             $table->string('browser')->nullable();
-            $table->string('device')->nullable();   
-            $table->string('platform')->nullable(); 
+            $table->string('device')->nullable();
+            $table->string('platform')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

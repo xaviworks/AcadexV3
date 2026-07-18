@@ -36,7 +36,7 @@ class StudentFormattedQuerySearchTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Search Results');
-        $response->assertSeeText($student->last_name . ', ' . $student->first_name . ' ' . $student->middle_name);
+        $response->assertSeeText($student->last_name.', '.$student->first_name.' '.$student->middle_name);
         $response->assertDontSeeText('No Students Found');
     }
 
@@ -60,7 +60,7 @@ class StudentFormattedQuerySearchTest extends TestCase
 
         $response->assertOk();
         $response->assertSeeText('Search Results');
-        $response->assertSeeText($student->last_name . ', ' . $student->first_name . ' ' . $student->middle_name);
+        $response->assertSeeText($student->last_name.', '.$student->first_name.' '.$student->middle_name);
         $response->assertDontSeeText('No Students Found');
     }
 

@@ -28,22 +28,25 @@ class ResetUserTwoFactor extends Command
     public function handle()
     {
         $email = $this->argument('email');
-        
+
         $user = User::where('email', $email)->first();
-        
-        if (!$user) {
+
+        if (! $user) {
             $this->error("User not found with email: {$email}");
+
             return 1;
         }
 
-        if (!$user->two_factor_secret) {
+        if (! $user->two_factor_secret) {
             $this->info("User {$user->full_name} does not have 2FA enabled.");
+
             return 0;
         }
 
         // Confirm the action
-        if (!$this->confirm("Are you sure you want to reset 2FA for {$user->full_name} ({$email})?")) {
+        if (! $this->confirm("Are you sure you want to reset 2FA for {$user->full_name} ({$email})?")) {
             $this->info('Operation cancelled.');
+
             return 0;
         }
 
@@ -71,8 +74,8 @@ class ResetUserTwoFactor extends Command
         ]);
 
         $this->info("✓ Two-factor authentication has been reset for {$user->full_name}");
-        $this->info("✓ All trusted devices have been cleared");
-        $this->warn("⚠ The user should re-enable 2FA for security");
+        $this->info('✓ All trusted devices have been cleared');
+        $this->warn('⚠ The user should re-enable 2FA for security');
 
         return 0;
     }

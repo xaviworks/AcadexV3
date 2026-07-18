@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Backup;
 use App\Models\AuditLog;
+use App\Models\Backup;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -52,8 +52,8 @@ class RestoreService
             'started_at' => now()->toIso8601String(),
         ];
 
-        $zip = new ZipArchive();
-        
+        $zip = new ZipArchive;
+
         if ($zip->open($fullPath) !== true) {
             throw new \RuntimeException('Could not open backup archive');
         }
@@ -77,6 +77,7 @@ class RestoreService
                 if (! empty($options['tables']) && ! in_array($table, $options['tables'])) {
                     return false;
                 }
+
                 return true;
             });
 
@@ -86,9 +87,10 @@ class RestoreService
             foreach ($tablesToRestore as $table) {
                 try {
                     $dataContent = $zip->getFromName("data/{$table}.json");
-                    
+
                     if (! $dataContent) {
                         $results['tables_skipped'][] = $table;
+
                         continue;
                     }
 
@@ -96,6 +98,7 @@ class RestoreService
 
                     if (! is_array($data)) {
                         $results['errors'][] = "Invalid data format for table: {$table}";
+
                         continue;
                     }
 
@@ -113,7 +116,7 @@ class RestoreService
                         $chunk = array_map(function ($item) {
                             return (array) $item;
                         }, $chunk);
-                        
+
                         DB::table($table)->insert($chunk);
                     }
 
@@ -122,7 +125,7 @@ class RestoreService
                     Log::info("Restored table: {$table}", ['rows' => count($data)]);
 
                 } catch (\Throwable $e) {
-                    $results['errors'][] = "Error restoring {$table}: " . $e->getMessage();
+                    $results['errors'][] = "Error restoring {$table}: ".$e->getMessage();
                     Log::error("Error restoring table: {$table}", ['error' => $e->getMessage()]);
                 }
             }
@@ -158,10 +161,10 @@ class RestoreService
         } catch (\Throwable $e) {
             DB::rollBack();
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
-            
+
             $results['success'] = false;
             $results['errors'][] = $e->getMessage();
-            
+
             Log::error('Restore failed', [
                 'backup_id' => $backup->id,
                 'error' => $e->getMessage(),
@@ -181,21 +184,21 @@ class RestoreService
     protected function getOrderedTables(array $tables): array
     {
         $ordered = [];
-        
+
         // First, add tables in defined order
         foreach ($this->restoreOrder as $table) {
             if (in_array($table, $tables)) {
                 $ordered[] = $table;
             }
         }
-        
+
         // Then add any remaining tables
         foreach ($tables as $table) {
             if (! in_array($table, $ordered)) {
                 $ordered[] = $table;
             }
         }
-        
+
         return $ordered;
     }
 
@@ -221,8 +224,8 @@ class RestoreService
             'warnings' => [],
         ];
 
-        $zip = new ZipArchive();
-        
+        $zip = new ZipArchive;
+
         if ($zip->open($fullPath) !== true) {
             throw new \RuntimeException('Could not open backup archive');
         }
@@ -231,11 +234,12 @@ class RestoreService
             foreach ($backup->tables ?? [] as $table) {
                 if (! Schema::hasTable($table)) {
                     $preview['warnings'][] = "Table '{$table}' does not exist in current database";
+
                     continue;
                 }
 
                 $dataContent = $zip->getFromName("data/{$table}.json");
-                
+
                 if (! $dataContent) {
                     continue;
                 }
@@ -281,7 +285,7 @@ class RestoreService
             if (! $model) {
                 // Model was deleted, try to restore
                 if ($auditLog->event === AuditLog::EVENT_DELETED) {
-                    $model = new $modelClass();
+                    $model = new $modelClass;
                     $model->fill($auditLog->old_values);
                     $model->save();
                 } else {
@@ -310,7 +314,7 @@ class RestoreService
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            
+
             Log::error('Rollback failed', [
                 'audit_id' => $auditLog->id,
                 'error' => $e->getMessage(),

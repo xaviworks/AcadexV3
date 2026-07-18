@@ -74,6 +74,7 @@ class FormulaStructure
     public static function flattenWeights(array $structure): array
     {
         $structure = self::normalize($structure);
+
         return self::gatherLeafWeights($structure);
     }
 
@@ -140,6 +141,7 @@ class FormulaStructure
                 $children = $node['children'] ?? [];
                 if (empty($children)) {
                     $errors[] = sprintf('%s must include at least one component.', $pathString);
+
                     return;
                 }
 
@@ -189,6 +191,7 @@ class FormulaStructure
     {
         $structure = self::clone($payload);
         self::convertPercentWeights($structure, true);
+
         return self::normalize($structure);
     }
 
@@ -199,6 +202,7 @@ class FormulaStructure
     {
         $structure = self::normalize($structure);
         self::convertDecimalWeightsToPercent($structure, true);
+
         return $structure;
     }
 
@@ -228,6 +232,7 @@ class FormulaStructure
     public static function baseActivityType(string $activityType): string
     {
         $segments = explode('.', $activityType);
+
         return mb_strtolower(end($segments));
     }
 
@@ -375,7 +380,7 @@ class FormulaStructure
     protected static function normalizeNode(array $node, string $parentKey, int $index): array
     {
         $normalized = self::clone($node);
-        $normalized['key'] = $normalized['key'] ?? ($parentKey . '_' . $index);
+        $normalized['key'] = $normalized['key'] ?? ($parentKey.'_'.$index);
         $normalized['type'] = self::normalizeType($normalized['type'] ?? 'activity');
         $normalized['label'] = $normalized['label'] ?? self::formatLabel($normalized['key']);
         $normalized['weight'] = isset($normalized['weight'])
@@ -405,6 +410,7 @@ class FormulaStructure
     protected static function normalizeType(string $type): string
     {
         $type = mb_strtolower($type);
+
         return in_array($type, ['composite', 'activity'], true) ? $type : 'activity';
     }
 

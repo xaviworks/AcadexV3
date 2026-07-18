@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicPeriod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class PeriodSelectionController extends Controller
 {

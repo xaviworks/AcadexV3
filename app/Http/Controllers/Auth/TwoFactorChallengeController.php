@@ -11,13 +11,11 @@ use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorChallengeController extends Controller
 {
-    public function __construct(private readonly LoginFlowService $loginFlowService)
-    {
-    }
+    public function __construct(private readonly LoginFlowService $loginFlowService) {}
 
     public function create()
     {
-        if (!session()->has('auth.2fa.id')) {
+        if (! session()->has('auth.2fa.id')) {
             return redirect()->route('login');
         }
 
@@ -39,12 +37,12 @@ class TwoFactorChallengeController extends Controller
         $fingerprint = $request->input('device_fingerprint') ?? session()->get('auth.2fa.fingerprint');
         $isRecoveryMode = $request->input('recovery') === '1';
 
-        if (!$userId) {
+        if (! $userId) {
             return redirect()->route('login');
         }
 
         $user = User::findOrFail($userId);
-        
+
         if (! $user->two_factor_secret) {
             Auth::login($user);
             $request->session()->forget(['auth.2fa.id', 'auth.2fa.fingerprint']);
@@ -55,14 +53,14 @@ class TwoFactorChallengeController extends Controller
         }
 
         $valid = false;
-        
+
         if ($isRecoveryMode) {
             // Verify recovery code
             $recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
-            
+
             if (is_array($recoveryCodes) && in_array($request->code, $recoveryCodes)) {
                 $valid = true;
-                
+
                 // Remove used recovery code
                 $recoveryCodes = array_values(array_diff($recoveryCodes, [$request->code]));
                 $user->forceFill([
@@ -71,7 +69,7 @@ class TwoFactorChallengeController extends Controller
             }
         } else {
             // Verify authenticator code
-            $google2fa = new Google2FA();
+            $google2fa = new Google2FA;
             $valid = $google2fa->verifyKey($user->two_factor_secret, $request->code);
         }
 
@@ -99,7 +97,7 @@ class TwoFactorChallengeController extends Controller
             return $this->loginFlowService->redirectAfterLogin($user);
         }
 
-        $errorMessage = $isRecoveryMode 
+        $errorMessage = $isRecoveryMode
             ? 'The provided recovery code was invalid or has already been used.'
             : 'The provided two factor authentication code was invalid.';
 
@@ -109,6 +107,7 @@ class TwoFactorChallengeController extends Controller
     public function destroy(Request $request)
     {
         $request->session()->forget(['auth.2fa.id', 'auth.2fa.fingerprint']);
+
         return redirect()->route('login');
     }
 }

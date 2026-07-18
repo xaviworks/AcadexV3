@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Course;
 use App\Models\Department;
+use Illuminate\Database\Seeder;
 
 class CoursesTableSeeder extends Seeder
 {
@@ -52,7 +52,7 @@ class CoursesTableSeeder extends Seeder
                 'course_code' => 'BSED',
                 'course_description' => 'Bachelor of Secondary Education',
                 'department_id' => $ase->id,
-            ],            
+            ],
             [
                 'course_code' => 'BEED',
                 'course_description' => 'Bachelor of Elementary Education',

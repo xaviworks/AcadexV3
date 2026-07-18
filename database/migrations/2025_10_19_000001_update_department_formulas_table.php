@@ -13,7 +13,7 @@ return new class extends Migration
             if (! Schema::hasColumn('grades_formula', 'is_department_fallback')) {
                 $table->boolean('is_department_fallback')->default(false)->after('scope_level');
             }
-            
+
             try {
                 $table->dropForeign(['department_id']);
             } catch (\Throwable $exception) {

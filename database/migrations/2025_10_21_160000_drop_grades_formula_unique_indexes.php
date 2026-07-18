@@ -3,7 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         $indexes = [
@@ -29,9 +30,9 @@ return new class extends Migration {
     private function dropIndexIfExists(string $table, string $index): void
     {
         try {
-            $exists = DB::select('SHOW INDEX FROM `' . $table . '` WHERE `Key_name` = ?', [$index]);
+            $exists = DB::select('SHOW INDEX FROM `'.$table.'` WHERE `Key_name` = ?', [$index]);
             if (! empty($exists)) {
-                DB::statement('ALTER TABLE `' . $table . '` DROP INDEX `' . $index . '`');
+                DB::statement('ALTER TABLE `'.$table.'` DROP INDEX `'.$index.'`');
             }
         } catch (\Throwable $exception) {
             // Ignore drop failures to keep migration idempotent across environments.

@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\UnverifiedUser;
-use App\Models\Department;
 use App\Models\Course;
+use App\Models\Department;
+use App\Models\UnverifiedUser;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class GEInstructorSeeder extends Seeder
@@ -14,14 +14,16 @@ class GEInstructorSeeder extends Seeder
     {
         $geDepartment = Department::where('department_code', 'GE')->first();
         $course = Course::first(); // Get any course
-        
-        if (!$geDepartment) {
+
+        if (! $geDepartment) {
             echo "GE Department not found. Please run DepartmentsTableSeeder first.\n";
+
             return;
         }
-        
-        if (!$course) {
+
+        if (! $course) {
             echo "No courses found. Please run CoursesTableSeeder first.\n";
+
             return;
         }
 

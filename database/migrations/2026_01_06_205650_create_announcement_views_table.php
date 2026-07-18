@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamp('viewed_at')->useCurrent();
             $table->timestamps();
-            
+
             // Ensure one view record per user per announcement
             $table->unique(['announcement_id', 'user_id']);
         });

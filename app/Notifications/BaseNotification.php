@@ -2,20 +2,19 @@
 
 namespace App\Notifications;
 
-use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Notifications\Notification;
 
 /**
  * Base notification class with role-aware message formatting.
  * Admin users receive detailed technical information.
  * End users receive friendly, actionable messages.
- * 
+ *
  * Note: Notifications are processed synchronously for immediate delivery.
  * To enable queued notifications, implement ShouldQueue and use Queueable trait.
  */
 abstract class BaseNotification extends Notification
 {
-
     /**
      * Get the notification category (academic, security, system, etc.)
      */
@@ -84,7 +83,7 @@ abstract class BaseNotification extends Notification
 
         // Check user preferences
         $prefs = $notifiable->notificationPreferences;
-        
+
         if ($prefs?->push_enabled ?? true) {
             $channels[] = 'broadcast';
         }
@@ -122,8 +121,8 @@ abstract class BaseNotification extends Notification
             'priority' => $this->getPriority(),
             'icon' => $this->getIcon(),
             'color' => $this->getColor(),
-            'message' => $notifiable->isAdmin() 
-                ? $this->getAdminMessage() 
+            'message' => $notifiable->isAdmin()
+                ? $this->getAdminMessage()
                 : $this->getUserMessage(),
             'action_url' => $this->getActionUrl(),
             'action_text' => $this->getActionText(),

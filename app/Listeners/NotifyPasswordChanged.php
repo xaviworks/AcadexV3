@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
-use App\Services\NotificationService;
 use App\Notifications\SecurityAlert;
+use App\Services\NotificationService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Log;
 
@@ -53,16 +53,26 @@ class NotifyPasswordChanged
         if (preg_match('/tablet/i', $agent)) {
             return 'Tablet';
         }
+
         return 'Desktop';
     }
 
     private function getBrowser(): string
     {
         $agent = request()->userAgent();
-        if (preg_match('/Chrome/i', $agent)) return 'Chrome';
-        if (preg_match('/Firefox/i', $agent)) return 'Firefox';
-        if (preg_match('/Safari/i', $agent)) return 'Safari';
-        if (preg_match('/Edge/i', $agent)) return 'Edge';
+        if (preg_match('/Chrome/i', $agent)) {
+            return 'Chrome';
+        }
+        if (preg_match('/Firefox/i', $agent)) {
+            return 'Firefox';
+        }
+        if (preg_match('/Safari/i', $agent)) {
+            return 'Safari';
+        }
+        if (preg_match('/Edge/i', $agent)) {
+            return 'Edge';
+        }
+
         return 'Unknown';
     }
 }

@@ -64,26 +64,26 @@ class VpaaDashboardAcademicPeriodTest extends TestCase
         ]);
 
         $deptOne = Department::create([
-            'department_code' => 'BSIT-' . Str::upper(Str::random(4)),
+            'department_code' => 'BSIT-'.Str::upper(Str::random(4)),
             'department_description' => 'Department One',
             'is_deleted' => false,
         ]);
 
         $deptTwo = Department::create([
-            'department_code' => 'BSBA-' . Str::upper(Str::random(4)),
+            'department_code' => 'BSBA-'.Str::upper(Str::random(4)),
             'department_description' => 'Department Two',
             'is_deleted' => false,
         ]);
 
         $courseOne = Course::create([
-            'course_code' => 'C1-' . Str::upper(Str::random(6)),
+            'course_code' => 'C1-'.Str::upper(Str::random(6)),
             'course_description' => 'Course One',
             'department_id' => $deptOne->id,
             'is_deleted' => false,
         ]);
 
         $courseTwo = Course::create([
-            'course_code' => 'C2-' . Str::upper(Str::random(6)),
+            'course_code' => 'C2-'.Str::upper(Str::random(6)),
             'course_description' => 'Course Two',
             'department_id' => $deptTwo->id,
             'is_deleted' => false,
@@ -102,7 +102,7 @@ class VpaaDashboardAcademicPeriodTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'SUB1-' . Str::upper(Str::random(6)),
+            'subject_code' => 'SUB1-'.Str::upper(Str::random(6)),
             'subject_description' => 'Subject One',
             'year_level' => 1,
             'department_id' => $deptOne->id,
@@ -113,7 +113,7 @@ class VpaaDashboardAcademicPeriodTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'SUB2-' . Str::upper(Str::random(6)),
+            'subject_code' => 'SUB2-'.Str::upper(Str::random(6)),
             'subject_description' => 'Subject Two',
             'year_level' => 1,
             'department_id' => $deptTwo->id,

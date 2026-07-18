@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Jenssegers\Agent\Agent;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -41,14 +41,11 @@ class TrackSessionActivity
 
     /**
      * Update session metadata with device information.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return void
      */
     protected function updateSessionMetadata(Request $request): void
     {
         try {
-            $agent = new Agent();
+            $agent = new Agent;
             $agent->setUserAgent($request->userAgent());
 
             $updateData = [
@@ -71,28 +68,25 @@ class TrackSessionActivity
             // (file driver never inserts into the sessions table itself).
             DB::table('sessions')->upsert(
                 [array_merge([
-                    'id'            => $request->session()->getId(),
-                    'user_id'       => Auth::id(),
-                    'ip_address'    => $request->ip(),
-                    'user_agent'    => substr((string) $request->userAgent(), 0, 500),
-                    'payload'       => '',
+                    'id' => $request->session()->getId(),
+                    'user_id' => Auth::id(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => substr((string) $request->userAgent(), 0, 500),
+                    'payload' => '',
                     'last_activity' => time(),
                 ], $updateData)],
                 ['id'],
                 ['user_id', 'ip_address', 'user_agent', 'last_activity',
-                 'last_activity_at', 'device_type', 'browser', 'platform', 'device_fingerprint']
+                    'last_activity_at', 'device_type', 'browser', 'platform', 'device_fingerprint']
             );
         } catch (\Exception $e) {
             // Silently fail to avoid disrupting the request
-            \Log::error('Failed to update session metadata: ' . $e->getMessage());
+            \Log::error('Failed to update session metadata: '.$e->getMessage());
         }
     }
 
     /**
      * Determine device type from agent.
-     *
-     * @param  \Jenssegers\Agent\Agent  $agent
-     * @return string
      */
     protected function getDeviceType(Agent $agent): string
     {

@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Backup;
 use App\Services\BackupService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +15,7 @@ class ScheduledBackupCommand extends Command
     public function handle(BackupService $backupService): int
     {
         $type = $this->option('type');
-        
+
         $this->info("Starting scheduled {$type} backup...");
 
         try {
@@ -27,7 +26,7 @@ class ScheduledBackupCommand extends Command
 
             $this->info("Backup completed: {$backup->name}");
             $this->info("Size: {$backup->size_formatted}");
-            $this->info("Tables: " . count($backup->tables ?? []));
+            $this->info('Tables: '.count($backup->tables ?? []));
 
             Log::info('Scheduled backup completed', [
                 'backup_id' => $backup->id,
@@ -40,7 +39,7 @@ class ScheduledBackupCommand extends Command
         } catch (\Throwable $e) {
             $this->error("Backup failed: {$e->getMessage()}");
             Log::error('Scheduled backup failed', ['error' => $e->getMessage()]);
-            
+
             return Command::FAILURE;
         }
     }

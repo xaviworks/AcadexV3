@@ -12,9 +12,7 @@ use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class PasswordController extends Controller
 {
-    public function __construct(private readonly PasswordUpdateService $passwordUpdateService)
-    {
-    }
+    public function __construct(private readonly PasswordUpdateService $passwordUpdateService) {}
 
     /**
      * Update the user's password.

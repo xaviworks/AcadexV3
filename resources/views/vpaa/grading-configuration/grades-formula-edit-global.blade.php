@@ -27,7 +27,7 @@
         return $value !== null && $value !== '';
     });
 
-    $backRoute = route('admin.gradesFormula', array_merge($queryParams, ['view' => 'formulas']));
+    $backRoute = route('vpaa.gradingConfiguration.index', array_merge($queryParams, ['view' => 'formulas']));
 @endphp
 
 <div class="container-fluid py-4">
@@ -63,7 +63,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('admin.gradesFormula.update', ['formula' => $formula->id]) }}" id="formula-form">
+                    <form method="POST" action="{{ route('vpaa.gradingConfiguration.formulas.update', ['formula' => $formula->id]) }}" id="formula-form">
                         @csrf
                         @method('PUT')
 
@@ -206,8 +206,8 @@
 </div>
 @endsection
 
-{{-- JavaScript moved to: resources/js/pages/admin/grades-formula-edit-global.js --}}
+{{-- JavaScript moved to: resources/js/pages/vpaa/grading-configuration-edit-global.js --}}
 
-{{-- Styles: resources/css/admin/grades-formula.css --}}
+{{-- Styles: resources/css/vpaa/grading-configuration.css --}}
 @push('styles')
 @endpush

@@ -17,7 +17,7 @@ class UnverifiedEmailVerificationNotificationController extends Controller
     {
         $user = Auth::guard('unverified')->user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -29,17 +29,18 @@ class UnverifiedEmailVerificationNotificationController extends Controller
             $user->sendEmailVerificationNotification();
         } catch (\Exception $e) {
             $msg = '[Acadex] Resend verification email failed'
-                . ' | user_id=' . $user->id
-                . ' | email=' . $user->email
-                . ' | exception=' . get_class($e)
-                . ' | error=' . $e->getMessage();
+                .' | user_id='.$user->id
+                .' | email='.$user->email
+                .' | exception='.get_class($e)
+                .' | error='.$e->getMessage();
             error_log($msg);
             Log::error('Resend verification email failed', [
-                'user_id'   => $user->id,
-                'email'     => $user->email,
-                'error'     => $e->getMessage(),
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
                 'exception' => get_class($e),
             ]);
+
             return back()->with('warning', 'Could not send the verification email. Please try again later.');
         }
 

@@ -8,7 +8,7 @@
             <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-clipboard-check-fill text-success me-2"></i>{{ $request->label }}</h1>
             <p class="text-muted mb-0">Formula Request Details</p>
         </div>
-        <a href="{{ route('admin.structureTemplateRequests.index') }}" class="btn btn-outline-secondary">
+        <a href="{{ route('vpaa.gradingConfiguration.templateRequests.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i>Back to Requests
         </a>
     </div>
@@ -224,7 +224,7 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="{{ route('admin.structureTemplateRequests.approve', $request) }}">
+                <form method="POST" action="{{ route('vpaa.gradingConfiguration.templateRequests.approve', $request) }}">
                     @csrf
                     <div class="modal-body">
                         <p class="mb-3">Are you sure you want to approve this formula request? This will create a new structure formu that can be used by chairpersons and instructors.</p>
@@ -259,7 +259,7 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" action="{{ route('admin.structureTemplateRequests.reject', $request) }}">
+                <form method="POST" action="{{ route('vpaa.gradingConfiguration.templateRequests.reject', $request) }}">
                     @csrf
                     <div class="modal-body">
                         <p class="mb-3">Please provide a reason for rejecting this formula request. This information will be visible to the chairperson who submitted it.</p>

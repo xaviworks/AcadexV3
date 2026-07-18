@@ -12,7 +12,7 @@ use Illuminate\Notifications\Messages\MailMessage;
  * Notification sent to Chairperson when a GE assignment request is approved.
  * Supports both database and email channels.
  * Queued for async processing to prevent SMTP timeouts from blocking the UI.
- * 
+ *
  * Admin view: Full approval details with IDs
  * User view: Friendly notification about GE request approval
  */
@@ -29,6 +29,7 @@ class GERequestApproved extends BaseNotification implements ShouldQueue
      * The number of seconds to wait before retrying.
      */
     public int $backoff = 10;
+
     public function __construct(
         protected GESubjectRequest $request,
         protected User $instructor,
@@ -45,7 +46,7 @@ class GERequestApproved extends BaseNotification implements ShouldQueue
 
         // Check user preferences for email
         $prefs = $notifiable->notificationPreferences;
-        
+
         if ($prefs?->email_enabled ?? true) {
             $channels[] = 'mail';
         }
@@ -81,14 +82,14 @@ class GERequestApproved extends BaseNotification implements ShouldQueue
     {
         $instructorName = $this->instructor->full_name;
         $approverName = $this->approvedBy?->full_name ?? 'GE Coordinator';
-        
+
         return "[GE Request Approved] The GE assignment request for {$instructorName} (ID: {$this->instructor->id}) has been approved by {$approverName}. Instructor can now teach GE subjects.";
     }
 
     public function getUserMessage(): string
     {
         $instructorName = $this->instructor->full_name;
-        
+
         return "Your GE assignment request for {$instructorName} has been approved";
     }
 
@@ -123,7 +124,7 @@ class GERequestApproved extends BaseNotification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $instructorName = $this->instructor->full_name;
-        
+
         return (new MailMessage)
             ->subject('GE Assignment Request Approved - Acadex')
             ->greeting("Hello {$notifiable->first_name}!")

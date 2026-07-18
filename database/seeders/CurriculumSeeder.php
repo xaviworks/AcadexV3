@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Course;
 use App\Models\Curriculum;
 use App\Models\CurriculumSubject;
-use App\Models\Course;
+use Illuminate\Database\Seeder;
 
 class CurriculumSeeder extends Seeder
 {
@@ -16,7 +16,7 @@ class CurriculumSeeder extends Seeder
         $bsba = Course::where('course_code', 'BSBA')->first();
         $bspsy = Course::where('course_code', 'BSPSY')->first();
 
-        if (!$bsit || !$bsba || !$bspsy) {
+        if (! $bsit || ! $bsba || ! $bspsy) {
             throw new \Exception('Required courses not found. Seed courses first.');
         }
 
@@ -132,7 +132,7 @@ class CurriculumSeeder extends Seeder
             [2, '1st', 'PD 3', 'Values Development & Interpersonal Relationship'],
             [2, '1st', 'PE 3', 'Dance for Theatre'],
 
-            [2, '2nd', 'BA CC 3', "Income Taxation"],
+            [2, '2nd', 'BA CC 3', 'Income Taxation'],
             [2, '2nd', 'BA CC 4', 'Obligation and Contracts'],
             [2, '2nd', 'BA MKTG 5', 'Distribution Management'],
             [2, '2nd', 'BA MKTG 6', 'Retail Management'],
@@ -192,7 +192,7 @@ class CurriculumSeeder extends Seeder
             [2, '1st', 'PSYCH 103', 'DEVELOPMENTAL PSYCHOLOGY'],
             [2, '1st', 'PSYCH 105', 'PSYCHOLOGICAL / BIOLOGICAL PSYCHOLOGY'],
 
-            [2, '2nd', 'GE 10', "THE ENTREPRENEURIAL MIND"],
+            [2, '2nd', 'GE 10', 'THE ENTREPRENEURIAL MIND'],
             [2, '2nd', 'GE 3', 'THE CONTEMPORARY WORLD '],
             [2, '2nd', 'NS ELEC 3', 'HUMAN ANATOMY & PHYSIOLOGY'],
             [2, '2nd', 'PD 4', 'CAREER DEVELOPMENT & COMMUNITY INVOLVEMENT'],

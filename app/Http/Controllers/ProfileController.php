@@ -15,9 +15,7 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function __construct(private readonly PasswordUpdateService $passwordUpdateService)
-    {
-    }
+    public function __construct(private readonly PasswordUpdateService $passwordUpdateService) {}
 
     /**
      * Display the user's profile form.
@@ -26,7 +24,7 @@ class ProfileController extends Controller
     {
         // Get user with minimal data needed for profile
         $user = $request->user();
-        
+
         return view('profile.edit', [
             'user' => $user,
         ]);

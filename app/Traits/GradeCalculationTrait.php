@@ -9,8 +9,8 @@ use App\Models\TermGrade;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 trait GradeCalculationTrait
 {
@@ -81,31 +81,31 @@ trait GradeCalculationTrait
             'allScored' => $allScored,
         ];
     }
-    
+
     protected function updateTermGrade(int $studentId, int $subjectId, int $termId, int $academicPeriodId, float $termGrade): void
     {
         TermGrade::updateOrCreate(
             [
                 'student_id' => $studentId,
                 'subject_id' => $subjectId,
-                'term_id' => $termId
+                'term_id' => $termId,
             ],
             [
                 'term_grade' => $termGrade,
                 'academic_period_id' => $academicPeriodId,
                 'created_by' => Auth::id(),
-                'updated_by' => Auth::id()
+                'updated_by' => Auth::id(),
             ]
         );
     }
-    
+
     protected function calculateAndUpdateFinalGrade(int $studentId, Subject $subject, int $academicPeriodId, ?array $formulaSettings = null): void
     {
         $termGrades = TermGrade::where('student_id', $studentId)
             ->where('subject_id', $subject->id)
             ->whereIn('term_id', [1, 2, 3, 4])
             ->get();
-            
+
         if ($termGrades->count() === 4) {
             $formula = $formulaSettings
                 ?? $this->getGradesFormulaSettings(
@@ -115,11 +115,11 @@ trait GradeCalculationTrait
                 );
             $finalGrade = round($termGrades->avg('term_grade'), 2);
             $remarks = $finalGrade >= $formula['passing_grade'] ? 'Passed' : 'Failed';
-            
+
             FinalGrade::updateOrCreate(
                 [
                     'student_id' => $studentId,
-                    'subject_id' => $subject->id
+                    'subject_id' => $subject->id,
                 ],
                 [
                     'academic_period_id' => $academicPeriodId,
@@ -127,14 +127,14 @@ trait GradeCalculationTrait
                     'remarks' => $remarks,
                     'is_deleted' => false,
                     'created_by' => Auth::id(),
-                    'updated_by' => Auth::id()
+                    'updated_by' => Auth::id(),
                 ]
             );
-            
+
             Log::info("Final grade updated for student {$studentId} in subject {$subject->id}: {$finalGrade} ({$remarks})");
         }
     }
-    
+
     protected function getTermId(string $term): ?int
     {
         return [
@@ -168,6 +168,7 @@ trait GradeCalculationTrait
         $children = $node['children'] ?? [];
         if (empty($children)) {
             $allScored = false;
+
             return null;
         }
 
@@ -208,6 +209,7 @@ trait GradeCalculationTrait
 
         if ($activities->isEmpty()) {
             $allScored = false;
+
             return null;
         }
 
@@ -222,6 +224,7 @@ trait GradeCalculationTrait
 
             if (! $score || $score->score === null) {
                 $allScored = false;
+
                 return null;
             }
 
@@ -232,6 +235,7 @@ trait GradeCalculationTrait
 
         if (empty($collected)) {
             $allScored = false;
+
             return null;
         }
 
@@ -263,4 +267,4 @@ trait GradeCalculationTrait
 
         return $this->clampGradeValue($transmuted);
     }
-} 
+}

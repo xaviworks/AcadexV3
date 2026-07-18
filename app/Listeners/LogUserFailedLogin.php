@@ -8,9 +8,7 @@ use Jenssegers\Agent\Agent;
 
 class LogUserFailedLogin
 {
-    public function __construct(private readonly UserLogRecorder $recorder)
-    {
-    }
+    public function __construct(private readonly UserLogRecorder $recorder) {}
 
     public function handle(Failed $event)
     {
@@ -21,7 +19,7 @@ class LogUserFailedLogin
             return;
         }
 
-        $agent = new Agent();
+        $agent = new Agent;
         $browser = $agent->browser();
         $platform = $agent->platform();
         $device = $agent->isMobile() ? 'Mobile' : ($agent->isTablet() ? 'Tablet' : 'Desktop');
@@ -35,5 +33,3 @@ class LogUserFailedLogin
         ]);
     }
 }
-
-

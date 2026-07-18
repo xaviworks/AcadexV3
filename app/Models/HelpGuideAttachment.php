@@ -75,6 +75,7 @@ class HelpGuideAttachment extends Model
     public function isImage(): bool
     {
         $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+
         return in_array($this->extension, $imageExtensions);
     }
 
@@ -92,15 +93,15 @@ class HelpGuideAttachment extends Model
     public function getHumanFileSizeAttribute(): string
     {
         $bytes = $this->file_size;
-        
+
         if ($bytes >= 1073741824) {
-            return number_format($bytes / 1073741824, 2) . ' GB';
+            return number_format($bytes / 1073741824, 2).' GB';
         } elseif ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
+            return number_format($bytes / 1048576, 2).' MB';
         } elseif ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
+            return number_format($bytes / 1024, 2).' KB';
         } else {
-            return $bytes . ' bytes';
+            return $bytes.' bytes';
         }
     }
 
@@ -120,7 +121,7 @@ class HelpGuideAttachment extends Model
         if ($this->fileExists()) {
             return Storage::disk('public')->delete($this->file_path);
         }
-        
+
         return false;
     }
 
@@ -132,7 +133,7 @@ class HelpGuideAttachment extends Model
         if ($this->fileExists()) {
             return Storage::disk('public')->get($this->file_path);
         }
-        
+
         return null;
     }
 }

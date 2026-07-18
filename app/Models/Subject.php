@@ -26,22 +26,22 @@ class Subject extends Model
     use HasFactory;
 
     protected $fillable = [
-        'subject_code', 'subject_description', 'units', 'is_universal', 
+        'subject_code', 'subject_description', 'units', 'is_universal',
         'academic_period_id', 'department_id', 'course_id', 'instructor_id',
-        'is_deleted', 'created_by', 'updated_by', 'year_level'
+        'is_deleted', 'created_by', 'updated_by', 'year_level',
     ];
 
     public function academicPeriod()
     {
         return $this->belongsTo(AcademicPeriod::class);
     }
-    
+
     public function instructor()
     {
         // Keep this for backward compatibility
         return $this->belongsTo(User::class, 'instructor_id');
     }
-    
+
     public function instructors()
     {
         return $this->belongsToMany(User::class, 'instructor_subject', 'subject_id', 'instructor_id')
@@ -59,7 +59,7 @@ class Subject extends Model
     }
 
     public function students()
-    {   
+    {
         return $this->belongsToMany(Student::class, 'student_subjects', 'subject_id', 'student_id')
             ->withPivot('is_deleted')
             ->withTimestamps()
@@ -86,7 +86,4 @@ class Subject extends Model
     {
         return $this->hasOne(SubjectAttainmentLevel::class, 'subject_id');
     }
-
-
-
 }

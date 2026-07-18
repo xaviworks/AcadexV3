@@ -4,15 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('course_outcome_attainments', function (Blueprint $table) {
             // Add new columns if they don't exist
-            if (!Schema::hasColumn('course_outcome_attainments', 'subject_id')) {
+            if (! Schema::hasColumn('course_outcome_attainments', 'subject_id')) {
                 $table->unsignedBigInteger('subject_id')->after('student_id');
             }
-            if (!Schema::hasColumn('course_outcome_attainments', 'course_outcome_id')) {
+            if (! Schema::hasColumn('course_outcome_attainments', 'course_outcome_id')) {
                 $table->unsignedBigInteger('course_outcome_id')->after('subject_id');
             }
         });
@@ -58,9 +59,9 @@ return new class extends Migration {
             if (Schema::hasColumn('course_outcome_attainments', 'course_outcome_id')) {
                 $table->dropColumn('course_outcome_id');
             }
-            
+
             // Re-add the original co_id column and constraint
-            if (!Schema::hasColumn('course_outcome_attainments', 'co_id')) {
+            if (! Schema::hasColumn('course_outcome_attainments', 'co_id')) {
                 $table->unsignedBigInteger('co_id')->after('term');
                 $table->foreign('co_id')->references('id')->on('course_outcomes')->onDelete('cascade');
             }

@@ -73,21 +73,21 @@ class VpaaAttainmentReportTest extends TestCase
         ]);
 
         $courseA = Course::create([
-            'course_code' => 'CS-' . Str::upper(Str::random(6)),
+            'course_code' => 'CS-'.Str::upper(Str::random(6)),
             'course_description' => 'BS Computer Science',
             'department_id' => $departmentA->id,
             'is_deleted' => false,
         ]);
 
         $courseB = Course::create([
-            'course_code' => 'BA-' . Str::upper(Str::random(6)),
+            'course_code' => 'BA-'.Str::upper(Str::random(6)),
             'course_description' => 'BS Business Administration',
             'department_id' => $departmentB->id,
             'is_deleted' => false,
         ]);
 
         $inScopeSubject = Subject::create([
-            'subject_code' => 'CS101-' . Str::upper(Str::random(4)),
+            'subject_code' => 'CS101-'.Str::upper(Str::random(4)),
             'subject_description' => 'Intro to CS',
             'department_id' => $departmentA->id,
             'course_id' => $courseA->id,
@@ -96,7 +96,7 @@ class VpaaAttainmentReportTest extends TestCase
         ]);
 
         $otherPeriodSubject = Subject::create([
-            'subject_code' => 'CS102-' . Str::upper(Str::random(4)),
+            'subject_code' => 'CS102-'.Str::upper(Str::random(4)),
             'subject_description' => 'Data Structures',
             'department_id' => $departmentA->id,
             'course_id' => $courseA->id,
@@ -105,7 +105,7 @@ class VpaaAttainmentReportTest extends TestCase
         ]);
 
         $otherDepartmentSubject = Subject::create([
-            'subject_code' => 'BA101-' . Str::upper(Str::random(4)),
+            'subject_code' => 'BA101-'.Str::upper(Str::random(4)),
             'subject_description' => 'Accounting 1',
             'department_id' => $departmentB->id,
             'course_id' => $courseB->id,
@@ -144,14 +144,14 @@ class VpaaAttainmentReportTest extends TestCase
         ]);
 
         $course = Course::create([
-            'course_code' => 'ED-' . Str::upper(Str::random(6)),
+            'course_code' => 'ED-'.Str::upper(Str::random(6)),
             'course_description' => 'BS Education',
             'department_id' => $department->id,
             'is_deleted' => false,
         ]);
 
         $subject = Subject::create([
-            'subject_code' => 'ED101-' . Str::upper(Str::random(4)),
+            'subject_code' => 'ED101-'.Str::upper(Str::random(4)),
             'subject_description' => 'Foundations of Education',
             'department_id' => $department->id,
             'course_id' => $course->id,

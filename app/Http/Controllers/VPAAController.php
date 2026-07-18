@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
-use App\Models\Subject;
-use App\Models\CourseOutcomes;
-use App\Models\FinalGrade;
-use App\Models\Student;
-use App\Models\User;
-use App\Models\Department;
-use App\Models\CourseOutcomeAttainment;
 use App\Models\AcademicPeriod;
+use App\Models\Course;
+use App\Models\Department;
+use App\Models\Student;
+use App\Models\Subject;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 
 class VPAAController extends Controller
@@ -21,22 +17,21 @@ class VPAAController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        
+
         // Check if user is VPAA (role 5)
         $this->middleware(function ($request, $next) {
             if (Auth::check() && Auth::user()?->role === 5) {
                 return $next($request);
             }
-            
+
             return redirect()->route('dashboard')
                 ->with('error', 'You are not authorized to access this page.');
         });
     }
-    
+
     /**
      * Show course outcome attainment reports
      *
-     * @param Request $request
      * @return \Illuminate\View\View
      */
     public function viewCourseOutcomeAttainment(Request $request)
@@ -47,7 +42,7 @@ class VPAAController extends Controller
         $academicPeriodId = $this->resolveRequiredAcademicPeriodId();
         $period = \App\Models\AcademicPeriod::find($academicPeriodId);
 
-        if (!$departmentId) {
+        if (! $departmentId) {
             // Show department wildcards with chairperson and GE coordinator (optimized with eager loading)
             $departments = Department::where('is_deleted', false)
                 ->select('id', 'department_code', 'department_description')
@@ -55,7 +50,7 @@ class VPAAController extends Controller
                     'users' => function ($query) {
                         $query->whereIn('role', [1, 4])
                             ->select('id', 'department_id', 'role', 'first_name', 'last_name', 'email');
-                    }
+                    },
                 ])
                 ->orderBy('department_description')
                 ->get();
@@ -122,7 +117,7 @@ class VPAAController extends Controller
 
         return view('vpaa.scores.course-outcome-results', $viewData);
     }
-    
+
     /**
      * Display the VPAA dashboard.
      *
@@ -240,6 +235,7 @@ class VPAAController extends Controller
         $currentPeriod = AcademicPeriod::resolveCurrentByDate();
         if ($currentPeriod) {
             session(['active_academic_period_id' => $currentPeriod->id]);
+
             return (int) $currentPeriod->id;
         }
 
@@ -250,6 +246,7 @@ class VPAAController extends Controller
 
         if ($latestPeriod) {
             session(['active_academic_period_id' => $latestPeriod->id]);
+
             return (int) $latestPeriod->id;
         }
 
@@ -282,7 +279,7 @@ class VPAAController extends Controller
                 'users' => function ($query) {
                     $query->whereIn('role', [1, 4]) // Chairperson and GE Coordinator
                         ->select('id', 'department_id', 'role', 'first_name', 'last_name', 'email');
-                }
+                },
             ])
             ->orderBy('department_description')
             ->get();
@@ -323,11 +320,10 @@ class VPAAController extends Controller
 
         return view('vpaa.departments', compact('departments'));
     }
-    
+
     /**
      * Store a newly created department in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function storeDepartment(Request $request)
@@ -339,39 +335,39 @@ class VPAAController extends Controller
 
         try {
             Department::create($validated);
+
             return redirect()->route('vpaa.departments')
                 ->with('status', 'Department created successfully.');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Error creating department: ' . $e->getMessage());
+                ->with('error', 'Error creating department: '.$e->getMessage());
         }
     }
 
     /**
      * Update the specified department in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function updateDepartment(Request $request, $id)
     {
         $validated = $request->validate([
-            'department_code' => 'required|string|max:20|unique:departments,department_code,' . $id,
+            'department_code' => 'required|string|max:20|unique:departments,department_code,'.$id,
             'department_description' => 'required|string|max:255',
         ]);
 
         try {
             $department = Department::findOrFail($id);
             $department->update($validated);
-            
+
             return redirect()->route('vpaa.departments')
                 ->with('status', 'Department updated successfully.');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Error updating department: ' . $e->getMessage());
+                ->with('error', 'Error updating department: '.$e->getMessage());
         }
     }
 
@@ -385,23 +381,23 @@ class VPAAController extends Controller
     {
         try {
             $department = Department::findOrFail($id);
-            
+
             // Check if department has any users or students
             $hasUsers = User::where('department_id', $id)->exists();
             $hasStudents = $department->students()->exists();
-            
+
             if ($hasUsers || $hasStudents) {
                 return redirect()->back()
                     ->with('error', 'Cannot delete department with associated users or students.');
             }
-            
+
             $department->update(['is_deleted' => true]);
-            
+
             return redirect()->route('vpaa.departments')
                 ->with('status', 'Department deleted successfully.');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error deleting department: ' . $e->getMessage());
+                ->with('error', 'Error deleting department: '.$e->getMessage());
         }
     }
 
@@ -415,15 +411,15 @@ class VPAAController extends Controller
 
         // Check if department_id is passed as a URL parameter or as a request parameter
         $departmentId = $departmentId ?: $request->input('department_id');
-        
+
         // Build query for instructors
         $query = User::where('role', 0)
-            ->with(['department' => function($query) {
+            ->with(['department' => function ($query) {
                 $query->select('id', 'department_code', 'department_description');
             }])
             ->orderBy('is_active', 'desc')
             ->orderBy('last_name');
-        
+
         // Apply department filter if selected
         if ($departmentId) {
             $query->where('department_id', $departmentId);
@@ -431,7 +427,7 @@ class VPAAController extends Controller
             // Department-specific instructor views remain period-scoped to active teaching assignments.
             $this->applyTeachingScope($query, $academicPeriodId, (int) $departmentId);
         }
-        
+
         $instructors = $query->get();
 
         $departments = Department::where('is_deleted', false)
@@ -442,7 +438,7 @@ class VPAAController extends Controller
 
         return view('vpaa.instructors', compact('instructors', 'departments', 'selectedDepartment'));
     }
-    
+
     /**
      * Show the form for editing the specified instructor.
      *
@@ -456,14 +452,13 @@ class VPAAController extends Controller
             ->select('id', 'department_code', 'department_description')
             ->orderBy('department_description')
             ->get();
-            
+
         return view('vpaa.edit-instructor', compact('instructor', 'departments'));
     }
-    
+
     /**
      * Update the specified instructor in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -474,9 +469,9 @@ class VPAAController extends Controller
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$id,
             'department_id' => 'required|exists:departments,id',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ]);
 
         // Update the instructor
@@ -495,7 +490,6 @@ class VPAAController extends Controller
     // ============================
     // View Students by Department
     // ============================
-
 
     // ============================
     // View Final Grades by Department/Course
@@ -589,5 +583,5 @@ class VPAAController extends Controller
             });
         });
     }
-// (Stray code removed)
+    // (Stray code removed)
 }

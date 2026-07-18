@@ -2,30 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
+use App\Models\FinalGrade;
+use App\Models\Student;
+use App\Models\Subject;
+use App\Models\TermGrade;
+use App\Models\UnverifiedUser;
+use App\Models\User;
+use App\Models\UserLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
-use App\Models\
-{
-    Student, 
-    Subject, 
-    TermGrade, 
-    FinalGrade,
-    User,
-    UnverifiedUser,
-    UserLog,
-    Course,
-    Department,
-};
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         if ($user->role === 0) {
             return $this->instructorDashboard();
         }
@@ -55,7 +50,7 @@ class DashboardController extends Controller
 
     private function instructorDashboard()
     {
-        if (!session()->has('active_academic_period_id')) {
+        if (! session()->has('active_academic_period_id')) {
             return redirect()->route('select.academicPeriod');
         }
 
@@ -88,7 +83,7 @@ class DashboardController extends Controller
 
         return Subject::whereIn('id', $allIds)
             ->where('is_deleted', false)
-            ->withCount(['students' => fn($q) => $q->where('students.is_deleted', false)])
+            ->withCount(['students' => fn ($q) => $q->where('students.is_deleted', false)])
             ->get();
     }
 
@@ -137,7 +132,7 @@ class DashboardController extends Controller
             ->groupBy('subject_id', 'term_id')
             ->get()
             ->groupBy('subject_id')
-            ->map(fn($rows) => $rows->pluck('graded_count', 'term_id'));
+            ->map(fn ($rows) => $rows->pluck('graded_count', 'term_id'));
 
         $studentCounts = $subjects->pluck('students_count', 'id');
 
@@ -145,11 +140,11 @@ class DashboardController extends Controller
         foreach ($terms as $term) {
             $termId = $this->getTermId($term);
             $total = $studentCounts->sum();
-            $graded = $gradedBySubjectTerm->map(fn($termRows) => $termRows->get($termId, 0))->sum();
+            $graded = $gradedBySubjectTerm->map(fn ($termRows) => $termRows->get($termId, 0))->sum();
 
             $termCompletions[$term] = [
                 'graded' => $graded,
-                'total'  => $total,
+                'total' => $total,
             ];
         }
 
@@ -167,7 +162,7 @@ class DashboardController extends Controller
             ->groupBy('subject_id', 'term_id')
             ->get()
             ->groupBy('subject_id')
-            ->map(fn($rows) => $rows->pluck('graded_count', 'term_id'));
+            ->map(fn ($rows) => $rows->pluck('graded_count', 'term_id'));
 
         $subjectCharts = [];
 
@@ -175,25 +170,25 @@ class DashboardController extends Controller
             $termsData = [];
             $termPercentages = [];
             $subjectGraded = $gradedBySubjectTerm->get($subject->id, collect());
-            $studentCount  = $subject->students_count;
+            $studentCount = $subject->students_count;
 
             foreach ($terms as $term) {
-                $termId    = $this->getTermId($term);
+                $termId = $this->getTermId($term);
                 $gradedCount = $subjectGraded->get($termId, 0);
-                $percentage  = $studentCount > 0 ? round(($gradedCount / $studentCount) * 100, 2) : 0;
+                $percentage = $studentCount > 0 ? round(($gradedCount / $studentCount) * 100, 2) : 0;
 
                 $termsData[$term] = [
-                    'graded'     => $gradedCount,
-                    'total'      => $studentCount,
+                    'graded' => $gradedCount,
+                    'total' => $studentCount,
                     'percentage' => $percentage,
                 ];
                 $termPercentages[] = $percentage;
             }
 
             $subjectCharts[] = [
-                'code'         => $subject->subject_code,
-                'description'  => $subject->subject_description,
-                'terms'        => $termsData,
+                'code' => $subject->subject_code,
+                'description' => $subject->subject_description,
+                'terms' => $termsData,
                 'termPercentages' => $termPercentages,
             ];
         }
@@ -203,7 +198,7 @@ class DashboardController extends Controller
 
     private function chairpersonDashboard()
     {
-        if (!session()->has('active_academic_period_id')) {
+        if (! session()->has('active_academic_period_id')) {
             return redirect()->route('select.academicPeriod');
         }
 
@@ -212,18 +207,18 @@ class DashboardController extends Controller
         $chairpersonCourseId = Auth::user()->course_id;
 
         // One aggregated query instead of 3 separate User COUNT queries
-        $instructorStats = User::where("role", 0)
-            ->where("department_id", $departmentId)
-            ->where("course_id", $chairpersonCourseId)
+        $instructorStats = User::where('role', 0)
+            ->where('department_id', $departmentId)
+            ->where('course_id', $chairpersonCourseId)
             ->selectRaw('
                 SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_count,
                 SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive_count
             ')
             ->first();
 
-        $countActiveInstructors   = (int) ($instructorStats->active_count ?? 0);
+        $countActiveInstructors = (int) ($instructorStats->active_count ?? 0);
         $countInactiveInstructors = (int) ($instructorStats->inactive_count ?? 0);
-        $countInstructors         = $countActiveInstructors;
+        $countInstructors = $countActiveInstructors;
 
         // JOIN instead of costly EXISTS subquery (whereHas)
         $countStudents = Student::join('student_subjects', 'students.id', '=', 'student_subjects.student_id')
@@ -240,7 +235,7 @@ class DashboardController extends Controller
             ->distinct('course_id')
             ->count('course_id');
 
-        $countUnverifiedInstructors = UnverifiedUser::where("department_id", $departmentId)->count();
+        $countUnverifiedInstructors = UnverifiedUser::where('department_id', $departmentId)->count();
 
         $data = compact(
             'countInstructors',
@@ -274,7 +269,7 @@ class DashboardController extends Controller
     private function getLoginStats($selectedDate)
     {
         $hours = range(0, 23);
-        
+
         $successfulLogins = UserLog::selectRaw('HOUR(created_at) as hour, COUNT(*) as total')
             ->where('event_type', 'login')
             ->whereDate('created_at', $selectedDate)
@@ -287,8 +282,8 @@ class DashboardController extends Controller
             ->groupByRaw('HOUR(created_at)')
             ->pluck('total', 'hour');
 
-        $successfulData = array_map(fn($hour) => $successfulLogins[$hour] ?? 0, $hours);
-        $failedData = array_map(fn($hour) => $failedLogins[$hour] ?? 0, $hours);
+        $successfulData = array_map(fn ($hour) => $successfulLogins[$hour] ?? 0, $hours);
+        $failedData = array_map(fn ($hour) => $failedLogins[$hour] ?? 0, $hours);
 
         return [
             'loginCount' => array_sum($successfulData),
@@ -312,8 +307,8 @@ class DashboardController extends Controller
             ->groupByRaw('MONTH(created_at)')
             ->pluck('total', 'month');
 
-        $monthlySuccessfulData = array_map(fn($month) => $monthlySuccessfulLogins[$month] ?? 0, range(1, 12));
-        $monthlyFailedData = array_map(fn($month) => $monthlyFailedLogins[$month] ?? 0, range(1, 12));
+        $monthlySuccessfulData = array_map(fn ($month) => $monthlySuccessfulLogins[$month] ?? 0, range(1, 12));
+        $monthlyFailedData = array_map(fn ($month) => $monthlyFailedLogins[$month] ?? 0, range(1, 12));
 
         return [
             'monthlySuccessfulData' => $monthlySuccessfulData,
@@ -363,7 +358,7 @@ class DashboardController extends Controller
         return view('dashboard.dean', [
             'studentsPerDepartment' => $studentsPerDepartment,
             'totalInstructors' => $totalInstructors,
-            'studentsPerCourse' => $studentsPerCourse
+            'studentsPerCourse' => $studentsPerCourse,
         ]);
     }
 
@@ -420,78 +415,78 @@ class DashboardController extends Controller
 
     private function geCoordinatorDashboard()
     {
-        if (!session()->has('active_academic_period_id')) {
+        if (! session()->has('active_academic_period_id')) {
             return redirect()->route('select.academicPeriod');
         }
 
         $academicPeriodId = session('active_academic_period_id');
-        
+
         // Get GE department
         $geDepartment = Department::where('department_code', 'GE')->first();
-        
-        if (!$geDepartment) {
+
+        if (! $geDepartment) {
             return back()->with('error', 'GE department not found. Please contact administrator.');
         }
 
         // Count all instructors in GE department or approved to teach GE subjects
-        $countInstructors = User::where("role", 0)
-            ->where(function($query) use ($geDepartment) {
-                $query->where("department_id", $geDepartment->id) // Always count GE department instructors
-                      ->orWhere("can_teach_ge", true) // Count those who can currently teach GE
-                      ->orWhere(function($subQuery) {
-                          // Count inactive instructors who previously had approved GE requests
-                          $subQuery->where('is_active', false)
-                                   ->whereHas('geSubjectRequests', function($requestQuery) {
-                                       $requestQuery->where('status', 'approved');
-                                   });
-                      });
+        $countInstructors = User::where('role', 0)
+            ->where(function ($query) use ($geDepartment) {
+                $query->where('department_id', $geDepartment->id) // Always count GE department instructors
+                    ->orWhere('can_teach_ge', true) // Count those who can currently teach GE
+                    ->orWhere(function ($subQuery) {
+                        // Count inactive instructors who previously had approved GE requests
+                        $subQuery->where('is_active', false)
+                            ->whereHas('geSubjectRequests', function ($requestQuery) {
+                                $requestQuery->where('status', 'approved');
+                            });
+                    });
             })
             ->count();
-            
-        $countActiveInstructors = User::where("is_active", 1)
-            ->where("role", 0)
-            ->where(function($query) use ($geDepartment) {
-                $query->where("department_id", $geDepartment->id)
-                      ->orWhere("can_teach_ge", true);
+
+        $countActiveInstructors = User::where('is_active', 1)
+            ->where('role', 0)
+            ->where(function ($query) use ($geDepartment) {
+                $query->where('department_id', $geDepartment->id)
+                    ->orWhere('can_teach_ge', true);
             })
             ->count();
-            
-        $countInactiveInstructors = User::where("is_active", 0)
-            ->where("role", 0)
-            ->where(function($query) use ($geDepartment) {
-                $query->where("department_id", $geDepartment->id)
-                      ->orWhere(function($subQuery) {
-                          // Count inactive instructors who previously had approved GE requests
-                          $subQuery->whereHas('geSubjectRequests', function($requestQuery) {
-                              $requestQuery->where('status', 'approved');
-                          });
-                      });
+
+        $countInactiveInstructors = User::where('is_active', 0)
+            ->where('role', 0)
+            ->where(function ($query) use ($geDepartment) {
+                $query->where('department_id', $geDepartment->id)
+                    ->orWhere(function ($subQuery) {
+                        // Count inactive instructors who previously had approved GE requests
+                        $subQuery->whereHas('geSubjectRequests', function ($requestQuery) {
+                            $requestQuery->where('status', 'approved');
+                        });
+                    });
             })
             ->count();
-            
-        $countPendingInstructors = UnverifiedUser::where("department_id", $geDepartment->id)
+
+        $countPendingInstructors = UnverifiedUser::where('department_id', $geDepartment->id)
             ->count();
 
         $data = [
-            "countInstructors" => $countInstructors,
-            "countStudents" => Student::whereHas('subjects', function($query) use ($geDepartment, $academicPeriodId) {
-                    $query->where('department_id', $geDepartment->id)
-                          ->where('academic_period_id', $academicPeriodId);
-                })
-                ->where("is_deleted", false)
+            'countInstructors' => $countInstructors,
+            'countStudents' => Student::whereHas('subjects', function ($query) use ($geDepartment, $academicPeriodId) {
+                $query->where('department_id', $geDepartment->id)
+                    ->where('academic_period_id', $academicPeriodId);
+            })
+                ->where('is_deleted', false)
                 ->distinct()
-                ->count("students.id"),
-            "countCourses" => Subject::where("department_id", $geDepartment->id)
-                ->where("is_deleted", false)
+                ->count('students.id'),
+            'countCourses' => Subject::where('department_id', $geDepartment->id)
+                ->where('is_deleted', false)
                 ->where('academic_period_id', $academicPeriodId)
                 ->distinct('subject_code')
                 ->count(),
-            "countActiveInstructors" => $countActiveInstructors,
-            "countInactiveInstructors" => $countInactiveInstructors,
-            "countPendingInstructors" => $countPendingInstructors,
-            "activePercentage" => $countInstructors > 0 ? round(($countActiveInstructors / $countInstructors) * 100, 1) : 0,
-            "inactivePercentage" => $countInstructors > 0 ? round(($countInactiveInstructors / $countInstructors) * 100, 1) : 0,
-            "pendingPercentage" => ($countInstructors + $countPendingInstructors) > 0 ? round(($countPendingInstructors / ($countInstructors + $countPendingInstructors)) * 100, 1) : 0,
+            'countActiveInstructors' => $countActiveInstructors,
+            'countInactiveInstructors' => $countInactiveInstructors,
+            'countPendingInstructors' => $countPendingInstructors,
+            'activePercentage' => $countInstructors > 0 ? round(($countActiveInstructors / $countInstructors) * 100, 1) : 0,
+            'inactivePercentage' => $countInstructors > 0 ? round(($countInactiveInstructors / $countInstructors) * 100, 1) : 0,
+            'pendingPercentage' => ($countInstructors + $countPendingInstructors) > 0 ? round(($countPendingInstructors / ($countInstructors + $countPendingInstructors)) * 100, 1) : 0,
         ];
 
         return view('dashboard.gecoordinator', $data);
@@ -540,7 +535,7 @@ class DashboardController extends Controller
 
     private function pollInstructorData(): \Illuminate\Http\JsonResponse
     {
-        if (!session()->has('active_academic_period_id')) {
+        if (! session()->has('active_academic_period_id')) {
             return response()->json(['error' => 'No academic period set'], 400);
         }
 
@@ -562,7 +557,7 @@ class DashboardController extends Controller
 
     private function pollChairpersonData(): \Illuminate\Http\JsonResponse
     {
-        if (!session()->has('active_academic_period_id')) {
+        if (! session()->has('active_academic_period_id')) {
             return response()->json(['error' => 'No academic period set'], 400);
         }
 
@@ -571,18 +566,18 @@ class DashboardController extends Controller
         $chairpersonCourseId = Auth::user()->course_id;
 
         // One aggregated query instead of 3 separate User COUNT queries
-        $instructorStats = User::where("role", 0)
-            ->where("department_id", $departmentId)
-            ->where("course_id", $chairpersonCourseId)
+        $instructorStats = User::where('role', 0)
+            ->where('department_id', $departmentId)
+            ->where('course_id', $chairpersonCourseId)
             ->selectRaw('
                 SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_count,
                 SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive_count
             ')
             ->first();
 
-        $countActiveInstructors   = (int) ($instructorStats->active_count ?? 0);
+        $countActiveInstructors = (int) ($instructorStats->active_count ?? 0);
         $countInactiveInstructors = (int) ($instructorStats->inactive_count ?? 0);
-        $countInstructors         = $countActiveInstructors;
+        $countInstructors = $countActiveInstructors;
 
         // JOIN instead of costly EXISTS subquery (whereHas)
         $countStudents = Student::join('student_subjects', 'students.id', '=', 'student_subjects.student_id')
@@ -599,7 +594,7 @@ class DashboardController extends Controller
             ->distinct('course_id')
             ->count('course_id');
 
-        $countUnverifiedInstructors = UnverifiedUser::where("department_id", $departmentId)->count();
+        $countUnverifiedInstructors = UnverifiedUser::where('department_id', $departmentId)->count();
 
         return response()->json([
             'countInstructors' => $countInstructors,
@@ -616,62 +611,62 @@ class DashboardController extends Controller
 
     private function pollGECoordinatorData(): \Illuminate\Http\JsonResponse
     {
-        if (!session()->has('active_academic_period_id')) {
+        if (! session()->has('active_academic_period_id')) {
             return response()->json(['error' => 'No academic period set'], 400);
         }
 
         $academicPeriodId = session('active_academic_period_id');
         $geDepartment = Department::where('department_code', 'GE')->first();
 
-        if (!$geDepartment) {
+        if (! $geDepartment) {
             return response()->json(['error' => 'GE department not found'], 404);
         }
 
-        $countInstructors = User::where("role", 0)
-            ->where(function($query) use ($geDepartment) {
-                $query->where("department_id", $geDepartment->id)
-                      ->orWhere("can_teach_ge", true)
-                      ->orWhere(function($subQuery) {
-                          $subQuery->where('is_active', false)
-                                   ->whereHas('geSubjectRequests', function($requestQuery) {
-                                       $requestQuery->where('status', 'approved');
-                                   });
-                      });
-            })
-            ->count();
-
-        $countActiveInstructors = User::where("is_active", 1)
-            ->where("role", 0)
-            ->where(function($query) use ($geDepartment) {
-                $query->where("department_id", $geDepartment->id)
-                      ->orWhere("can_teach_ge", true);
-            })
-            ->count();
-
-        $countInactiveInstructors = User::where("is_active", 0)
-            ->where("role", 0)
-            ->where(function($query) use ($geDepartment) {
-                $query->where("department_id", $geDepartment->id)
-                      ->orWhere(function($subQuery) {
-                          $subQuery->whereHas('geSubjectRequests', function($requestQuery) {
-                              $requestQuery->where('status', 'approved');
-                          });
-                      });
-            })
-            ->count();
-
-        $countPendingInstructors = UnverifiedUser::where("department_id", $geDepartment->id)->count();
-
-        $countStudents = Student::whereHas('subjects', function($query) use ($geDepartment, $academicPeriodId) {
+        $countInstructors = User::where('role', 0)
+            ->where(function ($query) use ($geDepartment) {
                 $query->where('department_id', $geDepartment->id)
-                      ->where('academic_period_id', $academicPeriodId);
+                    ->orWhere('can_teach_ge', true)
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->where('is_active', false)
+                            ->whereHas('geSubjectRequests', function ($requestQuery) {
+                                $requestQuery->where('status', 'approved');
+                            });
+                    });
             })
-            ->where("is_deleted", false)
-            ->distinct()
-            ->count("students.id");
+            ->count();
 
-        $countCourses = Subject::where("department_id", $geDepartment->id)
-            ->where("is_deleted", false)
+        $countActiveInstructors = User::where('is_active', 1)
+            ->where('role', 0)
+            ->where(function ($query) use ($geDepartment) {
+                $query->where('department_id', $geDepartment->id)
+                    ->orWhere('can_teach_ge', true);
+            })
+            ->count();
+
+        $countInactiveInstructors = User::where('is_active', 0)
+            ->where('role', 0)
+            ->where(function ($query) use ($geDepartment) {
+                $query->where('department_id', $geDepartment->id)
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->whereHas('geSubjectRequests', function ($requestQuery) {
+                            $requestQuery->where('status', 'approved');
+                        });
+                    });
+            })
+            ->count();
+
+        $countPendingInstructors = UnverifiedUser::where('department_id', $geDepartment->id)->count();
+
+        $countStudents = Student::whereHas('subjects', function ($query) use ($geDepartment, $academicPeriodId) {
+            $query->where('department_id', $geDepartment->id)
+                ->where('academic_period_id', $academicPeriodId);
+        })
+            ->where('is_deleted', false)
+            ->distinct()
+            ->count('students.id');
+
+        $countCourses = Subject::where('department_id', $geDepartment->id)
+            ->where('is_deleted', false)
             ->where('academic_period_id', $academicPeriodId)
             ->distinct('subject_code')
             ->count();

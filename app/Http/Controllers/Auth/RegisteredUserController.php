@@ -23,6 +23,7 @@ class RegisteredUserController extends Controller
     {
         $departments = Department::all();
         $geDepartment = Department::where('department_code', 'GE')->first();
+
         return view('auth.register', compact('departments', 'geDepartment'));
     }
 
@@ -35,25 +36,25 @@ class RegisteredUserController extends Controller
     {
         // Validate the base email format first
         $request->validate([
-            'first_name'    => ['required', 'string', 'max:255'],
-            'middle_name'   => ['nullable', 'string', 'max:255'],
-            'last_name'     => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'string', 'regex:/^[^@]+$/', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'middle_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'regex:/^[^@]+$/', 'max:255'],
             'department_id' => ['required', 'exists:departments,id'],
-            'course_id'     => ['required', 'exists:courses,id'],
-            'password'      => [
+            'course_id' => ['required', 'exists:courses,id'],
+            'password' => [
                 'required',
                 'confirmed',
                 Password::min(8)
                     ->mixedCase()
                     ->letters()
                     ->numbers()
-                    ->symbols()
+                    ->symbols(),
             ],
         ]);
 
         // Append domain to email
-        $fullEmail = strtolower(trim($request->email)) . '@brokenshire.edu.ph';
+        $fullEmail = strtolower(trim($request->email)).'@brokenshire.edu.ph';
 
         // Check uniqueness of the full email in both unverified_users and users tables
         if (UnverifiedUser::where('email', $fullEmail)->exists()) {
@@ -66,13 +67,13 @@ class RegisteredUserController extends Controller
 
         // Store in unverified_users table
         $unverifiedUser = UnverifiedUser::create([
-            'first_name'    => $request->first_name,
-            'middle_name'   => $request->middle_name,
-            'last_name'     => $request->last_name,
-            'email'         => $fullEmail,
-            'password'      => Hash::make($request->password),
+            'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name' => $request->last_name,
+            'email' => $fullEmail,
+            'password' => Hash::make($request->password),
             'department_id' => $request->department_id,
-            'course_id'     => $request->course_id,
+            'course_id' => $request->course_id,
         ]);
 
         // Fire the Registered event to send verification email
@@ -83,15 +84,15 @@ class RegisteredUserController extends Controller
             // Mail failure must not prevent registration — user can resend later
             $emailSent = false;
             $msg = '[Acadex] Registration verification email failed'
-                . ' | user_id=' . $unverifiedUser->id
-                . ' | email=' . $unverifiedUser->email
-                . ' | exception=' . get_class($e)
-                . ' | error=' . $e->getMessage();
+                .' | user_id='.$unverifiedUser->id
+                .' | email='.$unverifiedUser->email
+                .' | exception='.get_class($e)
+                .' | error='.$e->getMessage();
             error_log($msg);
             Log::error('Registration verification email failed', [
-                'user_id'   => $unverifiedUser->id,
-                'email'     => $unverifiedUser->email,
-                'error'     => $e->getMessage(),
+                'user_id' => $unverifiedUser->id,
+                'email' => $unverifiedUser->email,
+                'error' => $e->getMessage(),
                 'exception' => get_class($e),
             ]);
         }

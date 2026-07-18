@@ -7,7 +7,7 @@ use App\Models\User;
 
 /**
  * Notification sent to GE Coordinator when a new GE assignment request is submitted.
- * 
+ *
  * Admin view: Full request details with IDs
  * User view: Friendly notification about new GE request
  */
@@ -45,7 +45,7 @@ class GERequestSubmitted extends BaseNotification
         $requestedByName = $this->requestedBy->full_name;
         $departmentName = $this->instructor->department?->department_name ?? 'Unknown';
         $courseName = $this->instructor->course?->course_code ?? 'Unknown';
-        
+
         return "[GE Request] {$requestedByName} (ID: {$this->requestedBy->id}, Chairperson) submitted a GE assignment request for {$instructorName} (ID: {$this->instructor->id}). Department: {$departmentName}, Course: {$courseName}";
     }
 
@@ -53,7 +53,7 @@ class GERequestSubmitted extends BaseNotification
     {
         $instructorName = $this->instructor->full_name;
         $requestedByName = $this->requestedBy->full_name;
-        
+
         return "{$requestedByName} requested GE teaching access for {$instructorName}";
     }
 

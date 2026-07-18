@@ -10,6 +10,6 @@ class Term extends Model
     use HasFactory;
 
     protected $fillable = [
-        'term_name', 'is_deleted', 'created_by', 'updated_by'
+        'term_name', 'is_deleted', 'created_by', 'updated_by',
     ];
 }
