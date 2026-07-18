@@ -57,6 +57,12 @@ class FinalGradeController extends Controller
                 ->orderBy('last_name')
                 ->orderBy('first_name')
                 ->get();
+            $studentIds = $students->pluck('id');
+
+            $finalGradeRecords = FinalGrade::where('subject_id', $subjectId)
+                ->whereIn('student_id', $studentIds)
+                ->get()
+                ->keyBy('student_id');
 
             $terms = ['prelim', 'midterm', 'prefinal', 'final'];
             $termGrades = [];
@@ -70,10 +76,7 @@ class FinalGradeController extends Controller
             }
 
             foreach ($students as $student) {
-                // Get final grade record for notes
-                $finalGradeRecord = FinalGrade::where('student_id', $student->id)
-                    ->where('subject_id', $subjectId)
-                    ->first();
+                $finalGradeRecord = $finalGradeRecords->get($student->id);
 
                 $row = [
                     'student' => $student,
