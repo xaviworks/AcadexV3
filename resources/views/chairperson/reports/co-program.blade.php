@@ -447,7 +447,7 @@
                                                 id="poMatrixExpandToggle"
                                                 data-ui="co-plo-expand-toggle"
                                                 data-default-label="Expand table"
-                                                data-expanded-label="Collapse table"
+                                                data-expanded-label="Exit expanded table view"
                                                 aria-pressed="false"
                                                 aria-label="Expand mapping table"
                                             >
@@ -487,6 +487,21 @@
                                                 </button>
                                             @endforeach
                                         </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end mb-3">
+                                        <button
+                                            type="submit"
+                                            class="btn btn-success rounded-pill px-4 shadow-sm"
+                                            id="poMatrixSaveTop"
+                                            data-ui="co-plo-save-top"
+                                            data-save-scope="mapping"
+                                            disabled
+                                            aria-disabled="true"
+                                            title="Make changes to enable saving."
+                                        >
+                                            <i class="bi bi-check2-circle me-1"></i>Save Mapping
+                                        </button>
                                     </div>
 
                                     <div class="table-responsive po-matrix-wrap" style="--po-matrix-outcome-count: {{ max(1, $visiblePloDefinitions->count()) }};" data-ui="co-plo-matrix-wrap">
@@ -656,4 +671,3 @@
 </template>
 
 @endsection
-

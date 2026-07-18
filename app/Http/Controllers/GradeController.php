@@ -143,7 +143,7 @@ class GradeController extends Controller
                 abort(403, 'Subject does not belong to the current academic period.');
             }
 
-            $students = $subject->studentsWithEnrollmentStatus()
+            $students = $subject->students()
                 ->where('students.is_deleted', false)
                 ->orderBy('students.last_name')
                 ->orderBy('students.first_name')

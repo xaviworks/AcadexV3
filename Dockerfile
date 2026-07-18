@@ -1,98 +1,154 @@
-FROM php:8.2-apache
+FROM php:8.2-apache AS php-base
 
-# Enable mod_rewrite and suppress ServerName warning
-RUN a2enmod rewrite && echo "ServerName localhost" >> /etc/apache2/apache2.conf
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Tune Apache prefork MPM for Railway (limited RAM container)
-RUN echo '<IfModule mpm_prefork_module>\n\
-    StartServers          3\n\
-    MinSpareServers       3\n\
-    MaxSpareServers       5\n\
-    MaxRequestWorkers    20\n\
-    MaxConnectionsPerChild 1000\n\
-</IfModule>' > /etc/apache2/mods-available/mpm_prefork.conf
+ENV APACHE_DOCUMENT_ROOT=/app/public \
+    PORT=8080 \
+    DB_CONNECTION=mysql \
+    DB_HOST=placeholder \
+    DB_DATABASE=placeholder \
+    SESSION_DRIVER=file \
+    CACHE_STORE=file \
+    LOG_CHANNEL=stderr \
+    LOG_LEVEL=info \
+    DEBUGBAR_ENABLED=false
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git curl zip unzip \
-    libpng-dev libjpeg-dev libfreetype6-dev \
-    libzip-dev libonig-dev libxml2-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mbstring xml bcmath gd zip opcache \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install PHP extensions, then remove build-only packages from the base image.
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libonig-dev \
+        libpng-dev \
+        libxml2-dev \
+        libzip-dev; \
+    docker-php-ext-configure gd --with-freetype --with-jpeg; \
+    docker-php-ext-install pdo_mysql mbstring xml bcmath gd zip opcache; \
+    docker-php-source delete; \
+    apt-get purge -y --auto-remove \
+        $PHPIZE_DEPS \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libonig-dev \
+        libpng-dev \
+        libxml2-dev \
+        libzip-dev; \
+    apt-get install -y --no-install-recommends \
+        libfreetype6 \
+        libjpeg62-turbo \
+        libonig5 \
+        libpng16-16 \
+        libxml2 \
+        libzip4; \
+    rm -rf /var/lib/apt/lists/*
 
-# PHP performance tuning (OPcache + memory)
-RUN echo 'opcache.enable=1\n\
-opcache.memory_consumption=128\n\
-opcache.interned_strings_buffer=16\n\
-opcache.max_accelerated_files=10000\n\
-opcache.validate_timestamps=0\n\
-opcache.save_comments=1\n\
-opcache.enable_cli=1' > /usr/local/etc/php/conf.d/opcache.ini \
-    && echo 'memory_limit=256M\n\
-upload_max_filesize=64M\n\
-post_max_size=64M\n\
-max_execution_time=60\n\
-realpath_cache_size=4096K\n\
-realpath_cache_ttl=600' > /usr/local/etc/php/conf.d/performance.ini
+# Enable Apache modules and configure Apache for Laravel/Railway at build time.
+RUN set -eux; \
+    a2enmod rewrite; \
+    printf '%s\n' 'ServerName localhost' >> /etc/apache2/apache2.conf; \
+    printf '%s\n' \
+        '<IfModule mpm_prefork_module>' \
+        '    StartServers          3' \
+        '    MinSpareServers       3' \
+        '    MaxSpareServers       5' \
+        '    MaxRequestWorkers    20' \
+        '    MaxConnectionsPerChild 1000' \
+        '</IfModule>' > /etc/apache2/mods-available/mpm_prefork.conf; \
+    rm -f /etc/apache2/mods-enabled/mpm_*; \
+    ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load; \
+    ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf; \
+    sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf; \
+    sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf; \
+    printf '%s\n' \
+        '<Directory /app/public>' \
+        '    AllowOverride All' \
+        '    Require all granted' \
+        '</Directory>' > /etc/apache2/conf-available/laravel.conf; \
+    a2enconf laravel; \
+    sed -ri -e 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf; \
+    sed -ri -e 's/:80/:${PORT}/g' /etc/apache2/sites-available/*.conf
 
-# Install Node.js 22
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Configure Apache to serve from /app/public
-ENV APACHE_DOCUMENT_ROOT=/app/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
-    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
-    && echo '<Directory /app/public>\n    AllowOverride All\n    Require all granted\n</Directory>' > /etc/apache2/conf-available/laravel.conf \
-    && a2enconf laravel
-
-# Set Railway port via Apache
-RUN sed -ri -e 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf \
-    && sed -ri -e 's/:80/:${PORT}/g' /etc/apache2/sites-available/*.conf
+# PHP performance tuning (OPcache + memory).
+RUN set -eux; \
+    printf '%s\n' \
+        'opcache.enable=1' \
+        'opcache.memory_consumption=128' \
+        'opcache.interned_strings_buffer=16' \
+        'opcache.max_accelerated_files=10000' \
+        'opcache.validate_timestamps=0' \
+        'opcache.save_comments=1' \
+        'opcache.enable_cli=1' > /usr/local/etc/php/conf.d/opcache.ini; \
+    printf '%s\n' \
+        'memory_limit=256M' \
+        'upload_max_filesize=64M' \
+        'post_max_size=64M' \
+        'max_execution_time=60' \
+        'realpath_cache_size=4096K' \
+        'realpath_cache_ttl=600' > /usr/local/etc/php/conf.d/performance.ini
 
 WORKDIR /app
 
-# Copy composer files first (Docker layer caching)
-COPY composer.json composer.lock ./
+FROM php-base AS vendor
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 ENV COMPOSER_ALLOW_SUPERUSER=1
-# Prevent SQLite fallback during build (no DB available at build time)
-ENV DB_CONNECTION=mysql
-ENV DB_HOST=placeholder
-ENV DB_DATABASE=placeholder
-# Use file-based sessions/cache to avoid DB queries on every request
-ENV SESSION_DRIVER=file
-ENV CACHE_STORE=file
-# Ensure debug tools never activate in production
-ENV DEBUGBAR_ENABLED=false
-RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction
 
-# Copy package files and install
-COPY package.json package-lock.json ./
-RUN npm ci
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends git unzip zip; \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy entire project
+COPY composer.json composer.lock ./
+RUN composer install --optimize-autoloader --no-dev --no-scripts --no-interaction --prefer-dist
+
 COPY . .
+RUN composer dump-autoload --optimize --no-scripts
 
-# Build frontend assets
+FROM node:22-bookworm-slim AS assets
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY . .
 RUN npm run build
 
-# Optimize autoloader and discover packages at build time
-RUN composer dump-autoload --optimize --no-scripts 2>/dev/null || true
+FROM php-base AS runtime
 
-# Setup Laravel storage directories
-RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache \
-    && chown -R www-data:www-data /app
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends gosu; \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy startup script
+COPY . .
+COPY --from=vendor /app/vendor ./vendor
+COPY --from=vendor /app/bootstrap/cache ./bootstrap/cache
+COPY --from=assets /app/public/build ./public/build
+
+RUN set -eux; \
+    mkdir -p \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/framework/cache/data \
+        storage/framework/testing \
+        storage/app/public \
+        storage/app/private \
+        storage/logs \
+        bootstrap/cache \
+        /var/lock/apache2 \
+        /var/log/apache2 \
+        /var/run/apache2; \
+    ln -sfn ../storage/app/public public/storage; \
+    chmod -R u=rwX,g=rX,o=rX /app; \
+    chown -R www-data:www-data storage bootstrap/cache /var/lock/apache2 /var/log/apache2 /var/run/apache2; \
+    chmod -R u=rwX,g=rwX,o=rX storage bootstrap/cache
+
 COPY start.sh /start.sh
-RUN chmod +x /start.sh
+RUN chmod 755 /start.sh
 
-EXPOSE ${PORT:-8080}
+EXPOSE 8080
 
 CMD ["/start.sh"]
