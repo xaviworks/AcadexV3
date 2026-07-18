@@ -13,7 +13,18 @@
                 
                 // For roles without a selected period, fall back to the latest/current period
                 if (!$activePeriod && in_array($user->role, [2, 3, 5])) { // Dean, Admin, VPAA
-                    $activePeriod = \App\Models\AcademicPeriod::orderBy('created_at', 'desc')->first();
+                    if ($isVpaa) {
+                        $activePeriod = \App\Models\AcademicPeriod::resolveCurrentByDate()
+                            ?? \App\Models\AcademicPeriod::where('is_deleted', false)
+                                ->orderByDesc('academic_year')
+                                ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
+                                ->first();
+                    } else {
+                        $activePeriod = \App\Models\AcademicPeriod::where('is_deleted', false)
+                            ->orderByDesc('academic_year')
+                            ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
+                            ->first();
+                    }
                 }
 
                 if ($showPeriodDropdown) {

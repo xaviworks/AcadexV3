@@ -10,15 +10,17 @@
             </h2>
             <p class="text-muted mb-0">
                 Select a department to view its subjects
-                @if($academicYear && $semester)
-                    <span class="ms-2 small">({{ $academicYear }} - {{ $semester }})</span>
-                @endif
             </p>
         </div>
     </div>
 
+    <x-breadcrumbs :items="[
+        ['label' => 'Dashboard', 'url' => route('dashboard')],
+        ['label' => 'Attainment Report']
+    ]" />
+
     @if(isset($departments) && count($departments))
-        <div class="row" id="department-selection">
+        <div class="row g-4 px-4 py-2" id="department-selection">
             @foreach($departments as $dept)
                 <div class="col-md-4">
                     <div

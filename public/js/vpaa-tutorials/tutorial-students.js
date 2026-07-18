@@ -18,15 +18,15 @@
         description: 'Learn how to browse students by department',
         steps: [
             {
-                target: '.breadcrumb',
-                title: 'Navigation',
-                content: 'You\'re in the Students section. Use the breadcrumb to navigate back to the dashboard.',
+                target: '.container-fluid h2.fw-bold, .container-fluid h1, h1.h3',
+                title: 'Students by Department',
+                content: 'This page is the department-selection view for student records. Start by reviewing the page title and instructions.',
                 position: 'bottom'
             },
             {
-                target: '.card.border-0.shadow-sm.rounded-4.mb-3',
+                target: '.container-fluid .text-muted.mb-0, .breadcrumb, nav[aria-label="breadcrumb"]',
                 title: 'Selection Instructions',
-                content: 'To view student records, first select a department from the cards below.',
+                content: 'Use these instructions and navigation cues to confirm you are selecting a department before viewing student records.',
                 position: 'bottom'
             },
             {
@@ -51,16 +51,16 @@
         description: 'Learn how to browse and filter student records',
         steps: [
             {
-                target: '.container h1, h1.text-2xl',
+                target: '.container-fluid h2.fw-bold, .container-fluid h1, h1.h3',
                 title: 'Students Overview',
                 content: 'This page displays students from the selected department. You can further filter by course.',
                 position: 'bottom'
             },
             {
-                target: 'a.btn-outline-secondary',
-                title: 'Back to Overview',
-                content: 'Click this button to return to the department selection page.',
-                position: 'left',
+                target: '.container-fluid .text-muted.mb-0, .breadcrumb, nav[aria-label="breadcrumb"]',
+                title: 'Page Context',
+                content: 'This section confirms your current view and helps you orient while reviewing filtered student data.',
+                position: 'bottom',
                 optional: true
             },
             {

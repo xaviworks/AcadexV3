@@ -14,20 +14,29 @@ class EnsureAcademicPeriodSet
         $user = Auth::user();
         $isInstructor = $user && $user->role === 0;
         $isGeCoordinator = $user && $user->role === 4;
-        $autoAssignLatestPeriod = $user && in_array($user->role, [2, 5], true);
+        $isDean = $user && $user->role === 2;
+        $isVpaa = $user && $user->role === 5;
 
         if (
             Auth::check() &&
-            $autoAssignLatestPeriod &&
+            ($isDean || $isVpaa) &&
             !session()->has('active_academic_period_id')
         ) {
-            $latestPeriod = AcademicPeriod::where('is_deleted', false)
-                ->orderByDesc('academic_year')
-                ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
-                ->first();
+            $periodToAssign = null;
 
-            if ($latestPeriod) {
-                session(['active_academic_period_id' => $latestPeriod->id]);
+            if ($isVpaa) {
+                $periodToAssign = AcademicPeriod::resolveCurrentByDate();
+            }
+
+            if (! $periodToAssign) {
+                $periodToAssign = AcademicPeriod::where('is_deleted', false)
+                    ->orderByDesc('academic_year')
+                    ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
+                    ->first();
+            }
+
+            if ($periodToAssign) {
+                session(['active_academic_period_id' => $periodToAssign->id]);
             }
         }
         

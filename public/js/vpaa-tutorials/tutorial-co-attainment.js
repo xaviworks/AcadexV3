@@ -78,28 +78,28 @@
         description: 'Learn how to read course outcome attainment data',
         steps: [
             {
-                target: '.card:has(.bi-list-check), .card.border-0.shadow-sm.rounded-4:first-of-type',
-                title: 'Course Outcomes Table',
-                content: 'This table lists all course outcomes (COs) defined for the selected subject. Each row shows a specific outcome with its details.',
+                target: '[data-page="instructor.course-outcome-results"], .card.border-0.shadow-sm.rounded-3, .main-results-container',
+                title: 'Course Outcome Results',
+                content: 'This page summarizes student attainment for the selected subject, with controls for display mode and period-based review.',
                 position: 'bottom'
             },
             {
-                target: '.table thead.table-success',
-                title: 'Table Headers',
-                content: 'The columns show: CO Code (identifier), Identifier, Description (what students should achieve), Academic Period, and Status.',
+                target: '#term-navigation-container, .compact-stepper, #displayTypeDropdown',
+                title: 'Period and View Controls',
+                content: 'Use these controls to switch between all periods or a specific period and change how attainment data is displayed.',
                 position: 'bottom'
             },
             {
-                target: '.table tbody tr:first-child',
-                title: 'Course Outcome Row',
-                content: 'Each row represents one course outcome. The CO Code uniquely identifies the outcome, while the Description explains what competency is being measured.',
+                target: '.table.co-table tbody tr:first-child, #print-area .table tbody tr:first-child, .table tbody tr:first-child',
+                title: 'Attainment Data Row',
+                content: 'Each row presents attainment metrics for a summary or target level, while each CO column shows the corresponding value for that outcome.',
                 position: 'bottom',
                 optional: true
             },
             {
-                target: '.badge.bg-success',
-                title: 'Status Badge',
-                content: 'The status indicates whether the course outcome is Active or Inactive. Active outcomes are currently being assessed.',
+                target: '#current-view.badge, .badge.bg-success',
+                title: 'Current View Badge',
+                content: 'This badge indicates the active period context (for example, All Periods or a specific period) used for the displayed results.',
                 position: 'left',
                 optional: true
             }

@@ -228,13 +228,19 @@ class VPAAController extends Controller
     }
 
     /**
-     * Resolve active academic period from session; for VPAA fallback to the latest available period.
+     * Resolve active academic period from session; for VPAA prefer date-based current period.
      */
     private function resolveActiveAcademicPeriodId(): ?int
     {
         $sessionPeriodId = session('active_academic_period_id');
         if ($sessionPeriodId && AcademicPeriod::where('id', $sessionPeriodId)->exists()) {
             return (int) $sessionPeriodId;
+        }
+
+        $currentPeriod = AcademicPeriod::resolveCurrentByDate();
+        if ($currentPeriod) {
+            session(['active_academic_period_id' => $currentPeriod->id]);
+            return (int) $currentPeriod->id;
         }
 
         $latestPeriod = AcademicPeriod::where('is_deleted', false)

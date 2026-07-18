@@ -41,6 +41,26 @@
     }
 
     /**
+     * Reuse loader query params (e.g., ?v=timestamp) for module cache busting.
+     */
+    function getScriptQuerySuffix() {
+        const scripts = document.querySelectorAll('script[src*="vpaa-tutorial.js"]');
+        for (const script of scripts) {
+            const src = script.getAttribute('src');
+            if (!src) {
+                continue;
+            }
+
+            const queryIndex = src.indexOf('?');
+            if (queryIndex !== -1) {
+                return src.substring(queryIndex);
+            }
+        }
+
+        return '';
+    }
+
+    /**
      * Load a script and return a promise
      */
     function loadScript(src) {
@@ -69,19 +89,24 @@
     function loadTutorialSystem() {
         const basePath = getScriptBasePath();
         const tutorialsPath = basePath + 'vpaa-tutorials/';
+        const querySuffix = getScriptQuerySuffix();
+
+        function withVersion(fileName) {
+            return tutorialsPath + fileName + querySuffix;
+        }
         
         // Load core first, then all tutorial modules
-        loadScript(tutorialsPath + 'tutorial-core.js')
+        loadScript(withVersion('tutorial-core.js'))
             .then(function() {
                 // Load all tutorial modules in parallel
                 return Promise.all([
-                    loadScript(tutorialsPath + 'tutorial-dashboard.js'),
-                    loadScript(tutorialsPath + 'tutorial-departments.js'),
-                    loadScript(tutorialsPath + 'tutorial-instructors.js'),
-                    loadScript(tutorialsPath + 'tutorial-students.js'),
-                    loadScript(tutorialsPath + 'tutorial-grades.js'),
-                    loadScript(tutorialsPath + 'tutorial-co-attainment.js'),
-                    loadScript(tutorialsPath + 'tutorial-reports.js')
+                    loadScript(withVersion('tutorial-dashboard.js')),
+                    loadScript(withVersion('tutorial-departments.js')),
+                    loadScript(withVersion('tutorial-instructors.js')),
+                    loadScript(withVersion('tutorial-students.js')),
+                    loadScript(withVersion('tutorial-grades.js')),
+                    loadScript(withVersion('tutorial-co-attainment.js')),
+                    loadScript(withVersion('tutorial-reports.js'))
                 ]);
             })
             .then(function() {

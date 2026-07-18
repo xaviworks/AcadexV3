@@ -9,12 +9,20 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class VpaaDashboardAcademicPeriodTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
+    }
 
     public function test_set_academic_period_uses_redirect_target_when_provided(): void
     {
@@ -144,5 +152,31 @@ class VpaaDashboardAcademicPeriodTest extends TestCase
         $response->assertJsonPath('instructorsCount', 2);
         $response->assertJsonPath('studentsCount', 1);
         $response->assertJsonPath('academicPrograms', 1);
+    }
+
+    public function test_vpaa_auto_selects_date_based_current_period_when_session_is_missing(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 4, 7, 9, 0, 0));
+
+        $vpaa = User::factory()->createOne([
+            'role' => 5,
+        ]);
+
+        $currentPeriod = AcademicPeriod::create([
+            'academic_year' => '2025-2026',
+            'semester' => '2nd',
+            'is_deleted' => false,
+        ]);
+
+        AcademicPeriod::create([
+            'academic_year' => '2026-2027',
+            'semester' => '1st',
+            'is_deleted' => false,
+        ]);
+
+        $response = $this->actingAs($vpaa)->get(route('vpaa.dashboard'));
+
+        $response->assertOk();
+        $response->assertSessionHas('active_academic_period_id', $currentPeriod->id);
     }
 }
