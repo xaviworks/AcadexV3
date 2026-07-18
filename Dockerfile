@@ -151,4 +151,5 @@ RUN chmod 755 /start.sh
 
 EXPOSE 8080
 
-CMD ["/start.sh"]
+ENTRYPOINT ["/start.sh"]
+CMD ["web"]
