@@ -21,13 +21,13 @@ class AnnouncementController extends Controller
     public function getActive()
     {
         $user = Auth::user();
-        
+
         $announcements = Announcement::current()
             ->forRole($user->role)
             ->orderByPriority('desc')
             ->orderByDesc('created_at')
             ->get()
-            ->filter(fn($announcement) => $announcement->shouldShowToUser($user))
+            ->filter(fn ($announcement) => $announcement->shouldShowToUser($user))
             ->values();
 
         return response()->json($announcements);
@@ -39,7 +39,7 @@ class AnnouncementController extends Controller
     public function markAsViewed(Announcement $announcement)
     {
         $announcement->markAsViewedBy(Auth::user());
-        
+
         return response()->json(['success' => true]);
     }
 
@@ -95,9 +95,9 @@ class AnnouncementController extends Controller
         ]);
 
         $validated['created_by'] = Auth::id();
-        
+
         // If target_roles is not in request or is empty, set to null (meaning "All Users")
-        if (!isset($validated['target_roles']) || empty($validated['target_roles'])) {
+        if (! isset($validated['target_roles']) || empty($validated['target_roles'])) {
             $validated['target_roles'] = null;
         } else {
             // Ensure target_roles are integers, not strings
@@ -141,9 +141,9 @@ class AnnouncementController extends Controller
             'is_dismissible' => 'boolean',
             'show_once' => 'boolean',
         ]);
-        
+
         // If target_roles is not in request or is empty, set to null (meaning "All Users")
-        if (!isset($validated['target_roles']) || empty($validated['target_roles'])) {
+        if (! isset($validated['target_roles']) || empty($validated['target_roles'])) {
             $validated['target_roles'] = null;
         } else {
             // Ensure target_roles are integers, not strings
@@ -176,7 +176,7 @@ class AnnouncementController extends Controller
     {
         Gate::authorize('admin');
 
-        $announcement->update(['is_active' => !$announcement->is_active]);
+        $announcement->update(['is_active' => ! $announcement->is_active]);
 
         return response()->json([
             'success' => true,

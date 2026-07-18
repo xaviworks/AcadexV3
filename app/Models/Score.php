@@ -11,7 +11,7 @@ class Score extends Model
 
     protected $fillable = [
         'activity_id', 'student_id', 'score',
-        'is_deleted', 'created_by', 'updated_by'
+        'is_deleted', 'created_by', 'updated_by',
     ];
 
     /**

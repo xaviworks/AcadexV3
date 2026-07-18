@@ -19,13 +19,13 @@ class DeanStudentsAcademicPeriodTest extends TestCase
     public function test_dean_students_view_only_shows_selected_academic_period(): void
     {
         $department = Department::create([
-            'department_code' => 'DPT-' . Str::upper(Str::random(4)),
+            'department_code' => 'DPT-'.Str::upper(Str::random(4)),
             'department_description' => 'Dean Department',
             'is_deleted' => false,
         ]);
 
         $course = Course::create([
-            'course_code' => 'CRS-' . Str::upper(Str::random(5)),
+            'course_code' => 'CRS-'.Str::upper(Str::random(5)),
             'course_description' => 'Dean Course',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -83,13 +83,13 @@ class DeanStudentsAcademicPeriodTest extends TestCase
     public function test_dean_instructors_view_only_shows_teaching_instructors_for_selected_period(): void
     {
         $department = Department::create([
-            'department_code' => 'DIN-' . Str::upper(Str::random(4)),
+            'department_code' => 'DIN-'.Str::upper(Str::random(4)),
             'department_description' => 'Dean Instructor Department',
             'is_deleted' => false,
         ]);
 
         $course = Course::create([
-            'course_code' => 'DIR-' . Str::upper(Str::random(5)),
+            'course_code' => 'DIR-'.Str::upper(Str::random(5)),
             'course_description' => 'Dean Instructor Course',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -127,7 +127,7 @@ class DeanStudentsAcademicPeriodTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'DCI-' . Str::upper(Str::random(6)),
+            'subject_code' => 'DCI-'.Str::upper(Str::random(6)),
             'subject_description' => 'Current Period Subject',
             'year_level' => 1,
             'department_id' => $department->id,
@@ -138,7 +138,7 @@ class DeanStudentsAcademicPeriodTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'DLI-' . Str::upper(Str::random(6)),
+            'subject_code' => 'DLI-'.Str::upper(Str::random(6)),
             'subject_description' => 'Legacy Period Subject',
             'year_level' => 1,
             'department_id' => $department->id,
@@ -160,13 +160,13 @@ class DeanStudentsAcademicPeriodTest extends TestCase
     public function test_dean_grades_lists_primary_assigned_instructor_for_selected_course(): void
     {
         $department = Department::create([
-            'department_code' => 'DGR-' . Str::upper(Str::random(4)),
+            'department_code' => 'DGR-'.Str::upper(Str::random(4)),
             'department_description' => 'Dean Grades Department',
             'is_deleted' => false,
         ]);
 
         $course = Course::create([
-            'course_code' => 'DGC-' . Str::upper(Str::random(5)),
+            'course_code' => 'DGC-'.Str::upper(Str::random(5)),
             'course_description' => 'Dean Grades Course',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -195,7 +195,7 @@ class DeanStudentsAcademicPeriodTest extends TestCase
         // This intentionally uses only subjects.instructor_id (no instructor_subject pivot)
         // to cover the Dean grades regression where primary instructors were omitted.
         Subject::create([
-            'subject_code' => 'DGS-' . Str::upper(Str::random(6)),
+            'subject_code' => 'DGS-'.Str::upper(Str::random(6)),
             'subject_description' => 'Dean Grades Subject',
             'year_level' => 1,
             'department_id' => $department->id,

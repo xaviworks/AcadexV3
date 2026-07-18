@@ -1,4 +1,19 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+set -e
+
+export PATH="$HOME/.volta/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:$PATH"
+
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    . "$HOME/.nvm/nvm.sh"
+fi
+
+if [ -s "$HOME/.asdf/asdf.sh" ]; then
+    . "$HOME/.asdf/asdf.sh"
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+    echo "husky - npm command not found. Install Node.js/npm or add npm to PATH." >&2
+    exit 127
+fi
 
 npm run lint:fix

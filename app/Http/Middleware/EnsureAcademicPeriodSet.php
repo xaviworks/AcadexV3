@@ -20,7 +20,7 @@ class EnsureAcademicPeriodSet
         if (
             Auth::check() &&
             ($isDean || $isVpaa) &&
-            !session()->has('active_academic_period_id')
+            ! session()->has('active_academic_period_id')
         ) {
             $periodToAssign = null;
 
@@ -39,13 +39,13 @@ class EnsureAcademicPeriodSet
                 session(['active_academic_period_id' => $periodToAssign->id]);
             }
         }
-        
+
         if (
             Auth::check() &&
             ($isInstructor || $isGeCoordinator) &&
-            !session()->has('active_academic_period_id') &&
-            !$request->is('select-academic-period') &&
-            !$request->is('set-academic-period')
+            ! session()->has('active_academic_period_id') &&
+            ! $request->is('select-academic-period') &&
+            ! $request->is('set-academic-period')
         ) {
             // Return JSON for AJAX requests to avoid returning HTML content that causes
             // fetch().json() to throw parse errors in the frontend.

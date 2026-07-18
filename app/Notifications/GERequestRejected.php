@@ -12,7 +12,7 @@ use Illuminate\Notifications\Messages\MailMessage;
  * Notification sent to Chairperson when a GE assignment request is rejected.
  * Supports both database and email channels.
  * Queued for async processing to prevent SMTP timeouts from blocking the UI.
- * 
+ *
  * Admin view: Full rejection details with IDs
  * User view: Friendly notification about GE request rejection
  */
@@ -29,6 +29,7 @@ class GERequestRejected extends BaseNotification implements ShouldQueue
      * The number of seconds to wait before retrying.
      */
     public int $backoff = 10;
+
     public function __construct(
         protected GESubjectRequest $request,
         protected User $instructor,
@@ -45,7 +46,7 @@ class GERequestRejected extends BaseNotification implements ShouldQueue
 
         // Check user preferences for email
         $prefs = $notifiable->notificationPreferences;
-        
+
         if ($prefs?->email_enabled ?? true) {
             $channels[] = 'mail';
         }
@@ -81,14 +82,14 @@ class GERequestRejected extends BaseNotification implements ShouldQueue
     {
         $instructorName = $this->instructor->full_name;
         $rejectorName = $this->rejectedBy?->full_name ?? 'GE Coordinator';
-        
+
         return "[GE Request Rejected] The GE assignment request for {$instructorName} (ID: {$this->instructor->id}) has been rejected by {$rejectorName}.";
     }
 
     public function getUserMessage(): string
     {
         $instructorName = $this->instructor->full_name;
-        
+
         return "Your GE assignment request for {$instructorName} has been rejected";
     }
 
@@ -123,13 +124,13 @@ class GERequestRejected extends BaseNotification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $instructorName = $this->instructor->full_name;
-        
+
         return (new MailMessage)
             ->subject('GE Assignment Request Update - Acadex')
             ->greeting("Hello {$notifiable->first_name},")
             ->line("Your GE teaching assignment request for **{$instructorName}** has been reviewed.")
-            ->line("Unfortunately, the request was not approved at this time.")
-            ->line("If you have questions about this decision, please contact the GE Coordinator.")
+            ->line('Unfortunately, the request was not approved at this time.')
+            ->line('If you have questions about this decision, please contact the GE Coordinator.')
             ->action('View Instructors', $this->getActionUrl())
             ->salutation('Best regards, The Acadex Team');
     }

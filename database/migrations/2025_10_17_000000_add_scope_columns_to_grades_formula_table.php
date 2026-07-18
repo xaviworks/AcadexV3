@@ -32,10 +32,10 @@ return new class extends Migration
         if (Schema::hasTable('grades_formula')) {
             DB::table('grades_formula')->update([
                 'scope_level' => DB::raw(
-                    "CASE " .
-                    "WHEN subject_id IS NOT NULL THEN 'subject' " .
-                    "WHEN course_id IS NOT NULL THEN 'course' " .
-                    "WHEN department_id IS NOT NULL THEN 'department' " .
+                    'CASE '.
+                    "WHEN subject_id IS NOT NULL THEN 'subject' ".
+                    "WHEN course_id IS NOT NULL THEN 'course' ".
+                    "WHEN department_id IS NOT NULL THEN 'department' ".
                     "ELSE 'global' END"
                 ),
             ]);

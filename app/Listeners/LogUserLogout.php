@@ -9,21 +9,19 @@ use Jenssegers\Agent\Agent;
 
 class LogUserLogout
 {
-    public function __construct(private readonly UserLogRecorder $recorder)
-    {
-    }
+    public function __construct(private readonly UserLogRecorder $recorder) {}
 
     public function handle(Logout $event)
     {
         $user = $event->user;
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
         $userId = $user->getAuthIdentifier();
 
-        $agent = new Agent();
+        $agent = new Agent;
         $browser = $agent->browser();
         $platform = $agent->platform();
         $device = $agent->isMobile() ? 'Mobile' : ($agent->isTablet() ? 'Tablet' : 'Desktop');

@@ -30,12 +30,12 @@ class CourseOutcomeAttainment extends Model
     {
         return $this->belongsTo(CourseOutcomes::class, 'course_outcome_id');
     }
-    
+
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
     }
-    
+
     public function academicPeriod(): BelongsTo
     {
         return $this->belongsTo(AcademicPeriod::class);

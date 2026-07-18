@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Gate;
 
 class FinalGradeController extends Controller
 {
-    use GradeCalculationTrait, ActivityManagementTrait;
+    use ActivityManagementTrait, GradeCalculationTrait;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -29,10 +30,12 @@ class FinalGradeController extends Controller
     {
         Gate::authorize('instructor');
 
-                $subjects = Subject::where(function($q) {
-                        $q->where('instructor_id', Auth::id())
-                            ->orWhereHas('instructors', function($q2) { $q2->where('instructor_id', Auth::id()); });
-                })->get();
+        $subjects = Subject::where(function ($q) {
+            $q->where('instructor_id', Auth::id())
+                ->orWhereHas('instructors', function ($q2) {
+                    $q2->where('instructor_id', Auth::id());
+                });
+        })->get();
         $finalData = [];
 
         if ($request->filled('subject_id')) {
@@ -81,9 +84,9 @@ class FinalGradeController extends Controller
                     'final_average' => null,
                     'remarks' => $finalGradeRecord->remarks ?? null,
                     'notes' => $finalGradeRecord->notes ?? '',
-                    'has_notes' => !empty($finalGradeRecord->notes ?? ''),
+                    'has_notes' => ! empty($finalGradeRecord->notes ?? ''),
                     'is_dropped' => isset($droppedStudentIds[$student->id]),
-                ];                
+                ];
 
                 // Always calculate final_average if all 4 term grades exist,
                 // even for dropped students (show their earned average).
@@ -98,7 +101,7 @@ class FinalGradeController extends Controller
                     $row['final_average'] = $avg;
 
                     // Only override remarks for non-dropped students
-                    if (!$row['is_dropped']) {
+                    if (! $row['is_dropped']) {
                         $row['remarks'] = $avg >= 75 ? 'Passed' : 'Failed';
                     }
                 }
@@ -120,9 +123,11 @@ class FinalGradeController extends Controller
         ]);
 
         $subject = Subject::where('id', $request->subject_id)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('instructor_id', Auth::id())
-                  ->orWhereHas('instructors', function($qr) { $qr->where('instructor_id', Auth::id()); });
+                    ->orWhereHas('instructors', function ($qr) {
+                        $qr->where('instructor_id', Auth::id());
+                    });
             })
             ->firstOrFail();
         $subjectId = $subject->id;
@@ -130,7 +135,7 @@ class FinalGradeController extends Controller
         $students = Student::whereHas('subjects', function ($q) use ($subjectId) {
             $q->where('subject_id', $subjectId)
                 ->where('student_subjects.is_deleted', false);
-            })
+        })
             ->where('is_deleted', false)
             ->get();
 
@@ -179,8 +184,8 @@ class FinalGradeController extends Controller
         }
 
         return redirect()->route('instructor.final-grades.index', ['subject_id' => $subjectId])
-        ->with('success', 'Final grades generated successfully.');
-    
+            ->with('success', 'Final grades generated successfully.');
+
     }
 
     public function termReport(Request $request)
@@ -194,9 +199,11 @@ class FinalGradeController extends Controller
 
         $subject = Subject::with('course')
             ->where('id', $validated['subject_id'])
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('instructor_id', Auth::id())
-                  ->orWhereHas('instructors', function($qr) { $qr->where('instructor_id', Auth::id()); });
+                    ->orWhereHas('instructors', function ($qr) {
+                        $qr->where('instructor_id', Auth::id());
+                    });
             })
             ->firstOrFail();
 

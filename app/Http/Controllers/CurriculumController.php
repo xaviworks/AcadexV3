@@ -23,10 +23,10 @@ class CurriculumController extends Controller
         Gate::authorize('admin-chair');
 
         $query = Curriculum::with('course')->orderByDesc('created_at');
-        
+
         // If user is chairperson, only show curriculums for their assigned course
         if (Gate::allows('chairperson')) {
-            $query->whereHas('course', function($q) {
+            $query->whereHas('course', function ($q) {
                 $q->where('id', Auth::user()->course_id);
             });
         }
@@ -55,7 +55,7 @@ class CurriculumController extends Controller
         Gate::authorize('admin-chair');
 
         $query = Course::where('is_deleted', false);
-        
+
         // If user is chairperson, only show their assigned course
         if (Gate::allows('chairperson')) {
             $query->where('id', Auth::user()->course_id);
@@ -145,34 +145,37 @@ class CurriculumController extends Controller
 
     public function selectSubjects()
     {
-        if (!(Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
+        if (! (Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
             abort(403);
         }
 
         // For Chairperson: show curriculums for their assigned course
         if (Auth::user()->role === 1) {
             $curriculums = Curriculum::with('course')
-                ->whereHas('course', function($q) {
+                ->whereHas('course', function ($q) {
                     $q->where('id', Auth::user()->course_id);
                 })
                 ->get();
+
             return view('chairperson.select-curriculum-subjects', compact('curriculums'));
         }
 
         // For GE Coordinator: show all curriculums (they can select any, but will filter to GE subjects)
         if (Auth::user()->role === 4) {
             $curriculums = Curriculum::with('course')->get();
+
             return view('chairperson.select-curriculum-subjects', compact('curriculums'));
         }
 
         // Default: show all curriculums (for admin/dean)
         $curriculums = Curriculum::with('course')->get();
+
         return view('chairperson.select-curriculum-subjects', compact('curriculums'));
     }
 
     public function fetchSubjects(Curriculum $curriculum)
     {
-        if (!(Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
+        if (! (Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
             abort(403);
         }
 
@@ -188,15 +191,15 @@ class CurriculumController extends Controller
 
         // Get current academic period for checking already imported subjects
         $academicPeriodId = session('active_academic_period_id');
-        
+
         // Get all already imported subject codes for this academic period
         $importedSubjectCodes = Subject::where('academic_period_id', $academicPeriodId)
             ->pluck('subject_code')
             ->toArray();
-        
-        $subjects = $curriculumSubjects->map(function($cs) use ($importedSubjectCodes) {
+
+        $subjects = $curriculumSubjects->map(function ($cs) use ($importedSubjectCodes) {
             // Mark as GE if subject code starts with 'GE', 'NSTP', 'PD', 'PE', 'RS' or contains 'General Education'
-            $isGE = stripos($cs->subject_code, 'GE') === 0 || 
+            $isGE = stripos($cs->subject_code, 'GE') === 0 ||
                     stripos($cs->subject_code, 'NSTP') === 0 ||
                     stripos($cs->subject_code, 'PD') === 0 ||
                     stripos($cs->subject_code, 'PE') === 0 ||
@@ -205,16 +208,16 @@ class CurriculumController extends Controller
                     stripos($cs->subject_description, 'Understanding the Self') !== false ||
                     stripos($cs->subject_description, 'Philippine History') !== false ||
                     stripos($cs->subject_description, 'Mathematics in the Modern World') !== false;
-            
+
             // For Chairperson: exclude GE, PD, PE, RS, NSTP subjects
             $isRestricted = false;
             if (Auth::user()->role === 1) {
                 $isRestricted = $isGE;
             }
-            
+
             // Check if subject is already imported
             $alreadyImported = in_array($cs->subject_code, $importedSubjectCodes);
-            
+
             return [
                 'id' => $cs->id,
                 'subject_code' => $cs->subject_code,
@@ -232,7 +235,7 @@ class CurriculumController extends Controller
 
     public function confirmSubjects(Request $request)
     {
-        if (!(Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
+        if (! (Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -257,7 +260,7 @@ class CurriculumController extends Controller
 
         foreach ($subjects as $curriculumSubject) {
             // For GE subjects, set the department to GE
-            $isGE = stripos($curriculumSubject->subject_code, 'GE') === 0 || 
+            $isGE = stripos($curriculumSubject->subject_code, 'GE') === 0 ||
                    stripos($curriculumSubject->subject_code, 'NSTP') === 0 ||
                    stripos($curriculumSubject->subject_code, 'PD') === 0 ||
                    stripos($curriculumSubject->subject_code, 'PE') === 0 ||
@@ -266,16 +269,16 @@ class CurriculumController extends Controller
                    stripos($curriculumSubject->subject_description, 'Understanding the Self') !== false ||
                    stripos($curriculumSubject->subject_description, 'Philippine History') !== false ||
                    stripos($curriculumSubject->subject_description, 'Mathematics in the Modern World') !== false;
-            
+
             // Use GE department for universal subjects, otherwise use the course's department
             // This ensures proper formula inheritance from the department level
-            $departmentId = $isGE ? 
-                Department::where('department_code', 'GE')->first()?->id : 
+            $departmentId = $isGE ?
+                Department::where('department_code', 'GE')->first()?->id :
                 $courseDepartmentId;
 
             Subject::firstOrCreate([
                 'subject_code' => $curriculumSubject->subject_code,
-                'academic_period_id' => session('active_academic_period_id')
+                'academic_period_id' => session('active_academic_period_id'),
             ], [
                 'subject_description' => $curriculumSubject->subject_description,
                 'year_level' => $curriculumSubject->year_level,

@@ -28,9 +28,9 @@ class LoginRequest extends FormRequest
     {
         $username = $this->input('email');
 
-        if (!str_contains($username, '@')) {
+        if (! str_contains($username, '@')) {
             $this->merge([
-                'email' => $username . '@brokenshire.edu.ph',
+                'email' => $username.'@brokenshire.edu.ph',
             ]);
         }
     }
@@ -59,8 +59,8 @@ class LoginRequest extends FormRequest
 
         // Check if user exists but is deactivated before attempting authentication
         $user = User::where('email', $this->input('email'))->first();
-        
-        if ($user && !$user->is_active) {
+
+        if ($user && ! $user->is_active) {
             // Check if the disable duration has expired
             if ($user->disabled_until && now()->greaterThanOrEqualTo($user->disabled_until)) {
                 // Auto re-enable the user since the disable period has passed
@@ -70,7 +70,7 @@ class LoginRequest extends FormRequest
             } else {
                 // Still disabled
                 RateLimiter::hit($this->throttleKey());
-                
+
                 throw ValidationException::withMessages([
                     'email' => 'Your account is on hold, please contact your coordinator or the admin.',
                 ]);
@@ -119,6 +119,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')) . '|' . $this->ip());
+        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
     }
 }

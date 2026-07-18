@@ -1,32 +1,38 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ChairpersonController;
-use App\Http\Controllers\Chairperson\AccountApprovalController;
-use App\Http\Controllers\InstructorController;
-use App\Http\Controllers\DeanController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AcademicPeriodController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\GradeController;
-use App\Http\Controllers\FinalGradeController;
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\CurriculumController;
-use App\Http\Controllers\StudentImportController;
-use App\Http\Controllers\CourseOutcomesController;
-use App\Http\Middleware\EnsureAcademicPeriodSet;
+use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Admin\DepartmentController as AdminDepartmentController;
+use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\UserSessionController as AdminUserSessionController;
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Chairperson\AccountApprovalController;
+use App\Http\Controllers\ChairpersonController;
 use App\Http\Controllers\CourseOutcomeAttainmentController;
 use App\Http\Controllers\CourseOutcomeReportsController;
+use App\Http\Controllers\CourseOutcomesController;
+use App\Http\Controllers\CurriculumController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeanController;
+use App\Http\Controllers\FaviconController;
+use App\Http\Controllers\FinalGradeController;
+use App\Http\Controllers\GradeController;
+use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\AnnouncementController;
-
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StudentImportController;
+use App\Http\Controllers\VPAA\GradesFormulaController as VpaaGradesFormulaController;
+use App\Http\Controllers\VPAA\StructureTemplateController as VpaaStructureTemplateController;
+use App\Http\Controllers\VPAA\StructureTemplateRequestController as VpaaStructureTemplateRequestController;
+use App\Http\Middleware\EnsureAcademicPeriodSet;
+use Illuminate\Http\Request;
 // Welcome Page
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\FaviconController;
+use Illuminate\Support\Facades\Route;
 
 // Serve favicon at both /favicon.ico and /assets/favicon.ico (keeps browser requests working when Herd/Valet proxies static files)
 Route::get('/favicon.ico', [FaviconController::class, 'show']);
@@ -54,9 +60,10 @@ Route::get('/', function () {
 // We check Auth::check() manually so the endpoint always returns a real 401 when the
 // session has been revoked, allowing the JS poller to detect and force a page redirect.
 Route::get('/session/check', function () {
-    if (!Auth::check()) {
+    if (! Auth::check()) {
         return response()->json(['authenticated' => false], 401);
     }
+
     return response()->json(['authenticated' => true, 'user_id' => Auth::id()]);
 })->name('session.check');
 
@@ -121,7 +128,7 @@ Route::middleware('auth')->group(function () {
         if (
             is_string($storedRedirect) &&
             str_starts_with($storedRedirect, '/') &&
-            !in_array($storedRedirect, ['/select-academic-period', '/set-academic-period'], true)
+            ! in_array($storedRedirect, ['/select-academic-period', '/set-academic-period'], true)
         ) {
             return redirect($storedRedirect);
         }
@@ -180,22 +187,22 @@ Route::prefix('chairperson')
         Route::post('/instructors/{id}/deactivate', [ChairpersonController::class, 'deactivateInstructor'])->name('deactivateInstructor');
         Route::post('/instructors/{id}/activate', [ChairpersonController::class, 'activateInstructor'])->name('activateInstructor');
         Route::post('/instructors/{id}/request-ge-assignment', [ChairpersonController::class, 'requestGEAssignment'])->name('requestGEAssignment');
-        
+
         Route::get('/assign-subjects', [ChairpersonController::class, 'assignSubjects'])->name('assign-subjects');
         Route::post('/assign-subjects/store', [ChairpersonController::class, 'storeAssignedSubject'])->name('storeAssignedSubject');
-        
+
         // Add this route for toggling assigned subjects
         Route::post('/assign-subjects/toggle', [ChairpersonController::class, 'toggleAssignedSubject'])->name('toggleAssignedSubject');
 
-    Route::get('/grades', [ChairpersonController::class, 'viewGrades'])->name('viewGrades');
-    Route::post('/grades/save-notes', [ChairpersonController::class, 'saveGradeNotes'])->name('saveGradeNotes');
+        Route::get('/grades', [ChairpersonController::class, 'viewGrades'])->name('viewGrades');
+        Route::post('/grades/save-notes', [ChairpersonController::class, 'saveGradeNotes'])->name('saveGradeNotes');
 
-    // Reports - Program-level CO compliance for chairperson's department
-    Route::get('/reports/co-program', [\App\Http\Controllers\ProgramReportsController::class, 'chairProgram'])->name('reports.co-program');
-    Route::post('/reports/co-program/plos', [\App\Http\Controllers\ProgramReportsController::class, 'saveChairProgramPlos'])
-        ->name('reports.co-program.plos.save');
-    Route::post('/reports/co-program/plos/mappings', [\App\Http\Controllers\ProgramReportsController::class, 'saveChairProgramPloMappings'])
-        ->name('reports.co-program.plos.mappings.save');
+        // Reports - Program-level CO compliance for chairperson's department
+        Route::get('/reports/co-program', [\App\Http\Controllers\ProgramReportsController::class, 'chairProgram'])->name('reports.co-program');
+        Route::post('/reports/co-program/plos', [\App\Http\Controllers\ProgramReportsController::class, 'saveChairProgramPlos'])
+            ->name('reports.co-program.plos.save');
+        Route::post('/reports/co-program/plos/mappings', [\App\Http\Controllers\ProgramReportsController::class, 'saveChairProgramPloMappings'])
+            ->name('reports.co-program.plos.mappings.save');
         // Reports - Per-course and Per-student CO compliance
         Route::get('/reports/co-course', [CourseOutcomeReportsController::class, 'chairCourse'])->name('reports.co-course');
         Route::get('/reports/co-student', [CourseOutcomeReportsController::class, 'chairStudent'])->name('reports.co-student');
@@ -215,7 +222,7 @@ Route::prefix('chairperson')
         Route::get('/approvals', [AccountApprovalController::class, 'index'])->name('accounts.index');
         Route::post('/approvals/{id}/approve', [AccountApprovalController::class, 'approve'])->name('accounts.approve');
         Route::post('/approvals/{id}/reject', [AccountApprovalController::class, 'reject'])->name('accounts.reject');
-        
+
         // Structure Template Requests
         Route::get('/structure-templates', [ChairpersonController::class, 'indexTemplateRequests'])->name('structureTemplates.index');
         Route::get('/structure-templates/create', [ChairpersonController::class, 'createTemplateRequest'])->name('structureTemplates.create');
@@ -244,21 +251,21 @@ Route::prefix('gecoordinator')
         Route::post('/instructors', [\App\Http\Controllers\GECoordinatorController::class, 'storeInstructor'])->name('storeInstructor');
         Route::post('/instructors/{id}/deactivate', [\App\Http\Controllers\GECoordinatorController::class, 'deactivateInstructor'])->name('deactivateInstructor');
         Route::post('/instructors/{id}/activate', [\App\Http\Controllers\GECoordinatorController::class, 'activateInstructor'])->name('activateInstructor');
-        
+
         // Subject Management Routes
         Route::get('/assign-subjects', [\App\Http\Controllers\GECoordinatorController::class, 'assignSubjects'])->name('assign-subjects');
-        
+
         // Handle assigning instructors (POST for new assignments, DELETE for unassigning)
         Route::post('/subjects/assign', [\App\Http\Controllers\GECoordinatorController::class, 'toggleAssignedSubject'])->name('assignInstructor');
         Route::delete('/subjects/unassign', [\App\Http\Controllers\GECoordinatorController::class, 'toggleAssignedSubject'])->name('unassignInstructor');
-        
+
         // Get instructors for a subject
         Route::get('/subjects/{subject}/instructors', [\App\Http\Controllers\GECoordinatorController::class, 'getSubjectInstructors'])
             ->name('getSubjectInstructors');
-        
+
         Route::get('/students-by-year', [\App\Http\Controllers\GECoordinatorController::class, 'viewStudentsPerYear'])->name('studentsByYear');
         Route::get('/grades', [\App\Http\Controllers\GECoordinatorController::class, 'viewGrades'])->name('viewGrades');
-        
+
         // Course Outcomes - GE Coordinator has same access as Chairperson
         Route::resource('course_outcomes', CourseOutcomesController::class);
         Route::patch('/course_outcomes/{courseOutcome}/description', [CourseOutcomesController::class, 'updateDescription'])
@@ -269,21 +276,21 @@ Route::prefix('gecoordinator')
             ->name('course_outcomes.validate_password');
         // AJAX endpoint for course outcomes by subject and term (use GradeController)
         Route::get('/course-outcomes', [GradeController::class, 'ajaxCourseOutcomes'])->name('course-outcomes.ajax');
-        
+
         // Account Approval Routes
         Route::get('/approvals', [\App\Http\Controllers\GECoordinator\AccountApprovalController::class, 'index'])->name('accounts.index');
         Route::post('/approvals/{id}/approve', [\App\Http\Controllers\GECoordinator\AccountApprovalController::class, 'approve'])->name('accounts.approve');
         Route::post('/approvals/{id}/reject', [\App\Http\Controllers\GECoordinator\AccountApprovalController::class, 'reject'])->name('accounts.reject');
-        
+
         // GE Assignment Request Routes
         Route::post('/ge-requests/{id}/approve', [\App\Http\Controllers\GECoordinatorController::class, 'approveGERequest'])->name('geRequests.approve');
         Route::post('/ge-requests/{id}/reject', [\App\Http\Controllers\GECoordinatorController::class, 'rejectGERequest'])->name('geRequests.reject');
-        
+
         Route::get('/manage-schedule', [\App\Http\Controllers\GECoordinatorController::class, 'manageSchedule'])->name('manage-schedule');
 
         // Reports Route
         Route::get('/reports', [\App\Http\Controllers\GECoordinatorController::class, 'reports'])->name('reports');
-        
+
         // CO Reports
         Route::get('/reports/co-student', [\App\Http\Controllers\CourseOutcomeReportsController::class, 'geCoordinatorStudent'])
             ->name('reports.co-student');
@@ -354,15 +361,15 @@ Route::prefix('instructor')
         Route::patch('/course_outcomes/{courseOutcome}/description', [CourseOutcomesController::class, 'updateDescription'])
             ->name('course_outcomes.update_description');
         // AJAX endpoint for course outcomes by subject and term (use GradeController)
-        Route::get('/course-outcomes', [GradeController::class, 'ajaxCourseOutcomes'])  ->name('course-outcomes.ajax');
+        Route::get('/course-outcomes', [GradeController::class, 'ajaxCourseOutcomes'])->name('course-outcomes.ajax');
 
         // Course Outcome Attainments
         Route::get('/course-outcome-attainments', [CourseOutcomeAttainmentController::class,    'index'])->name('course-outcome-attainments.index');
         Route::get('/course-outcome-attainments/subject/{subject}', [CourseOutcomeAttainmentController::class, 'subject'])->name('course-outcome-attainments.subject');
         Route::put('/course-outcome-attainments/subject/{subject}/target-levels', [CourseOutcomeAttainmentController::class, 'updateTargetLevels'])->name('course-outcome-attainments.target-levels.update');
         Route::post('/course-outcome-attainments', [CourseOutcomeAttainmentController::class,   'store'])->name('course-outcome-attainments.store');
-        Route::get('/course-outcome-attainments/{id}',  [CourseOutcomeAttainmentController::class, 'show'])->name('course-outcome-attainments.show');
-        Route::put('/course-outcome-attainments/{id}',  [CourseOutcomeAttainmentController::class, 'update'])->name('course-outcome-attainments. update');
+        Route::get('/course-outcome-attainments/{id}', [CourseOutcomeAttainmentController::class, 'show'])->name('course-outcome-attainments.show');
+        Route::put('/course-outcome-attainments/{id}', [CourseOutcomeAttainmentController::class, 'update'])->name('course-outcome-attainments. update');
         Route::delete('/course-outcome-attainments/{id}', [CourseOutcomeAttainmentController::class, 'destroy'])->name('course-outcome-attainments.destroy');
     });
 
@@ -373,7 +380,7 @@ Route::prefix('dean')->middleware(['auth', 'academic.period.set'])->name('dean.'
     Route::get('/grades', [DeanController::class, 'viewGrades'])->name('grades');
     Route::get('/instructor/grades/partial', [GradeController::class, 'partial'])->name('instructor.grades.partial');
     Route::get('/dean/students', [DeanController::class, 'viewStudents'])->name('dean.students');
-    
+
     // CO Reports - Dean sees their department's data
     Route::get('/reports/co-program', [\App\Http\Controllers\ProgramReportsController::class, 'deanProgram'])->name('reports.co-program');
     Route::get('/reports/co-course', [\App\Http\Controllers\CourseOutcomeReportsController::class, 'deanCourse'])->name('reports.co-course');
@@ -383,70 +390,44 @@ Route::prefix('dean')->middleware(['auth', 'academic.period.set'])->name('dean.'
 // Admin Routes
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     // Department CRUD
-    Route::get('/departments', [AdminController::class, 'departments'])->name('departments');
-    Route::get('/departments/create', [AdminController::class, 'createDepartment'])->name('createDepartment');
-    Route::post('/departments/store', [AdminController::class, 'storeDepartment'])->name('storeDepartment');
-    Route::put('/departments/{department}', [AdminController::class, 'updateDepartment'])->name('updateDepartment');
-    Route::delete('/departments/{department}', [AdminController::class, 'destroyDepartment'])->name('destroyDepartment');
-    Route::post('/departments/validate-password', [AdminController::class, 'validateDepartmentPassword'])->name('departments.validatePassword');
+    Route::get('/departments', [AdminDepartmentController::class, 'index'])->name('departments');
+    Route::get('/departments/create', [AdminDepartmentController::class, 'create'])->name('createDepartment');
+    Route::post('/departments/store', [AdminDepartmentController::class, 'store'])->name('storeDepartment');
+    Route::put('/departments/{department}', [AdminDepartmentController::class, 'update'])->name('updateDepartment');
+    Route::delete('/departments/{department}', [AdminDepartmentController::class, 'destroy'])->name('destroyDepartment');
+    Route::post('/departments/validate-password', [AdminDepartmentController::class, 'validatePassword'])->name('departments.validatePassword');
 
-    Route::get('/courses', [AdminController::class, 'courses'])->name('courses');
-    Route::get('/courses/create', [AdminController::class, 'createCourse'])->name('createCourse');
-    Route::post('/courses/store', [AdminController::class, 'storeCourse'])->name('storeCourse');
-    Route::put('/courses/{course}', [AdminController::class, 'updateCourse'])->name('updateCourse');
-    Route::delete('/courses/{course}', [AdminController::class, 'destroyCourse'])->name('destroyCourse');
+    Route::get('/courses', [AdminCourseController::class, 'index'])->name('courses');
+    Route::get('/courses/create', [AdminCourseController::class, 'create'])->name('createCourse');
+    Route::post('/courses/store', [AdminCourseController::class, 'store'])->name('storeCourse');
+    Route::put('/courses/{course}', [AdminCourseController::class, 'update'])->name('updateCourse');
+    Route::delete('/courses/{course}', [AdminCourseController::class, 'destroy'])->name('destroyCourse');
 
-    Route::get('/subjects', [AdminController::class, 'subjects'])->name('subjects');
-    Route::get('/subjects/create', [AdminController::class, 'createSubject'])->name('createSubject');
-    Route::post('/subjects/store', [AdminController::class, 'storeSubject'])->name('storeSubject');
-    Route::put('/subjects/{subject}', [AdminController::class, 'updateSubject'])->name('updateSubject');
-    Route::delete('/subjects/{subject}', [AdminController::class, 'destroySubject'])->name('destroySubject');
+    Route::get('/subjects', [AdminSubjectController::class, 'index'])->name('subjects');
+    Route::get('/subjects/create', [AdminSubjectController::class, 'create'])->name('createSubject');
+    Route::post('/subjects/store', [AdminSubjectController::class, 'store'])->name('storeSubject');
+    Route::put('/subjects/{subject}', [AdminSubjectController::class, 'update'])->name('updateSubject');
+    Route::delete('/subjects/{subject}', [AdminSubjectController::class, 'destroy'])->name('destroySubject');
 
     Route::get('/academic-periods', [AcademicPeriodController::class, 'index'])->name('academicPeriods');
     Route::post('/academic-periods/generate', [AcademicPeriodController::class, 'generate'])->name('academicPeriods.generate');
 
-    Route::get('/grades-formula', [AdminController::class, 'gradesFormula'])->name('gradesFormula');
-    Route::get('/grades-formula/default', [AdminController::class, 'gradesFormulaDefault'])->name('gradesFormula.default');
-    Route::get('/grades-formula/department/{department}', [AdminController::class, 'gradesFormulaDepartment'])->name('gradesFormula.department');
-    Route::get('/grades-formula/department/{department}/edit', [AdminController::class, 'gradesFormulaEditDepartment'])->name('gradesFormula.edit.department');
-    // REMOVED: Route::post('/grades-formula/department/bulk-apply') - Departments tab deprecated
-    Route::post('/grades-formula/department/{department}/apply-template', [AdminController::class, 'applyDepartmentTemplate'])->name('gradesFormula.department.applyTemplate');
-    Route::get('/grades-formula/department/{department}/course/{course}', [AdminController::class, 'gradesFormulaCourse'])->name('gradesFormula.course');
-    Route::get('/grades-formula/department/{department}/course/{course}/edit', [AdminController::class, 'gradesFormulaEditCourse'])->name('gradesFormula.edit.course');
-    Route::get('/grades-formula/subject/{subject}', [AdminController::class, 'gradesFormulaSubject'])->name('gradesFormula.subject');
-    Route::get('/grades-formula/subject/{subject}/edit', [AdminController::class, 'gradesFormulaEditSubject'])->name('gradesFormula.edit.subject');
-    Route::post('/grades-formula/subject/{subject}/apply', [AdminController::class, 'applySubjectFormula'])->name('gradesFormula.subject.apply');
-    Route::delete('/grades-formula/subject/{subject}/custom', [AdminController::class, 'removeSubjectFormula'])->name('gradesFormula.subject.remove');
-    Route::post('/grades-formula/store', [AdminController::class, 'storeGradesFormula'])->name('gradesFormula.store');
-    Route::put('/grades-formula/{formula}', [AdminController::class, 'updateGradesFormula'])->name('gradesFormula.update');
-    Route::delete('/grades-formula/{formula}', [AdminController::class, 'destroyGlobalFormula'])->name('gradesFormula.destroy');
-    Route::get('/grades-formula/{formula}/edit', [AdminController::class, 'editGlobalFormula'])->name('gradesFormula.edit');
-    Route::post('/grades-formula/structure-template/store', [AdminController::class, 'storeStructureTemplate'])->name('gradesFormula.structureTemplate.store');
-    Route::get('/grades-formula/structure-template/{template}/edit', [AdminController::class, 'editStructureTemplate'])->name('gradesFormula.structureTemplate.edit');
-    Route::put('/grades-formula/structure-template/{template}', [AdminController::class, 'updateStructureTemplate'])->name('gradesFormula.structureTemplate.update');
-    Route::delete('/grades-formula/structure-template/{template}', [AdminController::class, 'destroyStructureTemplate'])->name('gradesFormula.structureTemplate.destroy');
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users');
+    Route::post('/users/confirm-password', [AdminUserController::class, 'confirmCreationPassword'])->name('confirmUserCreationWithPassword');
+    Route::post('/users/store-verified-user', [AdminUserController::class, 'store'])->name('storeVerifiedUser');
 
-    // Structure Template Requests (from chairpersons)
-    Route::get('/structure-template-requests', [AdminController::class, 'indexStructureTemplateRequests'])->name('structureTemplateRequests.index');
-    Route::get('/structure-template-requests/{templateRequest}', [AdminController::class, 'showStructureTemplateRequest'])->name('structureTemplateRequests.show');
-    Route::post('/structure-template-requests/{templateRequest}/approve', [AdminController::class, 'approveStructureTemplateRequest'])->name('structureTemplateRequests.approve');
-    Route::post('/structure-template-requests/{templateRequest}/reject', [AdminController::class, 'rejectStructureTemplateRequest'])->name('structureTemplateRequests.reject');
-
-    Route::get('/users', [AdminController::class, 'viewUsers'])->name('users');
-    Route::post('/users/confirm-password', [AdminController::class, 'adminConfirmUserCreationWithPassword'])->name('confirmUserCreationWithPassword');
-    Route::post('/users/store-verified-user', [AdminController::class, 'storeUser'])->name('storeVerifiedUser');
-    
     // Session Management - Force Logout and Disable
-    Route::post('/users/{user}/force-logout', [AdminController::class, 'forceLogoutUser'])->name('users.forceLogout');
-    Route::post('/users/{user}/disable', [AdminController::class, 'disableUser'])->name('users.disable');
-    Route::post('/users/{user}/enable', [AdminController::class, 'enableUser'])->name('users.enable');
-    Route::get('/users/{user}/session-count', [AdminController::class, 'getUserSessionCount'])->name('users.sessionCount');
+    Route::post('/users/{user}/force-logout', [AdminUserSessionController::class, 'forceLogout'])->name('users.forceLogout');
+    Route::post('/users/{user}/disable', [AdminUserController::class, 'disable'])->name('users.disable');
+    Route::post('/users/{user}/enable', [AdminUserController::class, 'enable'])->name('users.enable');
+    Route::get('/users/{user}/session-count', [AdminUserSessionController::class, 'countForUser'])->name('users.sessionCount');
 
     // Session Management Routes
-    Route::get('/sessions', [AdminController::class, 'sessions'])->name('sessions');
-    Route::post('/sessions/revoke', [AdminController::class, 'revokeSession'])->name('sessions.revoke');
-    Route::post('/sessions/reset-2fa', [AdminController::class, 'reset2FA'])->name('sessions.reset2fa');
-    Route::post('/sessions/revoke-all', [AdminController::class, 'revokeAllSessions'])->name('sessions.revokeAll');
+    Route::get('/sessions', [AdminUserSessionController::class, 'sessions'])->name('sessions');
+    Route::post('/sessions/revoke', [AdminUserSessionController::class, 'revokeSession'])->name('sessions.revoke');
+    Route::post('/sessions/revoke-user', [AdminUserSessionController::class, 'revokeUserSessions'])->name('sessions.revokeUser');
+    Route::post('/sessions/reset-2fa', [AdminUserSessionController::class, 'reset2FA'])->name('sessions.reset2fa');
+    Route::post('/sessions/revoke-all', [AdminUserSessionController::class, 'revokeAllSessions'])->name('sessions.revokeAll');
 
     // Disaster Recovery Routes (simplified & user-friendly)
     Route::prefix('disaster-recovery')->name('disaster-recovery.')->group(function () {
@@ -490,8 +471,8 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
 });
 
 // VPAA Routes
-use App\Http\Controllers\VPAAController as VPAAController;
 use App\Http\Controllers\ProgramReportsController;
+use App\Http\Controllers\VPAAController;
 
 Route::prefix('vpaa')
     ->middleware(['auth', 'academic.period.set'])
@@ -511,25 +492,58 @@ Route::prefix('vpaa')
         // Dashboard
         Route::get('/dashboard', [VPAAController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/poll', [VPAAController::class, 'pollData'])->name('dashboard.poll');
-        
+
         // Departments
         Route::get('/departments', [VPAAController::class, 'viewDepartments'])->name('departments');
         Route::post('/departments', [VPAAController::class, 'storeDepartment'])->name('departments.store');
         Route::put('/departments/{department}', [VPAAController::class, 'updateDepartment'])->name('departments.update');
         Route::delete('/departments/{department}', [VPAAController::class, 'destroyDepartment'])->name('departments.destroy');
-        
+
         // Instructors
         Route::get('/instructors', [VPAAController::class, 'viewInstructors'])->name('instructors');
         Route::get('/instructors/{instructor}/edit', [VPAAController::class, 'editInstructor'])->name('instructors.edit');
         Route::put('/instructors/{instructor}', [VPAAController::class, 'updateInstructor'])->name('instructors.update');
         // Department-specific instructor view - this should come after the edit routes to avoid conflicts
         Route::get('/instructors/department/{departmentId}', [VPAAController::class, 'viewInstructors'])->name('instructors.department');
-        
+
         // Students
         Route::get('/students', [VPAAController::class, 'viewStudents'])->name('students');
-        
+
         // Grades
         Route::get('/grades', [VPAAController::class, 'viewGrades'])->name('grades');
+
+        Route::prefix('grading-configuration')
+            ->name('gradingConfiguration.')
+            ->group(function () {
+                Route::get('/', [VpaaGradesFormulaController::class, 'index'])->name('index');
+                Route::get('/default', [VpaaGradesFormulaController::class, 'showDefault'])->name('default');
+
+                Route::get('/departments/{department}', [VpaaGradesFormulaController::class, 'showDepartment'])->name('departments.show');
+                Route::get('/departments/{department}/edit', [VpaaGradesFormulaController::class, 'editDepartment'])->name('departments.edit');
+                Route::post('/departments/{department}/apply-template', [VpaaGradesFormulaController::class, 'applyDepartmentTemplate'])->name('departments.applyTemplate');
+                Route::get('/departments/{department}/courses/{course}', [VpaaGradesFormulaController::class, 'showCourse'])->name('courses.show');
+                Route::get('/departments/{department}/courses/{course}/edit', [VpaaGradesFormulaController::class, 'editCourse'])->name('courses.edit');
+
+                Route::get('/subjects/{subject}', [VpaaGradesFormulaController::class, 'showSubject'])->name('subjects.show');
+                Route::get('/subjects/{subject}/edit', [VpaaGradesFormulaController::class, 'editSubject'])->name('subjects.edit');
+                Route::post('/subjects/{subject}/apply', [VpaaGradesFormulaController::class, 'applySubjectFormula'])->name('subjects.apply');
+                Route::delete('/subjects/{subject}/custom', [VpaaGradesFormulaController::class, 'removeSubjectFormula'])->name('subjects.removeCustom');
+
+                Route::post('/formulas', [VpaaGradesFormulaController::class, 'store'])->name('formulas.store');
+                Route::get('/formulas/{formula}/edit', [VpaaGradesFormulaController::class, 'edit'])->name('formulas.edit');
+                Route::put('/formulas/{formula}', [VpaaGradesFormulaController::class, 'update'])->name('formulas.update');
+                Route::delete('/formulas/{formula}', [VpaaGradesFormulaController::class, 'destroy'])->name('formulas.destroy');
+
+                Route::post('/structure-templates', [VpaaStructureTemplateController::class, 'store'])->name('structureTemplates.store');
+                Route::get('/structure-templates/{template}/edit', [VpaaStructureTemplateController::class, 'edit'])->name('structureTemplates.edit');
+                Route::put('/structure-templates/{template}', [VpaaStructureTemplateController::class, 'update'])->name('structureTemplates.update');
+                Route::delete('/structure-templates/{template}', [VpaaStructureTemplateController::class, 'destroy'])->name('structureTemplates.destroy');
+
+                Route::get('/template-requests', [VpaaStructureTemplateRequestController::class, 'index'])->name('templateRequests.index');
+                Route::get('/template-requests/{templateRequest}', [VpaaStructureTemplateRequestController::class, 'show'])->name('templateRequests.show');
+                Route::post('/template-requests/{templateRequest}/approve', [VpaaStructureTemplateRequestController::class, 'approve'])->name('templateRequests.approve');
+                Route::post('/template-requests/{templateRequest}/reject', [VpaaStructureTemplateRequestController::class, 'reject'])->name('templateRequests.reject');
+            });
     });
 
 // Add a fallback redirect for VPAA dashboard

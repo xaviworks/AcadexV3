@@ -24,5 +24,4 @@ class DatabaseSeeder extends Seeder
             AnnouncementTemplateSeeder::class,
         ]);
     }
-    
 }

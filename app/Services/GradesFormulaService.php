@@ -30,8 +30,7 @@ class GradesFormulaService
         ?int $departmentId = null,
         ?string $semester = null,
         ?int $academicPeriodId = null
-    ): array
-    {
+    ): array {
         $academicPeriodId = $academicPeriodId ?? session('active_academic_period_id');
         $academicPeriod = self::getAcademicPeriod($academicPeriodId);
         $semester = $semester ?? $academicPeriod?->semester;
@@ -121,6 +120,7 @@ class GradesFormulaService
             || ! isset(self::$cache[$cacheKey]['meta']['relative_weights'])
             || ! isset(self::$cache[$cacheKey]['meta']['weight_details'][0]['relative_weight_percent'])) {
             unset(self::$cache[$cacheKey]);
+
             return self::getSettings($subjectId, $courseId, $departmentId, $semester, $academicPeriodId);
         }
 
@@ -136,8 +136,7 @@ class GradesFormulaService
         ?int $departmentId = null,
         ?string $semester = null,
         ?int $academicPeriodId = null
-    ): array
-    {
+    ): array {
         $settings = self::getSettings($subjectId, $courseId, $departmentId, $semester, $academicPeriodId);
 
         if (isset($settings['structure'])) {
@@ -164,8 +163,7 @@ class GradesFormulaService
         ?int $departmentId,
         ?string $semester = null,
         ?int $academicPeriodId = null
-    ): array
-    {
+    ): array {
         $resolvedSubject = null;
         $resolvedCourse = null;
         $resolvedDepartment = null;

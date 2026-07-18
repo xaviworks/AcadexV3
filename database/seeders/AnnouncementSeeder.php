@@ -14,9 +14,10 @@ class AnnouncementSeeder extends Seeder
     public function run(): void
     {
         $admin = User::where('role', 3)->first();
-        
-        if (!$admin) {
+
+        if (! $admin) {
             $this->command->warn('No admin user found. Skipping announcement seeding.');
+
             return;
         }
 

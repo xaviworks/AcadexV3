@@ -46,9 +46,9 @@ class FinalGrade extends Model
     {
         return $query->where('is_deleted', false);
     }
+
     public function academicPeriod()
     {
         return $this->belongsTo(AcademicPeriod::class);
     }
-
 }

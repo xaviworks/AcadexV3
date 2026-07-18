@@ -2,10 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         if (Schema::getConnection()->getDriverName() === 'sqlite') {
@@ -24,7 +25,7 @@ return new class extends Migration {
             });
         }
         // Add course_outcome_id column if it does not exist
-        if (!Schema::hasColumn('course_outcome_attainments', 'course_outcome_id')) {
+        if (! Schema::hasColumn('course_outcome_attainments', 'course_outcome_id')) {
             Schema::table('course_outcome_attainments', function (Blueprint $table) {
                 $table->unsignedBigInteger('course_outcome_id')->after('subject_id');
             });
@@ -37,7 +38,7 @@ return new class extends Migration {
             return;
         }
         // Add co_id column back if needed
-        if (!Schema::hasColumn('course_outcome_attainments', 'co_id')) {
+        if (! Schema::hasColumn('course_outcome_attainments', 'co_id')) {
             Schema::table('course_outcome_attainments', function (Blueprint $table) {
                 $table->unsignedBigInteger('co_id')->after('term');
             });

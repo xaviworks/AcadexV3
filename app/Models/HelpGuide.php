@@ -50,10 +50,15 @@ class HelpGuide extends Model
      * Role constants for reference
      */
     public const ROLE_INSTRUCTOR = 0;
+
     public const ROLE_CHAIRPERSON = 1;
+
     public const ROLE_DEAN = 2;
+
     public const ROLE_ADMIN = 3;
+
     public const ROLE_GE_COORDINATOR = 4;
+
     public const ROLE_VPAA = 5;
 
     /**
@@ -134,13 +139,13 @@ class HelpGuide extends Model
     {
         $roles = self::availableRoles();
         $labels = [];
-        
+
         foreach ($this->visible_roles ?? [] as $roleId) {
             if (isset($roles[$roleId])) {
                 $labels[] = $roles[$roleId];
             }
         }
-        
+
         return $labels;
     }
 
@@ -149,7 +154,7 @@ class HelpGuide extends Model
      */
     public function hasAttachment(): bool
     {
-        return !empty($this->attachment_path) || $this->attachments()->exists();
+        return ! empty($this->attachment_path) || $this->attachments()->exists();
     }
 
     /**
@@ -173,7 +178,7 @@ class HelpGuide extends Model
      */
     public function getAttachmentUrlAttribute(): ?string
     {
-        if (!$this->hasAttachment()) {
+        if (! $this->hasAttachment()) {
             return null;
         }
 
@@ -191,9 +196,10 @@ class HelpGuide extends Model
                 'attachment_path' => null,
                 'attachment_name' => null,
             ]);
+
             return true;
         }
-        
+
         return false;
     }
 
@@ -202,10 +208,10 @@ class HelpGuide extends Model
      */
     public function getAttachmentExtensionAttribute(): ?string
     {
-        if (!$this->attachment_name) {
+        if (! $this->attachment_name) {
             return null;
         }
-        
+
         return strtolower(pathinfo($this->attachment_name, PATHINFO_EXTENSION));
     }
 
@@ -215,6 +221,7 @@ class HelpGuide extends Model
     public function attachmentIsImage(): bool
     {
         $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+
         return in_array($this->attachment_extension, $imageExtensions);
     }
 

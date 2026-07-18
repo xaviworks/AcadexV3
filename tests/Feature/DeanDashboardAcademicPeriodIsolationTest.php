@@ -19,26 +19,26 @@ class DeanDashboardAcademicPeriodIsolationTest extends TestCase
     public function test_dean_dashboard_and_poll_only_use_selected_period_and_department_data(): void
     {
         $deanDepartment = Department::create([
-            'department_code' => 'DEAN-' . Str::upper(Str::random(4)),
+            'department_code' => 'DEAN-'.Str::upper(Str::random(4)),
             'department_description' => 'Dean Department',
             'is_deleted' => false,
         ]);
 
         $otherDepartment = Department::create([
-            'department_code' => 'OTHR-' . Str::upper(Str::random(4)),
+            'department_code' => 'OTHR-'.Str::upper(Str::random(4)),
             'department_description' => 'Other Department',
             'is_deleted' => false,
         ]);
 
         $deanCourse = Course::create([
-            'course_code' => 'DC-' . Str::upper(Str::random(6)),
+            'course_code' => 'DC-'.Str::upper(Str::random(6)),
             'course_description' => 'Dean Course',
             'department_id' => $deanDepartment->id,
             'is_deleted' => false,
         ]);
 
         $otherCourse = Course::create([
-            'course_code' => 'OC-' . Str::upper(Str::random(6)),
+            'course_code' => 'OC-'.Str::upper(Str::random(6)),
             'course_description' => 'Other Course',
             'department_id' => $otherDepartment->id,
             'is_deleted' => false,
@@ -126,7 +126,7 @@ class DeanDashboardAcademicPeriodIsolationTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'SUBD-' . Str::upper(Str::random(6)),
+            'subject_code' => 'SUBD-'.Str::upper(Str::random(6)),
             'subject_description' => 'Dean Current Subject',
             'year_level' => 1,
             'department_id' => $deanDepartment->id,
@@ -137,7 +137,7 @@ class DeanDashboardAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $pivotSubject = Subject::create([
-            'subject_code' => 'SUBP-' . Str::upper(Str::random(6)),
+            'subject_code' => 'SUBP-'.Str::upper(Str::random(6)),
             'subject_description' => 'Dean Pivot Subject',
             'year_level' => 1,
             'department_id' => $deanDepartment->id,
@@ -150,7 +150,7 @@ class DeanDashboardAcademicPeriodIsolationTest extends TestCase
         $pivotSubject->instructors()->attach($instructorPivot->id);
 
         Subject::create([
-            'subject_code' => 'SUBO-' . Str::upper(Str::random(6)),
+            'subject_code' => 'SUBO-'.Str::upper(Str::random(6)),
             'subject_description' => 'Dean Old Subject',
             'year_level' => 1,
             'department_id' => $deanDepartment->id,
@@ -161,7 +161,7 @@ class DeanDashboardAcademicPeriodIsolationTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'SUBX-' . Str::upper(Str::random(6)),
+            'subject_code' => 'SUBX-'.Str::upper(Str::random(6)),
             'subject_description' => 'Other Department Subject',
             'year_level' => 1,
             'department_id' => $otherDepartment->id,

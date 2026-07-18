@@ -10,7 +10,8 @@ class ActivityAlignmentStatusTest extends TestCase
 {
     public function test_quiz_and_ocr_require_three_minimum_when_weighted(): void
     {
-        $helper = new class {
+        $helper = new class
+        {
             use ActivityManagementTrait;
 
             public function minRequired(array $component): int
@@ -47,7 +48,8 @@ class ActivityAlignmentStatusTest extends TestCase
 
     public function test_exam_with_one_count_is_ok_not_warning(): void
     {
-        $helper = new class {
+        $helper = new class
+        {
             use ActivityManagementTrait;
 
             public function minRequired(array $component): int
@@ -76,7 +78,8 @@ class ActivityAlignmentStatusTest extends TestCase
 
     public function test_status_is_exceeds_when_actual_count_is_above_max(): void
     {
-        $helper = new class {
+        $helper = new class
+        {
             use ActivityManagementTrait;
 
             public function status(int $actualCount, int $minRequired, ?int $maxAllowed): string

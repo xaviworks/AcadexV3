@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\AcademicPeriod;
+use Illuminate\Database\Seeder;
 
 class AcademicPeriodsTableSeeder extends Seeder
 {

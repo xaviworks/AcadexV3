@@ -22,10 +22,10 @@ trait SendsSecurityNotifications
         array $metadata = []
     ): void {
         // Add request metadata if not provided
-        if (!isset($metadata['ip_address'])) {
+        if (! isset($metadata['ip_address'])) {
             $metadata['ip_address'] = request()->ip();
         }
-        if (!isset($metadata['user_agent'])) {
+        if (! isset($metadata['user_agent'])) {
             $metadata['user_agent'] = request()->userAgent();
         }
 

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
             $table->timestamps();
-            
+
             // Ensure each instructor can only be assigned to a subject once
             $table->unique(['instructor_id', 'subject_id']);
         });

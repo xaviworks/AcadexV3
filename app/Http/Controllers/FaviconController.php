@@ -15,7 +15,7 @@ class FaviconController extends BaseController
     {
         $path = public_path('favicon.ico');
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             abort(404);
         }
 

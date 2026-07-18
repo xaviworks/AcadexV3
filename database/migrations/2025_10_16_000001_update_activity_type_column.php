@@ -16,16 +16,18 @@ return new class extends Migration
     {
         if ($this->isSqlite()) {
             $this->rebuildSqliteTable(true);
+
             return;
         }
 
-        DB::statement("ALTER TABLE activities MODIFY type VARCHAR(191) NOT NULL");
+        DB::statement('ALTER TABLE activities MODIFY type VARCHAR(191) NOT NULL');
     }
 
     public function down(): void
     {
         if ($this->isSqlite()) {
             $this->rebuildSqliteTable(false, $this->legacyTypeExpression());
+
             return;
         }
 

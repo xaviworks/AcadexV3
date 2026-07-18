@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -16,13 +14,13 @@ return new class extends Migration
         DB::table('subjects')
             ->where('is_universal', true)
             ->update(['course_id' => 1]);
-            
+
         // Also update subjects that don't have is_universal = true to have course_id != 1
         // Get the first non-GE course
         $nonGeCourse = DB::table('courses')
             ->where('course_description', '!=', 'General Education')
             ->first();
-            
+
         if ($nonGeCourse) {
             DB::table('subjects')
                 ->where('is_universal', false)

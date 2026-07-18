@@ -66,13 +66,16 @@ class AddSemesterToGradesFormulaTable extends Migration
         // Best-effort rollback: keep data, just drop semester uniques and column
         try {
             DB::statement('ALTER TABLE `grades_formula` DROP INDEX `grades_formula_course_semester_unique`');
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
         try {
             DB::statement('ALTER TABLE `grades_formula` DROP INDEX `grades_formula_subject_semester_unique`');
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
         try {
             DB::statement('ALTER TABLE `grades_formula` DROP INDEX `grades_formula_dept_semester_fallback`');
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         Schema::table('grades_formula', function (Blueprint $table) {
             if (Schema::hasColumn('grades_formula', 'semester')) {
@@ -86,12 +89,14 @@ class AddSemesterToGradesFormulaTable extends Migration
             if (empty($exists)) {
                 DB::statement('ALTER TABLE `grades_formula` ADD UNIQUE `grades_formula_course_unique` (`course_id`)');
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
         try {
             $exists = DB::select('SHOW INDEX FROM `grades_formula` WHERE `Key_name` = ?', ['grades_formula_subject_unique']);
             if (empty($exists)) {
                 DB::statement('ALTER TABLE `grades_formula` ADD UNIQUE `grades_formula_subject_unique` (`subject_id`)');
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
     }
 }

@@ -20,7 +20,7 @@ class Department extends Model
     use HasFactory;
 
     protected $fillable = [
-        'department_code', 'department_description', 'is_deleted', 'created_by', 'updated_by'
+        'department_code', 'department_description', 'is_deleted', 'created_by', 'updated_by',
     ];
 
     protected static function booted()

@@ -23,7 +23,7 @@ class Activity extends Model
     protected $fillable = [
         'subject_id', 'term', 'type', 'title', 'number_of_items',
         'course_outcome_id',
-        'is_deleted', 'created_by', 'updated_by'
+        'is_deleted', 'created_by', 'updated_by',
     ];
 
     public function subject()

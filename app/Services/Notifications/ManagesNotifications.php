@@ -75,9 +75,10 @@ trait ManagesNotifications
     public static function markAsRead(User $user, string $notificationId): bool
     {
         $notification = $user->notifications()->find($notificationId);
-        
+
         if ($notification) {
             $notification->markAsRead();
+
             return true;
         }
 
@@ -101,6 +102,7 @@ trait ManagesNotifications
     {
         $count = $user->unreadNotifications()->count();
         $user->unreadNotifications->markAsRead();
+
         return $count;
     }
 
@@ -132,7 +134,7 @@ trait ManagesNotifications
             'priority' => $data['priority'] ?? 'normal',
             'icon' => $data['icon'] ?? 'bi-bell',
             'color' => $data['color'] ?? 'info',
-            'message' => $isAdmin 
+            'message' => $isAdmin
                 ? ($data['admin_message'] ?? $data['user_message'] ?? 'Notification')
                 : ($data['user_message'] ?? 'Notification'),
             'action_url' => $data['action_url'] ?? null,
@@ -143,7 +145,7 @@ trait ManagesNotifications
             'time_ago' => $notification->created_at->diffForHumans(),
             'extra' => $isAdmin ? array_diff_key($data, array_flip([
                 'type', 'category', 'priority', 'icon', 'color',
-                'admin_message', 'user_message', 'action_url', 'action_text'
+                'admin_message', 'user_message', 'action_url', 'action_text',
             ])) : null,
         ];
 

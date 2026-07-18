@@ -2,10 +2,10 @@
 
 namespace App\Http;
 
-use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use App\Http\Middleware\NoCacheHeaders;
-use App\Http\Middleware\EnsureUserIsVPAA;
 use App\Http\Middleware\EnsureAcademicPeriodSet;
+use App\Http\Middleware\EnsureUserIsVPAA;
+use App\Http\Middleware\NoCacheHeaders;
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {

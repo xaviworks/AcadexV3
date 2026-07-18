@@ -2,14 +2,14 @@
 
 namespace App\Notifications;
 
-use App\Models\User;
 use App\Models\Subject;
+use App\Models\User;
 use Illuminate\Notifications\Messages\MailMessage;
 
 /**
  * Notification sent to Instructors when they are assigned to a course/subject.
  * Supports both database and email channels.
- * 
+ *
  * Admin view: Full assignment details with IDs
  * User view: Welcoming message about the new teaching assignment
  */
@@ -30,7 +30,7 @@ class CourseAssigned extends BaseNotification
 
         // Check user preferences for email
         $prefs = $notifiable->notificationPreferences;
-        
+
         if ($prefs?->email_enabled ?? true) {
             $channels[] = 'mail';
         }
@@ -65,14 +65,14 @@ class CourseAssigned extends BaseNotification
     public function getAdminMessage(): string
     {
         $assignerName = $this->assignedBy->full_name;
-        $assignerRole = match($this->assignedBy->role) {
+        $assignerRole = match ($this->assignedBy->role) {
             1 => 'Chairperson',
             4 => 'GE Coordinator',
             default => 'User',
         };
         $subjectInfo = "{$this->subject->subject_code} - {$this->subject->subject_description}";
         $period = $this->academicPeriod ?? 'current period';
-        
+
         return "[Course Assignment] {$assignerName} ({$assignerRole}, ID: {$this->assignedBy->id}) assigned subject {$subjectInfo} (ID: {$this->subject->id}) for {$period}";
     }
 
@@ -80,7 +80,7 @@ class CourseAssigned extends BaseNotification
     {
         $subjectCode = $this->subject->subject_code;
         $subjectName = $this->subject->subject_description;
-        
+
         return "You've been assigned to teach {$subjectCode} ({$subjectName})";
     }
 
@@ -116,14 +116,14 @@ class CourseAssigned extends BaseNotification
         $subjectCode = $this->subject->subject_code;
         $subjectName = $this->subject->subject_description;
         $period = $this->academicPeriod ?? 'the current academic period';
-        
+
         return (new MailMessage)
             ->subject("New Course Assignment: {$subjectCode} - Acadex")
             ->greeting("Hello {$notifiable->first_name}!")
-            ->line("You have been assigned to teach a new course.")
+            ->line('You have been assigned to teach a new course.')
             ->line("**Subject:** {$subjectCode} - {$subjectName}")
             ->line("**Period:** {$period}")
-            ->line("Please log in to the Acadex platform to view your students and manage your course.")
+            ->line('Please log in to the Acadex platform to view your students and manage your course.')
             ->action('Go to Dashboard', $this->getActionUrl())
             ->salutation('Best regards, The Acadex Team');
     }

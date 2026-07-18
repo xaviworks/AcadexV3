@@ -51,8 +51,8 @@ class DepartmentBaselineFormulaSeeder extends Seeder
                     'academic_period_id' => null,
                 ],
                 [
-                    'name' => 'department_' . Str::lower($departmentCode) . '_baseline_seed',
-                    'label' => trim(($department->department_description ?? 'Department') . ' Baseline Formula'),
+                    'name' => 'department_'.Str::lower($departmentCode).'_baseline_seed',
+                    'label' => trim(($department->department_description ?? 'Department').' Baseline Formula'),
                     'course_id' => null,
                     'subject_id' => null,
                     'base_score' => 40,

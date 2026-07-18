@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Models\User;
-use App\Services\NotificationService;
 use App\Notifications\SecurityAlert;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Log;
 
 /**

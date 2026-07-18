@@ -24,20 +24,21 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-mortarboard-fill text-success me-2"></i>{{ $course->course_code }} · {{ $course->course_description }}</h1>
-            <p class="text-muted mb-0">Review course formula and drill down into subject weighting</p>
+            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-building-fill text-success me-2"></i>{{ $department->department_code }} Department</h1>
+            <p class="text-muted mb-0">{{ $department->department_description }}</p>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i>Back to Department
+        <div class="d-flex gap-2">
+            <a href="{{ $buildRoute('vpaa.gradingConfiguration.index', ['view' => 'overview']) }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back
             </a>
-            <a href="{{ $buildRoute('admin.gradesFormula.edit.course', ['department' => $department->id, 'course' => $course->id]) }}" class="btn btn-success btn-sm">
-                <i class="bi bi-pencil-square me-1"></i>{{ $needsCourseFormula ? 'Create Course Formula' : 'Edit Course Formula' }}
+            <a href="{{ $buildRoute('vpaa.gradingConfiguration.departments.edit', ['department' => $department->id]) }}" class="btn btn-success btn-sm">
+                <i class="bi bi-pencil-square me-1"></i>Edit Department Baseline
             </a>
         </div>
     </div>
+
     <div class="d-flex justify-content-end mb-3">
-        <form method="GET" action="{{ route('admin.gradesFormula.course', ['department' => $department->id, 'course' => $course->id]) }}" class="d-flex align-items-center gap-2 flex-wrap">
+    <form method="GET" action="{{ route('vpaa.gradingConfiguration.departments.show', ['department' => $department->id]) }}" class="d-flex align-items-center gap-2 flex-wrap">
             <div class="d-flex flex-column">
                 <label class="text-success small mb-1">Academic Year</label>
                 <select name="academic_year" class="form-select form-select-sm max-w-180" onchange="this.form.submit()">
@@ -58,32 +59,25 @@
             </div>
         </form>
     </div>
+
     @php
-        $totalSubjects = $subjectSummaries->count();
-        $customSubjects = $subjectSummaries->filter(fn ($summary) => $summary['has_formula'])->count();
-        $defaultSubjects = max($totalSubjects - $customSubjects, 0);
-    $fallbackScope = $courseFormula ? 'Course Formula' : ($departmentFallback ? 'Department Baseline' : 'Institution Fallback Formula');
-    $fallbackLabel = $courseFormula->label ?? $departmentFallback->label ?? $globalFormula->label ?? 'Institution Fallback';
+        $totalCourses = $courseSummaries->count();
+        $customCourses = $courseSummaries->filter(fn ($summary) => $summary['has_formula'])->count();
+        $defaultCourses = max($totalCourses - $customCourses, 0);
+        $fallbackLabel = $departmentFallback->label ?? $globalFormula->label ?? 'Baseline Formula';
     @endphp
 
-    <div class="card border-0 shadow-sm mb-3 bg-gradient-green-card">
+    <div class="card border-0 shadow-sm mb-3 bg-success bg-opacity-10">
         <div class="card-body py-3">
             <div class="row align-items-center">
-                <div class="col-md-8 d-flex align-items-center gap-3">
-                    <div class="p-2 rounded-circle bg-gradient-overlay">
-                        <i class="bi bi-journals text-white icon-md"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-1 fw-bold">Subject Wildcards Overview</h6>
-                        <small class="opacity-90">{{ $totalSubjects }} subjects · {{ $customSubjects }} custom formulas · {{ $defaultSubjects }} using fallback</small>
-                    </div>
+                <div class="col-md-8">
+                    <h6 class="mb-1 fw-bold text-success"><i class="bi bi-collection me-2"></i>Course Wildcards Overview</h6>
+                    <small class="text-muted">{{ $totalCourses }} courses · {{ $customCourses }} subject overrides · {{ $defaultCourses }} using baseline</small>
                 </div>
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <div class="bg-white bg-opacity-25 rounded-pill px-3 py-1 d-inline-flex align-items-center gap-2">
-                        <small class="fw-semibold text-dark mb-0">
-                            <i class="bi bi-lightbulb me-1"></i>{{ $fallbackScope }} · {{ $fallbackLabel }}
-                        </small>
-                    </div>
+                <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                    <span class="badge bg-success text-white px-3 py-2">
+                        <i class="bi bi-lightbulb me-1"></i>Baseline: {{ $fallbackLabel }}
+                    </span>
                 </div>
             </div>
         </div>
@@ -99,62 +93,61 @@
                 <div class="d-flex flex-wrap gap-2">
                     <button class="btn btn-success btn-sm rounded-pill wildcard-filter-btn active" data-filter="all">
                         <i class="bi bi-grid-3x3-gap-fill me-1"></i>All
-                        <span class="badge bg-white text-success ms-1">{{ $totalSubjects }}</span>
+                        <span class="badge bg-white text-success ms-1">{{ $totalCourses }}</span>
                     </button>
                     <button class="btn btn-outline-success btn-sm rounded-pill wildcard-filter-btn" data-filter="custom">
                         <i class="bi bi-star-fill me-1"></i>Formulas
-                        <span class="badge bg-success text-white ms-1">{{ $customSubjects }}</span>
+                        <span class="badge bg-success text-white ms-1">{{ $customCourses }}</span>
                     </button>
                     <button class="btn btn-outline-success btn-sm rounded-pill wildcard-filter-btn" data-filter="default">
                         <i class="bi bi-shield-check me-1"></i>Subjects
-                        <span class="badge bg-success text-white ms-1">{{ $defaultSubjects }}</span>
+                        <span class="badge bg-success text-white ms-1">{{ $defaultCourses }}</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    @if($needsCourseFormula)
-        <div class="alert alert-info shadow-sm">
-            <i class="bi bi-info-circle me-2"></i>No custom course formula yet. Subjects will inherit the {{ $departmentFallback ? 'department baseline' : 'institution fallback' }} unless a course or subject formula is created.
-        </div>
-    @endif
-
-    @if($subjectSummaries->isEmpty())
+    @if($courseSummaries->isEmpty())
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
                 <div class="text-muted mb-3">
                     <i class="bi bi-journal-minus fs-1 opacity-50"></i>
                 </div>
-                <h5 class="text-muted mb-2">No subjects found</h5>
-                <p class="text-muted mb-0">Add subjects to this course to configure subject-level formulas.</p>
+                <h5 class="text-muted mb-2">No courses found</h5>
+                <p class="text-muted mb-0">Add courses to this department to configure course-level formulas.</p>
             </div>
         </div>
     @else
-        <div class="row g-4" id="subject-wildcards">
-            @foreach($subjectSummaries as $summary)
+        <div class="row g-4" id="course-wildcards" data-wildcard-section="courses">
+            @foreach($courseSummaries as $summary)
                 @php
-                    $subject = $summary['subject'];
+                    $course = $summary['course'];
                 @endphp
                 <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                    <a href="{{ $buildRoute('admin.gradesFormula.subject', ['subject' => $subject->id]) }}" class="text-decoration-none text-reset">
-                        <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow" data-status="{{ $summary['status'] }}" data-url="{{ $buildRoute('admin.gradesFormula.subject', ['subject' => $subject->id]) }}">
+                    <a href="{{ $buildRoute('vpaa.gradingConfiguration.courses.show', ['department' => $department->id, 'course' => $course->id]) }}" class="text-decoration-none text-reset">
+                        <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow" data-status="{{ $summary['status'] }}" data-url="{{ $buildRoute('vpaa.gradingConfiguration.courses.show', ['department' => $department->id, 'course' => $course->id]) }}">
                             {{-- Top header --}}
                             <div class="position-relative header-height-80 bg-gradient-green-soft">
                                 <div class="wildcard-circle-positioned">
-                                    <h5 class="mb-0 text-white fw-bold">{{ $subject->subject_code }}</h5>
+                                    <span class="text-white fw-bold">{{ $course->course_code }}</span>
                                 </div>
                             </div>
 
                             {{-- Card body --}}
                             <div class="card-body pt-5 text-center">
-                                <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $subject->subject_description }}">
-                                    {{ $subject->subject_description }}
+                                <h6 class="fw-semibold mt-4 text-dark text-truncate" title="{{ $course->course_description }}">
+                                    {{ $course->course_description }}
                                 </h6>
                                 <p class="text-muted small mb-3">{{ $summary['scope_text'] }}</p>
 
                                 {{-- Footer badges --}}
                                 <div class="d-flex flex-column gap-2 mt-4">
+                                    @if($summary['missing_subject_count'] > 0)
+                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ $summary['missing_subject_count'] }} subject{{ $summary['missing_subject_count'] === 1 ? '' : 's' }} pending
+                                        </span>
+                                    @endif
                                     <span class="badge px-3 py-2 fw-semibold rounded-pill {{ $summary['has_formula'] ? 'bg-success' : 'bg-secondary' }}">
                                         @if($summary['has_formula'])
                                             ✓ {{ $summary['formula_scope'] }}
@@ -173,8 +166,8 @@
 </div>
 @endsection
 
-{{-- JavaScript moved to: resources/js/pages/admin/grades-formula-course.js --}}
+{{-- JavaScript moved to: resources/js/pages/vpaa/grading-configuration-department.js --}}
 
-{{-- Styles: resources/css/admin/grades-formula.css --}}
+{{-- Styles: resources/css/vpaa/grading-configuration.css --}}
 @push('styles')
 @endpush

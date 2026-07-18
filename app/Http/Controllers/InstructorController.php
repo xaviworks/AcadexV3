@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Subject;
 use App\Models\Course;
+use App\Models\Subject;
 use App\Models\TermGrade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,16 +40,16 @@ class InstructorController extends Controller
         $subjects = collect();
 
         if ($academicPeriodId) {
-            $subjects = Subject::where(function($query) use ($academicPeriodId) {
+            $subjects = Subject::where(function ($query) {
                 $query->where('instructor_id', Auth::id())
-                      ->orWhereHas('instructors', function($q) {
-                          $q->where('instructor_id', Auth::id());
-                      });
+                    ->orWhereHas('instructors', function ($q) {
+                        $q->where('instructor_id', Auth::id());
+                    });
             })
-            ->where('is_deleted', false)
-            ->where('academic_period_id', $academicPeriodId)
-            ->withCount('students')
-            ->get();
+                ->where('is_deleted', false)
+                ->where('academic_period_id', $academicPeriodId)
+                ->withCount('students')
+                ->get();
 
             // Optimize: Fetch graded counts for all subjects at once (prevent N+1)
             $gradedCounts = TermGrade::whereIn('subject_id', $subjects->pluck('id'))
@@ -70,7 +70,7 @@ class InstructorController extends Controller
             }
         }
 
-        $courses = Cache::remember('courses:all', 3600, fn() => Course::all());
+        $courses = Cache::remember('courses:all', 3600, fn () => Course::all());
         $students = collect();
 
         if ($request->filled('subject_id')) {
@@ -79,7 +79,7 @@ class InstructorController extends Controller
             // Allow access if instructor is primary instructor or assigned via pivot
             $isPrimary = $subject->instructor_id === Auth::id();
             $isPivotAssigned = $subject->instructors()->where('instructor_id', Auth::id())->exists();
-            if (!$isPrimary && !$isPivotAssigned) {
+            if (! $isPrimary && ! $isPivotAssigned) {
                 abort(403, 'Unauthorized access to subject.');
             }
 

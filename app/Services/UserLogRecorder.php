@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\UserLog;
-use Illuminate\Support\Carbon;
 use App\Models\User;
+use App\Models\UserLog;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Carbon;
 
 class UserLogRecorder
 {
@@ -14,7 +14,7 @@ class UserLogRecorder
     public function record(int $userId, string $eventType, array $payload): void
     {
         // Defensive: ensure the referenced user still exists before inserting a log.
-        if (!User::where('id', $userId)->exists()) {
+        if (! User::where('id', $userId)->exists()) {
             // User no longer exists; skip recording to avoid FK violations.
             return;
         }
@@ -36,6 +36,7 @@ class UserLogRecorder
             $recent->fill($attributes);
             $recent->updated_at = $now;
             $recent->save();
+
             return;
         }
 
@@ -51,7 +52,7 @@ class UserLogRecorder
 
     private function isDuplicate(UserLog $log, array $attributes, Carbon $now): bool
     {
-        if (!$log->created_at) {
+        if (! $log->created_at) {
             return false;
         }
 

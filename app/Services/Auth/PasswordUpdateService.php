@@ -8,9 +8,7 @@ use Illuminate\Support\Str;
 
 class PasswordUpdateService
 {
-    public function __construct(private readonly TrackedSessionService $trackedSessionService)
-    {
-    }
+    public function __construct(private readonly TrackedSessionService $trackedSessionService) {}
 
     public function update(User $user, string $plainPassword, ?string $currentSessionId = null): void
     {

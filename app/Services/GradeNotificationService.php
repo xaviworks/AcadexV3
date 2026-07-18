@@ -11,26 +11,21 @@ class GradeNotificationService
 {
     /**
      * Create notifications for chairpersons and GE coordinator when instructor saves grades.
-     *
-     * @param int $subjectId
-     * @param string $term
-     * @param int $studentsGraded
-     * @return void
      */
     public static function notifyGradeSaved(int $subjectId, string $term, int $studentsGraded): void
     {
         $subject = Subject::with(['course.department'])->find($subjectId);
-        if (!$subject) {
+        if (! $subject) {
             return;
         }
 
         $instructor = Auth::user();
-        if (!$instructor) {
+        if (! $instructor) {
             return;
         }
 
-        $instructorName = trim($instructor->first_name . ' ' . $instructor->last_name);
-        $subjectName = $subject->subject_code . ' - ' . $subject->subject_description;
+        $instructorName = trim($instructor->first_name.' '.$instructor->last_name);
+        $subjectName = $subject->subject_code.' - '.$subject->subject_description;
         $termLabel = ucfirst($term);
 
         $message = "{$instructorName} has saved grades for {$studentsGraded} student(s) in {$subjectName} ({$termLabel})";
@@ -64,7 +59,7 @@ class GradeNotificationService
                 ->get();
 
             foreach ($geCoordinators as $geCoordinator) {
-                if ($geCoordinator->id !== $instructor->id && !in_array($geCoordinator->id, $notifiedUsers)) {
+                if ($geCoordinator->id !== $instructor->id && ! in_array($geCoordinator->id, $notifiedUsers)) {
                     self::createNotification(
                         $instructor->id,
                         $geCoordinator->id,
@@ -80,14 +75,6 @@ class GradeNotificationService
 
     /**
      * Create a grade notification record.
-     *
-     * @param int $instructorId
-     * @param int $notifiedUserId
-     * @param int $subjectId
-     * @param string $term
-     * @param int $studentsGraded
-     * @param string $message
-     * @return void
      */
     private static function createNotification(
         int $instructorId,
@@ -111,7 +98,6 @@ class GradeNotificationService
     /**
      * Get unread notifications for a user.
      *
-     * @param int $userId
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public static function getUnreadNotifications(int $userId)
@@ -126,8 +112,6 @@ class GradeNotificationService
     /**
      * Get all notifications for a user (with pagination).
      *
-     * @param int $userId
-     * @param int $perPage
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
     public static function getAllNotifications(int $userId, int $perPage = 20)
@@ -140,10 +124,6 @@ class GradeNotificationService
 
     /**
      * Mark notification as read.
-     *
-     * @param int $notificationId
-     * @param int $userId
-     * @return bool
      */
     public static function markAsRead(int $notificationId, int $userId): bool
     {
@@ -151,8 +131,9 @@ class GradeNotificationService
             ->where('notified_user_id', $userId)
             ->first();
 
-        if ($notification && !$notification->is_read) {
+        if ($notification && ! $notification->is_read) {
             $notification->markAsRead();
+
             return true;
         }
 
@@ -161,9 +142,6 @@ class GradeNotificationService
 
     /**
      * Mark all notifications as read for a user.
-     *
-     * @param int $userId
-     * @return int
      */
     public static function markAllAsRead(int $userId): int
     {
@@ -177,9 +155,6 @@ class GradeNotificationService
 
     /**
      * Get unread notification count for a user.
-     *
-     * @param int $userId
-     * @return int
      */
     public static function getUnreadCount(int $userId): int
     {

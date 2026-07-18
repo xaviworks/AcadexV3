@@ -39,7 +39,7 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-6 col-md-8">
-            <form method="GET" action="{{ route('admin.gradesFormula') }}" id="periodForm">
+            <form method="GET" action="{{ route('vpaa.gradingConfiguration.index') }}" id="periodForm">
                 {{-- "All Academic Periods" Option --}}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-0 py-3">
@@ -166,6 +166,6 @@
     </div>
 </div>
 
-{{-- Styles: resources/css/admin/grades-formula-select-period.css --}}
-{{-- Scripts: resources/js/pages/admin/grades-formula-select-period.js --}}
+{{-- Styles: resources/css/vpaa/grading-configuration-select-period.css --}}
+{{-- Scripts: resources/js/pages/vpaa/grading-configuration-select-period.js --}}
 @endsection

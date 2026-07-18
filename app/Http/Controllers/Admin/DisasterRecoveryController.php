@@ -37,7 +37,7 @@ class DisasterRecoveryController extends Controller
 
         $latestBackup = $backups->first();
         $storageInfo = $this->backupService->getStorageInfo();
-        
+
         // Recent activity
         $recentActivity = AuditLog::with('user')
             ->latest()
@@ -77,7 +77,7 @@ class DisasterRecoveryController extends Controller
             'notes' => 'nullable|string|max:255',
         ]);
 
-        if (!Hash::check($request->password, Auth::user()->password)) {
+        if (! Hash::check($request->password, Auth::user()->password)) {
             return back()->with('error', 'Incorrect password. Please try again.');
         }
 
@@ -93,7 +93,7 @@ class DisasterRecoveryController extends Controller
             return back()->with('success', "Backup created successfully! ({$backup->size_formatted})");
 
         } catch (\Throwable $e) {
-            return back()->with('error', 'Backup failed: ' . $e->getMessage());
+            return back()->with('error', 'Backup failed: '.$e->getMessage());
         }
     }
 
@@ -104,7 +104,7 @@ class DisasterRecoveryController extends Controller
     {
         Gate::authorize('admin');
 
-        if (!$backup->fileExists()) {
+        if (! $backup->fileExists()) {
             abort(404, 'Backup file not found');
         }
 
@@ -126,7 +126,7 @@ class DisasterRecoveryController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Hash::check($request->password, Auth::user()->password)) {
+        if (! Hash::check($request->password, Auth::user()->password)) {
             return back()->with('error', 'Incorrect password. Please try again.');
         }
 
@@ -147,7 +147,7 @@ class DisasterRecoveryController extends Controller
             'confirm_restore' => 'required|accepted',
         ]);
 
-        if (!Hash::check($request->password, Auth::user()->password)) {
+        if (! Hash::check($request->password, Auth::user()->password)) {
             return back()->with('error', 'Incorrect password. Please try again.');
         }
 
@@ -155,8 +155,8 @@ class DisasterRecoveryController extends Controller
             // Create safety backup if requested
             if ($request->boolean('create_safety_backup')) {
                 $this->backupService->createFullBackup(
-                    Auth::user(), 
-                    'Safety backup before restoring ' . $backup->created_at->format('Y-m-d H:i')
+                    Auth::user(),
+                    'Safety backup before restoring '.$backup->created_at->format('Y-m-d H:i')
                 );
             }
 
@@ -170,7 +170,7 @@ class DisasterRecoveryController extends Controller
             return back()->with('success', "Restore completed! {$tablesRestored} tables, {$totalRows} records restored.");
 
         } catch (\Throwable $e) {
-            return back()->with('error', 'Restore failed: ' . $e->getMessage());
+            return back()->with('error', 'Restore failed: '.$e->getMessage());
         }
     }
 
@@ -183,6 +183,7 @@ class DisasterRecoveryController extends Controller
 
         try {
             $preview = $this->backupService->previewBackup($backup);
+
             return response()->json(['success' => true, 'preview' => $preview]);
         } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
@@ -206,7 +207,7 @@ class DisasterRecoveryController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('auditable_type', 'like', "%{$search}%")
-                  ->orWhereHas('user', fn($q) => $q->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('user', fn ($q) => $q->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -226,6 +227,7 @@ class DisasterRecoveryController extends Controller
     {
         Gate::authorize('admin');
         $auditLog->load('user');
+
         return view('admin.disaster-recovery.activity-show', ['log' => $auditLog]);
     }
 
@@ -240,23 +242,22 @@ class DisasterRecoveryController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Hash::check($request->password, Auth::user()->password)) {
+        if (! Hash::check($request->password, Auth::user()->password)) {
             return back()->with('error', 'Incorrect password. Please try again.');
         }
 
-        if (!$auditLog->old_values) {
+        if (! $auditLog->old_values) {
             return back()->with('error', 'Cannot rollback: no previous data available.');
         }
 
         try {
             $this->restoreService->rollbackToAuditLog($auditLog);
+
             return back()->with('success', 'Change rolled back successfully.');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Rollback failed: ' . $e->getMessage());
+            return back()->with('error', 'Rollback failed: '.$e->getMessage());
         }
     }
-
-
 
     /**
      * Update backup schedule.
@@ -297,7 +298,7 @@ class DisasterRecoveryController extends Controller
             return back()->with('success', "Manual backup completed! ({$backup->size_formatted})");
 
         } catch (\Throwable $e) {
-            return back()->with('error', 'Backup failed: ' . $e->getMessage());
+            return back()->with('error', 'Backup failed: '.$e->getMessage());
         }
     }
 }

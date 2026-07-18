@@ -10,7 +10,7 @@ class TermGrade extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'subject_id', 'academic_period_id', 'term_id', 
-        'term_grade', 'is_deleted', 'created_by', 'updated_by'
+        'student_id', 'subject_id', 'academic_period_id', 'term_id',
+        'term_grade', 'is_deleted', 'created_by', 'updated_by',
     ];
 }

@@ -6,6 +6,7 @@ use App\Support\Grades\FormulaDefaults;
 use App\Support\Grades\FormulaStructure;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 /**
  * @property int $id
  * @property string|null $name
@@ -94,9 +95,9 @@ class GradesFormula extends Model
             return $mapped;
         }
 
-    $fallback = FormulaStructure::default('lecture_only');
+        $fallback = FormulaStructure::default('lecture_only');
 
-    return collect(FormulaStructure::flattenWeights($fallback))
+        return collect(FormulaStructure::flattenWeights($fallback))
             ->pluck('weight', 'activity_type')
             ->map(fn ($value) => (float) $value)
             ->toArray();

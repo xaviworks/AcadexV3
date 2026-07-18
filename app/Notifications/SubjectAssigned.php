@@ -2,12 +2,12 @@
 
 namespace App\Notifications;
 
-use App\Models\User;
 use App\Models\Subject;
+use App\Models\User;
 
 /**
  * Notification sent to Instructors when they receive a new subject assignment.
- * 
+ *
  * Admin view: Full assignment details with IDs
  * User view: Welcoming message about the new teaching assignment
  */
@@ -36,10 +36,10 @@ class SubjectAssigned extends BaseNotification
 
     public function getAdminMessage(): string
     {
-        $assignerName = trim($this->assignedBy->first_name . ' ' . $this->assignedBy->last_name);
+        $assignerName = trim($this->assignedBy->first_name.' '.$this->assignedBy->last_name);
         $subjectInfo = "{$this->subject->subject_code} - {$this->subject->subject_description}";
         $period = $this->academicPeriod ?? 'current period';
-        
+
         return "[Subject Assignment] {$assignerName} (ID: {$this->assignedBy->id}, Role: {$this->assignedBy->role}) assigned subject {$subjectInfo} (ID: {$this->subject->id}) for {$period}";
     }
 
@@ -47,7 +47,7 @@ class SubjectAssigned extends BaseNotification
     {
         $subjectCode = $this->subject->subject_code;
         $subjectName = $this->subject->subject_description;
-        
+
         return "You've been assigned to teach {$subjectCode} ({$subjectName})";
     }
 

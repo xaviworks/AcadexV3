@@ -61,16 +61,16 @@
         return $url . '?' . http_build_query($queryParams);
     };
 
-    $backRoute = $buildRoute('admin.gradesFormula');
+    $backRoute = $buildRoute('vpaa.gradingConfiguration.index');
     $backLabel = 'Back to Wildcards';
     if ($context === 'department' && isset($department)) {
-        $backRoute = $buildRoute('admin.gradesFormula.department', ['department' => $department->id]);
+        $backRoute = $buildRoute('vpaa.gradingConfiguration.departments.show', ['department' => $department->id]);
         $backLabel = 'Back to Department';
     } elseif ($context === 'course' && isset($department, $course)) {
-        $backRoute = $buildRoute('admin.gradesFormula.course', ['department' => $department->id, 'course' => $course->id]);
+        $backRoute = $buildRoute('vpaa.gradingConfiguration.courses.show', ['department' => $department->id, 'course' => $course->id]);
         $backLabel = 'Back to Course';
     } elseif ($context === 'subject' && isset($subject)) {
-        $backRoute = $buildRoute('admin.gradesFormula.subject', ['subject' => $subject->id]);
+        $backRoute = $buildRoute('vpaa.gradingConfiguration.subjects.show', ['subject' => $subject->id]);
         $backLabel = 'Back to Subject';
     }
 
@@ -114,7 +114,7 @@
         $submitLabel = 'Save Formula';
     }
 
-    $formRouteName = $hasFormula ? 'admin.gradesFormula.update' : 'admin.gradesFormula.store';
+    $formRouteName = $hasFormula ? 'vpaa.gradingConfiguration.formulas.update' : 'vpaa.gradingConfiguration.formulas.store';
     $formRouteParameters = $hasFormula && isset($formula)
         ? ['formula' => $formula->id]
         : [];
@@ -132,7 +132,7 @@
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none link-success-green text-sm">
+                        <a href="{{ $buildRoute('vpaa.gradingConfiguration.index') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-sliders me-1"></i>Grades Formula
                         </a>
                     </li>
@@ -203,7 +203,7 @@
             @if ($isDefault)
                 <form
                     method="POST"
-                    action="{{ $buildRoute('admin.gradesFormula.update', ['formula' => $defaultFormula->id]) }}"
+                    action="{{ $buildRoute('vpaa.gradingConfiguration.formulas.update', ['formula' => $defaultFormula->id]) }}"
                     x-data="structuredFormulaEditor({ initial: @js($structurePayload), catalog: @js($structureCatalog) })"
                     @submit="handleSubmit"
                     class="row g-4 js-validated-form"
@@ -248,7 +248,7 @@
                         <small class="text-muted">Used to label final grades as Passed or Failed.</small>
                     </div>
 
-                    @include('admin.partials.formula-structure-editor')
+                    @include('vpaa.grading-configuration.partials.formula-structure-editor')
 
                     <div class="col-12">
                         <div class="alert alert-info mb-2">
@@ -338,7 +338,7 @@
                         <input type="number" step="0.01" min="0" max="100" name="passing_grade" class="form-control" value="{{ $passingGradeValue }}" required>
                     </div>
 
-                    @include('admin.partials.formula-structure-editor')
+                    @include('vpaa.grading-configuration.partials.formula-structure-editor')
 
                     <div class="col-12">
                         <div class="alert alert-{{ $hasFormula ? 'info' : 'secondary' }} mb-2">
@@ -415,7 +415,7 @@ This subject already has a custom formula. Applying a structure template will re
 @endsection
 
 @push('scripts')
-{{-- JavaScript (Alpine.js component) moved to: resources/js/pages/admin/grades-formula-form.js --}}
+{{-- JavaScript (Alpine.js component) moved to: resources/js/pages/vpaa/grading-configuration-form.js --}}
 @endpush
 
-{{-- Styles: resources/css/admin/grades-formula.css --}}
+{{-- Styles: resources/css/vpaa/grading-configuration.css --}}

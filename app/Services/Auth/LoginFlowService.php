@@ -6,20 +6,18 @@ use App\Models\User;
 use App\Models\UserDevice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 
 class LoginFlowService
 {
-    public function __construct(private readonly TrackedSessionService $trackedSessionService)
-    {
-    }
+    public function __construct(private readonly TrackedSessionService $trackedSessionService) {}
 
     public function sanitizeIntendedUrl(Request $request, User $user): void
     {
@@ -61,7 +59,7 @@ class LoginFlowService
 
         $sameDeviceSessions = [];
         $differentDeviceSessions = [];
-        $agent = new Agent();
+        $agent = new Agent;
         $agent->setUserAgent(request()->userAgent());
         $currentBrowser = $agent->browser();
         $currentPlatform = $agent->platform();
@@ -145,7 +143,7 @@ class LoginFlowService
             return;
         }
 
-        $agent = new Agent();
+        $agent = new Agent;
         $agent->setUserAgent($request->userAgent());
 
         $plainToken = Str::random(64);
@@ -165,7 +163,7 @@ class LoginFlowService
 
     public function rememberTrustedDevice(User $user, string $deviceFingerprint, string $ipAddress, ?string $userAgent): void
     {
-        $agent = new Agent();
+        $agent = new Agent;
         $agent->setUserAgent($userAgent);
         $plainToken = Str::random(64);
         $trustedUntil = $this->trustedUntil();

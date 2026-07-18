@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\Auth\PasswordUpdateService;
 use App\Notifications\PasswordResetSuccess;
+use App\Services\Auth\PasswordUpdateService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,9 +15,7 @@ use Illuminate\View\View;
 
 class NewPasswordController extends Controller
 {
-    public function __construct(private readonly PasswordUpdateService $passwordUpdateService)
-    {
-    }
+    public function __construct(private readonly PasswordUpdateService $passwordUpdateService) {}
 
     /**
      * Display the password reset view.

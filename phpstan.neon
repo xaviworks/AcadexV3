@@ -8,6 +8,4 @@ parameters:
     ignoreErrors:
         - '#Unsafe usage of new static#'
     excludePaths:
-        - app/Http/Controllers/Auth/RegisteredUserControllerBackup.php
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
+        - app/Http/Controllers/Auth/RegisteredUserControllerBackup.php (?)

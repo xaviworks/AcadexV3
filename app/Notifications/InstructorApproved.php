@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 /**
  * Notification sent to Instructors when their account is approved.
  * Supports both database and email channels.
- * 
+ *
  * Admin view: Full approval details with IDs
  * User view: Welcoming message about account approval
  */
@@ -28,7 +28,7 @@ class InstructorApproved extends BaseNotification
 
         // Check user preferences for email
         $prefs = $notifiable->notificationPreferences;
-        
+
         if ($prefs?->email_enabled ?? true) {
             $channels[] = 'mail';
         }
@@ -64,18 +64,18 @@ class InstructorApproved extends BaseNotification
     {
         $instructorName = $this->instructor->full_name;
         $approverName = $this->approvedBy?->full_name ?? 'System';
-        $approverRole = $this->approvedBy ? match($this->approvedBy->role) {
+        $approverRole = $this->approvedBy ? match ($this->approvedBy->role) {
             1 => 'Chairperson',
             4 => 'GE Coordinator',
             default => 'User',
         } : 'System';
-        
+
         return "[Account Approved] Instructor {$instructorName} (ID: {$this->instructor->id}, Email: {$this->instructor->email}) was approved by {$approverName} ({$approverRole})";
     }
 
     public function getUserMessage(): string
     {
-        return "Your instructor account has been approved. Welcome to Acadex!";
+        return 'Your instructor account has been approved. Welcome to Acadex!';
     }
 
     public function getActionUrl(): ?string

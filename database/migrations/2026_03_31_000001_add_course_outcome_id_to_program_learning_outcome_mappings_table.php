@@ -9,7 +9,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasColumn('program_learning_outcome_mappings', 'course_outcome_id')) {
+        if (! Schema::hasColumn('program_learning_outcome_mappings', 'course_outcome_id')) {
             Schema::table('program_learning_outcome_mappings', function (Blueprint $table) {
                 $table->foreignId('course_outcome_id')
                     ->nullable()
@@ -23,7 +23,7 @@ return new class extends Migration
             return;
         }
 
-        if (!$this->indexExists('program_learning_outcome_mappings', 'plo_map_course_id_idx')) {
+        if (! $this->indexExists('program_learning_outcome_mappings', 'plo_map_course_id_idx')) {
             Schema::table('program_learning_outcome_mappings', function (Blueprint $table) {
                 // Keep a dedicated index for the course_id foreign key before dropping
                 // the old unique index that currently satisfies that requirement.
@@ -37,7 +37,7 @@ return new class extends Migration
             });
         }
 
-        if (!$this->foreignKeyExists('program_learning_outcome_mappings', 'plo_map_course_outcome_fk')) {
+        if (! $this->foreignKeyExists('program_learning_outcome_mappings', 'plo_map_course_outcome_fk')) {
             Schema::table('program_learning_outcome_mappings', function (Blueprint $table) {
                 $table->foreign('course_outcome_id', 'plo_map_course_outcome_fk')
                     ->references('id')
@@ -46,7 +46,7 @@ return new class extends Migration
             });
         }
 
-        if (!$this->indexExists('program_learning_outcome_mappings', 'plo_mapping_course_plo_coid_unique')) {
+        if (! $this->indexExists('program_learning_outcome_mappings', 'plo_mapping_course_plo_coid_unique')) {
             Schema::table('program_learning_outcome_mappings', function (Blueprint $table) {
                 $table->unique(
                     ['course_id', 'program_learning_outcome_id', 'course_outcome_id'],
@@ -55,7 +55,7 @@ return new class extends Migration
             });
         }
 
-        if (!$this->indexExists('program_learning_outcome_mappings', 'plo_mapping_course_coid_index')) {
+        if (! $this->indexExists('program_learning_outcome_mappings', 'plo_mapping_course_coid_index')) {
             Schema::table('program_learning_outcome_mappings', function (Blueprint $table) {
                 $table->index(['course_id', 'course_outcome_id'], 'plo_mapping_course_coid_index');
             });
@@ -104,7 +104,7 @@ return new class extends Migration
             });
         }
 
-        if (!$this->indexExists('program_learning_outcome_mappings', 'plo_mapping_course_plo_co_unique')) {
+        if (! $this->indexExists('program_learning_outcome_mappings', 'plo_mapping_course_plo_co_unique')) {
             Schema::table('program_learning_outcome_mappings', function (Blueprint $table) {
                 $table->unique(
                     ['course_id', 'program_learning_outcome_id', 'co_code'],
@@ -118,15 +118,17 @@ return new class extends Migration
     {
         if ($this->isSqlite()) {
             $rows = DB::select("PRAGMA index_list('{$table}')");
+
             return collect($rows)->contains(function ($row) use ($indexName) {
                 $name = $row->name ?? ($row['name'] ?? null);
+
                 return $name === $indexName;
             });
         }
 
         $rows = DB::select("SHOW INDEX FROM `{$table}` WHERE Key_name = ?", [$indexName]);
 
-        return !empty($rows);
+        return ! empty($rows);
     }
 
     private function foreignKeyExists(string $table, string $foreignKeyName): bool

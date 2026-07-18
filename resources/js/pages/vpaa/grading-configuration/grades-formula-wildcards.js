@@ -229,7 +229,7 @@ export function initGradesFormulaWildcards() {
   const deleteGlobalFormulaError = document.getElementById('delete-global-formula-error');
   const deleteGlobalFormulaPassword = document.getElementById('delete-global-formula-password');
   const deleteGlobalButtons = document.querySelectorAll('.js-delete-global-formula');
-  const deleteGlobalFormulaBaseUrl = pageData.deleteGlobalFormulaBaseUrl || '/admin/grades-formula';
+  const deleteGlobalFormulaBaseUrl = pageData.deleteGlobalFormulaBaseUrl || '/vpaa/grading-configuration';
 
   deleteGlobalButtons.forEach((button) => {
     button.addEventListener('click', function () {
@@ -1106,13 +1106,12 @@ function initStructureTemplateManagement(config) {
   });
 }
 
-// Auto-initialize on DOMContentLoaded - only on admin grades formula wildcards page
+// Auto-initialize on DOMContentLoaded.
 document.addEventListener('DOMContentLoaded', function () {
-  // Only initialize if we're on the admin grades formula wildcards page
-  // Check for page-specific elements that only exist on that page
   if (
     document.querySelector('[data-section-container]') ||
     document.getElementById('create-template-modal') ||
+    document.querySelector('[data-page="vpaa-grading-configuration-wildcards"]') ||
     document.querySelector('[data-page="admin-grades-formula-wildcards"]')
   ) {
     initGradesFormulaWildcards();

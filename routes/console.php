@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Schema;
 try {
     if (Schema::hasTable('settings')) {
         $scheduleSetting = Setting::where('key', 'backup_schedule')->value('value');
-        
+
         if ($scheduleSetting) {
             $config = json_decode($scheduleSetting, true);
             $frequency = $config['frequency'] ?? 'never';

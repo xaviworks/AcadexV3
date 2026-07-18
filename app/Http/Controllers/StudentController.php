@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\FinalGrade;
+use App\Models\ReviewStudent;
 use App\Models\Student;
 use App\Models\StudentSubject;
 use App\Models\Subject;
-use App\Models\FinalGrade;
-use App\Models\ReviewStudent;
+use App\Traits\ActivityManagementTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use App\Traits\ActivityManagementTrait;
-
 
 class StudentController extends Controller
 {
@@ -27,32 +26,32 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         Gate::authorize('instructor');
-    
+
         $academicPeriodId = session('active_academic_period_id');
-    
-        $subjects = Subject::where(function($query) use ($academicPeriodId) {
+
+        $subjects = Subject::where(function ($query) {
             $query->where('instructor_id', Auth::id())
-                  ->orWhereHas('instructors', function($q) {
-                      $q->where('instructor_id', Auth::id());
-                  });
+                ->orWhereHas('instructors', function ($q) {
+                    $q->where('instructor_id', Auth::id());
+                });
         })
-        ->where('is_deleted', false)
-        ->where('academic_period_id', $academicPeriodId)
-        ->get();
-    
+            ->where('is_deleted', false)
+            ->where('academic_period_id', $academicPeriodId)
+            ->get();
+
         $courses = Course::where('department_id', Auth::user()->department_id)->get();
-    
+
         $students = null;
         if ($request->has('subject_id')) {
             $subject = Subject::where('id', $request->subject_id)
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('instructor_id', Auth::id())
-                          ->orWhereHas('instructors', function($q) {
-                              $q->where('instructor_id', Auth::id());
-                          });
+                        ->orWhereHas('instructors', function ($q) {
+                            $q->where('instructor_id', Auth::id());
+                        });
                 })
                 ->firstOrFail();
-    
+
             $students = $subject->studentsWithEnrollmentStatus()
                 ->where('students.is_deleted', 0)
                 ->orderBy('last_name')
@@ -66,35 +65,35 @@ class StudentController extends Controller
             ->orderByDesc('created_at')
             ->orderBy('is_confirmed')  // Show unconfirmed first
             ->get();
-    
+
         return view('instructor.manage-students', compact('subjects', 'courses', 'students', 'reviewStudents'));
     }
-    
 
     // ➕ Show Enrollment Form
     public function create()
     {
         Gate::authorize('instructor');
-    
+
         $academicPeriodId = session('active_academic_period_id');
-    
+
         $courses = Course::where('department_id', Auth::user()->department_id)->get();
-    
-                $subjects = Subject::where(function($q) {
-                        $q->where('instructor_id', Auth::id())
-                            ->orWhereHas('instructors', function($q2) { $q2->where('instructor_id', Auth::id()); });
-                })
+
+        $subjects = Subject::where(function ($q) {
+            $q->where('instructor_id', Auth::id())
+                ->orWhereHas('instructors', function ($q2) {
+                    $q2->where('instructor_id', Auth::id());
+                });
+        })
             ->where('academic_period_id', $academicPeriodId)
             ->get();
-    
+
         return view('instructor.add-student', compact('subjects', 'courses'));
     }
-    
 
     public function store(Request $request)
     {
         Gate::authorize('instructor');
-    
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
@@ -103,18 +102,20 @@ class StudentController extends Controller
             'subject_id' => 'required|exists:subjects,id',
             'course_id' => 'required|exists:courses,id',
         ]);
-    
+
         $academicPeriodId = session('active_academic_period_id');
         $instructor = Auth::user();
-    
+
         $subject = Subject::where('id', $request->subject_id)
             ->where('academic_period_id', $academicPeriodId)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('instructor_id', Auth::id())
-                  ->orWhereHas('instructors', function($qr) { $qr->where('instructor_id', Auth::id()); });
+                    ->orWhereHas('instructors', function ($qr) {
+                        $qr->where('instructor_id', Auth::id());
+                    });
             })
             ->firstOrFail();
-    
+
         $student = Student::create([
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
@@ -126,20 +127,19 @@ class StudentController extends Controller
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ]);
-    
+
         StudentSubject::create([
             'student_id' => $student->id,
             'subject_id' => $subject->id,
         ]);
-    
+
         // ✅ Automatically insert default activities for all terms
         foreach (['prelim', 'midterm', 'prefinal', 'final'] as $term) {
             $this->getOrCreateDefaultActivities($subject->id, $term);
         }
-    
+
         return redirect()->route('instructor.students.index', ['subject_id' => $subject->id])->with('success', 'Student enrolled successfully with default activities.');
-    }    
-    
+    }
 
     // 🗑 Drop Student from a Subject
     public function drop(Request $request, $studentId)
@@ -153,7 +153,7 @@ class StudentController extends Controller
         $academicPeriodId = session('active_academic_period_id');
 
         $subject = Subject::where('id', $request->subject_id)
-            ->when($academicPeriodId, fn($query) => $query->where('academic_period_id', $academicPeriodId))
+            ->when($academicPeriodId, fn ($query) => $query->where('academic_period_id', $academicPeriodId))
             ->where(function ($query) {
                 $query->where('instructor_id', Auth::id())
                     ->orWhereHas('instructors', function ($q) {
@@ -200,7 +200,7 @@ class StudentController extends Controller
         $academicPeriodId = session('active_academic_period_id');
 
         $subject = Subject::where('id', $request->subject_id)
-            ->when($academicPeriodId, fn($query) => $query->where('academic_period_id', $academicPeriodId))
+            ->when($academicPeriodId, fn ($query) => $query->where('academic_period_id', $academicPeriodId))
             ->where(function ($query) {
                 $query->where('instructor_id', Auth::id())
                     ->orWhereHas('instructors', function ($q) {

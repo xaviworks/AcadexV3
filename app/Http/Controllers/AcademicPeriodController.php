@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicPeriod;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
@@ -20,6 +19,7 @@ class AcademicPeriodController extends Controller
         Gate::authorize('admin');
 
         $periods = AcademicPeriod::orderBy('created_at', 'desc')->get();
+
         return view('admin.academic-periods.index', compact('periods'));
     }
 
@@ -47,11 +47,11 @@ class AcademicPeriodController extends Controller
                 });
             })
             ->get(['academic_year', 'semester'])
-            ->map(fn (AcademicPeriod $period) => $period->academic_year . '|' . $period->semester)
+            ->map(fn (AcademicPeriod $period) => $period->academic_year.'|'.$period->semester)
             ->all();
 
         $missingPeriods = array_values(array_filter($targetPeriods, function (array $period) use ($existingKeys) {
-            return ! in_array($period['academic_year'] . '|' . $period['semester'], $existingKeys, true);
+            return ! in_array($period['academic_year'].'|'.$period['semester'], $existingKeys, true);
         }));
 
         if (empty($missingPeriods)) {

@@ -10,8 +10,8 @@ use App\Models\ProgramLearningOutcomeMapping;
 use App\Models\Score;
 use App\Models\Student;
 use App\Models\Subject;
-use Illuminate\Support\Collection;
 use App\Traits\CourseOutcomeTrait;
+use Illuminate\Support\Collection;
 
 /**
  * Aggregates Course Outcome (CO) attainment across different scopes.
@@ -26,6 +26,7 @@ class CourseOutcomeReportingService
     use CourseOutcomeTrait;
 
     public const DEFAULT_PLO_COUNT = 13;
+
     public const MAX_PLO_COUNT = 20;
 
     private const IT_PROGRAM_OUTCOME_DESCRIPTIONS = [
@@ -43,6 +44,7 @@ class CourseOutcomeReportingService
         12 => 'Understand professional, ethical, legal, security and social issues and responsibilities in the utilization of information technology',
         13 => 'Recognize the need for and engage in planning self-learning and improving performance as a foundation for continuing professional development.',
     ];
+
     /**
      * Compute CO attainment for a single student in a specific subject across terms.
      * Returns structure compatible with computeCoAttainment plus term/column helpers.
@@ -63,7 +65,7 @@ class CourseOutcomeReportingService
             $activitiesByTerm[$term] = $activities;
 
             $coIds = $activities->pluck('course_outcome_id')->unique()->toArray();
-            if (!empty($coIds)) {
+            if (! empty($coIds)) {
                 $sortedCos = CourseOutcomes::whereIn('id', $coIds)
                     ->where('is_deleted', false)
                     ->orderBy('co_code')
@@ -92,8 +94,8 @@ class CourseOutcomeReportingService
                     ->where('is_deleted', false)
                     ->first();
                 $studentScores[$term][$activity->id] = [
-                    'score' => $score ? (int)$score->score : 0,
-                    'max' => (int)$activity->number_of_items,
+                    'score' => $score ? (int) $score->score : 0,
+                    'max' => (int) $activity->number_of_items,
                 ];
             }
         }
@@ -107,14 +109,15 @@ class CourseOutcomeReportingService
             : CourseOutcomes::whereIn('id', $finalCOs)->where('is_deleted', false)->get()->keyBy('id');
 
         // Sort final COs by numeric code order and map IDs to codes
-        usort($finalCOs, function($a, $b) use ($coDetails) {
+        usort($finalCOs, function ($a, $b) use ($coDetails) {
             $codeA = $coDetails[$a]->co_code ?? '';
             $codeB = $coDetails[$b]->co_code ?? '';
-            $numA = (int)preg_replace('/[^0-9]/', '', $codeA);
-            $numB = (int)preg_replace('/[^0-9]/', '', $codeB);
+            $numA = (int) preg_replace('/[^0-9]/', '', $codeA);
+            $numB = (int) preg_replace('/[^0-9]/', '', $codeB);
+
             return $numA <=> $numB;
         });
-        
+
         // Map CO IDs to CO codes for display
         $coCodesForHeader = [];
         foreach ($finalCOs as $coId) {
@@ -131,7 +134,7 @@ class CourseOutcomeReportingService
                 if (isset($coDetails[$coId])) {
                     $coCode = $coDetails[$coId]->co_code;
                     $percent = $coAttainment['per_term'][$term][$coId] ?? 0;
-                    
+
                     // Get raw scores from the original data
                     $rawScore = 0;
                     $maxScore = 0;
@@ -143,7 +146,7 @@ class CourseOutcomeReportingService
                             }
                         }
                     }
-                    
+
                     if ($maxScore > 0) {
                         $coResultsByCode[$term][$coCode] = [
                             'raw' => $rawScore,
@@ -155,7 +158,7 @@ class CourseOutcomeReportingService
                 }
             }
         }
-        
+
         // Add final/overall row with semester totals
         $finalCOs_data = [];
         foreach ($finalCOs as $coId) {
@@ -178,9 +181,10 @@ class CourseOutcomeReportingService
             'coResults' => $coResultsByCode,
         ];
     }
+
     /**
      * Compute aggregated CO attainment for a single subject across all enrolled students and terms.
-    * Returns: [co_code_number => ['raw' => int, 'max' => int, 'percent' => float, 'target_percentage' => int]]
+     * Returns: [co_code_number => ['raw' => int, 'max' => int, 'percent' => float, 'target_percentage' => int]]
      */
     public function aggregateSubject(int $subjectId): array
     {
@@ -214,26 +218,28 @@ class CourseOutcomeReportingService
         $scores = Score::whereIn('activity_id', $activityIds)
             ->whereIn('student_id', $students->pluck('id'))
             ->get()
-            ->groupBy(function ($s) { return $s->activity_id.'::'.$s->student_id; });
+            ->groupBy(function ($s) {
+                return $s->activity_id.'::'.$s->student_id;
+            });
 
         foreach ($activities as $activity) {
             // Determine CO number from the course_outcomes.co_code (e.g., CO1 -> 1)
             $coId = $activity->course_outcome_id;
             $co = CourseOutcomes::find($coId);
-            if (!$co || $co->is_deleted) {
+            if (! $co || $co->is_deleted) {
                 continue;
             }
-            $coNum = (int)preg_replace('/[^0-9]/', '', (string)$co->co_code);
+            $coNum = (int) preg_replace('/[^0-9]/', '', (string) $co->co_code);
             if ($coNum <= 0) {
                 // Fallback by position if code missing
                 $coNum = 0;
             }
 
-            if (!isset($coTotals[$coNum])) {
+            if (! isset($coTotals[$coNum])) {
                 $coTotals[$coNum] = ['raw' => 0, 'max' => 0];
             }
 
-            if (!isset($coTargets[$coNum])) {
+            if (! isset($coTargets[$coNum])) {
                 $coTargets[$coNum] = (int) ($co->target_percentage ?? 75);
             }
 
@@ -241,8 +247,8 @@ class CourseOutcomeReportingService
             foreach ($students as $student) {
                 $key = $activity->id.'::'.$student->id;
                 $score = $scores->get($key)?->first();
-                $coTotals[$coNum]['raw'] += $score ? (int)$score->score : 0;
-                $coTotals[$coNum]['max'] += (int)$activity->number_of_items;
+                $coTotals[$coNum]['raw'] += $score ? (int) $score->score : 0;
+                $coTotals[$coNum]['max'] += (int) $activity->number_of_items;
             }
         }
 
@@ -259,16 +265,17 @@ class CourseOutcomeReportingService
         }
 
         ksort($result);
+
         return $result;
     }
 
     /**
      * Aggregate CO attainment for a course (program) across all its subjects in a given academic period.
      * Returns same structure as aggregateSubject but merged across subjects.
-     * 
-     * @param int $courseId The course ID to aggregate
-     * @param int|null $academicPeriodId Optional academic period filter
-     * @param bool $excludeGE If true, excludes GE subjects (department_id = 1)
+     *
+     * @param  int  $courseId  The course ID to aggregate
+     * @param  int|null  $academicPeriodId  Optional academic period filter
+     * @param  bool  $excludeGE  If true, excludes GE subjects (department_id = 1)
      */
     public function aggregateCourse(int $courseId, ?int $academicPeriodId = null, bool $excludeGE = false): array
     {
@@ -355,18 +362,18 @@ class CourseOutcomeReportingService
             ->select('activity_id', 'student_id', 'score')
             ->get()
             ->groupBy(function ($score) {
-                return $score->activity_id . '::' . $score->student_id;
+                return $score->activity_id.'::'.$score->student_id;
             });
 
         foreach ($activities as $activity) {
             $courseOutcome = $activity->courseOutcome;
-            if (!$courseOutcome || $courseOutcome->is_deleted) {
+            if (! $courseOutcome || $courseOutcome->is_deleted) {
                 continue;
             }
 
             $courseOutcomeId = (int) $courseOutcome->id;
 
-            if (!isset($merged[$courseOutcomeId])) {
+            if (! isset($merged[$courseOutcomeId])) {
                 $merged[$courseOutcomeId] = [
                     'raw' => 0,
                     'max' => 0,
@@ -379,7 +386,7 @@ class CourseOutcomeReportingService
             $enrolledStudentIds = $subjectStudentMap->get($activity->subject_id, []);
 
             foreach ($enrolledStudentIds as $studentId) {
-                $key = $activity->id . '::' . $studentId;
+                $key = $activity->id.'::'.$studentId;
                 $score = $scores->get($key)?->first();
                 $merged[$courseOutcomeId]['raw'] += $score ? (int) $score->score : 0;
                 $merged[$courseOutcomeId]['max'] += (int) $activity->number_of_items;
@@ -460,25 +467,27 @@ class CourseOutcomeReportingService
             ->whereIn('student_id', $studentIds)
             ->select('activity_id', 'student_id', 'score')
             ->get()
-            ->groupBy(function ($s) { return $s->activity_id.'::'.$s->student_id; });
+            ->groupBy(function ($s) {
+                return $s->activity_id.'::'.$s->student_id;
+            });
 
         // Process each activity
         foreach ($activities as $activity) {
             $co = $activity->courseOutcome;
-            if (!$co || $co->is_deleted) {
+            if (! $co || $co->is_deleted) {
                 continue;
             }
-            
-            $coNum = (int)preg_replace('/[^0-9]/', '', (string)$co->co_code);
+
+            $coNum = (int) preg_replace('/[^0-9]/', '', (string) $co->co_code);
             if ($coNum <= 0) {
                 $coNum = 0;
             }
 
-            if (!isset($merged[$coNum])) {
+            if (! isset($merged[$coNum])) {
                 $merged[$coNum] = ['raw' => 0, 'max' => 0];
             }
 
-            if (!isset($coTargets[$coNum])) {
+            if (! isset($coTargets[$coNum])) {
                 $coTargets[$coNum] = (int) ($co->target_percentage ?? 75);
             }
 
@@ -488,8 +497,8 @@ class CourseOutcomeReportingService
             foreach ($enrolledStudentIds as $studentId) {
                 $key = $activity->id.'::'.$studentId;
                 $score = $scores->get($key)?->first();
-                $merged[$coNum]['raw'] += $score ? (int)$score->score : 0;
-                $merged[$coNum]['max'] += (int)$activity->number_of_items;
+                $merged[$coNum]['raw'] += $score ? (int) $score->score : 0;
+                $merged[$coNum]['max'] += (int) $activity->number_of_items;
             }
         }
 
@@ -505,6 +514,7 @@ class CourseOutcomeReportingService
         }
 
         ksort($result);
+
         return $result;
     }
 
@@ -534,6 +544,7 @@ class CourseOutcomeReportingService
                 'co' => $this->aggregateSubjects($subjectIds),
             ];
         }
+
         return $out;
     }
 
@@ -577,7 +588,7 @@ class CourseOutcomeReportingService
                     ->where('students.is_deleted', false)
                     ->whereHas('subjects', function ($q) use ($subject) {
                         $q->where('subject_id', $subject->id)
-                          ->where('student_subjects.is_deleted', false);
+                            ->where('student_subjects.is_deleted', false);
                     })
                     ->pluck('students.id')
                     ->all();
@@ -602,21 +613,23 @@ class CourseOutcomeReportingService
                     ->whereIn('student_id', $enrolledStudents)
                     ->where('is_deleted', false)
                     ->get()
-                    ->groupBy(function ($s) { return $s->activity_id.'::'.$s->student_id; });
+                    ->groupBy(function ($s) {
+                        return $s->activity_id.'::'.$s->student_id;
+                    });
 
                 // Aggregate CO data
                 foreach ($activities as $activity) {
                     $coId = $activity->course_outcome_id;
                     $co = CourseOutcomes::find($coId);
-                    if (!$co || $co->is_deleted) {
+                    if (! $co || $co->is_deleted) {
                         continue;
                     }
-                    $coNum = (int)preg_replace('/[^0-9]/', '', (string)$co->co_code);
+                    $coNum = (int) preg_replace('/[^0-9]/', '', (string) $co->co_code);
                     if ($coNum <= 0) {
                         continue;
                     }
 
-                    if (!isset($coTotals[$coNum])) {
+                    if (! isset($coTotals[$coNum])) {
                         $coTotals[$coNum] = ['raw' => 0, 'max' => 0];
                     }
 
@@ -624,14 +637,14 @@ class CourseOutcomeReportingService
                     foreach ($enrolledStudents as $studentId) {
                         $key = $activity->id.'::'.$studentId;
                         $score = $scores->get($key)?->first();
-                        $coTotals[$coNum]['raw'] += $score ? (int)$score->score : 0;
-                        $coTotals[$coNum]['max'] += (int)$activity->number_of_items;
+                        $coTotals[$coNum]['raw'] += $score ? (int) $score->score : 0;
+                        $coTotals[$coNum]['max'] += (int) $activity->number_of_items;
                     }
                 }
             }
 
             // Compute final percentages for this course
-            if (!empty($coTotals)) {
+            if (! empty($coTotals)) {
                 $result = [];
                 foreach ($coTotals as $num => $totals) {
                     $percent = $totals['max'] > 0 ? round(($totals['raw'] / $totals['max']) * 100, 2) : 0.0;
@@ -673,7 +686,7 @@ class CourseOutcomeReportingService
         }
 
         if (strlen($lettersOnly) === 1) {
-            return $lettersOnly . 'X';
+            return $lettersOnly.'X';
         }
 
         return substr($lettersOnly, 0, 2);
@@ -775,11 +788,12 @@ class CourseOutcomeReportingService
             $mappedLabels = $mappedCourseOutcomeIds
                 ->map(function ($courseOutcomeId) use ($availableCourseOutcomeRowsById) {
                     $row = $availableCourseOutcomeRowsById->get($courseOutcomeId);
-                    if (!$row) {
+                    if (! $row) {
                         return null;
                     }
 
                     $identifier = trim((string) ($row['co_identifier'] ?? ''));
+
                     return $identifier !== '' ? $identifier : (string) $row['co_code'];
                 })
                 ->filter()
@@ -796,6 +810,7 @@ class CourseOutcomeReportingService
             $legacyMappedMetrics = $legacyMappedCoCodes
                 ->map(function ($code) use ($coAggregates) {
                     $coNumber = $this->extractOutcomeNumber($code);
+
                     return $coAggregates[$coNumber] ?? null;
                 })
                 ->filter();
@@ -805,6 +820,7 @@ class CourseOutcomeReportingService
 
             if ($mappedMetrics->isEmpty()) {
                 $results[$plo->id] = null;
+
                 continue;
             }
 
@@ -834,7 +850,7 @@ class CourseOutcomeReportingService
                     ->map(fn ($id) => (int) $id);
 
                 $expandedLegacyRows = collect($items)
-                    ->filter(fn ($item) => empty($item->course_outcome_id) && !empty($item->co_code))
+                    ->filter(fn ($item) => empty($item->course_outcome_id) && ! empty($item->co_code))
                     ->flatMap(function ($item) use ($availableCourseOutcomeIdsByCode) {
                         return $availableCourseOutcomeIdsByCode->get($item->co_code, []);
                     })
@@ -979,16 +995,16 @@ class CourseOutcomeReportingService
 
     private function buildProgramOutcomeCode(string $prefix, int $index): string
     {
-        return $prefix . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+        return $prefix.str_pad((string) $index, 2, '0', STR_PAD_LEFT);
     }
 
     private function buildDefaultProgramOutcomeTitle(string $prefix, int $index): string
     {
         if ($prefix === 'IT') {
             return self::IT_PROGRAM_OUTCOME_DESCRIPTIONS[$index]
-                ?? ('Information Technology Program Outcome ' . $index);
+                ?? ('Information Technology Program Outcome '.$index);
         }
 
-        return 'Program Outcome ' . str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+        return 'Program Outcome '.str_pad((string) $index, 2, '0', STR_PAD_LEFT);
     }
 }

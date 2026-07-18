@@ -208,7 +208,7 @@ class HelpGuideController extends Controller
         $this->authorizeOwnership($helpGuide);
 
         $helpGuide->update([
-            'is_active' => !$helpGuide->is_active,
+            'is_active' => ! $helpGuide->is_active,
             'updated_by' => Auth::id(),
         ]);
 

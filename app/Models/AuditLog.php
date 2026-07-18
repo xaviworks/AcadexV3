@@ -47,10 +47,15 @@ class AuditLog extends Model
 
     // Event constants
     public const EVENT_CREATED = 'created';
+
     public const EVENT_UPDATED = 'updated';
+
     public const EVENT_DELETED = 'deleted';
+
     public const EVENT_RESTORED = 'restored';
+
     public const EVENT_BULK_UPDATED = 'bulk_updated';
+
     public const EVENT_BULK_DELETED = 'bulk_deleted';
 
     /**
@@ -75,6 +80,7 @@ class AuditLog extends Model
     public function getModelNameAttribute(): string
     {
         $class = class_basename($this->auditable_type);
+
         return preg_replace('/(?<!^)[A-Z]/', ' $0', $class);
     }
 
@@ -143,7 +149,7 @@ class AuditLog extends Model
     public function scopeForInstance($query, string $modelClass, int $modelId)
     {
         return $query->where('auditable_type', $modelClass)
-                     ->where('auditable_id', $modelId);
+            ->where('auditable_id', $modelId);
     }
 
     /**
@@ -173,6 +179,7 @@ class AuditLog extends Model
         if ($to) {
             $query->where('created_at', '<=', $to);
         }
+
         return $query;
     }
 

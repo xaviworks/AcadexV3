@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
-use App\Models\Subject;
 use App\Models\CourseOutcomes;
+use App\Models\Subject;
 use App\Services\GradesFormulaService;
 use App\Support\Grades\FormulaStructure;
 use App\Traits\ActivityManagementTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException as ValidationError;
 
 class ActivityController extends Controller
@@ -28,7 +28,7 @@ class ActivityController extends Controller
     {
         return $this->create($request);
     }
-    
+
     // ➕ Full Create Activity Form
     public function create(Request $request)
     {
@@ -40,7 +40,7 @@ class ActivityController extends Controller
         $instructorId = Auth::id();
         $directIds = Subject::where('instructor_id', $instructorId)
             ->where('is_deleted', false)
-            ->when($academicPeriodId, fn($q) => $q->where('academic_period_id', $academicPeriodId))
+            ->when($academicPeriodId, fn ($q) => $q->where('academic_period_id', $academicPeriodId))
             ->pluck('id');
         $pivotIds = \Illuminate\Support\Facades\DB::table('instructor_subject')
             ->where('instructor_id', $instructorId)
@@ -171,22 +171,23 @@ class ActivityController extends Controller
     public function addActivity(Request $request)
     {
         Gate::authorize('instructor');
-    
+
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'term' => 'required|in:prelim,midterm,prefinal,final',
         ]);
-    
+
         $subject = Subject::findOrFail($request->subject_id);
         $academicPeriodId = session('active_academic_period_id');
-    
+
         if ($academicPeriodId && $subject->academic_period_id !== (int) $academicPeriodId) {
             abort(403, 'This subject does not belong to the current academic period.');
         }
-    
+
         $courseOutcomes = \App\Models\CourseOutcomes::where('subject_id', $subject->id)
             ->where('is_deleted', false)
             ->get();
+
         return redirect()
             ->route('instructor.activities.create', [
                 'subject_id' => $subject->id,
@@ -199,7 +200,7 @@ class ActivityController extends Controller
     public function store(Request $request)
     {
         Gate::authorize('instructor');
-    
+
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'term' => 'required|in:prelim,midterm,prefinal,final',
@@ -209,10 +210,10 @@ class ActivityController extends Controller
             'course_outcome_id' => 'nullable|exists:course_outcomes,id',
             'create_single' => 'sometimes|boolean',
         ]);
-    
-    $subject = Subject::with('academicPeriod')->findOrFail($validated['subject_id']);
+
+        $subject = Subject::with('academicPeriod')->findOrFail($validated['subject_id']);
         $academicPeriodId = session('active_academic_period_id');
-    
+
         if ($academicPeriodId && $subject->academic_period_id !== (int) $academicPeriodId) {
             abort(403, 'This subject does not belong to the active academic period.');
         }
@@ -318,7 +319,7 @@ class ActivityController extends Controller
             for ($index = 0; $index < $createCount; $index++) {
                 $sequenceNumber = $sequenceStart + $index;
                 $title = $isBulkType
-                    ? trim($baseTitle . ' ' . $sequenceNumber)
+                    ? trim($baseTitle.' '.$sequenceNumber)
                     : $baseTitle;
 
                 Activity::create([
@@ -351,7 +352,7 @@ class ActivityController extends Controller
             'subject_id' => $subject->id,
             'term' => $request->term,
         ])->with('success', $message);
-    }    
+    }
 
     public function realign(Request $request)
     {
@@ -364,9 +365,11 @@ class ActivityController extends Controller
 
         $subject = Subject::with('academicPeriod')
             ->where('id', $validated['subject_id'])
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('instructor_id', Auth::id())
-                  ->orWhereHas('instructors', function($qr) { $qr->where('instructor_id', Auth::id()); });
+                    ->orWhereHas('instructors', function ($qr) {
+                        $qr->where('instructor_id', Auth::id());
+                    });
             })
             ->where('is_deleted', false)
             ->firstOrFail();
@@ -380,15 +383,15 @@ class ActivityController extends Controller
 
         $messageSegments = [];
         if ($summary['created'] > 0) {
-            $messageSegments[] = $summary['created'] . ' created';
+            $messageSegments[] = $summary['created'].' created';
         }
         if ($summary['archived'] > 0) {
-            $messageSegments[] = $summary['archived'] . ' archived';
+            $messageSegments[] = $summary['archived'].' archived';
         }
 
         $message = 'Activities realigned to match the active formula.';
         if (! empty($messageSegments)) {
-            $message .= ' (' . implode(', ', $messageSegments) . ')';
+            $message .= ' ('.implode(', ', $messageSegments).')';
         }
 
         $routeParameters = ['subject_id' => $subject->id];
@@ -419,7 +422,7 @@ class ActivityController extends Controller
             if ($subject->instructor_id !== Auth::id()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'You are not authorized to update this activity.'
+                    'message' => 'You are not authorized to update this activity.',
                 ], 403);
             }
 
@@ -428,7 +431,7 @@ class ActivityController extends Controller
             if ($academicPeriodId && $subject->academic_period_id !== (int) $academicPeriodId) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'This subject does not belong to the current academic period.'
+                    'message' => 'This subject does not belong to the current academic period.',
                 ], 403);
             }
 
@@ -488,8 +491,8 @@ class ActivityController extends Controller
                     'status' => 'success',
                     'message' => 'Activity updated successfully',
                     'data' => [
-                        'activity' => $activity->fresh()
-                    ]
+                        'activity' => $activity->fresh(),
+                    ],
                 ]);
             }
 
@@ -498,17 +501,17 @@ class ActivityController extends Controller
                 'term' => $activity->term,
             ])->with('success', 'Activity updated successfully.');
 
-    } catch (ValidationError $e) {
+        } catch (ValidationError $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validation failed',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while updating the activity',
-                'debug' => config('app.debug') ? $e->getMessage() : null
+                'debug' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }

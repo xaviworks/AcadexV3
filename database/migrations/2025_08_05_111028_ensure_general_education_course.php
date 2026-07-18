@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -14,8 +12,8 @@ return new class extends Migration
     {
         // Check if General Education course exists
         $geCourse = DB::table('courses')->where('course_description', 'General Education')->first();
-        
-        if (!$geCourse) {
+
+        if (! $geCourse) {
             // Create General Education course if it doesn't exist
             DB::table('courses')->insert([
                 'course_code' => 'GE',
@@ -26,7 +24,7 @@ return new class extends Migration
                 'updated_at' => now(),
             ]);
         }
-        
+
         // Ensure General Education course has ID = 1
         $geCourse = DB::table('courses')->where('course_description', 'General Education')->first();
         if ($geCourse && $geCourse->id != 1) {

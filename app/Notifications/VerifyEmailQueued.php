@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\URL;
 
 class VerifyEmailQueued extends Notification
 {
-
     /**
      * Create a new notification instance.
      */

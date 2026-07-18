@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
 
@@ -91,7 +91,6 @@ class User extends Authenticatable
         return $this->hasMany(UserDevice::class);
     }
 
-
     /**
      * Accessor to get the full name of the user.
      * Example: Juan Pedro Santos
@@ -119,7 +118,6 @@ class User extends Authenticatable
     /**
      * Relationships
      */
-
     public function subjects()
     {
         return $this->belongsToMany(Subject::class, 'instructor_subject', 'instructor_id', 'subject_id')

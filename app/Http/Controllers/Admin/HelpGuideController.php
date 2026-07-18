@@ -101,7 +101,7 @@ class HelpGuideController extends Controller
             $sortOrder = 0;
             foreach ($request->file('attachments') as $file) {
                 $filePath = $file->store('help-guides', 'public');
-                
+
                 $helpGuide->attachments()->create([
                     'file_path' => $filePath,
                     'file_name' => $file->getClientOriginalName(),
@@ -182,7 +182,7 @@ class HelpGuideController extends Controller
         if ($request->hasFile('attachment')) {
             // Delete old attachment if exists
             $helpGuide->deleteAttachment();
-            
+
             $file = $request->file('attachment');
             $attachmentName = $file->getClientOriginalName();
             $attachmentPath = $file->store('help-guides', 'public');
@@ -206,10 +206,10 @@ class HelpGuideController extends Controller
         if ($request->hasFile('attachments')) {
             $maxSortOrder = $helpGuide->attachments()->max('sort_order') ?? -1;
             $sortOrder = $maxSortOrder + 1;
-            
+
             foreach ($request->file('attachments') as $file) {
                 $filePath = $file->store('help-guides', 'public');
-                
+
                 $helpGuide->attachments()->create([
                     'file_path' => $filePath,
                     'file_name' => $file->getClientOriginalName(),
@@ -234,12 +234,12 @@ class HelpGuideController extends Controller
 
         // Delete legacy single attachment if exists
         $helpGuide->deleteAttachment();
-        
+
         // Delete all attachments files from storage
         foreach ($helpGuide->attachments as $attachment) {
             $attachment->deleteFile();
         }
-        
+
         // The cascade delete will handle removing attachment records
         $helpGuide->delete();
 
@@ -257,7 +257,7 @@ class HelpGuideController extends Controller
 
         // Delete file from storage
         $attachment->deleteFile();
-        
+
         // Delete database record
         $attachment->delete();
 
@@ -296,7 +296,7 @@ class HelpGuideController extends Controller
         Gate::authorize('admin');
 
         $helpGuide->update([
-            'is_active' => !$helpGuide->is_active,
+            'is_active' => ! $helpGuide->is_active,
             'updated_by' => Auth::id(),
         ]);
 
@@ -312,18 +312,18 @@ class HelpGuideController extends Controller
     public function downloadAttachment(HelpGuide $helpGuide)
     {
         // Allow any authenticated user to download if they can view the guide
-        if (!$helpGuide->hasAttachment()) {
+        if (! $helpGuide->hasAttachment()) {
             abort(404, 'Attachment not found.');
         }
 
         $user = Auth::user();
-        
+
         // Admin can always download
-        if ($user->role !== 3 && !$helpGuide->isVisibleToRole($user->role)) {
+        if ($user->role !== 3 && ! $helpGuide->isVisibleToRole($user->role)) {
             abort(403, 'You do not have permission to access this attachment.');
         }
 
-        if (!Storage::disk('public')->exists($helpGuide->attachment_path)) {
+        if (! Storage::disk('public')->exists($helpGuide->attachment_path)) {
             abort(404, 'Attachment file not found.');
         }
 
