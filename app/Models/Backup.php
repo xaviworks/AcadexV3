@@ -51,12 +51,16 @@ class Backup extends Model
 
     // Status constants
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_FAILED = 'failed';
 
     // Type constants
     public const TYPE_FULL = 'full';
+
     public const TYPE_SELECTIVE = 'selective';
+
     public const TYPE_CONFIG = 'config';
 
     /**
@@ -73,18 +77,18 @@ class Backup extends Model
     public function getSizeFormattedAttribute(): string
     {
         $bytes = $this->size;
-        
+
         if ($bytes >= 1073741824) {
-            return number_format($bytes / 1073741824, 2) . ' GB';
+            return number_format($bytes / 1073741824, 2).' GB';
         }
         if ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
+            return number_format($bytes / 1048576, 2).' MB';
         }
         if ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
+            return number_format($bytes / 1024, 2).' KB';
         }
-        
-        return $bytes . ' bytes';
+
+        return $bytes.' bytes';
     }
 
     /**

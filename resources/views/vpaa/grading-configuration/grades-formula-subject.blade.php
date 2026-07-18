@@ -27,13 +27,13 @@
             <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-book-fill text-success me-2"></i>{{ $subject->subject_code }} · {{ $subject->subject_description }}</h1>
             <p class="text-muted mb-0">Inspect formulas across all levels before editing this subject's grading scale</p>
         </div>
-        <a href="{{ $buildRoute('admin.gradesFormula.edit.subject', ['subject' => $subject->id]) }}" class="btn btn-success btn-sm">
+        <a href="{{ $buildRoute('vpaa.gradingConfiguration.subjects.edit', ['subject' => $subject->id]) }}" class="btn btn-success btn-sm">
             <i class="bi bi-pencil-square me-1"></i>{{ $subjectFormula ? 'Edit Subject Formula' : 'Create Subject Formula' }}
         </a>
     </div>
 
     <div class="d-flex justify-content-end mb-3">
-        <form method="GET" action="{{ route('admin.gradesFormula.subject', ['subject' => $subject->id]) }}" class="d-flex align-items-center gap-2 flex-wrap">
+        <form method="GET" action="{{ route('vpaa.gradingConfiguration.subjects.show', ['subject' => $subject->id]) }}" class="d-flex align-items-center gap-2 flex-wrap">
             <div class="d-flex flex-column">
                 <label class="text-success small mb-1">Academic Year</label>
                 <select name="academic_year" class="form-select form-select-sm max-w-180" onchange="this.form.submit()">
@@ -178,7 +178,7 @@
                     <form
                         id="subject-formula-apply-form"
                         method="POST"
-                        action="{{ $buildRoute('admin.gradesFormula.subject.apply', ['subject' => $subject->id]) }}"
+                        action="{{ $buildRoute('vpaa.gradingConfiguration.subjects.apply', ['subject' => $subject->id]) }}"
                         data-has-subject-formula="{{ $hasSubjectFormula ? '1' : '0' }}"
                         data-subject-name="{{ $subjectName }}"
                         data-requires-password="{{ $requiresPasswordPrompt ? '1' : '0' }}"
@@ -373,7 +373,7 @@ This subject already has a custom formula. Applying a structure template will re
                                         <p class="mb-0">Removing the custom formula will restore {{ $subjectName }} to {{ $departmentName }}’s baseline. You can always create a new subject formula afterward.</p>
                                     </div>
                                     <div class="modal-footer border-0 d-flex justify-content-between">
-                                        <form method="POST" action="{{ $buildRoute('admin.gradesFormula.subject.remove', ['subject' => $subject->id]) }}" class="d-inline">
+                                        <form method="POST" action="{{ $buildRoute('vpaa.gradingConfiguration.subjects.removeCustom', ['subject' => $subject->id]) }}" class="d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger">
@@ -397,7 +397,7 @@ This subject already has a custom formula. Applying a structure template will re
                         <h5 class="text-success fw-semibold mb-1">Add or Edit Subject Formula</h5>
                         <p class="text-muted mb-0">{{ $manageHeadline }} {{ $manageCopy }}</p>
                     </div>
-                    <a href="{{ $buildRoute('admin.gradesFormula.edit.subject', ['subject' => $subject->id]) }}" class="btn btn-outline-success px-4">{{ $manageCta }}</a>
+                    <a href="{{ $buildRoute('vpaa.gradingConfiguration.subjects.edit', ['subject' => $subject->id]) }}" class="btn btn-outline-success px-4">{{ $manageCta }}</a>
                 </div>
             </div>
         </div>
@@ -405,9 +405,9 @@ This subject already has a custom formula. Applying a structure template will re
 </div>
 @endsection
 
-{{-- JavaScript moved to: resources/js/pages/admin/grades-formula-subject.js --}}
+{{-- JavaScript moved to: resources/js/pages/vpaa/grading-configuration-subject.js --}}
 
-{{-- Styles: resources/css/admin/grades-formula.css --}}
+{{-- Styles: resources/css/vpaa/grading-configuration.css --}}
 @push('styles')
 
 @endpush

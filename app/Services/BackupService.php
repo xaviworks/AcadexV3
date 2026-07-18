@@ -53,7 +53,7 @@ class BackupService
     public function getAvailableTables(): array
     {
         $tables = Schema::getTableListing();
-        
+
         // Normalize table names: keep only the actual table name (last part)
         // This handles 3-part references and unexpected prefixes like '0.cache'
         $tables = array_map(function ($table) {
@@ -62,7 +62,7 @@ class BackupService
 
         // Filter out Laravel system tables
         $exclude = ['migrations', 'password_reset_tokens', 'personal_access_tokens', 'failed_jobs', 'jobs', 'job_batches', 'cache', 'cache_locks'];
-        
+
         return array_values(array_diff($tables, $exclude));
     }
 
@@ -109,8 +109,8 @@ class BackupService
      */
     public function createSelectiveBackup(?User $user, array $tables, ?string $name = null, ?string $notes = null): Backup
     {
-        $name = $name ?? 'Selective Backup (' . count($tables) . ' tables)';
-        
+        $name = $name ?? 'Selective Backup ('.count($tables).' tables)';
+
         return $this->createBackup(
             $user,
             Backup::TYPE_SELECTIVE,
@@ -140,8 +140,8 @@ class BackupService
     protected function createBackup(?User $user, string $type, array $tables, string $name, ?string $notes): Backup
     {
         $timestamp = now()->format('Y-m-d_H-i-s');
-        $filename = Str::slug($name) . '_' . $timestamp . '.zip';
-        $relativePath = $this->backupDir . '/' . $filename;
+        $filename = Str::slug($name).'_'.$timestamp.'.zip';
+        $relativePath = $this->backupDir.'/'.$filename;
         $fullPath = storage_path($relativePath);
 
         // Ensure backup directory exists
@@ -220,8 +220,8 @@ class BackupService
      */
     protected function performBackup(Backup $backup, array $tables, string $zipPath): void
     {
-        $zip = new ZipArchive();
-        
+        $zip = new ZipArchive;
+
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             throw new \RuntimeException('Could not create backup archive');
         }
@@ -244,7 +244,7 @@ class BackupService
                 // Export table data as JSON
                 $data = DB::table($table)->get()->toArray();
                 $jsonData = json_encode($data, JSON_PRETTY_PRINT);
-                
+
                 $zip->addFromString("data/{$table}.json", $jsonData);
 
                 // Export table schema
@@ -311,8 +311,8 @@ class BackupService
             throw new \RuntimeException('Backup file not found');
         }
 
-        $zip = new ZipArchive();
-        
+        $zip = new ZipArchive;
+
         if ($zip->open($fullPath) !== true) {
             throw new \RuntimeException('Could not open backup archive');
         }
@@ -352,7 +352,7 @@ class BackupService
     protected function ensureBackupDirectory(): void
     {
         $path = storage_path($this->backupDir);
-        
+
         if (! File::isDirectory($path)) {
             File::makeDirectory($path, 0755, true);
         }
@@ -364,7 +364,7 @@ class BackupService
     public function getStorageInfo(): array
     {
         $path = storage_path($this->backupDir);
-        
+
         if (! File::isDirectory($path)) {
             return [
                 'total_size' => 0,
@@ -375,7 +375,7 @@ class BackupService
 
         $totalSize = 0;
         $files = File::files($path);
-        
+
         foreach ($files as $file) {
             $totalSize += $file->getSize();
         }
@@ -393,16 +393,16 @@ class BackupService
     protected function formatBytes(int $bytes): string
     {
         if ($bytes >= 1073741824) {
-            return number_format($bytes / 1073741824, 2) . ' GB';
+            return number_format($bytes / 1073741824, 2).' GB';
         }
         if ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
+            return number_format($bytes / 1048576, 2).' MB';
         }
         if ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
+            return number_format($bytes / 1024, 2).' KB';
         }
-        
-        return $bytes . ' bytes';
+
+        return $bytes.' bytes';
     }
 
     /**

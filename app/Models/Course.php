@@ -31,7 +31,7 @@ class Course extends Model
         'department_id',
         'is_deleted',
         'created_by',
-        'updated_by'
+        'updated_by',
     ];
 
     protected static function booted()

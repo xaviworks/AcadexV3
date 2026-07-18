@@ -12,7 +12,7 @@ class AcademicPeriod extends Model
     use HasFactory;
 
     protected $fillable = [
-        'academic_year', 'semester', 'is_deleted', 'created_by', 'updated_by'
+        'academic_year', 'semester', 'is_deleted', 'created_by', 'updated_by',
     ];
 
     protected static function booted()

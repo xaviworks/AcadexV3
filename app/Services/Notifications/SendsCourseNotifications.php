@@ -2,11 +2,11 @@
 
 namespace App\Services\Notifications;
 
-use App\Models\User;
 use App\Models\Subject;
-use App\Notifications\SubjectAssigned;
+use App\Models\User;
 use App\Notifications\CourseAssigned;
 use App\Notifications\CourseRemoved;
+use App\Notifications\SubjectAssigned;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -18,6 +18,7 @@ trait SendsCourseNotifications
 {
     /**
      * Notify an instructor when they're assigned a new subject.
+     *
      * @deprecated Use notifyCourseAssigned() instead for email support.
      */
     public static function notifySubjectAssigned(
@@ -26,7 +27,7 @@ trait SendsCourseNotifications
         ?string $academicPeriod = null
     ): void {
         $assignedBy = Auth::user();
-        if (!$assignedBy || $assignedBy->id === $instructor->id) {
+        if (! $assignedBy || $assignedBy->id === $instructor->id) {
             return;
         }
 
@@ -43,13 +44,13 @@ trait SendsCourseNotifications
         ?string $academicPeriod = null
     ): void {
         $assignedBy = Auth::user();
-        if (!$assignedBy || $assignedBy->id === $instructor->id) {
+        if (! $assignedBy || $assignedBy->id === $instructor->id) {
             return;
         }
 
         try {
             $instructor->notify(new CourseAssigned($assignedBy, $subject, $academicPeriod));
-            
+
             Log::info('Course assigned notification sent', [
                 'instructor_id' => $instructor->id,
                 'subject_id' => $subject->id,
@@ -74,13 +75,13 @@ trait SendsCourseNotifications
         ?string $academicPeriod = null
     ): void {
         $removedBy = Auth::user();
-        if (!$removedBy || $removedBy->id === $instructor->id) {
+        if (! $removedBy || $removedBy->id === $instructor->id) {
             return;
         }
 
         try {
             $instructor->notify(new CourseRemoved($removedBy, $subject, $academicPeriod));
-            
+
             Log::info('Course removed notification sent', [
                 'instructor_id' => $instructor->id,
                 'subject_id' => $subject->id,

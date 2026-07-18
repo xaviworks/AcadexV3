@@ -55,7 +55,7 @@ class Announcement extends Model
      */
     public function isCurrentlyActive(): bool
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
 
@@ -77,7 +77,7 @@ class Announcement extends Model
      */
     public function shouldShowToUser(User $user): bool
     {
-        if (!$this->isCurrentlyActive()) {
+        if (! $this->isCurrentlyActive()) {
             return false;
         }
 
@@ -92,7 +92,7 @@ class Announcement extends Model
         }
 
         // Check role targeting
-        if ($this->target_roles !== null && !in_array($user->role, $this->target_roles)) {
+        if ($this->target_roles !== null && ! in_array($user->role, $this->target_roles)) {
             return false;
         }
 
@@ -104,7 +104,7 @@ class Announcement extends Model
      */
     public function markAsViewedBy(User $user): void
     {
-        if (!$this->viewedBy()->where('user_id', $user->id)->exists()) {
+        if (! $this->viewedBy()->where('user_id', $user->id)->exists()) {
             $this->viewedBy()->attach($user->id, ['viewed_at' => now()]);
         }
     }
@@ -123,6 +123,7 @@ class Announcement extends Model
     public function scopeCurrent($query)
     {
         $now = now();
+
         return $query->where('is_active', true)
             ->where(function ($q) use ($now) {
                 $q->whereNull('start_date')->orWhere('start_date', '<=', $now);
@@ -139,7 +140,7 @@ class Announcement extends Model
     {
         return $query->where(function ($q) use ($role) {
             $q->whereNull('target_roles')
-              ->orWhereJsonContains('target_roles', $role);
+                ->orWhereJsonContains('target_roles', $role);
         });
     }
 
@@ -152,6 +153,7 @@ class Announcement extends Model
         // For DESC (urgent first), we want ASC on FIELD
         // For ASC (low first), we want DESC on FIELD
         $order = $direction === 'desc' ? 'ASC' : 'DESC';
+
         return $query->orderByRaw("FIELD(priority, 'urgent', 'high', 'normal', 'low') {$order}");
     }
 
@@ -160,7 +162,7 @@ class Announcement extends Model
      */
     public function getPriorityOrderAttribute(): int
     {
-        return match($this->priority) {
+        return match ($this->priority) {
             'urgent' => 4,
             'high' => 3,
             'normal' => 2,

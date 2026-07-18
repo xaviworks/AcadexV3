@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-            
+
             $table->index('status');
             $table->index('type');
             $table->index('created_at');

@@ -98,9 +98,9 @@ class Student extends Model
     }
 
     public function scores()
-{
-    return $this->hasMany(\App\Models\Score::class, 'student_id');
-}
+    {
+        return $this->hasMany(\App\Models\Score::class, 'student_id');
+    }
 
     /**
      * Accessors
@@ -125,8 +125,7 @@ class Student extends Model
     }
 
     public function subject()
-{
-    return $this->belongsTo(Subject::class);
-}
-
+    {
+        return $this->belongsTo(Subject::class);
+    }
 }

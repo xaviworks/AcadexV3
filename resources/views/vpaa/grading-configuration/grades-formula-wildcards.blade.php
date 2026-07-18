@@ -134,7 +134,7 @@
             <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-sliders-fill text-success me-2"></i>Grades Formula Management</h1>
             <p class="text-muted mb-0">Select a wildcard to manage its grading scale</p>
         </div>
-        <form method="GET" action="{{ route('admin.gradesFormula') }}" class="d-flex align-items-center gap-2">
+        <form method="GET" action="{{ route('vpaa.gradingConfiguration.index') }}" class="d-flex align-items-center gap-2">
             <label class="text-success fw-semibold mb-0"><i class="bi bi-calendar-week me-1"></i>Academic Period:</label>
             <select name="academic_period_id" class="form-select form-select-sm" style="width: auto; min-width: 200px;" onchange="this.form.submit()">
                 <option value="">All Periods</option>
@@ -208,7 +208,7 @@
         <div data-section="overview" class="{{ $overviewActive ? '' : 'd-none' }}">
             <div class="section-scroll">
                 <div class="d-flex justify-content-end mb-3">
-                <form method="GET" action="{{ route('admin.gradesFormula') }}" class="d-flex align-items-center gap-2">
+                <form method="GET" action="{{ route('vpaa.gradingConfiguration.index') }}" class="d-flex align-items-center gap-2">
                     <label class="text-success small mb-0">Semester</label>
                     <select name="semester" class="form-select form-select-sm max-w-180" onchange="this.form.submit()">
                         <option value="" {{ request('semester') ? '' : 'selected' }}>All/Default</option>
@@ -234,8 +234,8 @@
                         $status = $summary['status'];
                     @endphp
                     <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                        <a href="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}" class="text-decoration-none text-reset">
-                            <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow" data-status="{{ $status }}" data-url="{{ $buildRoute('admin.gradesFormula.department', ['department' => $department->id]) }}">
+                        <a href="{{ $buildRoute('vpaa.gradingConfiguration.departments.show', ['department' => $department->id]) }}" class="text-decoration-none text-reset">
+                            <div class="wildcard-card card h-100 border-0 shadow-lg rounded-4 overflow-hidden cursor-pointer transition-transform-shadow" data-status="{{ $status }}" data-url="{{ $buildRoute('vpaa.gradingConfiguration.departments.show', ['department' => $department->id]) }}">
                             {{-- Top header --}}
                             <div class="position-relative header-height-80 bg-gradient-green-soft">
                                 <div class="wildcard-circle-positioned">
@@ -333,7 +333,7 @@
                                         <span class="badge bg-success-subtle text-success">Structure</span>
                                         @if(!empty($template['id']))
                                             <div class="btn-group btn-group-sm" role="group" aria-label="Manage structure template">
-                                                <a href="{{ route('admin.gradesFormula.structureTemplate.edit', array_merge(['template' => $template['id']], $preservedQuery)) }}" class="btn btn-outline-secondary">
+                                                <a href="{{ route('vpaa.gradingConfiguration.structureTemplates.edit', array_merge(['template' => $template['id']], $preservedQuery)) }}" class="btn btn-outline-secondary">
                                                     <i class="bi bi-pencil-square me-1"></i>Edit
                                                 </a>
                                                 <button type="button" class="btn btn-outline-danger js-delete-structure-template" data-template-id="{{ $template['id'] }}" data-template-label="{{ $template['label'] }}">
@@ -485,7 +485,7 @@
                                     @endif
 
                                     <div class="mt-auto d-flex gap-2">
-                                        <a href="{{ route('admin.gradesFormula.edit', ['formula' => $formula['id']]) }}" 
+                                        <a href="{{ route('vpaa.gradingConfiguration.formulas.edit', ['formula' => $formula['id']]) }}" 
                                            class="btn btn-sm btn-outline-primary flex-grow-1">
                                             <i class="bi bi-pencil me-1"></i>Edit
                                         </a>
@@ -608,7 +608,7 @@
                                 @endif
 
                                 <div class="mt-auto">
-                                    <a href="{{ $buildRoute('admin.gradesFormula.edit.department', ['department' => $dept->id]) }}" 
+                                    <a href="{{ $buildRoute('vpaa.gradingConfiguration.departments.edit', ['department' => $dept->id]) }}" 
                                        class="btn btn-sm btn-outline-success w-100">
                                         <i class="bi bi-pencil me-1"></i>Configure Baseline
                                     </a>
@@ -662,7 +662,7 @@
                                     @endif
 
                                     <div class="mt-auto d-flex gap-2">
-                                        <a href="{{ route('admin.gradesFormula.edit.department', array_merge(['department' => $formula['department_id']], $preservedQuery)) }}"
+                                        <a href="{{ route('vpaa.gradingConfiguration.departments.edit', array_merge(['department' => $formula['department_id']], $preservedQuery)) }}"
                                            class="btn btn-sm btn-outline-primary flex-grow-1">
                                             <i class="bi bi-pencil me-1"></i>Edit Department Baseline
                                         </a>
@@ -683,7 +683,7 @@
 <div class="modal fade" id="create-formula-modal" tabindex="-1" aria-labelledby="create-formula-modal-label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg rounded-4">
-            <form id="create-formula-form" method="POST" action="{{ route('admin.gradesFormula.store', $preservedQuery) }}">
+            <form id="create-formula-form" method="POST" action="{{ route('vpaa.gradingConfiguration.formulas.store', $preservedQuery) }}">
                 @csrf
                 <input type="hidden" name="scope_level" value="global">
                 <input type="hidden" name="base_score" value="60">
@@ -837,7 +837,7 @@
                 <form
                     id="delete-structure-template-form"
                     method="POST"
-                    data-action="{{ route('admin.gradesFormula.structureTemplate.destroy', array_merge(['template' => 'TEMPLATE_ID'], $preservedQuery)) }}"
+                    data-action="{{ route('vpaa.gradingConfiguration.structureTemplates.destroy', array_merge(['template' => 'TEMPLATE_ID'], $preservedQuery)) }}"
                 >
                     @csrf
                     @method('DELETE')
@@ -878,9 +878,9 @@
             <form
                 id="create-template-form"
                 method="POST"
-                action="{{ route('admin.gradesFormula.structureTemplate.store', $preservedQuery) }}"
-                data-store-action="{{ route('admin.gradesFormula.structureTemplate.store', $preservedQuery) }}"
-                data-update-action="{{ route('admin.gradesFormula.structureTemplate.update', array_merge(['template' => 'TEMPLATE_ID'], $preservedQuery)) }}"
+                action="{{ route('vpaa.gradingConfiguration.structureTemplates.store', $preservedQuery) }}"
+                data-store-action="{{ route('vpaa.gradingConfiguration.structureTemplates.store', $preservedQuery) }}"
+                data-update-action="{{ route('vpaa.gradingConfiguration.structureTemplates.update', array_merge(['template' => 'TEMPLATE_ID'], $preservedQuery)) }}"
                 data-initial-mode="{{ $templateModalMode }}"
             >
                 @csrf
@@ -989,7 +989,7 @@
 @endsection
 
 @push('scripts')
-{{-- JavaScript moved to: resources/js/pages/admin/grades-formula-wildcards.js --}}
+{{-- JavaScript moved to: resources/js/pages/vpaa/grading-configuration-wildcards.js --}}
 <script>
     window.pageData = {
         shouldReopenTemplateModal: @json($shouldReopenTemplateModal),
@@ -1005,6 +1005,6 @@
 </script>
 @endpush
 
-{{-- Styles: resources/css/admin/grades-formula.css --}}
+{{-- Styles: resources/css/vpaa/grading-configuration.css --}}
 @push('styles')
 @endpush

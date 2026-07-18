@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\GradesFormula;
 use App\Support\Grades\FormulaDefaults;
+use Illuminate\Database\Seeder;
 
 class GradesFormulaSeeder extends Seeder
 {

@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
 /**
  * Notification sent to rejected instructor applicants via email.
  * This notification is sent to the UnverifiedUser's email before their record is deleted.
- * 
+ *
  * Note: This extends base Notification since it doesn't need database storage
  * (the user record is being deleted).
  */
@@ -35,7 +35,7 @@ class InstructorRejected extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $rejectorRole = $this->rejectedBy ? match($this->rejectedBy->role) {
+        $rejectorRole = $this->rejectedBy ? match ($this->rejectedBy->role) {
             1 => 'Department Chairperson',
             4 => 'GE Coordinator',
             default => 'Administrator',

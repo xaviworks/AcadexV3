@@ -8,15 +8,13 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Term;
 use App\Models\TermGrade;
-use App\Models\FinalGrade;
-use App\Traits\GradeCalculationTrait;
-use App\Traits\ActivityManagementTrait;
 use App\Services\GradesFormulaService;
 use App\Services\NotificationService;
+use App\Traits\ActivityManagementTrait;
+use App\Traits\GradeCalculationTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 
 class GradeController extends Controller
 {
@@ -27,13 +25,13 @@ class GradeController extends Controller
     {
         $subjectId = $request->query('subject_id');
         $term = $request->query('term');
-        
-        if (!$subjectId) {
+
+        if (! $subjectId) {
             return response()->json([]);
         }
 
         $subject = Subject::find($subjectId);
-        if (!$subject) {
+        if (! $subject) {
             return response()->json([]);
         }
 
@@ -41,23 +39,25 @@ class GradeController extends Controller
         $outcomes = \App\Models\CourseOutcomes::where('subject_id', $subjectId)
             ->where('is_deleted', false)
             ->get()
-            ->sortBy(function($co) {
+            ->sortBy(function ($co) {
                 // Extract the numeric part after the last space or dot for proper sorting
                 preg_match('/([\d\.]+)$/', $co->co_identifier, $matches);
+
                 return isset($matches[1]) ? floatval($matches[1]) : $co->co_identifier;
             });
 
-        $result = $outcomes->map(function($co) {
+        $result = $outcomes->map(function ($co) {
             return [
                 'id' => $co->id,
                 'code' => $co->co_code,
                 'identifier' => $co->co_identifier,
             ];
         });
-        
+
         return response()->json($result->values());
     }
-    use GradeCalculationTrait, ActivityManagementTrait;
+
+    use ActivityManagementTrait, GradeCalculationTrait;
 
     public function __construct()
     {
@@ -67,21 +67,20 @@ class GradeController extends Controller
     /**
      * Display the grade management dashboard for the instructor.
      *
-     * @param Request $request
      * @return \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
      */
     public function index(Request $request)
     {
         Gate::authorize('instructor');
-    
+
         $academicPeriodId = session('active_academic_period_id');
         $term = $request->term ?? 'prelim';
         $termLabels = $this->getTermLabelMap();
-    
+
         // Avoid slow orWhereHas EXISTS subquery — use two indexed lookups merged in memory
         $instructorId = Auth::id();
         $directIds = Subject::where('instructor_id', $instructorId)
-            ->when($academicPeriodId, fn($q) => $q->where('academic_period_id', $academicPeriodId))
+            ->when($academicPeriodId, fn ($q) => $q->where('academic_period_id', $academicPeriodId))
             ->where('is_deleted', false)
             ->pluck('id');
         $pivotIds = \Illuminate\Support\Facades\DB::table('instructor_subject')
@@ -101,7 +100,7 @@ class GradeController extends Controller
             ->groupBy('subject_id', 'term_id')
             ->get()
             ->groupBy('subject_id')
-            ->map(fn($rows) => $rows->pluck('graded_count', 'term_id'));
+            ->map(fn ($rows) => $rows->pluck('graded_count', 'term_id'));
 
         foreach ($subjects as $subject) {
             $total = $subject->students_count;
@@ -121,21 +120,23 @@ class GradeController extends Controller
                 default => 'completed',
             };
         }
-    
-            $students = $activities = $scores = $termGrades = [];
-            $subject = null;
-            $courseOutcomes = collect();
-            $activityTypes = [];
-            $passingGrade = null;
-            $formulaMeta = null;
-            $componentStatus = null;
-    
+
+        $students = $activities = $scores = $termGrades = [];
+        $subject = null;
+        $courseOutcomes = collect();
+        $activityTypes = [];
+        $passingGrade = null;
+        $formulaMeta = null;
+        $componentStatus = null;
+
         if ($request->filled('subject_id')) {
             $subject = Subject::where('id', $request->subject_id)
-                ->when($academicPeriodId, fn($q) => $q->where('academic_period_id', $academicPeriodId))
-                ->where(function($q) {
+                ->when($academicPeriodId, fn ($q) => $q->where('academic_period_id', $academicPeriodId))
+                ->where(function ($q) {
                     $q->where('instructor_id', Auth::id())
-                      ->orWhereHas('instructors', function($qr) { $qr->where('instructor_id', Auth::id()); });
+                        ->orWhereHas('instructors', function ($qr) {
+                            $qr->where('instructor_id', Auth::id());
+                        });
                 })
                 ->firstOrFail();
 
@@ -168,12 +169,13 @@ class GradeController extends Controller
             $courseOutcomes = \App\Models\CourseOutcomes::where('subject_id', $subject->id)
                 ->where('is_deleted', false)
                 ->get()
-                ->sortBy(function($co) {
+                ->sortBy(function ($co) {
                     // Extract the numeric part after the last space or dot for proper sorting
                     preg_match('/([\d\.]+)$/', $co->co_identifier, $matches);
+
                     return isset($matches[1]) ? floatval($matches[1]) : $co->co_identifier;
                 });
-                
+
             // Pre-fetch ALL scores for these activities in one query, keyed by student → activity
             $activityIds = $activities->pluck('id');
             $allScoresGrouped = Score::whereIn('activity_id', $activityIds)
@@ -194,7 +196,7 @@ class GradeController extends Controller
                 }
             }
         }
-    
+
         if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
             return view('instructor.partials.grade-body', compact(
                 'subject',
@@ -230,18 +232,20 @@ class GradeController extends Controller
     public function store(Request $request)
     {
         Gate::authorize('instructor');
-    
+
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'term' => 'required|in:prelim,midterm,prefinal,final',
             'scores' => 'required|array',
             'course_outcomes' => 'array',
         ]);
-    
+
         $subject = Subject::where('id', $request->subject_id)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('instructor_id', Auth::id())
-                  ->orWhereHas('instructors', function($qr) { $qr->where('instructor_id', Auth::id()); });
+                    ->orWhereHas('instructors', function ($qr) {
+                        $qr->where('instructor_id', Auth::id());
+                    });
             })
             ->firstOrFail();
         $termId = $this->getTermId($request->term);
@@ -253,7 +257,7 @@ class GradeController extends Controller
             null,
             session('active_academic_period_id')
         );
-    
+
         // Update course_outcome_id for each activity if provided
         if ($request->has('course_outcomes')) {
             foreach ($request->course_outcomes as $activityId => $coId) {
@@ -266,7 +270,7 @@ class GradeController extends Controller
         }
 
         $studentsGraded = 0; // Track students who actually had grades saved
-        $activeStudentIds = $subject->students()->pluck('students.id')->map(fn($id) => (int) $id)->all();
+        $activeStudentIds = $subject->students()->pluck('students.id')->map(fn ($id) => (int) $id)->all();
 
         foreach ($request->scores as $studentId => $activityScores) {
             if (! in_array((int) $studentId, $activeStudentIds, true)) {
@@ -274,7 +278,7 @@ class GradeController extends Controller
             }
 
             $hasNewOrChangedScores = false; // Track if this student has any new or changed scores
-            
+
             // Save individual scores
             foreach ($activityScores as $activityId => $score) {
                 // Only process if score is not null, not empty string, and not just whitespace
@@ -283,9 +287,9 @@ class GradeController extends Controller
                     $existingScore = Score::where('student_id', $studentId)
                         ->where('activity_id', $activityId)
                         ->first();
-                    
+
                     // If no existing score, or if the score changed, mark as having changes
-                    if (!$existingScore || $existingScore->score != $score) {
+                    if (! $existingScore || $existingScore->score != $score) {
                         Score::updateOrCreate(
                             ['student_id' => $studentId, 'activity_id' => $activityId],
                             ['score' => $score, 'updated_by' => Auth::id()]
@@ -297,7 +301,7 @@ class GradeController extends Controller
                     $existingScore = Score::where('student_id', $studentId)
                         ->where('activity_id', $activityId)
                         ->first();
-                    
+
                     if ($existingScore) {
                         $existingScore->delete();
                         $hasNewOrChangedScores = true;
@@ -319,7 +323,9 @@ class GradeController extends Controller
             foreach ($activities as $activity) {
                 /** @var \App\Models\Activity $activity */
                 $coId = $activity->course_outcome_id;
-                if (!$coId) continue;
+                if (! $coId) {
+                    continue;
+                }
                 $score = isset($request->scores[$studentId][$activity->id]) ? $request->scores[$studentId][$activity->id] : null;
                 if ($score !== null && $score !== '') {
                     $coScores[$coId]['score'] = ($coScores[$coId]['score'] ?? 0) + $score;
@@ -327,7 +333,9 @@ class GradeController extends Controller
                 }
             }
             foreach ($coScores as $coId => $data) {
-                if (!isset($data['score']) || !isset($data['max'])) continue;
+                if (! isset($data['score']) || ! isset($data['max'])) {
+                    continue;
+                }
                 \App\Models\CourseOutcomeAttainment::updateOrCreate(
                     [
                         'student_id' => $studentId,
@@ -343,13 +351,13 @@ class GradeController extends Controller
                 );
             }
             // --- END NEW ---
-            
+
             // Increment counter only if this student had new or changed scores
             if ($hasNewOrChangedScores) {
                 $studentsGraded++;
             }
         }
-        
+
         // Only notify when ALL students have completed term grades for this subject/term
         // This means the instructor has completed grading the subject for this term
         if ($studentsGraded > 0) {
@@ -358,13 +366,13 @@ class GradeController extends Controller
                 ->where('term_id', $termId)
                 ->distinct('student_id')
                 ->count('student_id');
-            
+
             // Only send notification if all students now have term grades (grading complete)
             if ($totalStudents > 0 && $gradedStudents >= $totalStudents) {
                 NotificationService::notifyGradeSubmitted($subject, $request->term, $totalStudents);
             }
         }
-        
+
         // Build success message and respond appropriately based on the request type
         $successMessage = 'Grades have been saved successfully.';
 
@@ -374,7 +382,7 @@ class GradeController extends Controller
                 'message' => $successMessage,
             ]);
         }
-    
+
         return redirect()->route('instructor.grades.index', [
             'subject_id' => $request->subject_id,
             'term' => $request->term,
@@ -384,7 +392,7 @@ class GradeController extends Controller
     public function ajaxSaveScore(Request $request)
     {
         Gate::authorize('instructor');
-    
+
         $request->validate([
             'student_id' => 'required|exists:students,id',
             'activity_id' => 'required|exists:activities,id',
@@ -393,7 +401,7 @@ class GradeController extends Controller
             'term' => 'required|in:prelim,midterm,prefinal,final',
             'course_outcome_id' => 'nullable|exists:course_outcomes,id',
         ]);
-    
+
         $studentId = $request->student_id;
         $subject = Subject::findOrFail($request->subject_id);
         $termId = $this->getTermId($request->term);
@@ -408,13 +416,13 @@ class GradeController extends Controller
                 'message' => 'Cannot update score for a dropped student.',
             ], 422);
         }
-    
+
         // Save the individual score
         Score::updateOrCreate(
             ['student_id' => $studentId, 'activity_id' => $request->activity_id],
             ['score' => $request->score, 'updated_by' => Auth::id()]
         );
-    
+
         // Calculate and update term grade
         $activities = $this->getOrCreateDefaultActivities($subject->id, $request->term);
         $formulaSettings = GradesFormulaService::getSettings(
@@ -425,13 +433,13 @@ class GradeController extends Controller
             session('active_academic_period_id')
         );
         $activityScores = $this->calculateActivityScores($activities, $studentId, $subject, $formulaSettings);
-        
+
         if ($activityScores['allScored'] && $activityScores['grade'] !== null) {
             $termGrade = round($activityScores['grade'], 2);
             $this->updateTermGrade($studentId, $subject->id, $termId, $subject->academic_period_id, $termGrade);
             $this->calculateAndUpdateFinalGrade($studentId, $subject, $subject->academic_period_id, $activityScores['formula']);
         }
-    
+
         return response()->json(['status' => 'success']);
     }
 
@@ -439,7 +447,7 @@ class GradeController extends Controller
     {
         $subject = Subject::findOrFail($request->subject_id);
         $term = $request->term;
-    
+
         $students = $subject->studentsWithEnrollmentStatus()
             ->where('students.is_deleted', false)
             ->orderBy('students.last_name')
@@ -461,28 +469,29 @@ class GradeController extends Controller
         $termLabels = $this->getTermLabelMap();
         $componentSnapshot = $this->buildComponentAlignmentSnapshot($subject, $termLabels, $term);
         $componentStatus = $componentSnapshot['terms'][$term] ?? null;
-        
+
         $courseOutcomes = \App\Models\CourseOutcomes::where('subject_id', $subject->id)
             ->where('is_deleted', false)
             ->get()
-            ->sortBy(function($co) {
+            ->sortBy(function ($co) {
                 // Extract the numeric part after the last space or dot for proper sorting
                 preg_match('/([\d\.]+)$/', $co->co_identifier, $matches);
+
                 return isset($matches[1]) ? floatval($matches[1]) : $co->co_identifier;
             });
-            
+
         $scores = [];
         $termGrades = [];
 
         foreach ($students as $student) {
             $activityScores = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings);
             $weights = $activityScores['weights'];
-            
+
             foreach ($activities as $activity) {
                 $scoreRecord = $student->scores()->where('activity_id', $activity->id)->first();
                 $scores[$student->id][$activity->id] = $scoreRecord?->score;
             }
-            
+
             if ($activityScores['allScored'] && $activityScores['grade'] !== null) {
                 $termGrades[$student->id] = round($activityScores['grade'], 2);
             } else {

@@ -17,7 +17,7 @@
         return $url . '?' . http_build_query($queryParams);
     };
 
-    $backRoute = $buildRoute('admin.gradesFormula', ['view' => 'formulas']);
+    $backRoute = $buildRoute('vpaa.gradingConfiguration.index', ['view' => 'formulas']);
 @endphp
 
 @section('content')
@@ -32,7 +32,7 @@
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{{ $buildRoute('admin.gradesFormula') }}" class="text-decoration-none link-success-green text-sm">
+                        <a href="{{ $buildRoute('vpaa.gradingConfiguration.index') }}" class="text-decoration-none link-success-green text-sm">
                             <i class="bi bi-sliders me-1"></i>Grades Formula
                         </a>
                     </li>
@@ -84,7 +84,7 @@
             <h5 class="mb-0 fw-semibold text-primary-green">Template Information</h5>
         </div>
         <div class="card-body p-4">
-            <form method="POST" action="{{ route('admin.gradesFormula.structureTemplate.update', $template) }}" x-data="structureTemplateEditor()" x-init="init()">
+            <form method="POST" action="{{ route('vpaa.gradingConfiguration.structureTemplates.update', $template) }}" x-data="structureTemplateEditor()" x-init="init()">
                 @csrf
                 @method('PUT')
 

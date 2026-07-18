@@ -2,12 +2,12 @@
 
 namespace App\Notifications;
 
-use App\Models\User;
 use App\Models\Subject;
+use App\Models\User;
 
 /**
  * Notification sent to Chairpersons when an instructor submits grades.
- * 
+ *
  * Admin view: Full technical details with IDs and metadata
  * User view: Friendly message with clear action
  */
@@ -37,18 +37,18 @@ class GradeSubmitted extends BaseNotification
 
     public function getAdminMessage(): string
     {
-        $instructorName = trim($this->instructor->first_name . ' ' . $this->instructor->last_name);
+        $instructorName = trim($this->instructor->first_name.' '.$this->instructor->last_name);
         $subjectInfo = "{$this->subject->subject_code} - {$this->subject->subject_description}";
         $termLabel = ucfirst($this->term);
-        
+
         return "[Grade Entry] {$instructorName} (ID: {$this->instructor->id}) submitted {$termLabel} grades for {$this->studentsGraded} student(s) in {$subjectInfo} (Subject ID: {$this->subject->id}, Course: {$this->subject->course_id})";
     }
 
     public function getUserMessage(): string
     {
-        $instructorName = trim($this->instructor->first_name . ' ' . $this->instructor->last_name);
+        $instructorName = trim($this->instructor->first_name.' '.$this->instructor->last_name);
         $termLabel = ucfirst($this->term);
-        
+
         return "{$instructorName} submitted {$termLabel} grades for {$this->studentsGraded} student(s) in {$this->subject->subject_code}";
     }
 

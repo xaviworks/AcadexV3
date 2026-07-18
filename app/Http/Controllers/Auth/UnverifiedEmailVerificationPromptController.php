@@ -18,7 +18,7 @@ class UnverifiedEmailVerificationPromptController extends Controller
     {
         $user = Auth::guard('unverified')->user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -28,7 +28,7 @@ class UnverifiedEmailVerificationPromptController extends Controller
                 ->where('department_code', 'GE')
                 ->exists();
 
-            $approvalMessage = $isGEDepartment 
+            $approvalMessage = $isGEDepartment
                 ? 'Your account request has been submitted and is pending GE Coordinator approval.'
                 : 'Your account request has been submitted and is pending Department Chairperson approval.';
 

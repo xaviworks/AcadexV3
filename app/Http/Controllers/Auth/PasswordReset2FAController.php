@@ -17,14 +17,14 @@ class PasswordReset2FAController extends Controller
      */
     public function show(): View|RedirectResponse
     {
-        if (!session('password_reset.requires_2fa')) {
+        if (! session('password_reset.requires_2fa')) {
             return redirect()->route('password.request');
         }
 
         $email = session('password_reset.email');
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('password.request')
                 ->withErrors(['email' => 'User not found.']);
         }
@@ -41,23 +41,23 @@ class PasswordReset2FAController extends Controller
             'code' => ['required', 'string', 'size:6'],
         ]);
 
-        if (!session('password_reset.requires_2fa')) {
+        if (! session('password_reset.requires_2fa')) {
             return redirect()->route('password.request');
         }
 
         $email = session('password_reset.email');
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('password.request')
                 ->withErrors(['email' => 'User not found.']);
         }
 
         // Verify the 2FA code
-        $google2fa = new Google2FA();
+        $google2fa = new Google2FA;
         $valid = $google2fa->verifyKey($user->two_factor_secret, $request->code);
 
-        if (!$valid) {
+        if (! $valid) {
             return back()->withErrors(['code' => 'The provided two factor authentication code was invalid.']);
         }
 

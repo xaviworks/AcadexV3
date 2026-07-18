@@ -24,13 +24,13 @@ class ProgramReportsController extends Controller
      */
     public function vpaaDepartment(Request $request, CourseOutcomeReportingService $service)
     {
-        $departmentId = (int)$request->input('department_id', 0);
-        $courseId = (int)$request->input('course_id', 0);
+        $departmentId = (int) $request->input('department_id', 0);
+        $courseId = (int) $request->input('course_id', 0);
         $periodId = $this->resolveRequiredAcademicPeriodId();
         $period = AcademicPeriod::find($periodId);
 
         // Step 1: Department chooser
-        if (!$departmentId) {
+        if (! $departmentId) {
             $departments = Department::where('is_deleted', false)
                 ->select('id', 'department_code', 'department_description')
                 ->orderBy('department_description')
@@ -48,7 +48,7 @@ class ProgramReportsController extends Controller
             ->findOrFail($departmentId);
 
         // Step 2: Program chooser inside selected department
-        if (!$courseId) {
+        if (! $courseId) {
             $courses = Course::where('department_id', $department->id)
                 ->where('is_deleted', false)
                 ->orderBy('course_code')
@@ -98,10 +98,10 @@ class ProgramReportsController extends Controller
     {
         $periodId = session('active_academic_period_id');
         $period = $periodId ? AcademicPeriod::find($periodId) : null;
-        
+
         $departmentId = 1; // GE department
         $department = Department::find($departmentId);
-        
+
         // Get CO data for GE subjects across all programs
         $byCourse = $service->aggregateGESubjectsAcrossCourses($periodId);
 
@@ -167,11 +167,12 @@ class ProgramReportsController extends Controller
         $validator->after(function ($validator) use ($request, $outcomePrefix) {
             $submitted = collect($request->input('plos', []));
             $activeRows = $submitted->filter(function ($plo) {
-                return !filter_var($plo['delete'] ?? false, FILTER_VALIDATE_BOOL);
+                return ! filter_var($plo['delete'] ?? false, FILTER_VALIDATE_BOOL);
             })->values();
 
             if ($activeRows->isEmpty()) {
                 $validator->errors()->add('plos', 'At least one PLO must remain configured.');
+
                 return;
             }
 
@@ -180,12 +181,12 @@ class ProgramReportsController extends Controller
             }
 
             $codes = [];
-            $codePattern = '/^' . preg_quote($outcomePrefix, '/') . '(0[1-9]|1[0-9]|20)$/';
+            $codePattern = '/^'.preg_quote($outcomePrefix, '/').'(0[1-9]|1[0-9]|20)$/';
             foreach ($activeRows as $index => $plo) {
                 $code = strtoupper(trim((string) ($plo['code'] ?? '')));
                 $title = trim((string) ($plo['title'] ?? ''));
 
-                if ($code === '' || !preg_match($codePattern, $code)) {
+                if ($code === '' || ! preg_match($codePattern, $code)) {
                     $validator->errors()->add(
                         "plos.$index.code",
                         sprintf('Outcome code must follow %s01 to %s20.', $outcomePrefix, $outcomePrefix)
@@ -227,6 +228,7 @@ class ProgramReportsController extends Controller
                     $existing[(int) $id]->update(['is_deleted' => true]);
                     ProgramLearningOutcomeMapping::where('program_learning_outcome_id', (int) $id)->delete();
                 }
+
                 continue;
             }
 
@@ -268,14 +270,16 @@ class ProgramReportsController extends Controller
         $validator->after(function ($validator) use ($request, $ploIds, $availableCourseOutcomeIds, $availableCoCodes) {
             $allowedPloIds = collect($ploIds)->map(fn ($id) => (int) $id)->all();
 
-             if (empty($availableCourseOutcomeIds) && !empty($request->input('mappings', []))) {
+            if (empty($availableCourseOutcomeIds) && ! empty($request->input('mappings', []))) {
                 $validator->errors()->add('mappings', 'No course outcomes are available to link for this program yet.');
+
                 return;
             }
 
             foreach ($request->input('mappings', []) as $ploId => $mappings) {
-                if (!in_array((int) $ploId, $allowedPloIds, true)) {
+                if (! in_array((int) $ploId, $allowedPloIds, true)) {
                     $validator->errors()->add('mappings', 'Invalid PLO selected for mapping.');
+
                     continue;
                 }
 
@@ -290,7 +294,7 @@ class ProgramReportsController extends Controller
                     $isLegacyCoCode = is_string($normalizedValue)
                         && in_array(strtoupper($normalizedValue), $availableCoCodes, true);
 
-                    if (!$isCourseOutcomeId && !$isLegacyCoCode) {
+                    if (! $isCourseOutcomeId && ! $isLegacyCoCode) {
                         $validator->errors()->add(
                             "mappings.$ploId.$index",
                             'Mappings can only use available course outcomes for this program.'
@@ -321,7 +325,7 @@ class ProgramReportsController extends Controller
                     $courseOutcomeId = (int) $mappingValue;
                     $courseOutcomeRow = $availableRowsById->get($courseOutcomeId);
 
-                    if (!$courseOutcomeRow) {
+                    if (! $courseOutcomeRow) {
                         continue;
                     }
 
@@ -338,7 +342,7 @@ class ProgramReportsController extends Controller
                 if (is_string($mappingValue)) {
                     $coCode = strtoupper($mappingValue);
 
-                    if (!in_array($coCode, $availableCoCodes, true)) {
+                    if (! in_array($coCode, $availableCoCodes, true)) {
                         continue;
                     }
 
@@ -368,7 +372,7 @@ class ProgramReportsController extends Controller
         $user = auth()->user();
         $departmentId = $user?->department_id;
 
-        if (!$departmentId) {
+        if (! $departmentId) {
             abort(403, 'You are not assigned to any department.');
         }
 
@@ -376,7 +380,7 @@ class ProgramReportsController extends Controller
             ->select('id', 'department_code', 'department_description')
             ->findOrFail($departmentId);
 
-        if (!$courseId) {
+        if (! $courseId) {
             $courses = Course::where('department_id', $department->id)
                 ->where('is_deleted', false)
                 ->orderBy('course_code')
@@ -420,7 +424,7 @@ class ProgramReportsController extends Controller
     {
         $courseId = auth()->user()?->course_id;
 
-        if (!$courseId) {
+        if (! $courseId) {
             abort(403, 'You are not assigned to any course.');
         }
 

@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -33,8 +33,8 @@ return new class extends Migration
 
             // Remove the first ID (keep it) and delete the rest
             array_shift($ids);
-            
-            if (!empty($ids)) {
+
+            if (! empty($ids)) {
                 DB::table('curriculum_subjects')->whereIn('id', $ids)->delete();
             }
         }

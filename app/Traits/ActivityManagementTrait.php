@@ -64,7 +64,7 @@ trait ActivityManagementTrait
                         'subject_id' => $subjectId,
                         'term' => $term,
                         'type' => $type,
-                        'title' => trim($label . ' ' . $sequence),
+                        'title' => trim($label.' '.$sequence),
                         'number_of_items' => 100,
                         'created_at' => now(),
                         'updated_at' => now(),
@@ -96,6 +96,7 @@ trait ActivityManagementTrait
     {
         if ($typeOrder->isEmpty()) {
             $query->orderBy('type');
+
             return;
         }
 
@@ -103,7 +104,7 @@ trait ActivityManagementTrait
         $bindings = [];
 
         foreach ($typeOrder as $index => $type) {
-            $case .= 'WHEN ? THEN ' . $index . ' ';
+            $case .= 'WHEN ? THEN '.$index.' ';
             $bindings[] = $type;
         }
 
@@ -130,6 +131,7 @@ trait ActivityManagementTrait
                 $detail['activity_type'] = mb_strtolower($detail['activity_type']);
                 $detail['base_type'] = FormulaStructure::baseActivityType($detail['activity_type']);
                 $detail['relative_weight_percent'] = $detail['relative_weight_percent'] ?? $detail['weight_percent'];
+
                 return $detail;
             })
             ->keyBy('activity_type');
@@ -205,7 +207,7 @@ trait ActivityManagementTrait
                             'subject_id' => $subject->id,
                             'term' => $termName,
                             'type' => $activityType,
-                            'title' => trim($label . ' ' . ($sequenceStart + $index)),
+                            'title' => trim($label.' '.($sequenceStart + $index)),
                             'number_of_items' => 100,
                             'course_outcome_id' => null,
                             'is_deleted' => false,
@@ -358,6 +360,7 @@ trait ActivityManagementTrait
         $structureDetails = collect($formulaSettings['meta']['weight_details'] ?? [])
             ->map(function (array $detail) {
                 $activityType = mb_strtolower($detail['activity_type']);
+
                 return [
                     'activity_type' => $activityType,
                     'label' => $detail['label'] ?? FormulaStructure::formatLabel($activityType),
@@ -458,4 +461,4 @@ trait ActivityManagementTrait
             'allowed_types' => $allowedTypes,
         ];
     }
-} 
+}

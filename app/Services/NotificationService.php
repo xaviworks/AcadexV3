@@ -12,7 +12,7 @@ use App\Services\Notifications\SendsSystemNotifications;
 
 /**
  * Central service for managing notifications throughout the application.
- * 
+ *
  * This service uses traits to organize notification logic by domain:
  * - SendsGradeNotifications: Grade submission notifications
  * - SendsCourseNotifications: Course assignment/removal notifications
@@ -21,16 +21,16 @@ use App\Services\Notifications\SendsSystemNotifications;
  * - SendsSecurityNotifications: Security alert notifications
  * - SendsSystemNotifications: System-wide announcements
  * - ManagesNotifications: Utility methods for fetching/managing notifications
- * 
+ *
  * @see \App\Services\Notifications for individual trait implementations
  */
 class NotificationService
 {
-    use SendsGradeNotifications;
+    use ManagesNotifications;
     use SendsCourseNotifications;
-    use SendsInstructorNotifications;
     use SendsGERequestNotifications;
+    use SendsGradeNotifications;
+    use SendsInstructorNotifications;
     use SendsSecurityNotifications;
     use SendsSystemNotifications;
-    use ManagesNotifications;
 }

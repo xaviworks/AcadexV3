@@ -5,7 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('grades_formula', function (Blueprint $table) {
@@ -51,9 +52,9 @@ return new class extends Migration {
     private function dropIndexIfExists(string $table, string $index): void
     {
         try {
-            $exists = DB::select('SHOW INDEX FROM `' . $table . '` WHERE `Key_name` = ?', [$index]);
+            $exists = DB::select('SHOW INDEX FROM `'.$table.'` WHERE `Key_name` = ?', [$index]);
             if (! empty($exists)) {
-                DB::statement('ALTER TABLE `' . $table . '` DROP INDEX `' . $index . '`');
+                DB::statement('ALTER TABLE `'.$table.'` DROP INDEX `'.$index.'`');
             }
         } catch (\Throwable $e) {
             // Ignore drop failures to keep migration idempotent across environments.
@@ -63,9 +64,9 @@ return new class extends Migration {
     private function createIndexSafely(string $table, string $index, string $sqlFragment): void
     {
         try {
-            $exists = DB::select('SHOW INDEX FROM `' . $table . '` WHERE `Key_name` = ?', [$index]);
+            $exists = DB::select('SHOW INDEX FROM `'.$table.'` WHERE `Key_name` = ?', [$index]);
             if (empty($exists)) {
-                DB::statement('ALTER TABLE `' . $table . '` ADD ' . $sqlFragment . '');
+                DB::statement('ALTER TABLE `'.$table.'` ADD '.$sqlFragment.'');
             }
         } catch (\Throwable $e) {
             // Ignore add failures; administrators can adjust manually if needed.

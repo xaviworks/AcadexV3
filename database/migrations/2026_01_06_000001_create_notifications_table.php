@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('data');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
-            
+
             // Additional indexes for performance
             $table->index(['notifiable_type', 'notifiable_id', 'read_at']);
             $table->index('created_at');

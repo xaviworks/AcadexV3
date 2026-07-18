@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register Brevo HTTP API mail transport (port 443, bypasses Railway SMTP block)
         Mail::extend('brevo', function (array $config) {
-            $factory = new \Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoTransportFactory();
+            $factory = new \Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoTransportFactory;
 
             return $factory->create(
                 new Dsn('brevo+api', 'default', $config['key'] ?? config('services.brevo.key'))

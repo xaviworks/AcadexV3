@@ -29,13 +29,13 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $department = Department::create([
-            'department_code' => 'VPP-' . Str::upper(Str::random(4)),
+            'department_code' => 'VPP-'.Str::upper(Str::random(4)),
             'department_description' => 'VPAA Program Report Department',
             'is_deleted' => false,
         ]);
 
         $course = Course::create([
-            'course_code' => 'VPR-' . Str::upper(Str::random(5)),
+            'course_code' => 'VPR-'.Str::upper(Str::random(5)),
             'course_description' => 'VPAA Program Report Course',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -90,7 +90,7 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
     public function test_dean_co_program_report_only_uses_selected_academic_period_data(): void
     {
         $department = Department::create([
-            'department_code' => 'DPP-' . Str::upper(Str::random(4)),
+            'department_code' => 'DPP-'.Str::upper(Str::random(4)),
             'department_description' => 'Dean Program Report Department',
             'is_deleted' => false,
         ]);
@@ -101,7 +101,7 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $course = Course::create([
-            'course_code' => 'DPR-' . Str::upper(Str::random(5)),
+            'course_code' => 'DPR-'.Str::upper(Str::random(5)),
             'course_description' => 'Dean Program Report Course',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -160,8 +160,8 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
         $suffix = Str::upper(Str::random(4));
 
         $subject = Subject::create([
-            'subject_code' => 'CPR-' . $suffix,
-            'subject_description' => 'Program report subject ' . $suffix,
+            'subject_code' => 'CPR-'.$suffix,
+            'subject_description' => 'Program report subject '.$suffix,
             'academic_period_id' => $period->id,
             'department_id' => $department->id,
             'course_id' => $course->id,
@@ -172,7 +172,7 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
             'subject_id' => $subject->id,
             'academic_period_id' => $period->id,
             'co_code' => 'CO1',
-            'co_identifier' => 'CO1-' . $suffix,
+            'co_identifier' => 'CO1-'.$suffix,
             'description' => 'Program report CO',
             'target_percentage' => 75,
             'created_by' => $actorId,
@@ -181,7 +181,7 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
         ]);
 
         $student = Student::create([
-            'first_name' => 'Student' . $suffix,
+            'first_name' => 'Student'.$suffix,
             'last_name' => 'Program',
             'department_id' => $department->id,
             'course_id' => $course->id,
@@ -203,7 +203,7 @@ class DeanVpaaCoProgramAcademicPeriodIsolationTest extends TestCase
             'subject_id' => $subject->id,
             'term' => 'prelim',
             'type' => 'quiz',
-            'title' => 'Quiz ' . $suffix,
+            'title' => 'Quiz '.$suffix,
             'course_outcome_id' => $courseOutcome->id,
             'number_of_items' => 100,
             'is_deleted' => false,

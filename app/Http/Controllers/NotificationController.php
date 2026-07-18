@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\NotificationService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -26,7 +26,7 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
         $category = $request->get('category');
-        
+
         // Initial load of notifications
         $result = NotificationService::getNotifications(
             $user,
@@ -41,7 +41,7 @@ class NotificationController extends Controller
         });
 
         $unreadCount = NotificationService::getUnreadCount($user);
-        
+
         // Get notification categories for filter
         $categories = [
             'all' => 'All Notifications',
@@ -98,6 +98,7 @@ class NotificationController extends Controller
     public function getUnreadCount(): JsonResponse
     {
         $count = NotificationService::getUnviewedCount(Auth::user());
+
         return response()->json(['count' => $count]);
     }
 
@@ -136,21 +137,21 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
         $since = $request->get('since');
-        
+
         $query = $user->notifications()
             ->orderBy('created_at', 'desc')
             ->limit(10);
-        
+
         if ($since) {
             $query->where('created_at', '>', $since);
         }
-        
+
         $notifications = $query->get();
-        
+
         $formatted = $notifications->map(function ($notification) use ($user) {
             return NotificationService::formatForResponse($notification, $user);
         });
-        
+
         return response()->json([
             'notifications' => $formatted,
             'count' => NotificationService::getUnviewedCount($user),
@@ -209,7 +210,7 @@ class NotificationController extends Controller
         $user = Auth::user();
         $prefs = $user->notificationPreferences;
 
-        if (!$prefs) {
+        if (! $prefs) {
             $prefs = \App\Models\NotificationPreference::getDefaults();
         }
 
@@ -233,8 +234,8 @@ class NotificationController extends Controller
         $user = Auth::user();
         $prefs = $user->notificationPreferences;
 
-        if (!$prefs) {
-            $prefs = new \App\Models\NotificationPreference();
+        if (! $prefs) {
+            $prefs = new \App\Models\NotificationPreference;
             $prefs->user_id = $user->id;
         }
 
@@ -246,7 +247,7 @@ class NotificationController extends Controller
             'quiet_start',
             'quiet_end',
         ]));
-        
+
         $prefs->save();
 
         return response()->json([
@@ -263,7 +264,7 @@ class NotificationController extends Controller
         $user = Auth::user();
         $notification = $user->notifications()->find($id);
 
-        if (!$notification) {
+        if (! $notification) {
             return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
         }
 

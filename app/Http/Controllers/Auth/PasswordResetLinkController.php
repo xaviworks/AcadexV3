@@ -32,14 +32,14 @@ class PasswordResetLinkController extends Controller
 
         // Check if user exists and has 2FA enabled
         $user = User::where('email', $request->email)->first();
-        
+
         if ($user && $user->two_factor_secret && $user->two_factor_confirmed_at) {
             // Store email in session for 2FA verification
             session([
                 'password_reset.email' => $request->email,
                 'password_reset.requires_2fa' => true,
             ]);
-            
+
             return redirect()->route('password.2fa.challenge');
         }
 

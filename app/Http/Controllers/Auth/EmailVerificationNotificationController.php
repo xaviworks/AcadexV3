@@ -22,13 +22,14 @@ class EmailVerificationNotificationController extends Controller
             $request->user()->sendEmailVerificationNotification();
         } catch (\Exception $e) {
             $msg = '[Acadex] Email verification notification failed'
-                . ' | exception=' . get_class($e)
-                . ' | error=' . $e->getMessage();
+                .' | exception='.get_class($e)
+                .' | error='.$e->getMessage();
             error_log($msg);
             Log::error('Email verification notification failed', [
-                'error'     => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'exception' => get_class($e),
             ]);
+
             return back()->with('warning', 'Could not send the verification email. Please try again later.');
         }
 

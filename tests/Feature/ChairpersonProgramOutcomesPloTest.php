@@ -401,8 +401,8 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $payload = ['plos' => []];
         for ($i = 1; $i <= 21; $i++) {
             $payload['plos'][] = [
-                'code' => 'PLO' . $i,
-                'title' => 'Program Learning Outcome ' . $i,
+                'code' => 'PLO'.$i,
+                'title' => 'Program Learning Outcome '.$i,
                 'display_order' => $i,
                 'is_active' => '1',
                 'delete' => '0',
@@ -732,7 +732,7 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
         $tag = $this->extractTagById($html, $id);
 
         if ($expectedValue === null) {
-            $attributePattern = '/\\b' . preg_quote($attribute, '/') . '(?:\\s*=\\s*("[^"]*"|\'[^\']*\'))?/i';
+            $attributePattern = '/\\b'.preg_quote($attribute, '/').'(?:\\s*=\\s*("[^"]*"|\'[^\']*\'))?/i';
 
             $this->assertMatchesRegularExpression(
                 $attributePattern,
@@ -743,7 +743,7 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
             return;
         }
 
-        $attributePattern = '/\\b' . preg_quote($attribute, '/') . '="' . preg_quote($expectedValue, '/') . '"/i';
+        $attributePattern = '/\\b'.preg_quote($attribute, '/').'="'.preg_quote($expectedValue, '/').'"/i';
 
         $this->assertMatchesRegularExpression(
             $attributePattern,
@@ -759,7 +759,7 @@ class ChairpersonProgramOutcomesPloTest extends TestCase
 
     private function extractTagById(string $html, string $id): string
     {
-        $idPattern = '/<[^>]*\\bid="' . preg_quote($id, '/') . '"[^>]*>/i';
+        $idPattern = '/<[^>]*\\bid="'.preg_quote($id, '/').'"[^>]*>/i';
         $found = preg_match($idPattern, $html, $tagMatches);
 
         if ($found !== 1) {

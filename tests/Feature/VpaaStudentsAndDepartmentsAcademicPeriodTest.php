@@ -23,13 +23,13 @@ class VpaaStudentsAndDepartmentsAcademicPeriodTest extends TestCase
         ]);
 
         $department = Department::create([
-            'department_code' => 'VPAA-' . Str::upper(Str::random(4)),
+            'department_code' => 'VPAA-'.Str::upper(Str::random(4)),
             'department_description' => 'VPAA Department',
             'is_deleted' => false,
         ]);
 
         $course = Course::create([
-            'course_code' => 'VC-' . Str::upper(Str::random(6)),
+            'course_code' => 'VC-'.Str::upper(Str::random(6)),
             'course_description' => 'VPAA Course',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -86,13 +86,13 @@ class VpaaStudentsAndDepartmentsAcademicPeriodTest extends TestCase
         ]);
 
         $department = Department::create([
-            'department_code' => 'CNT-' . Str::upper(Str::random(4)),
+            'department_code' => 'CNT-'.Str::upper(Str::random(4)),
             'department_description' => 'Counted Department',
             'is_deleted' => false,
         ]);
 
         $course = Course::create([
-            'course_code' => 'COUNT-' . Str::upper(Str::random(5)),
+            'course_code' => 'COUNT-'.Str::upper(Str::random(5)),
             'course_description' => 'Counting Course',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -149,7 +149,7 @@ class VpaaStudentsAndDepartmentsAcademicPeriodTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'DNEW-' . Str::upper(Str::random(6)),
+            'subject_code' => 'DNEW-'.Str::upper(Str::random(6)),
             'subject_description' => 'Direct New Subject',
             'year_level' => 1,
             'department_id' => $department->id,
@@ -160,7 +160,7 @@ class VpaaStudentsAndDepartmentsAcademicPeriodTest extends TestCase
         ]);
 
         $pivotSubject = Subject::create([
-            'subject_code' => 'PNEW-' . Str::upper(Str::random(6)),
+            'subject_code' => 'PNEW-'.Str::upper(Str::random(6)),
             'subject_description' => 'Pivot New Subject',
             'year_level' => 1,
             'department_id' => $department->id,
@@ -173,7 +173,7 @@ class VpaaStudentsAndDepartmentsAcademicPeriodTest extends TestCase
         $pivotSubject->instructors()->attach($pivotInstructor->id);
 
         Subject::create([
-            'subject_code' => 'DOLD-' . Str::upper(Str::random(6)),
+            'subject_code' => 'DOLD-'.Str::upper(Str::random(6)),
             'subject_description' => 'Direct Old Subject',
             'year_level' => 1,
             'department_id' => $department->id,
@@ -205,13 +205,13 @@ class VpaaStudentsAndDepartmentsAcademicPeriodTest extends TestCase
         ]);
 
         $department = Department::create([
-            'department_code' => 'INS-' . Str::upper(Str::random(4)),
+            'department_code' => 'INS-'.Str::upper(Str::random(4)),
             'department_description' => 'Instructor Department',
             'is_deleted' => false,
         ]);
 
         $course = Course::create([
-            'course_code' => 'IAC-' . Str::upper(Str::random(5)),
+            'course_code' => 'IAC-'.Str::upper(Str::random(5)),
             'course_description' => 'Instructor Assignment Course',
             'department_id' => $department->id,
             'is_deleted' => false,
@@ -251,7 +251,7 @@ class VpaaStudentsAndDepartmentsAcademicPeriodTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'VIN-' . Str::upper(Str::random(6)),
+            'subject_code' => 'VIN-'.Str::upper(Str::random(6)),
             'subject_description' => 'Current Instructor Subject',
             'year_level' => 1,
             'department_id' => $department->id,
@@ -262,7 +262,7 @@ class VpaaStudentsAndDepartmentsAcademicPeriodTest extends TestCase
         ]);
 
         Subject::create([
-            'subject_code' => 'VIO-' . Str::upper(Str::random(6)),
+            'subject_code' => 'VIO-'.Str::upper(Str::random(6)),
             'subject_description' => 'Legacy Instructor Subject',
             'year_level' => 1,
             'department_id' => $department->id,

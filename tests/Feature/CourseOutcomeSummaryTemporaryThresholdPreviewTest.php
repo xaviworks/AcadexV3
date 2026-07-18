@@ -33,13 +33,13 @@ class CourseOutcomeSummaryTemporaryThresholdPreviewTest extends TestCase
         $response->assertOk();
         $response->assertSee('id="summary-target-level-form"', false);
         $response->assertSee('data-co-target-input="true"', false);
-        $response->assertSee('id="co-target-' . $co->id . '"', false);
+        $response->assertSee('id="co-target-'.$co->id.'"', false);
         $response->assertSee('data-co-target-label="true"', false);
         $response->assertSee('data-met-target-count-cell="true"', false);
         $response->assertSee('data-met-target-percentage-cell="true"', false);
         $response->assertSee('id="co-threshold-preview-data"', false);
         $response->assertSee('"initial_targets"', false);
-        $response->assertSee('"' . $co->id . '":' . $co->target_percentage, false);
+        $response->assertSee('"'.$co->id.'":'.$co->target_percentage, false);
         $response->assertSee('action="javascript:void(0)"', false);
     }
 
@@ -59,12 +59,12 @@ class CourseOutcomeSummaryTemporaryThresholdPreviewTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('data-co-target-input="true"', false);
-        $response->assertSee('id="co-target-' . $co->id . '"', false);
+        $response->assertSee('id="co-target-'.$co->id.'"', false);
         $response->assertSee('data-met-target-count-cell="true"', false);
         $response->assertSee('data-met-target-percentage-cell="true"', false);
         $response->assertSee('id="co-threshold-preview-data"', false);
         $response->assertSee('"initial_targets"', false);
-        $response->assertSee('"' . $co->id . '":' . $co->target_percentage, false);
+        $response->assertSee('"'.$co->id.'":'.$co->target_percentage, false);
         $response->assertSee('action="javascript:void(0)"', false);
     }
 
@@ -74,8 +74,8 @@ class CourseOutcomeSummaryTemporaryThresholdPreviewTest extends TestCase
     private function createSubjectWithSummaryData(User $owner, int $targetPercentage): array
     {
         $department = Department::create([
-            'department_code' => 'DP-' . Str::upper(Str::random(4)),
-            'department_description' => 'Department ' . Str::upper(Str::random(5)),
+            'department_code' => 'DP-'.Str::upper(Str::random(4)),
+            'department_description' => 'Department '.Str::upper(Str::random(5)),
             'is_deleted' => false,
         ]);
 
@@ -86,15 +86,15 @@ class CourseOutcomeSummaryTemporaryThresholdPreviewTest extends TestCase
         ]);
 
         $course = Course::create([
-            'course_code' => 'CRS-' . Str::upper(Str::random(6)),
-            'course_description' => 'Course ' . Str::upper(Str::random(5)),
+            'course_code' => 'CRS-'.Str::upper(Str::random(6)),
+            'course_description' => 'Course '.Str::upper(Str::random(5)),
             'department_id' => $department->id,
             'is_deleted' => false,
         ]);
 
         $subject = Subject::create([
-            'subject_code' => 'SUB-' . Str::upper(Str::random(6)),
-            'subject_description' => 'Subject ' . Str::upper(Str::random(5)),
+            'subject_code' => 'SUB-'.Str::upper(Str::random(6)),
+            'subject_description' => 'Subject '.Str::upper(Str::random(5)),
             'department_id' => $department->id,
             'course_id' => $course->id,
             'academic_period_id' => $period->id,

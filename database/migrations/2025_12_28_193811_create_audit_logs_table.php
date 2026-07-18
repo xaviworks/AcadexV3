@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->json('metadata')->nullable(); // additional context
             $table->timestamps();
-            
+
             $table->index(['auditable_type', 'auditable_id']);
             $table->index('user_id');
             $table->index('event');

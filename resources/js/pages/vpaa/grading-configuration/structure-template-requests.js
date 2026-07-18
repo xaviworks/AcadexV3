@@ -236,8 +236,9 @@ export function initStructureTemplateRequestsPage() {
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
   if (
+    document.querySelector('[data-page="vpaa-grading-configuration-template-requests"]') ||
     document.querySelector('[data-page="admin-structure-template-requests"]') ||
-    window.location.pathname.includes('/admin/structure-template-requests')
+    window.location.pathname.includes('/vpaa/grading-configuration/template-requests')
   ) {
     initStructureTemplateRequestsPage();
   }

@@ -16,14 +16,14 @@ import './admin/sessions.js';
 import './admin/subjects.js';
 import './admin/departments.js';
 import './admin/courses.js';
-import './admin/structure-template-requests.js';
-import './admin/grades-formula-course.js';
-import './admin/grades-formula-edit-global.js';
-import './admin/grades-formula-department.js';
-import './admin/grades-formula-select-period.js';
-import './admin/grades-formula-subject.js';
-import './admin/grades-formula-form.js';
-import './admin/grades-formula-wildcards.js';
+import './vpaa/grading-configuration/structure-template-requests.js';
+import './vpaa/grading-configuration/grades-formula-course.js';
+import './vpaa/grading-configuration/grades-formula-edit-global.js';
+import './vpaa/grading-configuration/grades-formula-department.js';
+import './vpaa/grading-configuration/grades-formula-select-period.js';
+import './vpaa/grading-configuration/grades-formula-subject.js';
+import './vpaa/grading-configuration/grades-formula-form.js';
+import './vpaa/grading-configuration/grades-formula-wildcards.js';
 
 // Dashboard pages
 import './dashboard/instructor.js';
@@ -80,14 +80,6 @@ export function initPage(pageName) {
     'admin.subjects': window.initAdminSubjectsPage,
     'admin.departments': window.initAdminDepartmentsPage,
     'admin.courses': window.initAdminCoursesPage,
-    'admin.structure-template-requests': window.initStructureTemplateRequestsPage,
-    'admin.grades-formula-course': window.initGradesFormulaCourse,
-    'admin.grades-formula-edit-global': window.initGradesFormulaEditGlobal,
-    'admin.grades-formula-department': window.initGradesFormulaDepartment,
-    'admin.grades-formula-select-period': window.initGradesFormulaSelectPeriod,
-    'admin.grades-formula-subject': window.initGradesFormulaSubject,
-    'admin.grades-formula-form': window.initGradesFormulaForm,
-    'admin.grades-formula-wildcards': window.initGradesFormulaWildcards,
 
     // Dashboard
     'dashboard.instructor': window.initSubjectPerformanceChart,
@@ -128,6 +120,14 @@ export function initPage(pageName) {
     'vpaa.students': window.initVpaaStudentsPage,
     'vpaa.students-departments': window.initVpaaStudentsDepartmentsPage,
     'vpaa.grades': window.initVpaaGradesPage,
+    'vpaa.grading-configuration.template-requests': window.initStructureTemplateRequestsPage,
+    'vpaa.grading-configuration.course': window.initGradesFormulaCourse,
+    'vpaa.grading-configuration.edit-global': window.initGradesFormulaEditGlobal,
+    'vpaa.grading-configuration.department': window.initGradesFormulaDepartment,
+    'vpaa.grading-configuration.select-period': window.initGradesFormulaSelectPeriod,
+    'vpaa.grading-configuration.subject': window.initGradesFormulaSubject,
+    'vpaa.grading-configuration.form': window.initGradesFormulaForm,
+    'vpaa.grading-configuration.wildcards': window.initGradesFormulaWildcards,
     'vpaa.reports.attainment': window.initVpaaCourseOutcomeResultsWildcardsPage,
     'vpaa.reports.attainment.subject': window.initVpaaCourseOutcomeResultsPage,
     'vpaa.course-outcome-results': window.initVpaaCourseOutcomeResultsPage,

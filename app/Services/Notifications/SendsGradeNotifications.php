@@ -2,8 +2,8 @@
 
 namespace App\Services\Notifications;
 
-use App\Models\User;
 use App\Models\Subject;
+use App\Models\User;
 use App\Notifications\GradeSubmitted;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
@@ -23,7 +23,7 @@ trait SendsGradeNotifications
         int $studentsGraded
     ): void {
         $instructor = Auth::user();
-        if (!$instructor) {
+        if (! $instructor) {
             return;
         }
 

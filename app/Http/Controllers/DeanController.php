@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Models\Subject;
 use App\Models\FinalGrade;
 use App\Models\Student;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,7 +73,7 @@ class DeanController extends Controller
 
         $selectedCourseId = $request->input('course_id');
         $academicPeriodId = session('active_academic_period_id');
-        
+
         $query = Student::with('course')
             ->where('department_id', Auth::user()->department_id)
             ->where('is_deleted', false)
@@ -115,26 +115,26 @@ class DeanController extends Controller
     public function viewGrades(Request $request)
     {
         Gate::authorize('dean');
-    
+
         $departmentId = Auth::user()->department_id;
         $academicPeriodId = session('active_academic_period_id'); // Assuming academic period is stored in session
-    
+
         // List of courses in the dean's department
         $courses = Course::where('department_id', $departmentId)
             ->where('is_deleted', false)
             ->orderBy('course_code')
             ->get();
-    
+
         // Initialize collections
         $students = collect();
         $finalGrades = collect();
         $instructors = collect();
         $subjects = collect();
-    
+
         // Step 1: Filter by selected course
         if ($request->filled('course_id')) {
             $courseId = $request->input('course_id');
-    
+
             // Step 2: Get instructors for the selected course
             $instructors = User::where('role', 0) // role 0 = instructor
                 ->where('department_id', $departmentId)
@@ -167,17 +167,17 @@ class DeanController extends Controller
                 })
                 ->orderBy('last_name')
                 ->get();
-    
+
             // Step 3: Get subjects for the selected course and instructor
             if ($request->filled('instructor_id') && $academicPeriodId) {
                 $instructorId = $request->input('instructor_id');
-    
+
                 $subjects = Subject::where([
-                        ['department_id', $departmentId],
-                        ['academic_period_id', $academicPeriodId],
-                        ['course_id', $courseId],
-                        ['is_deleted', false],
-                    ])
+                    ['department_id', $departmentId],
+                    ['academic_period_id', $academicPeriodId],
+                    ['course_id', $courseId],
+                    ['is_deleted', false],
+                ])
                     ->where(function ($query) use ($instructorId) {
                         $query->where('instructor_id', $instructorId)
                             ->orWhereHas('instructors', function ($subQuery) use ($instructorId) {
@@ -186,11 +186,11 @@ class DeanController extends Controller
                     })
                     ->orderBy('subject_code')
                     ->get();
-    
+
                 // Step 4: Get students for the selected subject and course
                 if ($request->filled('subject_id')) {
                     $subjectId = $request->input('subject_id');
-    
+
                     // Ensure the selected subject belongs to the selected instructor and scope.
                     $subject = Subject::with('students')
                         ->where('id', $subjectId)
@@ -205,7 +205,7 @@ class DeanController extends Controller
                                 });
                         })
                         ->firstOrFail();
-    
+
                     $students = $subject->studentsWithEnrollmentStatus()
                         ->where('students.department_id', $departmentId)
                         ->where('students.course_id', $courseId)
@@ -213,7 +213,7 @@ class DeanController extends Controller
                         ->orderBy('students.last_name')
                         ->orderBy('students.first_name')
                         ->get();
-    
+
                     // Get final grades for the students in the selected subject
                     $finalGrades = FinalGrade::where('subject_id', $subjectId)
                         ->whereIn('student_id', $students->pluck('id'))
@@ -222,7 +222,7 @@ class DeanController extends Controller
                 }
             }
         }
-    
+
         return view('dean.grades', compact(
             'courses',
             'students',
@@ -231,5 +231,4 @@ class DeanController extends Controller
             'subjects'
         ));
     }
-    
 }

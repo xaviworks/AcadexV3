@@ -20,8 +20,7 @@ class AuthenticatedSessionController extends Controller
     public function __construct(
         private readonly LoginFlowService $loginFlowService,
         private readonly TrackedSessionService $trackedSessionService,
-    ) {
-    }
+    ) {}
 
     /**
      * Display the login view.

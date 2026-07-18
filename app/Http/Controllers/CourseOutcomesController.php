@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\
-{
-    CourseOutcomes,
-    Subject
-};
 use App\Models\AcademicPeriod;
+use App\Models\CourseOutcomes;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -23,13 +20,13 @@ class CourseOutcomesController extends Controller
     {
         $subjectId = $request->query('subject_id');
         $term = $request->query('term');
-        if (!$subjectId || !$term) {
+        if (! $subjectId || ! $term) {
             return response()->json([]);
         }
 
         // Find the academic period for the subject and term
         $subject = Subject::find($subjectId);
-        if (!$subject) {
+        if (! $subject) {
             return response()->json([]);
         }
         $academicPeriodId = $subject->academic_period_id;
@@ -40,7 +37,7 @@ class CourseOutcomesController extends Controller
             ->where('is_deleted', false)
             ->get();
 
-        $result = $outcomes->map(function($co) {
+        $result = $outcomes->map(function ($co) {
             return [
                 'id' => $co->id,
                 'code' => $co->co_code,
@@ -48,8 +45,10 @@ class CourseOutcomesController extends Controller
                 'target_percentage' => $co->target_percentage,
             ];
         });
+
         return response()->json($result);
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -57,13 +56,13 @@ class CourseOutcomesController extends Controller
     {
         // Use the active academic period from session
         $academicPeriodId = session('active_academic_period_id');
-        
-        if (!$academicPeriodId) {
+
+        if (! $academicPeriodId) {
             return redirect()->route('dashboard')->with('error', 'Please select an academic period first.');
         }
 
         $period = AcademicPeriod::find($academicPeriodId);
-        if (!$period) {
+        if (! $period) {
             return redirect()->route('dashboard')->with('error', 'Invalid academic period.');
         }
 
@@ -78,26 +77,26 @@ class CourseOutcomesController extends Controller
             // Chairperson: Show only subjects from their course (e.g., BSIT chairperson sees only BSIT subjects)
             // Exclude universal subjects (GE subjects should only be managed by GE Coordinator)
             $userCourseId = Auth::user()->course_id;
-            if (!$userCourseId) {
+            if (! $userCourseId) {
                 return redirect()->route('dashboard')->with('error', 'No course assigned to your account.');
             }
             $subjectsQuery->where('course_id', $userCourseId)
-                          ->where('is_universal', false);
+                ->where('is_universal', false);
         } elseif (Auth::user()->role === 4) {
             // GE Coordinator: Show only universal subjects (is_universal = true)
             $subjectsQuery->where('is_universal', true);
         } else {
             // Instructor: Only show assigned subjects
-            $subjectsQuery->where(function($query) {
+            $subjectsQuery->where(function ($query) {
                 $query->where('instructor_id', Auth::id())
-                      ->orWhereHas('instructors', function($q) {
-                          $q->where('instructor_id', Auth::id());
-                      });
+                    ->orWhereHas('instructors', function ($q) {
+                        $q->where('instructor_id', Auth::id());
+                    });
             });
         }
 
         $subjects = $subjectsQuery->orderBy('year_level')->orderBy('subject_code')->get();
-        
+
         // Group subjects by year level for better organization
         $subjectsByYear = $subjects->groupBy('year_level');
 
@@ -108,7 +107,7 @@ class CourseOutcomesController extends Controller
                 ->orderBy('created_at', 'asc');
 
             $cos = $query->get();
-            
+
             // Determine route prefix based on user role
             $routePrefix = Auth::user()->role === 1 ? 'chairperson' : (Auth::user()->role === 4 ? 'gecoordinator' : 'instructor');
 
@@ -123,6 +122,7 @@ class CourseOutcomesController extends Controller
         } else {
             // Determine route prefix based on user role
             $routePrefix = Auth::user()->role === 1 ? 'chairperson' : (Auth::user()->role === 4 ? 'gecoordinator' : 'instructor');
+
             return view('instructor.course-outcomes-wildcards', [
                 'subjects' => $subjects,
                 'subjectsByYear' => $subjectsByYear,
@@ -162,7 +162,7 @@ class CourseOutcomesController extends Controller
 
         // Get the academic period from the subject
         $subject = Subject::find($validated['subject_id']);
-        if (!$subject || !$subject->academic_period_id) {
+        if (! $subject || ! $subject->academic_period_id) {
             return redirect()->back()->with('error', 'Subject not found or no academic period assigned.');
         }
 
@@ -174,7 +174,7 @@ class CourseOutcomesController extends Controller
         }
 
         // Validate CO code format and check for duplicates
-        if (!preg_match('/^CO[1-6]$/i', $validated['co_code'])) {
+        if (! preg_match('/^CO[1-6]$/i', $validated['co_code'])) {
             return redirect()->back()
                 ->withErrors(['co_code' => 'CO Code must be in format CO1, CO2, CO3, CO4, CO5, or CO6.'])
                 ->withInput();
@@ -184,10 +184,10 @@ class CourseOutcomesController extends Controller
         $existingCO = $subject->courseOutcomes()
             ->where('co_code', $validated['co_code'])
             ->first();
-        
+
         if ($existingCO) {
             return redirect()->back()
-                ->withErrors(['co_code' => 'Course Outcome ' . $validated['co_code'] . ' already exists for this subject.'])
+                ->withErrors(['co_code' => 'Course Outcome '.$validated['co_code'].' already exists for this subject.'])
                 ->withInput();
         }
 
@@ -201,7 +201,7 @@ class CourseOutcomesController extends Controller
         $routePrefix = Auth::user()->role === 1 ? 'chairperson' : (Auth::user()->role === 4 ? 'gecoordinator' : 'instructor');
 
         // Redirect to the same page with subject_id for a full refresh
-        return redirect()->route($routePrefix . '.course_outcomes.index', ['subject_id' => $validated['subject_id']])
+        return redirect()->route($routePrefix.'.course_outcomes.index', ['subject_id' => $validated['subject_id']])
             ->with('success', 'Course Outcome created successfully.');
     }
 
@@ -237,7 +237,7 @@ class CourseOutcomesController extends Controller
         ]);
 
         // Validate CO code format (must be CO1-CO6)
-        if (!preg_match('/^CO[1-6]$/i', $validated['co_code'])) {
+        if (! preg_match('/^CO[1-6]$/i', $validated['co_code'])) {
             return redirect()->back()
                 ->withErrors(['co_code' => 'CO Code must be in format CO1, CO2, CO3, CO4, CO5, or CO6.'])
                 ->withInput();
@@ -249,10 +249,10 @@ class CourseOutcomesController extends Controller
             ->where('id', '!=', $courseOutcome->id)
             ->where('is_deleted', false)
             ->first();
-        
+
         if ($existingCO) {
             return redirect()->back()
-                ->withErrors(['co_code' => 'Course Outcome ' . $validated['co_code'] . ' already exists for this subject.'])
+                ->withErrors(['co_code' => 'Course Outcome '.$validated['co_code'].' already exists for this subject.'])
                 ->withInput();
         }
 
@@ -269,7 +269,7 @@ class CourseOutcomesController extends Controller
         // Determine route prefix based on user role
         $routePrefix = Auth::user()->role === 1 ? 'chairperson' : (Auth::user()->role === 4 ? 'gecoordinator' : 'instructor');
 
-        return redirect()->route($routePrefix . '.course_outcomes.index', ['subject_id' => $courseOutcome->subject_id])
+        return redirect()->route($routePrefix.'.course_outcomes.index', ['subject_id' => $courseOutcome->subject_id])
             ->with('success', 'Course Outcome updated successfully.');
     }
 
@@ -289,7 +289,7 @@ class CourseOutcomesController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Description updated successfully.',
-            'description' => $courseOutcome->description
+            'description' => $courseOutcome->description,
         ]);
     }
 
@@ -303,7 +303,7 @@ class CourseOutcomesController extends Controller
         // Determine route prefix based on user role
         $routePrefix = Auth::user()->role === 1 ? 'chairperson' : (Auth::user()->role === 4 ? 'gecoordinator' : 'instructor');
 
-        return redirect()->route($routePrefix . '.course_outcomes.index', ['subject_id' => $courseOutcome->subject_id])
+        return redirect()->route($routePrefix.'.course_outcomes.index', ['subject_id' => $courseOutcome->subject_id])
             ->with('success', 'Course Outcome deleted.');
     }
 
@@ -332,8 +332,8 @@ class CourseOutcomesController extends Controller
                     ->withInput()
                     ->with('error', 'Password verification failed. Override operation cancelled for security.');
             }
-            
-            if (!Hash::check($validated['password_confirmation'], Auth::user()->password)) {
+
+            if (! Hash::check($validated['password_confirmation'], Auth::user()->password)) {
                 return redirect()->back()
                     ->withErrors(['password_confirmation' => 'The provided password is incorrect.'])
                     ->withInput()
@@ -342,7 +342,7 @@ class CourseOutcomesController extends Controller
         }
 
         $academicPeriodId = session('active_academic_period_id');
-        if (!$academicPeriodId) {
+        if (! $academicPeriodId) {
             return redirect()->back()->with('error', 'No active academic period set.');
         }
 
@@ -350,7 +350,7 @@ class CourseOutcomesController extends Controller
         if (Auth::user()->role === 1) {
             // Chairperson: Show only subjects from their course, exclude universal subjects
             $userCourseId = Auth::user()->course_id;
-            if (!$userCourseId) {
+            if (! $userCourseId) {
                 return redirect()->back()->with('error', 'No course assigned to your account.');
             }
             $subjectsQuery = Subject::where('academic_period_id', $academicPeriodId)
@@ -367,7 +367,7 @@ class CourseOutcomesController extends Controller
         }
 
         // Filter by year levels if specified
-        if (!empty($validated['year_levels']) && !in_array('all', $validated['year_levels'])) {
+        if (! empty($validated['year_levels']) && ! in_array('all', $validated['year_levels'])) {
             $subjectsQuery->whereIn('year_level', $validated['year_levels']);
         }
 
@@ -391,6 +391,7 @@ class CourseOutcomesController extends Controller
             // Skip if mode is "missing_only" and subject already has COs
             if ($validated['generation_mode'] === 'missing_only' && $existingCOCount > 0) {
                 $skippedCount++;
+
                 continue;
             }
 
@@ -409,6 +410,7 @@ class CourseOutcomesController extends Controller
             // Check if we've already reached the 6 CO limit
             if ($existingCOCount >= 6) {
                 $limitReachedCount++;
+
                 continue;
             }
 
@@ -416,7 +418,8 @@ class CourseOutcomesController extends Controller
             $existingCONumbers = $existingCOs->pluck('co_code')
                 ->map(function ($coCode) {
                     preg_match('/CO(\d+)/i', $coCode, $matches);
-                    return isset($matches[1]) ? (int)$matches[1] : null;
+
+                    return isset($matches[1]) ? (int) $matches[1] : null;
                 })
                 ->filter()
                 ->toArray();
@@ -424,14 +427,14 @@ class CourseOutcomesController extends Controller
             // Find missing CO numbers (1-6)
             $missingCONumbers = [];
             for ($i = 1; $i <= 6; $i++) {
-                if (!in_array($i, $existingCONumbers)) {
+                if (! in_array($i, $existingCONumbers)) {
                     $missingCONumbers[] = $i;
                 }
             }
 
             // Limit to maximum of 6 COs total
             $slotsAvailable = 6 - $existingCOCount;
-            
+
             // For override mode, generate all 6 COs. For missing_only mode, generate missing COs up to limit
             if ($validated['generation_mode'] === 'override_all') {
                 $cosToGenerate = range(1, 6); // Generate all 6 COs for override
@@ -441,6 +444,7 @@ class CourseOutcomesController extends Controller
 
             if (empty($cosToGenerate)) {
                 $limitReachedCount++;
+
                 continue;
             }
 
@@ -449,8 +453,8 @@ class CourseOutcomesController extends Controller
                 $courseOutcomePayload = [
                     'subject_id' => $subject->id,
                     'academic_period_id' => $academicPeriodId,
-                    'co_code' => 'CO' . $coNumber,
-                    'co_identifier' => $subject->subject_code . '.' . $coNumber,
+                    'co_code' => 'CO'.$coNumber,
+                    'co_identifier' => $subject->subject_code.'.'.$coNumber,
                     'description' => 'Students have achieved 75% of the course outcomes',
                     'is_deleted' => false,
                     'created_by' => Auth::id(),
@@ -469,7 +473,7 @@ class CourseOutcomesController extends Controller
 
         // Create appropriate success message based on mode
         if ($validated['generation_mode'] === 'override_all') {
-            $message = "⚠️ Override operation completed! ";
+            $message = '⚠️ Override operation completed! ';
             $message .= "Generated new COs for {$generatedCount} subject(s). ";
             if ($overriddenCount > 0) {
                 $message .= "Deleted {$totalCOsDeleted} existing COs from {$overriddenCount} subject(s). ";
@@ -477,9 +481,9 @@ class CourseOutcomesController extends Controller
             if ($limitReachedCount > 0) {
                 $message .= "Skipped {$limitReachedCount} subject(s) that already have 6 COs (maximum limit). ";
             }
-            $message .= "All affected subjects now have standardized course outcomes.";
+            $message .= 'All affected subjects now have standardized course outcomes.';
         } else {
-            $message = "✅ Course outcomes generation completed! ";
+            $message = '✅ Course outcomes generation completed! ';
             $message .= "Generated COs for {$generatedCount} subject(s). ";
             if ($skippedCount > 0) {
                 $message .= "Skipped {$skippedCount} subject(s) that already had COs. ";
@@ -489,7 +493,7 @@ class CourseOutcomesController extends Controller
             }
         }
 
-        $message .= " Note: Each subject can have a maximum of 6 course outcomes (CO1-CO6).";
+        $message .= ' Note: Each subject can have a maximum of 6 course outcomes (CO1-CO6).';
 
         return redirect()->back()->with('success', $message);
     }
@@ -512,9 +516,7 @@ class CourseOutcomesController extends Controller
 
         return response()->json([
             'valid' => $isValid,
-            'message' => $isValid ? 'Password verified' : 'Invalid password'
+            'message' => $isValid ? 'Password verified' : 'Invalid password',
         ]);
     }
 }
-
-

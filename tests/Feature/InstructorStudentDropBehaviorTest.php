@@ -72,7 +72,7 @@ class InstructorStudentDropBehaviorTest extends TestCase
             ]));
 
         $response->assertOk();
-        $response->assertSeeText($student->last_name . ', ' . $student->first_name);
+        $response->assertSeeText($student->last_name.', '.$student->first_name);
         $response->assertSeeText('Dropped');
     }
 
@@ -133,7 +133,7 @@ class InstructorStudentDropBehaviorTest extends TestCase
             ]));
 
         $response->assertOk();
-        $response->assertDontSeeText($student->last_name . ', ' . $student->first_name);
+        $response->assertDontSeeText($student->last_name.', '.$student->first_name);
     }
 
     public function test_dropped_student_keeps_prelim_grade_in_final_grades_with_dropped_remark(): void
@@ -178,12 +178,12 @@ class InstructorStudentDropBehaviorTest extends TestCase
             ]));
 
         $response->assertOk();
-        $response->assertSeeText($student->last_name . ', ' . $student->first_name);
+        $response->assertSeeText($student->last_name.', '.$student->first_name);
         $response->assertSeeText('88');
         $response->assertSeeText('Dropped');
 
         $finalData = $response->viewData('finalData');
-        $row = collect($finalData)->first(fn($item) => $item['student']->id === $student->id);
+        $row = collect($finalData)->first(fn ($item) => $item['student']->id === $student->id);
 
         $this->assertNotNull($row);
         $this->assertSame(88.00, (float) $row['prelim']);
@@ -223,7 +223,7 @@ class InstructorStudentDropBehaviorTest extends TestCase
             ]));
 
         $response->assertOk();
-        $response->assertSeeText($student->last_name . ', ' . $student->first_name);
+        $response->assertSeeText($student->last_name.', '.$student->first_name);
         $response->assertSeeText('86');
     }
 

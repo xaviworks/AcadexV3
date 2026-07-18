@@ -12,7 +12,9 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 class StudentReviewImport implements ToCollection
 {
     protected $subjectId;
+
     protected $listName;
+
     protected int $importedCount = 0;
 
     public function __construct($subjectId, $listName)
@@ -89,7 +91,8 @@ class StudentReviewImport implements ToCollection
             }
 
             if (! empty($rowErrors)) {
-                $errors[] = "Row {$rowNumber}: " . implode(', ', $rowErrors) . '.';
+                $errors[] = "Row {$rowNumber}: ".implode(', ', $rowErrors).'.';
+
                 continue;
             }
 

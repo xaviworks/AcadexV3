@@ -20,13 +20,13 @@ class TwoFactorAuthenticationController extends Controller
         ]);
 
         $user = $request->user();
-        $google2fa = new Google2FA();
+        $google2fa = new Google2FA;
 
         $user->forceFill([
             'two_factor_secret' => $google2fa->generateSecretKey(),
             'two_factor_recovery_codes' => encrypt(json_encode(
                 \Illuminate\Support\Collection::times(8, function () {
-                    return \Illuminate\Support\Str::random(10) . '-' . \Illuminate\Support\Str::random(10);
+                    return \Illuminate\Support\Str::random(10).'-'.\Illuminate\Support\Str::random(10);
                 })->all()
             )),
             'two_factor_confirmed_at' => null,
@@ -68,7 +68,7 @@ class TwoFactorAuthenticationController extends Controller
         ]);
 
         $user = $request->user();
-        $google2fa = new Google2FA();
+        $google2fa = new Google2FA;
 
         if (! $google2fa->verifyKey($user->two_factor_secret, $request->code)) {
             throw ValidationException::withMessages([
@@ -132,7 +132,7 @@ class TwoFactorAuthenticationController extends Controller
             $recoveryCodes = json_decode(decrypt($encryptedCodes));
 
             // Ensure we have valid recovery codes
-            if (!$recoveryCodes || !is_array($recoveryCodes) || count($recoveryCodes) === 0) {
+            if (! $recoveryCodes || ! is_array($recoveryCodes) || count($recoveryCodes) === 0) {
                 return response()->json([
                     'message' => 'No recovery codes found. Please regenerate your codes.',
                 ], 404);
@@ -141,11 +141,11 @@ class TwoFactorAuthenticationController extends Controller
             return response()->json([
                 'recovery_codes' => $recoveryCodes,
             ], 200);
-            
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Invalid password. Please try again.',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
@@ -171,7 +171,7 @@ class TwoFactorAuthenticationController extends Controller
             }
 
             $newCodes = \Illuminate\Support\Collection::times(8, function () {
-                return \Illuminate\Support\Str::random(10) . '-' . \Illuminate\Support\Str::random(10);
+                return \Illuminate\Support\Str::random(10).'-'.\Illuminate\Support\Str::random(10);
             })->all();
 
             $request->user()->forceFill([
@@ -181,17 +181,17 @@ class TwoFactorAuthenticationController extends Controller
             if ($request->expectsJson() || $request->wantsJson()) {
                 return response()->json([
                     'recovery_codes' => $newCodes,
-                    'message' => 'Recovery codes regenerated successfully.'
+                    'message' => 'Recovery codes regenerated successfully.',
                 ], 200);
             }
 
             return back()->with('status', 'recovery-codes-regenerated');
-            
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->expectsJson() || $request->wantsJson()) {
                 return response()->json([
                     'message' => 'Invalid password. Please try again.',
-                    'errors' => $e->errors()
+                    'errors' => $e->errors(),
                 ], 422);
             }
             throw $e;

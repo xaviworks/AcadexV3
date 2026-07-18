@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('file_size')->default(0);
             $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
-            
+
             $table->index('help_guide_id');
         });
     }
