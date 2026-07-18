@@ -1,0 +1,33 @@
+services:
+  web:
+    build: .
+    env_file:
+      - .env
+    environment:
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "${PORT:-8080}:8080"
+    restart: unless-stopped
+    command: ["web"]
+
+  queue:
+    build: .
+    env_file:
+      - .env
+    environment:
+      RUN_MIGRATIONS: "false"
+    restart: unless-stopped
+    command: ["queue"]
+    depends_on:
+      - web
+
+  scheduler:
+    build: .
+    env_file:
+      - .env
+    environment:
+      RUN_MIGRATIONS: "false"
+    restart: unless-stopped
+    command: ["scheduler"]
+    depends_on:
+      - web

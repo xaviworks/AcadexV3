@@ -33,7 +33,18 @@ run_as_app() {
     fi
 }
 
+exec_as_app() {
+    if [ "$(id -u)" = "0" ]; then
+        exec gosu www-data "$@"
+    fi
+
+    exec "$@"
+}
+
+ROLE="${1:-web}"
+
 log "Container startup beginning."
+log "Container role: ${ROLE}"
 log "Runtime user: $(id -un) (uid=$(id -u), gid=$(id -g)); port: ${PORT:-8080}"
 log "Application environment: ${APP_ENV:-not-set}; debug: ${APP_DEBUG:-not-set}"
 if [ "${APP_DEBUG:-false}" = "true" ] || [ "${APP_DEBUG:-0}" = "1" ]; then
@@ -43,8 +54,11 @@ log "Cache/session/queue: ${CACHE_STORE:-not-set}/${SESSION_DRIVER:-not-set}/${Q
 
 log "PHP version: $(php -r 'echo PHP_VERSION;')"
 log "Loaded PHP extensions: $(php -m | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g')"
-log "Apache configuration check..."
-apachectl -t
+
+if [ "$ROLE" = "web" ]; then
+    log "Apache configuration check..."
+    apachectl -t
+fi
 
 if ! run_as_app test -r /app/artisan; then
     fatal 1 "Laravel artisan file is missing or unreadable"
@@ -71,27 +85,31 @@ if ! run_as_app test -w storage || ! run_as_app test -w bootstrap/cache; then
     fatal 1 "Laravel writable directories remain unavailable after permission setup"
 fi
 
-log "Running database migrations..."
-run_as_app php artisan migrate --force
-log "Database migrations completed."
+if [ "${RUN_MIGRATIONS:-}" = "true" ] || { [ -z "${RUN_MIGRATIONS:-}" ] && [ "$ROLE" = "web" ]; }; then
+    log "Running database migrations..."
+    run_as_app php artisan migrate --force
+    log "Database migrations completed."
 
-# Only seed if the database is empty (first deploy)
-# Use a direct PHP script — avoids booting PsySH/tinker (~2-3s startup cost)
-if ! USER_COUNT=$(run_as_app php -r "
+    # Only seed if the database is empty (first deploy).
+    # Use a direct PHP script to avoid booting PsySH/tinker during startup.
+    if ! USER_COUNT=$(run_as_app php -r "
 require '/app/vendor/autoload.php';
 \$app = require '/app/bootstrap/app.php';
 \$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 echo \App\Models\User::count();
 " ); then
-    fatal 1 "Unable to query the users table; refusing to guess whether seeders should run"
-fi
+        fatal 1 "Unable to query the users table; refusing to guess whether seeders should run"
+    fi
 
-if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
-    log "No users found; running seeders for the first deployment..."
-    run_as_app php artisan db:seed --force
-    log "Database seeders completed."
+    if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
+        log "No users found; running seeders for the first deployment..."
+        run_as_app php artisan db:seed --force
+        log "Database seeders completed."
+    else
+        log "Database already seeded ($USER_COUNT users); skipping seeders."
+    fi
 else
-    log "Database already seeded ($USER_COUNT users); skipping seeders."
+    log "Skipping migrations for role '${ROLE}'."
 fi
 
 log "Ensuring public storage link exists..."
@@ -108,18 +126,21 @@ run_as_app php artisan route:cache
 run_as_app php artisan view:cache
 run_as_app php artisan event:cache
 
-log "Starting Laravel scheduler in background; output will appear in docker logs."
-run_as_app php artisan schedule:work >> /dev/stdout 2>> /dev/stderr &
-SCHEDULER_PID=$!
-
-log "Starting Laravel queue worker in background; output will appear in docker logs."
-run_as_app php artisan queue:work --sleep=3 --tries=3 --max-time=3600 >> /dev/stdout 2>> /dev/stderr &
-QUEUE_PID=$!
-
-log "Scheduler PID: ${SCHEDULER_PID}; queue PID: ${QUEUE_PID}."
-log "Starting Apache on port ${PORT:-8080} as www-data..."
-if [ "$(id -u)" = "0" ]; then
-    exec gosu www-data apache2-foreground
-fi
-
-exec apache2-foreground
+case "$ROLE" in
+    web)
+        log "Starting Apache on port ${PORT:-8080} as www-data..."
+        exec_as_app apache2-foreground
+        ;;
+    queue)
+        log "Starting Laravel queue worker in foreground."
+        exec_as_app php artisan queue:work --sleep="${QUEUE_SLEEP:-3}" --tries="${QUEUE_TRIES:-3}" --timeout="${QUEUE_TIMEOUT:-90}" --max-time="${QUEUE_MAX_TIME:-3600}"
+        ;;
+    scheduler)
+        log "Starting Laravel scheduler in foreground."
+        exec_as_app php artisan schedule:work
+        ;;
+    *)
+        log "Running custom command: $*"
+        exec_as_app "$@"
+        ;;
+esac
