@@ -22,6 +22,8 @@ return [
 
     'default' => env('DB_CONNECTION', 'sqlite'),
 
+    'slow_query_ms' => env('DB_SLOW_QUERY_MS', 200),
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections
