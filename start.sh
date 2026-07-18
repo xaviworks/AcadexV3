@@ -36,7 +36,9 @@ run_as_app() {
 log "Container startup beginning."
 log "Runtime user: $(id -un) (uid=$(id -u), gid=$(id -g)); port: ${PORT:-8080}"
 log "Application environment: ${APP_ENV:-not-set}; debug: ${APP_DEBUG:-not-set}"
-log "Database target: ${DB_CONNECTION:-not-set}@${DB_HOST:-not-set}:${DB_PORT:-3306}/${DB_DATABASE:-not-set}"
+if [ "${APP_DEBUG:-false}" = "true" ] || [ "${APP_DEBUG:-0}" = "1" ]; then
+    log "Database target: ${DB_CONNECTION:-not-set}@${DB_HOST:-not-set}:${DB_PORT:-3306}/${DB_DATABASE:-not-set}"
+fi
 log "Cache/session/queue: ${CACHE_STORE:-not-set}/${SESSION_DRIVER:-not-set}/${QUEUE_CONNECTION:-not-set}"
 
 log "PHP version: $(php -r 'echo PHP_VERSION;')"
@@ -46,10 +48,6 @@ apachectl -t
 
 if ! run_as_app test -r /app/artisan; then
     fatal 1 "Laravel artisan file is missing or unreadable"
-fi
-
-if ! run_as_app test -w storage || ! run_as_app test -w bootstrap/cache; then
-    fatal 1 "Laravel writable directories are not writable by the application user"
 fi
 
 log "Laravel version: $(run_as_app php artisan --version)"
