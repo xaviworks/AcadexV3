@@ -29,9 +29,6 @@ class ChairpersonController extends Controller
 
     public function manageInstructors()
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
-            abort(403);
-        }
 
         // Get GE department to exclude GE department instructors from chairperson management
         $geDepartment = Department::where('department_code', 'GE')->first();
@@ -71,9 +68,6 @@ class ChairpersonController extends Controller
 
     public function storeInstructor(Request $request)
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
-            abort(403);
-        }
 
         // Validate base email format first
         $request->validate([
@@ -116,9 +110,6 @@ class ChairpersonController extends Controller
 
     public function deactivateInstructor($id)
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
-            abort(403);
-        }
 
         // Exclude GE department instructors
         $geDepartment = Department::where('department_code', 'GE')->first();
@@ -142,9 +133,6 @@ class ChairpersonController extends Controller
 
     public function activateInstructor($id)
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
-            abort(403);
-        }
 
         // Exclude GE department instructors
         $geDepartment = Department::where('department_code', 'GE')->first();
@@ -177,9 +165,6 @@ class ChairpersonController extends Controller
 
     public function requestGEAssignment($id)
     {
-        if (! Auth::user()->isChairperson()) {
-            abort(403);
-        }
 
         // Find the instructor (must be from chairperson's department)
         $instructor = User::where('id', $id)
@@ -216,9 +201,6 @@ class ChairpersonController extends Controller
 
     public function assignSubjects()
     {
-        if (! Auth::user()->isChairperson()) {
-            abort(403);
-        }
 
         $academicPeriodId = session('active_academic_period_id');
 
@@ -246,9 +228,6 @@ class ChairpersonController extends Controller
 
     public function storeAssignedSubject(Request $request)
     {
-        if (! Auth::user()->isChairperson()) {
-            abort(403);
-        }
 
         $academicPeriodId = session('active_academic_period_id');
         $request->validate([
@@ -286,9 +265,6 @@ class ChairpersonController extends Controller
 
     public function toggleAssignedSubject(Request $request)
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
-            abort(403);
-        }
         $academicPeriodId = session('active_academic_period_id');
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
@@ -374,9 +350,6 @@ class ChairpersonController extends Controller
 
     public function viewGrades(Request $request)
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
-            abort(403);
-        }
 
         $selectedInstructorId = $request->input('instructor_id');
         $selectedSubjectId = $request->input('subject_id');
@@ -478,9 +451,6 @@ class ChairpersonController extends Controller
 
     public function viewStudentsPerYear()
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
-            abort(403);
-        }
         if (Auth::user()->role === 1) {
             $students = Student::where('department_id', Auth::user()->department_id)
                 ->where('course_id', Auth::user()->course_id)
@@ -518,9 +488,6 @@ class ChairpersonController extends Controller
 
     public function saveGradeNotes(Request $request)
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
-            abort(403);
-        }
 
         $request->validate([
             'final_grade_id' => 'required|exists:final_grades,id',
@@ -553,9 +520,6 @@ class ChairpersonController extends Controller
      */
     public function indexTemplateRequests()
     {
-        if (Auth::user()->role !== 1) {
-            abort(403);
-        }
 
         $requests = \App\Models\StructureTemplateRequest::where('chairperson_id', Auth::id())
             ->with('reviewer')
@@ -571,9 +535,6 @@ class ChairpersonController extends Controller
      */
     public function createTemplateRequest()
     {
-        if (Auth::user()->role !== 1) {
-            abort(403);
-        }
 
         return view('chairperson.structure-template-create');
     }
@@ -583,9 +544,6 @@ class ChairpersonController extends Controller
      */
     public function storeTemplateRequest(\Illuminate\Http\Request $request)
     {
-        if (Auth::user()->role !== 1) {
-            abort(403);
-        }
 
         $request->validate([
             'template_name' => 'required|string|max:255',
@@ -624,7 +582,7 @@ class ChairpersonController extends Controller
      */
     public function showTemplateRequest(\App\Models\StructureTemplateRequest $request)
     {
-        if (Auth::user()->role !== 1 || $request->chairperson_id !== Auth::id()) {
+        if ($request->chairperson_id !== Auth::id()) {
             abort(403);
         }
 
@@ -638,7 +596,7 @@ class ChairpersonController extends Controller
      */
     public function destroyTemplateRequest(\App\Models\StructureTemplateRequest $request)
     {
-        if (Auth::user()->role !== 1 || $request->chairperson_id !== Auth::id()) {
+        if ($request->chairperson_id !== Auth::id()) {
             abort(403);
         }
 

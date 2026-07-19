@@ -27,9 +27,6 @@ class GECoordinatorController extends Controller
      */
     public function getAvailableInstructors()
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         $geDepartment = Department::where('department_code', 'GE')->firstOrFail();
 
@@ -56,9 +53,6 @@ class GECoordinatorController extends Controller
      */
     public function getSubjectInstructors(Subject $subject)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Ensure the subject is a GE subject.
         // Allow subjects that are explicitly marked as general education (course_id == 1)
@@ -83,9 +77,6 @@ class GECoordinatorController extends Controller
 
     public function manageInstructors()
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // GE Coordinator: show instructors from GE department AND those who can/could teach GE subjects
         $geDepartment = Department::where('department_code', 'GE')->first();
@@ -115,9 +106,6 @@ class GECoordinatorController extends Controller
 
     public function storeInstructor(Request $request)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Validate base email format first
         $request->validate([
@@ -160,9 +148,6 @@ class GECoordinatorController extends Controller
 
     public function deactivateInstructor($id)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Find the instructor
         $instructor = User::where('id', $id)
@@ -200,9 +185,6 @@ class GECoordinatorController extends Controller
 
     public function activateInstructor($id)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Find the instructor
         $instructor = User::where('id', $id)
@@ -244,9 +226,6 @@ class GECoordinatorController extends Controller
 
     public function assignSubjects()
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403, 'Unauthorized action.');
-        }
 
         $academicPeriodId = session('active_academic_period_id');
         if (! $academicPeriodId) {
@@ -307,9 +286,6 @@ class GECoordinatorController extends Controller
 
     public function storeAssignedSubject(Request $request)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
@@ -333,9 +309,6 @@ class GECoordinatorController extends Controller
 
     public function manageSchedule()
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Get active academic period from session
         $academicPeriodId = session('active_academic_period_id');
@@ -352,9 +325,6 @@ class GECoordinatorController extends Controller
 
     public function reports()
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Get active academic period from session
         $academicPeriodId = session('active_academic_period_id');
@@ -412,9 +382,6 @@ class GECoordinatorController extends Controller
 
     public function toggleAssignedSubject(Request $request)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
@@ -482,9 +449,6 @@ class GECoordinatorController extends Controller
 
     public function viewGrades(Request $request)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         $selectedInstructorId = $request->input('instructor_id');
         $selectedSubjectId = $request->input('subject_id');
@@ -572,9 +536,6 @@ class GECoordinatorController extends Controller
 
     public function viewStudentsPerYear()
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         $selectedSubjectId = request()->input('subject_id');
 
@@ -618,9 +579,6 @@ class GECoordinatorController extends Controller
 
     public function approveGERequest($id)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         $request = \App\Models\GESubjectRequest::where('id', $id)
             ->where('status', 'pending')
@@ -651,9 +609,6 @@ class GECoordinatorController extends Controller
 
     public function rejectGERequest($id)
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         $request = \App\Models\GESubjectRequest::where('id', $id)
             ->where('status', 'pending')

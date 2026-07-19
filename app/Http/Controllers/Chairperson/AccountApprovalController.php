@@ -10,7 +10,6 @@ use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class AccountApprovalController extends Controller
@@ -20,7 +19,6 @@ class AccountApprovalController extends Controller
      */
     public function index(): View
     {
-        Gate::authorize('chairperson');
 
         // Get GE department to exclude it
         $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
@@ -43,7 +41,6 @@ class AccountApprovalController extends Controller
      */
     public function approve(int $id): RedirectResponse
     {
-        Gate::authorize('chairperson');
 
         // Get GE department to exclude it
         $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();
@@ -97,7 +94,6 @@ class AccountApprovalController extends Controller
      */
     public function reject(int $id): RedirectResponse
     {
-        Gate::authorize('chairperson');
 
         // Get GE department to exclude it
         $geDepartment = \App\Models\Department::where('department_code', 'GE')->first();

@@ -7,7 +7,6 @@ use App\Models\HelpGuide;
 use App\Models\HelpGuideAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +22,6 @@ class HelpGuideController extends Controller
      */
     public function index()
     {
-        Gate::authorize('gecoordinator');
 
         $guides = HelpGuide::with(['creator', 'updater', 'attachments'])
             ->where('created_by', Auth::id())
@@ -40,7 +38,6 @@ class HelpGuideController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('gecoordinator');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -94,7 +91,6 @@ class HelpGuideController extends Controller
      */
     public function update(Request $request, HelpGuide $helpGuide)
     {
-        Gate::authorize('gecoordinator');
         $this->authorizeOwnership($helpGuide);
 
         $validated = $request->validate([
@@ -166,7 +162,6 @@ class HelpGuideController extends Controller
      */
     public function destroy(HelpGuide $helpGuide)
     {
-        Gate::authorize('gecoordinator');
         $this->authorizeOwnership($helpGuide);
 
         $helpGuide->deleteAttachment();
@@ -185,7 +180,6 @@ class HelpGuideController extends Controller
      */
     public function deleteAttachment(HelpGuideAttachment $attachment)
     {
-        Gate::authorize('gecoordinator');
 
         $helpGuide = $attachment->helpGuide;
         $this->authorizeOwnership($helpGuide);
@@ -204,7 +198,6 @@ class HelpGuideController extends Controller
      */
     public function toggleActive(HelpGuide $helpGuide)
     {
-        Gate::authorize('gecoordinator');
         $this->authorizeOwnership($helpGuide);
 
         $helpGuide->update([

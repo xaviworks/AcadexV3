@@ -20,9 +20,6 @@ class AccountApprovalController extends Controller
      */
     public function index(): View
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Get GE department
         $geDepartment = Department::where('department_code', 'GE')->first();
@@ -42,9 +39,6 @@ class AccountApprovalController extends Controller
      */
     public function approve(int $id): RedirectResponse
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Get GE department
         $geDepartment = Department::where('department_code', 'GE')->first();
@@ -96,9 +90,6 @@ class AccountApprovalController extends Controller
      */
     public function reject(int $id): RedirectResponse
     {
-        if (! Auth::user()->isGECoordinator()) {
-            abort(403);
-        }
 
         // Get GE department
         $geDepartment = Department::where('department_code', 'GE')->first();

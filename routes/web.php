@@ -178,7 +178,7 @@ Route::middleware('auth')->group(function () {
 
 // Chairperson Routes
 Route::prefix('chairperson')
-    ->middleware(['auth', 'academic.period.set'])
+    ->middleware(['auth', 'can:chairperson', 'academic.period.set'])
     ->name('chairperson.')
     ->group(function () {
         Route::get('/instructors', [ChairpersonController::class, 'manageInstructors'])->name('instructors');
@@ -243,7 +243,7 @@ Route::prefix('chairperson')
 
 // GE Coordinator Routes
 Route::prefix('gecoordinator')
-    ->middleware(['auth', 'academic.period.set'])
+    ->middleware(['auth', 'can:gecoordinator', 'academic.period.set'])
     ->name('gecoordinator.')
     ->group(function () {
         Route::get('/instructors', [\App\Http\Controllers\GECoordinatorController::class, 'manageInstructors'])->name('instructors');
@@ -319,7 +319,7 @@ Route::middleware(['auth', 'academic.period.set'])->group(function () {
 
 // Instructor Routes
 Route::prefix('instructor')
-    ->middleware(['auth', EnsureAcademicPeriodSet::class])
+    ->middleware(['auth', 'can:instructor', EnsureAcademicPeriodSet::class])
     ->name('instructor.')
     ->group(function () {
         Route::get('/dashboard', [InstructorController::class, 'dashboard'])->name('dashboard');
@@ -374,7 +374,7 @@ Route::prefix('instructor')
     });
 
 // Dean Routes
-Route::prefix('dean')->middleware(['auth', 'academic.period.set'])->name('dean.')->group(function () {
+Route::prefix('dean')->middleware(['auth', 'can:dean', 'academic.period.set'])->name('dean.')->group(function () {
     Route::get('/instructors', [DeanController::class, 'viewInstructors'])->name('instructors');
     Route::get('/students', [DeanController::class, 'viewStudents'])->name('students');
     Route::get('/grades', [DeanController::class, 'viewGrades'])->name('grades');
@@ -388,7 +388,7 @@ Route::prefix('dean')->middleware(['auth', 'academic.period.set'])->name('dean.'
 });
 
 // Admin Routes
-Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'can:admin'])->name('admin.')->group(function () {
     // Department CRUD
     Route::get('/departments', [AdminDepartmentController::class, 'index'])->name('departments');
     Route::get('/departments/create', [AdminDepartmentController::class, 'create'])->name('createDepartment');
@@ -475,7 +475,7 @@ use App\Http\Controllers\ProgramReportsController;
 use App\Http\Controllers\VPAAController;
 
 Route::prefix('vpaa')
-    ->middleware(['auth', 'academic.period.set'])
+    ->middleware(['auth', 'can:vpaa', 'academic.period.set'])
     ->name('vpaa.')
     ->group(function () {
         // CO Reports
@@ -549,7 +549,7 @@ Route::prefix('vpaa')
 // Add a fallback redirect for VPAA dashboard
 Route::get('/vpaa', function () {
     return redirect()->route('vpaa.dashboard');
-})->middleware(['auth', 'academic.period.set']);
+})->middleware(['auth', 'can:vpaa', 'academic.period.set']);
 
 // Auth Routes
 require __DIR__.'/auth.php';
