@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-5">
+<div class="container-fluid px-4 py-4">
     @include('chairperson.partials.reports-header', [
         'title' => 'Program Outcomes Summary',
         'subtitle' => 'Select a program to view Program Learning Outcome attainment in ' . ($department->department_description ?? 'the selected department'),
