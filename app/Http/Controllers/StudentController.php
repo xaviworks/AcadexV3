@@ -167,8 +167,10 @@ class StudentController extends Controller
             ->firstOrFail();
 
         if (! $enrollment->is_deleted) {
-            $enrollment->is_deleted = true;
-            $enrollment->save();
+            StudentSubject::whereKey($enrollment->id)->update([
+                'is_deleted' => true,
+                'updated_by' => Auth::id(),
+            ]);
         }
 
         $finalGrade = FinalGrade::firstOrNew([
@@ -214,8 +216,10 @@ class StudentController extends Controller
             ->firstOrFail();
 
         if ($enrollment->is_deleted) {
-            $enrollment->is_deleted = false;
-            $enrollment->save();
+            StudentSubject::whereKey($enrollment->id)->update([
+                'is_deleted' => false,
+                'updated_by' => Auth::id(),
+            ]);
         }
 
         FinalGrade::where('student_id', $studentId)

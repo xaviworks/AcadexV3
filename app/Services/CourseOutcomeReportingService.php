@@ -207,6 +207,9 @@ class CourseOutcomeReportingService
         $activities = Activity::where('subject_id', $subjectId)
             ->where('is_deleted', false)
             ->whereNotNull('course_outcome_id')
+            ->with(['courseOutcome' => function ($query) {
+                $query->select('id', 'co_code', 'is_deleted', 'target_percentage');
+            }])
             ->get();
 
         if ($activities->isEmpty()) {
@@ -224,8 +227,7 @@ class CourseOutcomeReportingService
 
         foreach ($activities as $activity) {
             // Determine CO number from the course_outcomes.co_code (e.g., CO1 -> 1)
-            $coId = $activity->course_outcome_id;
-            $co = CourseOutcomes::find($coId);
+            $co = $activity->courseOutcome;
             if (! $co || $co->is_deleted) {
                 continue;
             }
@@ -601,6 +603,9 @@ class CourseOutcomeReportingService
                 $activities = Activity::where('subject_id', $subject->id)
                     ->where('is_deleted', false)
                     ->whereNotNull('course_outcome_id')
+                    ->with(['courseOutcome' => function ($query) {
+                        $query->select('id', 'co_code', 'is_deleted');
+                    }])
                     ->get();
 
                 if ($activities->isEmpty()) {
@@ -619,8 +624,7 @@ class CourseOutcomeReportingService
 
                 // Aggregate CO data
                 foreach ($activities as $activity) {
-                    $coId = $activity->course_outcome_id;
-                    $co = CourseOutcomes::find($coId);
+                    $co = $activity->courseOutcome;
                     if (! $co || $co->is_deleted) {
                         continue;
                     }
@@ -906,6 +910,7 @@ class CourseOutcomeReportingService
             })
             ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
                 $query->where('subjects.academic_period_id', $academicPeriodId);
+                $query->where('course_outcomes.academic_period_id', $academicPeriodId);
             })
             ->get()
             ->sortBy(function ($row) {
@@ -947,6 +952,7 @@ class CourseOutcomeReportingService
             })
             ->when($academicPeriodId, function ($query) use ($academicPeriodId) {
                 $query->where('subjects.academic_period_id', $academicPeriodId);
+                $query->where('course_outcomes.academic_period_id', $academicPeriodId);
             })
             ->pluck('course_outcomes.co_code')
             ->filter()

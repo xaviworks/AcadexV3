@@ -272,6 +272,22 @@ class GradeController extends Controller
         $studentsGraded = 0; // Track students who actually had grades saved
         $activeStudentIds = $subject->students()->pluck('students.id')->map(fn ($id) => (int) $id)->all();
 
+        $submittedStudentIds = collect(array_keys($request->scores))
+            ->map(fn ($id) => (int) $id)
+            ->intersect($activeStudentIds)
+            ->values()
+            ->all();
+        $submittedActivityIds = collect($request->scores)
+            ->flatMap(fn ($activityScores) => array_keys((array) $activityScores))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+        $existingScores = Score::whereIn('student_id', $submittedStudentIds)
+            ->whereIn('activity_id', $submittedActivityIds)
+            ->get()
+            ->keyBy(fn (Score $score) => $score->student_id.':'.$score->activity_id);
+
         foreach ($request->scores as $studentId => $activityScores) {
             if (! in_array((int) $studentId, $activeStudentIds, true)) {
                 continue;
@@ -281,29 +297,24 @@ class GradeController extends Controller
 
             // Save individual scores
             foreach ($activityScores as $activityId => $score) {
+                $scoreKey = (int) $studentId.':'.(int) $activityId;
+                $existingScore = $existingScores->get($scoreKey);
+
                 // Only process if score is not null, not empty string, and not just whitespace
                 if ($score !== null && $score !== '' && trim($score) !== '') {
-                    // Check if this is a new score or a changed score
-                    $existingScore = Score::where('student_id', $studentId)
-                        ->where('activity_id', $activityId)
-                        ->first();
-
                     // If no existing score, or if the score changed, mark as having changes
                     if (! $existingScore || $existingScore->score != $score) {
-                        Score::updateOrCreate(
+                        $savedScore = Score::updateOrCreate(
                             ['student_id' => $studentId, 'activity_id' => $activityId],
                             ['score' => $score, 'updated_by' => Auth::id()]
                         );
+                        $existingScores->put($scoreKey, $savedScore);
                         $hasNewOrChangedScores = true;
                     }
                 } elseif ($score === '' || $score === null) {
-                    // Check if we need to delete an existing score (user cleared it)
-                    $existingScore = Score::where('student_id', $studentId)
-                        ->where('activity_id', $activityId)
-                        ->first();
-
                     if ($existingScore) {
                         $existingScore->delete();
+                        $existingScores->forget($scoreKey);
                         $hasNewOrChangedScores = true;
                     }
                 }
@@ -448,7 +459,7 @@ class GradeController extends Controller
         $subject = Subject::findOrFail($request->subject_id);
         $term = $request->term;
 
-        $students = $subject->studentsWithEnrollmentStatus()
+        $students = $subject->students()
             ->where('students.is_deleted', false)
             ->orderBy('students.last_name')
             ->orderBy('students.first_name')
@@ -480,16 +491,22 @@ class GradeController extends Controller
                 return isset($matches[1]) ? floatval($matches[1]) : $co->co_identifier;
             });
 
+        $activityIds = $activities->pluck('id');
+        $allScoresGrouped = Score::whereIn('activity_id', $activityIds)
+            ->get()
+            ->groupBy('student_id');
+
         $scores = [];
         $termGrades = [];
 
         foreach ($students as $student) {
-            $activityScores = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings);
+            $studentScores = $allScoresGrouped->get($student->id, collect());
+            $activityScores = $this->calculateActivityScores($activities, $student->id, $subject, $formulaSettings, $studentScores);
             $weights = $activityScores['weights'];
+            $keyedScores = $studentScores->keyBy('activity_id');
 
             foreach ($activities as $activity) {
-                $scoreRecord = $student->scores()->where('activity_id', $activity->id)->first();
-                $scores[$student->id][$activity->id] = $scoreRecord?->score;
+                $scores[$student->id][$activity->id] = $keyedScores->get($activity->id)?->score;
             }
 
             if ($activityScores['allScored'] && $activityScores['grade'] !== null) {
