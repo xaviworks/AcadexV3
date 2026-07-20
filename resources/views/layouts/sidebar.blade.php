@@ -412,36 +412,6 @@
             </div>
 
             <div class="sidebar-section">
-                <h6 class="px-3 mb-2 sidebar-heading">Grading Configuration</h6>
-                <ul class="nav nav-pills flex-column">
-                    <li class="nav-item">
-                        <a href="{{ route('vpaa.gradingConfiguration.index') }}" 
-                           class="nav-link {{ request()->routeIs('vpaa.gradingConfiguration.*') && ! request()->routeIs('vpaa.gradingConfiguration.templateRequests.*') ? 'active' : '' }} d-flex align-items-center sidebar-link">
-                            <i class="bi bi-sliders me-3"></i>
-                            <span>Grade Formulas</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        @php
-                            $pendingTemplateRequests = \App\Models\StructureTemplateRequest::pending()->count();
-                        @endphp
-                        <a href="{{ route('vpaa.gradingConfiguration.templateRequests.index') }}" 
-                           class="nav-link {{ request()->routeIs('vpaa.gradingConfiguration.templateRequests.*') ? 'active' : '' }} d-flex align-items-center justify-content-between sidebar-link">
-                            <div class="d-flex align-items-center" style="flex: 1; min-width: 0;">
-                                <i class="bi bi-clipboard-check me-3"></i>
-                                <span>Formula Requests</span>
-                            </div>
-                            <div style="min-width: 30px; text-align: right;">
-                                @if ($pendingTemplateRequests > 0)
-                                    <span class="badge bg-warning text-dark rounded-pill">{{ $pendingTemplateRequests }}</span>
-                                @endif
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="sidebar-section">
                 <h6 class="px-3 mb-2 sidebar-heading">Reports</h6>
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
@@ -546,6 +516,7 @@
             </div>
         @endif
 
+        @can('manage-grading-configuration')
             <div class="sidebar-section">
                 <h6 class="px-3 mb-2 sidebar-heading">Grading Configuration</h6>
                 <ul class="nav nav-pills flex-column">
@@ -575,6 +546,7 @@
                     </li>
                 </ul>
             </div>
+        @endcan
 
         {{-- Help Guides (All Users) --}}
         <div class="sidebar-section">
