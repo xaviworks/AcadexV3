@@ -14,7 +14,6 @@ class PasswordUpdateService
     {
         $user->forceFill([
             'password' => Hash::make($plainPassword),
-            'must_change_password' => false,
             'remember_token' => Str::random(60),
         ])->save();
 

@@ -25,7 +25,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register global middleware to track session activity
         $middleware->web(append: [
             \App\Http\Middleware\TrackSessionActivity::class,
-            \App\Http\Middleware\EnsureTemporaryPasswordIsChanged::class,
         ]);
 
         // Register route middleware

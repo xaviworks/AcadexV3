@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Crypt;
  * @property int|null $department_id
  * @property int|null $course_id
  * @property string $password
- * @property bool $must_change_password
  * @property bool $is_active
  * @property-read Department|null $department
  * @property-read Course|null $course
@@ -73,7 +72,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'must_change_password' => 'boolean',
         'is_active' => 'boolean',
         'can_teach_ge' => 'boolean',
         'disabled_until' => 'datetime',
