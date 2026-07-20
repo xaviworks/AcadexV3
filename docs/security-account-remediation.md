@@ -10,4 +10,4 @@ Use this checklist after deploying the seeder hardening to handle accounts that 
 6. Revoke active sessions and trusted devices for remediated users from the admin session management screen.
 7. Revoke any authentication tokens associated with affected users if token-based access is enabled.
 8. Review audit logs and user logs for suspicious successful or failed logins involving seeded account email addresses.
-9. Keep `ALLOW_PRIVILEGED_ACCOUNT_SEEDING=false` for ordinary deployments.
+9. Do not run account creation during application startup. Use a one-time `php artisan tinker` session when required.

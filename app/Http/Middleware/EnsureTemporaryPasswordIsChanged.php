@@ -35,8 +35,6 @@ class EnsureTemporaryPasswordIsChanged
             'profile.password.update',
             'password.update',
             'logout',
-            'verification.*',
-            'two-factor.*',
         );
     }
 }

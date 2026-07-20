@@ -94,13 +94,7 @@ if [ "${RUN_MIGRATIONS:-}" = "true" ] || { [ -z "${RUN_MIGRATIONS:-}" ] && [ "$R
     run_as_app php artisan db:seed --class=ReferenceDataSeeder --force
     log "Reference data seeders completed."
 
-    if [ "${ALLOW_PRIVILEGED_ACCOUNT_SEEDING:-false}" = "true" ]; then
-        log "Privileged account seeding is explicitly enabled."
-        run_as_app php artisan db:seed --class=AdminAccountsSeeder --force
-        log "Privileged account seeder completed."
-    else
-        log "Privileged account seeding is disabled."
-    fi
+    log "Privileged account seeding is never run automatically. Use an explicit CLI operation when required."
 else
     log "Skipping migrations for role '${ROLE}'."
 fi

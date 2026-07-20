@@ -215,7 +215,7 @@ Run database seeders.
 acadex seed
 
 # Specific seeder
-acadex seed --class=UserSeeder
+php artisan tinker
 ```
 
 ---
@@ -410,4 +410,3 @@ acadex -h
 | `acadex help` | Display help |
 
 ---
-
