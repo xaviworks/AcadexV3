@@ -6,12 +6,16 @@ use App\Models\Course;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Demo user seeding is only allowed in local or testing environments.');
+        }
+
         // Fetch Departments and Courses (updated department codes: ASE and SBISM)
         $ase = Department::where('department_code', 'ASE')->first();
         $sbism = Department::where('department_code', 'SBISM')->first();
@@ -122,13 +126,18 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $data) {
-            User::updateOrCreate(
-                ['email' => $data['email']],
-                array_merge($data, [
-                    'password' => Hash::make('password'),
-                    'is_active' => true,
-                ])
-            );
+            $user = User::firstOrNew(['email' => $data['email']]);
+
+            $user->fill(array_merge($data, [
+                'is_active' => true,
+            ]));
+
+            if (! $user->exists) {
+                $user->password = Str::password(32);
+                $user->must_change_password = true;
+            }
+
+            $user->save();
         }
     }
 }

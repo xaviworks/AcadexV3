@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\EnsureAcademicPeriodSet;
+use App\Http\Middleware\EnsureTemporaryPasswordIsChanged;
 use App\Http\Middleware\EnsureUserIsVPAA;
 use App\Http\Middleware\NoCacheHeaders;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -29,6 +30,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            EnsureTemporaryPasswordIsChanged::class,
         ],
 
         'api' => [
