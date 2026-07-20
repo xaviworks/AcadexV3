@@ -170,7 +170,7 @@ class VpaaAttainmentReportTest extends TestCase
         $response->assertSeeText($subject->subject_code);
     }
 
-    public function test_non_vpaa_user_is_redirected_from_vpaa_attainment_reports(): void
+    public function test_non_vpaa_user_is_forbidden_from_vpaa_attainment_reports(): void
     {
         $dean = User::factory()->create([
             'role' => 2,
@@ -179,7 +179,7 @@ class VpaaAttainmentReportTest extends TestCase
         $response = $this->actingAs($dean)
             ->get(route('vpaa.reports.attainment'));
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertForbidden();
     }
 
     public function test_old_vpaa_attainment_path_returns_not_found(): void

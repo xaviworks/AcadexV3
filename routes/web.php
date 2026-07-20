@@ -311,7 +311,7 @@ Route::prefix('gecoordinator')
     });
 
 // Curriculum Routes
-Route::middleware(['auth', 'academic.period.set'])->group(function () {
+Route::middleware(['auth', 'can:manage-curriculum-subjects', 'academic.period.set'])->group(function () {
     Route::get('/curriculum/select-subjects', [CurriculumController::class, 'selectSubjects'])->name('curriculum.selectSubjects');
     Route::post('/curriculum/confirm-subjects', [CurriculumController::class, 'confirmSubjects'])->name('curriculum.confirmSubjects');
     Route::get('/curriculum/{curriculum}/fetch-subjects', [CurriculumController::class, 'fetchSubjects'])->name('curriculum.fetchSubjects');

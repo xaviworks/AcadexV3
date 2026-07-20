@@ -7,7 +7,6 @@ use App\Models\CourseOutcomes;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
@@ -101,9 +100,15 @@ class CourseOutcomesController extends Controller
         $subjectsByYear = $subjects->groupBy('year_level');
 
         if ($request->filled('subject_id')) {
+            $selectedSubject = $subjects->firstWhere('id', (int) $request->subject_id);
+
+            if (! $selectedSubject) {
+                abort(403);
+            }
+
             $query = CourseOutcomes::where('is_deleted', false)
                 ->with(['subject', 'academicPeriod'])
-                ->where('subject_id', $request->subject_id)
+                ->where('subject_id', $selectedSubject->id)
                 ->orderBy('created_at', 'asc');
 
             $cos = $query->get();
@@ -115,7 +120,7 @@ class CourseOutcomesController extends Controller
                 'cos' => $cos,
                 'subjects' => $subjects,
                 'subjectsByYear' => $subjectsByYear,
-                'selectedSubject' => $subjects->firstWhere('id', $request->subject_id),
+                'selectedSubject' => $selectedSubject,
                 'currentPeriod' => $period,
                 'routePrefix' => $routePrefix,
             ]);
@@ -137,9 +142,10 @@ class CourseOutcomesController extends Controller
      */
     public function create()
     {
-        Gate::authorize('chairperson');
+        $this->authorize('create', CourseOutcomes::class);
+        $this->requireActiveAcademicPeriod();
 
-        $subjects = Subject::all();
+        $subjects = $this->manageableSubjects();
         $periods = AcademicPeriod::all();
 
         return view('course_outcomes.create', compact('subjects', 'periods'));
@@ -150,8 +156,6 @@ class CourseOutcomesController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('chairperson');
-
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'co_code' => 'required|string|max:255',
@@ -165,6 +169,9 @@ class CourseOutcomesController extends Controller
         if (! $subject || ! $subject->academic_period_id) {
             return redirect()->back()->with('error', 'Subject not found or no academic period assigned.');
         }
+
+        $this->authorize('create', [CourseOutcomes::class, $subject]);
+        $this->ensureActiveSubject($subject);
 
         // Check if subject already has 6 course outcomes (maximum limit)
         $existingCOCount = $subject->courseOutcomes()->count();
@@ -210,6 +217,9 @@ class CourseOutcomesController extends Controller
      */
     public function show(CourseOutcomes $courseOutcome)
     {
+        $this->authorize('view', $courseOutcome);
+        $this->ensureActiveCourseOutcome($courseOutcome);
+
         return view('course_outcomes.show', compact('courseOutcome'));
     }
 
@@ -218,7 +228,10 @@ class CourseOutcomesController extends Controller
      */
     public function edit(CourseOutcomes $courseOutcome)
     {
-        $subjects = Subject::all();
+        $this->authorize('update', $courseOutcome);
+        $this->ensureActiveCourseOutcome($courseOutcome);
+
+        $subjects = $this->manageableSubjects();
         $periods = AcademicPeriod::all();
 
         return view('course_outcomes.edit', compact('courseOutcome', 'subjects', 'periods'));
@@ -229,6 +242,9 @@ class CourseOutcomesController extends Controller
      */
     public function update(Request $request, CourseOutcomes $courseOutcome)
     {
+        $this->authorize('update', $courseOutcome);
+        $this->ensureActiveCourseOutcome($courseOutcome);
+
         $validated = $request->validate([
             'co_code' => 'required|string|max:255',
             'co_identifier' => 'required|string|max:255',
@@ -278,6 +294,9 @@ class CourseOutcomesController extends Controller
      */
     public function updateDescription(Request $request, CourseOutcomes $courseOutcome)
     {
+        $this->authorize('update', $courseOutcome);
+        $this->ensureActiveCourseOutcome($courseOutcome);
+
         $validated = $request->validate([
             'description' => 'required|string|max:1000',
         ]);
@@ -298,6 +317,9 @@ class CourseOutcomesController extends Controller
      */
     public function destroy(Request $request, CourseOutcomes $courseOutcome)
     {
+        $this->authorize('delete', $courseOutcome);
+        $this->ensureActiveCourseOutcome($courseOutcome);
+
         $courseOutcome->update(['is_deleted' => 1]);
 
         // Determine route prefix based on user role
@@ -312,11 +334,6 @@ class CourseOutcomesController extends Controller
      */
     public function generateCourseOutcomes(Request $request)
     {
-        // Ensure only chairperson and GE coordinator can access this
-        if (Auth::user()->role !== 1 && Auth::user()->role !== 4) {
-            return redirect()->back()->with('error', 'Unauthorized access.');
-        }
-
         $validated = $request->validate([
             'generation_mode' => 'required|in:missing_only,override_all',
             'year_levels' => 'nullable|array',
@@ -503,11 +520,6 @@ class CourseOutcomesController extends Controller
      */
     public function validatePassword(Request $request)
     {
-        // Ensure only chairperson and GE coordinator can access this
-        if (Auth::user()->role !== 1 && Auth::user()->role !== 4) {
-            return response()->json(['valid' => false, 'error' => 'Unauthorized'], 403);
-        }
-
         $request->validate([
             'password' => 'required|string',
         ]);
@@ -518,5 +530,42 @@ class CourseOutcomesController extends Controller
             'valid' => $isValid,
             'message' => $isValid ? 'Password verified' : 'Invalid password',
         ]);
+    }
+
+    private function manageableSubjects()
+    {
+        $subjects = Subject::query()
+            ->where('is_deleted', false)
+            ->where('academic_period_id', $this->requireActiveAcademicPeriod());
+
+        if (Auth::user()->role === 1) {
+            return $subjects->where('course_id', Auth::user()->course_id)
+                ->where('is_universal', false)
+                ->get();
+        }
+
+        return $subjects->where('is_universal', true)->get();
+    }
+
+    private function ensureActiveCourseOutcome(CourseOutcomes $courseOutcome): void
+    {
+        abort_unless(
+            (int) $courseOutcome->academic_period_id === $this->requireActiveAcademicPeriod(),
+            403
+        );
+    }
+
+    private function ensureActiveSubject(Subject $subject): void
+    {
+        abort_unless((int) $subject->academic_period_id === $this->requireActiveAcademicPeriod(), 403);
+    }
+
+    private function requireActiveAcademicPeriod(): int
+    {
+        $academicPeriodId = (int) session('active_academic_period_id');
+
+        abort_unless($academicPeriodId > 0, 403);
+
+        return $academicPeriodId;
     }
 }

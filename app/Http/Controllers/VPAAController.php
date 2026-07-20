@@ -9,26 +9,10 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class VPAAController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-
-        // Check if user is VPAA (role 5)
-        $this->middleware(function ($request, $next) {
-            if (Auth::check() && Auth::user()?->role === 5) {
-                return $next($request);
-            }
-
-            return redirect()->route('dashboard')
-                ->with('error', 'You are not authorized to access this page.');
-        });
-    }
-
     /**
      * Show course outcome attainment reports
      *

@@ -145,10 +145,6 @@ class CurriculumController extends Controller
 
     public function selectSubjects()
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
-            abort(403);
-        }
-
         // For Chairperson: show curriculums for their assigned course
         if (Auth::user()->role === 1) {
             $curriculums = Curriculum::with('course')
@@ -175,10 +171,6 @@ class CurriculumController extends Controller
 
     public function fetchSubjects(Curriculum $curriculum)
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
-            abort(403);
-        }
-
         // If user is chairperson, verify they can fetch subjects from this curriculum
         if (Auth::user()->role === 1 && $curriculum->course_id !== Auth::user()->course_id) {
             abort(403, 'Unauthorized to fetch subjects from this curriculum.');
@@ -235,10 +227,6 @@ class CurriculumController extends Controller
 
     public function confirmSubjects(Request $request)
     {
-        if (! (Auth::user()->role === 1 || Auth::user()->role === 2 || Auth::user()->role === 4)) {
-            abort(403, 'Unauthorized action.');
-        }
-
         $request->validate([
             'curriculum_id' => 'required|exists:curriculums,id',
             'subject_ids' => 'required|array',

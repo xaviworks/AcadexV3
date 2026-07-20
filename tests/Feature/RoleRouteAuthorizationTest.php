@@ -31,6 +31,7 @@ class RoleRouteAuthorizationTest extends TestCase
             'dean' => ['dean.instructors', 2],
             'admin' => ['admin.departments', 3],
             'VPAA' => ['vpaa.dashboard', 5],
+            'curriculum subject import' => ['curriculum.selectSubjects', 1],
         ];
     }
 }

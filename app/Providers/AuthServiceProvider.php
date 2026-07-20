@@ -13,8 +13,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // Example if you add policies later
-        // \App\Models\Model::class => \App\Policies\ModelPolicy::class,
+        \App\Models\CourseOutcomes::class => \App\Policies\CourseOutcomesPolicy::class,
     ];
 
     /**
@@ -30,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('gecoordinator', fn ($user) => $user->role === 4);
         Gate::define('vpaa', fn ($user) => $user->role === 5);
         Gate::define('manage-grading-configuration', fn ($user) => $user->role === 5);
+        Gate::define('manage-curriculum-subjects', fn ($user) => in_array($user->role, [1, 2, 4], true));
         Gate::define('admin-chair', function ($user) {
             return in_array($user->role, [1, 2]); // 1 = Admin, 2 = Chairperson
         });
