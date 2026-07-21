@@ -28,11 +28,15 @@ use App\Http\Controllers\StudentImportController;
 use App\Http\Controllers\VPAA\GradesFormulaController as VpaaGradesFormulaController;
 use App\Http\Controllers\VPAA\StructureTemplateController as VpaaStructureTemplateController;
 use App\Http\Controllers\VPAA\StructureTemplateRequestController as VpaaStructureTemplateRequestController;
+use App\Http\Controllers\Profile\TwoFactorAuthenticationController;
 use App\Http\Middleware\EnsureAcademicPeriodSet;
 use Illuminate\Http\Request;
 // Welcome Page
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+// VPAA Routes
+use App\Http\Controllers\ProgramReportsController;
+use App\Http\Controllers\VPAAController;
 
 // Serve favicon at both /favicon.ico and /assets/favicon.ico (keeps browser requests working when Herd/Valet proxies static files)
 Route::get('/favicon.ico', [FaviconController::class, 'show']);
@@ -82,8 +86,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/announcements/active', [AnnouncementController::class, 'getActive'])->name('announcements.active');
     Route::post('/announcements/{announcement}/view', [AnnouncementController::class, 'markAsViewed'])->name('announcements.view');
 });
-
-use App\Http\Controllers\Profile\TwoFactorAuthenticationController;
 
 // Profile Management
 Route::middleware('auth')->group(function () {
@@ -332,7 +334,7 @@ Route::prefix('instructor')
         Route::delete('/students/{student}/drop', [StudentController::class, 'drop'])->name('students.drop');
         Route::patch('/students/{student}/reenroll', [StudentController::class, 'reenroll'])->name('students.reenroll');
 
-        // ✅ Student Import Routes
+        //  Student Import Routes
         Route::get('/students/import', [StudentImportController::class, 'showUploadForm'])->name('students.import');
         Route::post('/students/import', [StudentImportController::class, 'upload'])->name('students.import.upload');
         Route::post('/students/import/confirm', [StudentImportController::class, 'confirmImport'])->name('students.import.confirm');
@@ -469,10 +471,6 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
         Route::post('/{announcement}/toggle', [AnnouncementController::class, 'toggleActive'])->name('toggle');
     });
 });
-
-// VPAA Routes
-use App\Http\Controllers\ProgramReportsController;
-use App\Http\Controllers\VPAAController;
 
 Route::prefix('vpaa')
     ->middleware(['auth', 'academic.period.set'])

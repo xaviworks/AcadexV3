@@ -38,7 +38,7 @@ class StructureTemplateRequestController extends Controller
             $query->rejected();
         }
 
-        $requests = $query->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
+        $requests = $query->orderByRaw("CASE status WHEN 'pending' THEN 1 WHEN 'approved' THEN 2 WHEN 'rejected' THEN 3 ELSE 4 END")
             ->orderByDesc('created_at')
             ->get();
 
