@@ -206,58 +206,45 @@
     @method('DELETE')
 </form>
 
-<!-- Create Announcement Modal -->
-<div class="modal fade" id="createAnnouncementModal" tabindex="-1" aria-labelledby="createAnnouncementModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createAnnouncementModalLabel">Create New Announcement</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="createAnnouncementForm" action="{{ route('admin.announcements.store') }}" method="POST">
-                @csrf
-                <input type="hidden" name="_modal" value="create">
-                <input type="hidden" name="is_dismissible" value="0">
-                <input type="hidden" name="show_once" value="0">
-                <input type="hidden" name="is_active" value="0">
-                <div class="modal-body">
-                    @include('admin.announcements.partials.form', ['announcement' => null])
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Create Announcement</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>                
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<x-modal.form
+    id="createAnnouncementModal"
+    title="Create New Announcement"
+    form="{{ route('admin.announcements.store') }}"
+    form-id="createAnnouncementForm"
+    scrollable
+>
+    @csrf
+    <input type="hidden" name="_modal" value="create">
+    <input type="hidden" name="is_dismissible" value="0">
+    <input type="hidden" name="show_once" value="0">
+    <input type="hidden" name="is_active" value="0">
+    @include('admin.announcements.partials.form', ['announcement' => null])
 
-<!-- Edit Announcement Modal -->
-<div class="modal fade" id="editAnnouncementModal" tabindex="-1" aria-labelledby="editAnnouncementModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editAnnouncementModalLabel">Edit Announcement</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editAnnouncementForm" method="POST">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="_modal" value="edit">
-                <input type="hidden" name="is_dismissible" value="0">
-                <input type="hidden" name="show_once" value="0">
-                <input type="hidden" name="is_active" value="0">
-                <div class="modal-body">
-                    @include('admin.announcements.partials.form', ['announcement' => new \App\Models\Announcement(), 'isEdit' => true])
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Update Announcement</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions primary-text="Create Announcement" />
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.form
+    id="editAnnouncementModal"
+    title="Edit Announcement"
+    form=""
+    form-id="editAnnouncementForm"
+    scrollable
+    variant="default"
+>
+    @csrf
+    @method('PUT')
+    <input type="hidden" name="_modal" value="edit">
+    <input type="hidden" name="is_dismissible" value="0">
+    <input type="hidden" name="show_once" value="0">
+    <input type="hidden" name="is_active" value="0">
+    @include('admin.announcements.partials.form', ['announcement' => new \App\Models\Announcement(), 'isEdit' => true])
+
+    <x-slot:footer>
+        <x-modal.actions primary-text="Update Announcement" />
+    </x-slot:footer>
+</x-modal.form>
 
 @push('scripts')
 <script>

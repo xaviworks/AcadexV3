@@ -260,18 +260,14 @@
     </div>
 </div>
 
-{{-- Modals --}}
-{{-- Create Backup Modal --}}
-<div class="modal fade" id="backupModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form action="{{ route('admin.disaster-recovery.backup.create') }}" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-plus-circle text-success me-2"></i>Create Backup</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
+<x-modal.form
+    id="backupModal"
+    title="Create Backup"
+    size="medium"
+    form="{{ route('admin.disaster-recovery.backup.create') }}"
+>
+    @csrf
+    <x-slot:icon><i class="fas fa-plus-circle me-1"></i></x-slot:icon>
                     <div class="alert alert-info border-0 bg-info bg-opacity-10 text-info mb-4">
                         <div class="d-flex">
                             <i class="fas fa-info-circle fs-5 me-3 mt-1"></i>
@@ -359,17 +355,15 @@
                         </div>
                         <div class="form-text text-muted">Please confirm your identity to proceed.</div>
                     </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success px-4">
-                        <i class="fas fa-save me-2"></i>Start Backup
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success px-4">
+                <i class="fas fa-save me-2"></i>Start Backup
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
 @push('scripts')
 <script>

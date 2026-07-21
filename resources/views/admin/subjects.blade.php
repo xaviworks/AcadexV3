@@ -92,276 +92,249 @@
     </div>
 </div>
 
-<div class="modal fade" id="addSubjectModal" tabindex="-1" aria-labelledby="addSubjectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="addSubjectModalLabel">
-                    <i class="bi bi-book-fill me-2"></i>Add New Course
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addSubjectForm">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Academic Period <span class="text-danger">*</span></label>
-                        <select name="academic_period_id" id="addSubjectAcademicPeriod" class="form-select" required>
-                            <option value="">Select Academic Period</option>
-                            @foreach($academicPeriods as $period)
-                                <option value="{{ $period->id }}">
-                                    {{ $period->academic_year }} - {{ ucfirst($period->semester) }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback" id="addSubjectAcademicPeriodError"></div>
-                    </div>
+<x-modal.form id="addSubjectModal" title="Add New Course" form="" form-id="addSubjectForm" scrollable>
+    @csrf
+    <x-slot:icon><i class="bi bi-book-fill me-1"></i></x-slot:icon>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
-                        <select name="department_id" id="addSubjectDepartment" class="form-select" required>
-                            <option value="">Select Department</option>
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}">
-                                    {{ $department->department_code }} - {{ $department->department_description }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback" id="addSubjectDepartmentError"></div>
-                    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Academic Period <span class="text-danger">*</span></label>
+        <select name="academic_period_id" id="addSubjectAcademicPeriod" class="form-select" required>
+            <option value="">Select Academic Period</option>
+            @foreach($academicPeriods as $period)
+                <option value="{{ $period->id }}">
+                    {{ $period->academic_year }} - {{ ucfirst($period->semester) }}
+                </option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback" id="addSubjectAcademicPeriodError"></div>
+    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Program <span class="text-danger">*</span></label>
-                        <select name="course_id" id="addSubjectCourse" class="form-select" required>
-                            <option value="">Select Program</option>
-                            @foreach($courses as $course)
-                                <option value="{{ $course->id }}" data-department="{{ $course->department_id }}">
-                                    {{ $course->course_code }} - {{ $course->course_description }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback" id="addSubjectCourseError"></div>
-                    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+        <select name="department_id" id="addSubjectDepartment" class="form-select" required>
+            <option value="">Select Department</option>
+            @foreach($departments as $department)
+                <option value="{{ $department->id }}">
+                    {{ $department->department_code }} - {{ $department->department_description }}
+                </option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback" id="addSubjectDepartmentError"></div>
+    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Course Code <span class="text-danger">*</span></label>
-                        <input type="text" name="subject_code" id="addSubjectCode" class="form-control" placeholder="e.g. ITE 101" required maxlength="255">
-                        <div class="invalid-feedback" id="addSubjectCodeError"></div>
-                    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Program <span class="text-danger">*</span></label>
+        <select name="course_id" id="addSubjectCourse" class="form-select" required>
+            <option value="">Select Program</option>
+            @foreach($courses as $course)
+                <option value="{{ $course->id }}" data-department="{{ $course->department_id }}">
+                    {{ $course->course_code }} - {{ $course->course_description }}
+                </option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback" id="addSubjectCourseError"></div>
+    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Course Description <span class="text-danger">*</span></label>
-                        <input type="text" name="subject_description" id="addSubjectDescription" class="form-control" placeholder="e.g. Introduction to Computing" required maxlength="255">
-                        <div class="invalid-feedback" id="addSubjectDescriptionError"></div>
-                    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Course Code <span class="text-danger">*</span></label>
+        <input type="text" name="subject_code" id="addSubjectCode" class="form-control" placeholder="e.g. ITE 101" required maxlength="255">
+        <div class="invalid-feedback" id="addSubjectCodeError"></div>
+    </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Units <span class="text-danger">*</span></label>
-                            <input type="number" name="units" id="addSubjectUnits" class="form-control" required min="1" max="6">
-                            <div class="invalid-feedback" id="addSubjectUnitsError"></div>
-                        </div>
-                        <div class="col-md-6 mb-0">
-                            <label class="form-label fw-semibold">Year Level <span class="text-danger">*</span></label>
-                            <select name="year_level" id="addSubjectYearLevel" class="form-select" required>
-                                <option value="">Select Year Level</option>
-                                <option value="1">1st Year</option>
-                                <option value="2">2nd Year</option>
-                                <option value="3">3rd Year</option>
-                                <option value="4">4th Year</option>
-                                <option value="5">5th Year</option>
-                            </select>
-                            <div class="invalid-feedback" id="addSubjectYearLevelError"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-success" onclick="confirmAddSubject()">
-                        <i class="bi bi-plus-lg me-1"></i>Add Course
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Course Description <span class="text-danger">*</span></label>
+        <input type="text" name="subject_description" id="addSubjectDescription" class="form-control" placeholder="e.g. Introduction to Computing" required maxlength="255">
+        <div class="invalid-feedback" id="addSubjectDescriptionError"></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Units <span class="text-danger">*</span></label>
+            <input type="number" name="units" id="addSubjectUnits" class="form-control" required min="1" max="6">
+            <div class="invalid-feedback" id="addSubjectUnitsError"></div>
+        </div>
+        <div class="col-md-6 mb-0">
+            <label class="form-label fw-semibold">Year Level <span class="text-danger">*</span></label>
+            <select name="year_level" id="addSubjectYearLevel" class="form-select" required>
+                <option value="">Select Year Level</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+                <option value="5">5th Year</option>
+            </select>
+            <div class="invalid-feedback" id="addSubjectYearLevelError"></div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="editSubjectModal" tabindex="-1" aria-labelledby="editSubjectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="editSubjectModalLabel">
-                    <i class="bi bi-pencil-square me-2"></i>Edit Course
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editSubjectForm">
-                @csrf
-                @method('PUT')
-                <input type="hidden" id="editSubjectId" name="subject_id">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Academic Period <span class="text-danger">*</span></label>
-                        <select name="academic_period_id" id="editSubjectAcademicPeriod" class="form-select" required>
-                            <option value="">Select Academic Period</option>
-                            @foreach($academicPeriods as $period)
-                                <option value="{{ $period->id }}">
-                                    {{ $period->academic_year }} - {{ ucfirst($period->semester) }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback" id="editSubjectAcademicPeriodError"></div>
-                    </div>
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-success" onclick="confirmAddSubject()">
+                <i class="bi bi-plus-lg me-1"></i>Add Course
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
-                        <select name="department_id" id="editSubjectDepartment" class="form-select" required>
-                            <option value="">Select Department</option>
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}">
-                                    {{ $department->department_code }} - {{ $department->department_description }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback" id="editSubjectDepartmentError"></div>
-                    </div>
+<x-modal.form id="editSubjectModal" title="Edit Course" form="" form-id="editSubjectForm" variant="default" scrollable>
+    @csrf
+    @method('PUT')
+    <x-slot:icon><i class="bi bi-pencil-square me-1"></i></x-slot:icon>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Program <span class="text-danger">*</span></label>
-                        <select name="course_id" id="editSubjectCourse" class="form-select" required>
-                            <option value="">Select Program</option>
-                            @foreach($courses as $course)
-                                <option value="{{ $course->id }}" data-department="{{ $course->department_id }}">
-                                    {{ $course->course_code }} - {{ $course->course_description }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback" id="editSubjectCourseError"></div>
-                    </div>
+    <input type="hidden" id="editSubjectId" name="subject_id">
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Academic Period <span class="text-danger">*</span></label>
+        <select name="academic_period_id" id="editSubjectAcademicPeriod" class="form-select" required>
+            <option value="">Select Academic Period</option>
+            @foreach($academicPeriods as $period)
+                <option value="{{ $period->id }}">
+                    {{ $period->academic_year }} - {{ ucfirst($period->semester) }}
+                </option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback" id="editSubjectAcademicPeriodError"></div>
+    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Course Code <span class="text-danger">*</span></label>
-                        <input type="text" name="subject_code" id="editSubjectCode" class="form-control" required maxlength="255">
-                        <div class="invalid-feedback" id="editSubjectCodeError"></div>
-                    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+        <select name="department_id" id="editSubjectDepartment" class="form-select" required>
+            <option value="">Select Department</option>
+            @foreach($departments as $department)
+                <option value="{{ $department->id }}">
+                    {{ $department->department_code }} - {{ $department->department_description }}
+                </option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback" id="editSubjectDepartmentError"></div>
+    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Course Description <span class="text-danger">*</span></label>
-                        <input type="text" name="subject_description" id="editSubjectDescription" class="form-control" required maxlength="255">
-                        <div class="invalid-feedback" id="editSubjectDescriptionError"></div>
-                    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Program <span class="text-danger">*</span></label>
+        <select name="course_id" id="editSubjectCourse" class="form-select" required>
+            <option value="">Select Program</option>
+            @foreach($courses as $course)
+                <option value="{{ $course->id }}" data-department="{{ $course->department_id }}">
+                    {{ $course->course_code }} - {{ $course->course_description }}
+                </option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback" id="editSubjectCourseError"></div>
+    </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">Units <span class="text-danger">*</span></label>
-                            <input type="number" name="units" id="editSubjectUnits" class="form-control" required min="1" max="6">
-                            <div class="invalid-feedback" id="editSubjectUnitsError"></div>
-                        </div>
-                        <div class="col-md-6 mb-0">
-                            <label class="form-label fw-semibold">Year Level <span class="text-danger">*</span></label>
-                            <select name="year_level" id="editSubjectYearLevel" class="form-select" required>
-                                <option value="">Select Year Level</option>
-                                <option value="1">1st Year</option>
-                                <option value="2">2nd Year</option>
-                                <option value="3">3rd Year</option>
-                                <option value="4">4th Year</option>
-                                <option value="5">5th Year</option>
-                            </select>
-                            <div class="invalid-feedback" id="editSubjectYearLevelError"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-primary" onclick="confirmEditSubject()">
-                        <i class="bi bi-check-lg me-1"></i>Save Changes
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Course Code <span class="text-danger">*</span></label>
+        <input type="text" name="subject_code" id="editSubjectCode" class="form-control" required maxlength="255">
+        <div class="invalid-feedback" id="editSubjectCodeError"></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Course Description <span class="text-danger">*</span></label>
+        <input type="text" name="subject_description" id="editSubjectDescription" class="form-control" required maxlength="255">
+        <div class="invalid-feedback" id="editSubjectDescriptionError"></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Units <span class="text-danger">*</span></label>
+            <input type="number" name="units" id="editSubjectUnits" class="form-control" required min="1" max="6">
+            <div class="invalid-feedback" id="editSubjectUnitsError"></div>
+        </div>
+        <div class="col-md-6 mb-0">
+            <label class="form-label fw-semibold">Year Level <span class="text-danger">*</span></label>
+            <select name="year_level" id="editSubjectYearLevel" class="form-select" required>
+                <option value="">Select Year Level</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+                <option value="5">5th Year</option>
+            </select>
+            <div class="invalid-feedback" id="editSubjectYearLevelError"></div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="deleteSubjectModal" tabindex="-1" aria-labelledby="deleteSubjectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteSubjectModalLabel">
-                    <i class="bi bi-trash me-2"></i>Delete Course
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="deleteSubjectId">
-                <div class="text-center mb-3">
-                    <div class="text-danger mb-3">
-                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
-                    </div>
-                    <h5 class="mb-2">Are you sure?</h5>
-                    <p class="text-muted mb-0">
-                        You are about to delete the course: <strong id="deleteSubjectName" class="text-danger"></strong>
-                    </p>
-                    <p class="text-muted small mt-2">
-                        This action cannot be undone. Associated records must be removed or reassigned first.
-                    </p>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-danger" onclick="confirmDeleteSubject()">
-                    <i class="bi bi-trash me-1"></i>Delete Course
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-primary" onclick="confirmEditSubject()">
+                <i class="bi bi-check-lg me-1"></i>Save Changes
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.destructive id="deleteSubjectModal" title="Delete Course">
+    <x-slot:icon><i class="bi bi-trash me-1"></i></x-slot:icon>
+    <input type="hidden" id="deleteSubjectId">
+    <div class="text-center mb-3">
+        <div class="text-danger mb-3">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+        </div>
+        <h5 class="mb-2">Are you sure?</h5>
+        <p class="text-muted mb-0">
+            You are about to delete the course: <strong id="deleteSubjectName" class="text-danger"></strong>
+        </p>
+        <p class="text-muted small mt-2">
+            This action cannot be undone. Associated records must be removed or reassigned first.
+        </p>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-danger" onclick="confirmDeleteSubject()">
+                <i class="bi bi-trash me-1"></i>Delete Course
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.form
+    id="subjectPasswordConfirmModal"
+    title="Confirm Your Password"
+    size="small"
+    form=""
+    form-id="subjectPasswordConfirmForm"
+    :no-page-loader="true"
+    :backdrop="false"
+    :keyboard="false"
+    close-action="cancelSubjectPasswordConfirm()"
+    variant="default"
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-shield-lock me-1"></i></x-slot:icon>
+
+    <p class="text-muted small mb-3">
+        <i class="bi bi-info-circle me-1"></i>
+        For security reasons, please re-enter your password to continue.
+    </p>
+    <div class="mb-0">
+        <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <input type="password" name="password" id="subjectConfirmPassword" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleSubjectConfirmPasswordVisibility()" tabindex="-1">
+                <i class="bi bi-eye" id="subjectTogglePasswordIcon"></i>
+            </button>
+        </div>
+        <div class="invalid-feedback" id="subjectPasswordError"></div>
+        <div id="subjectPasswordErrorAlert" class="alert alert-danger mt-2 py-2 px-3 small d-none">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span id="subjectPasswordErrorMessage"></span>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="subjectPasswordConfirmModal" tabindex="-1" aria-labelledby="subjectPasswordConfirmModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="subjectPasswordConfirmModalLabel">
-                    <i class="bi bi-shield-lock me-2"></i>Confirm Your Password
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="cancelSubjectPasswordConfirm()"></button>
-            </div>
-            <form id="subjectPasswordConfirmForm" data-no-page-loader>
-                @csrf
-                <div class="modal-body">
-                    <p class="text-muted small mb-3">
-                        <i class="bi bi-info-circle me-1"></i>
-                        For security reasons, please re-enter your password to continue.
-                    </p>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="password" name="password" id="subjectConfirmPassword" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
-                            <button type="button" class="btn btn-outline-secondary" onclick="toggleSubjectConfirmPasswordVisibility()" tabindex="-1">
-                                <i class="bi bi-eye" id="subjectTogglePasswordIcon"></i>
-                            </button>
-                        </div>
-                        <div class="invalid-feedback" id="subjectPasswordError"></div>
-                        <div id="subjectPasswordErrorAlert" class="alert alert-danger mt-2 py-2 px-3 small d-none">
-                            <i class="bi bi-exclamation-circle me-1"></i>
-                            <span id="subjectPasswordErrorMessage"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success" id="subjectConfirmPasswordBtn">
-                        <span id="subjectConfirmPasswordBtnText">
-                            <i class="bi bi-check-lg me-1"></i>Confirm
-                        </span>
-                        <span id="subjectConfirmPasswordBtnLoading" class="d-none">
-                            <span class="spinner-border spinner-border-sm me-1"></span>Verifying...
-                        </span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelSubjectPasswordConfirm()">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelSubjectPasswordConfirm()">Cancel</button>
+            <button type="submit" class="btn btn-success" id="subjectConfirmPasswordBtn">
+                <span id="subjectConfirmPasswordBtnText">
+                    <i class="bi bi-check-lg me-1"></i>Confirm
+                </span>
+                <span id="subjectConfirmPasswordBtnLoading" class="d-none">
+                    <span class="spinner-border spinner-border-sm me-1"></span>Verifying...
+                </span>
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
 @push('styles')
 <style>

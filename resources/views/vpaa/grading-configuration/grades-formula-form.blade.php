@@ -374,39 +374,38 @@
                 </form>
 
                 @if ($requiresPasswordPrompt)
-                    <div class="modal fade" id="formulaPasswordModal" tabindex="-1" aria-labelledby="formulaPasswordModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content border-0 shadow-sm">
-                                <div class="modal-header bg-success text-white">
-                                    <h5 class="modal-title" id="formulaPasswordModalLabel">
-                                        <i class="bi bi-lock-fill me-2"></i>Confirm Sensitive Change
-                                    </h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p class="text-muted mb-3">This subject already has recorded grades. Enter your password to continue updating its grading formula.</p>
-                                    <div class="alert alert-warning border-0 shadow-sm-sm mb-3 white-space-pre-wrap text-sm">
+                    <x-modal.warning
+                        id="formulaPasswordModal"
+                        title="Confirm Sensitive Change"
+                        size="medium"
+                    >
+                        <x-slot:icon>
+                            <i class="bi bi-lock-fill"></i>
+                        </x-slot:icon>
+
+                        <p class="text-muted mb-3">This subject already has recorded grades. Enter your password to continue updating its grading formula.</p>
+                        <div class="alert alert-warning border-0 shadow-sm-sm mb-3 white-space-pre-wrap text-sm">
 Choose Department Formula
 Department formulas replace the old department baselines. Pick one to baseline {{ $subjectStructureContext }} and refine a subject-specific override afterward.
 
 Custom subject formula active
 Applying a structure template will replace the current override.
 This subject already has a custom formula. Applying a structure template will replace the current subject override.
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="formulaPasswordInput" class="form-label fw-semibold">Account Password</label>
-                                        <input type="password" class="form-control" id="formulaPasswordInput" placeholder="Enter your password" autocomplete="current-password">
-                                        <div class="invalid-feedback" id="formulaPasswordInlineError"></div>
-                                    </div>
-                                    <div class="alert alert-danger d-none" id="formulaPasswordServerError"></div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-success" id="confirmFormulaPasswordBtn">Confirm &amp; Save</button>
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                                </div>
-                            </div>
                         </div>
-                    </div>
+                        <div class="mb-3">
+                            <label for="formulaPasswordInput" class="form-label fw-semibold">Account Password</label>
+                            <input type="password" class="form-control" id="formulaPasswordInput" placeholder="Enter your password" autocomplete="current-password">
+                            <div class="invalid-feedback" id="formulaPasswordInlineError"></div>
+                        </div>
+                        <div class="alert alert-danger d-none" id="formulaPasswordServerError"></div>
+
+                        <x-slot:footer>
+                            <x-modal.actions secondary-text="" primary-text="">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-success" id="confirmFormulaPasswordBtn">Confirm &amp; Save</button>
+                            </x-modal.actions>
+                        </x-slot:footer>
+                    </x-modal.warning>
                 @endif
             @endif
         </div>

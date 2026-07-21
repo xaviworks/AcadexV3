@@ -321,6 +321,8 @@ function initStructureTemplateManagement(config) {
   const openCreateTemplateBtn = document.getElementById('open-create-template');
   const createTemplateModalLabel = document.getElementById('create-template-modal-label');
   const templatePasswordModalLabel = document.getElementById('template-password-modal-label');
+  const createTemplateModalHeaderLabel = document.getElementById('create-template-modalLabel');
+  const templatePasswordModalHeaderLabel = document.getElementById('template-password-modalLabel');
   const deleteTemplateModal = document.getElementById('delete-structure-template-modal');
   const deleteTemplateForm = document.getElementById('delete-structure-template-form');
   const deleteTemplateName = document.getElementById('delete-template-name');
@@ -348,6 +350,16 @@ function initStructureTemplateManagement(config) {
   if (createTemplateModal && window.bootstrap?.Modal) {
     createTemplateModalInstance = window.bootstrap.Modal.getOrCreateInstance(createTemplateModal);
   }
+
+  const syncText = (elements, value, html = false) => {
+    elements.filter(Boolean).forEach((element) => {
+      if (html) {
+        element.innerHTML = value;
+      } else {
+        element.textContent = value;
+      }
+    });
+  };
 
   let componentCounter = 0;
 
@@ -467,15 +479,15 @@ function initStructureTemplateManagement(config) {
         templateKeyInput.classList.add('bg-light');
         templateKeyInput.dataset.userModified = 'true';
       }
-      if (createTemplateModalLabel) {
-        createTemplateModalLabel.textContent = 'Edit Structure Template';
-      }
+      syncText([createTemplateModalLabel, createTemplateModalHeaderLabel], 'Edit Structure Template');
       if (createTemplateSubmitBtn) {
         createTemplateSubmitBtn.innerHTML = '<i class="bi bi-save me-1"></i>Save Changes';
       }
-      if (templatePasswordModalLabel) {
-        templatePasswordModalLabel.innerHTML = '<i class="bi bi-shield-lock me-2"></i>Confirm Template Update';
-      }
+      syncText(
+        [templatePasswordModalLabel, templatePasswordModalHeaderLabel],
+        '<i class="bi bi-shield-lock me-2"></i>Confirm Template Update',
+        true
+      );
       if (templatePasswordConfirm) {
         templatePasswordConfirm.innerHTML = '<i class="bi bi-check-circle me-1"></i>Confirm and Update';
       }
@@ -506,15 +518,15 @@ function initStructureTemplateManagement(config) {
         }
         delete templateKeyInput.dataset.userModified;
       }
-      if (createTemplateModalLabel) {
-        createTemplateModalLabel.textContent = 'Create Structure Template';
-      }
+      syncText([createTemplateModalLabel, createTemplateModalHeaderLabel], 'Create Structure Template');
       if (createTemplateSubmitBtn) {
         createTemplateSubmitBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Create Template';
       }
-      if (templatePasswordModalLabel) {
-        templatePasswordModalLabel.innerHTML = '<i class="bi bi-shield-lock me-2"></i>Confirm Template Creation';
-      }
+      syncText(
+        [templatePasswordModalLabel, templatePasswordModalHeaderLabel],
+        '<i class="bi bi-shield-lock me-2"></i>Confirm Template Creation',
+        true
+      );
       if (templatePasswordConfirm) {
         templatePasswordConfirm.innerHTML = '<i class="bi bi-check-circle me-1"></i>Confirm and Create';
       }

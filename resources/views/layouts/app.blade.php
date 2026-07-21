@@ -444,56 +444,29 @@
         });
     </script>
 
-    {{-- Sign Out Confirmation Modal - At body level for proper z-index stacking --}}
-    <div class="modal fade" id="signOutModal" tabindex="-1" aria-labelledby="signOutModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 1.25rem; overflow: hidden;">
-                {{-- Header with gradient background --}}
-                <div class="modal-header border-0 text-white position-relative" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 2rem 2rem 1.5rem;">
-                    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M0 0h20v20H0z\" fill=\"none\"/%3E%3Cpath d=\"M0 0l10 10M10 0L0 10M10 10l10 10M20 0L10 10\" stroke=\"%23ffffff\" stroke-width=\"0.5\" opacity=\"0.1\"/%3E%3C/svg%3E'); opacity: 0.3;"></div>
-                    <div class="w-100 position-relative">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <div class="p-3 rounded-circle me-3" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
-                                    <i class="bi bi-box-arrow-right" style="font-size: 1.5rem;"></i>
-                                </div>
-                                <div>
-                                    <h5 class="modal-title fw-bold mb-0" id="signOutModalLabel">Sign Out</h5>
-                                    <small style="opacity: 0.9;">End your current session</small>
-                                </div>
-                            </div>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                    </div>
-                </div>
-                
-                {{-- Body with icon and message --}}
-                <div class="modal-body text-center" style="padding: 2.5rem 2rem;">
-                    <div class="mb-3">
-                        <div class="mx-auto d-inline-flex align-items-center justify-content-center rounded-circle" 
-                             style="width: 80px; height: 80px; background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);">
-                            <i class="bi bi-question-circle-fill text-danger" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                    <h5 class="fw-bold mb-3" style="color: #2c3e50;">Are you sure you want to sign out?</h5>
-                    <p class="text-muted mb-0">You'll need to sign in again to access your account.</p>
-                </div>
-                
-                {{-- Footer with action buttons --}}
-                <div class="modal-footer border-0 bg-light" style="padding: 1.5rem 2rem;">
-                    <form method="POST" action="{{ route('logout') }}" id="logoutForm" class="d-inline" onsubmit="clearAnnouncementSession()">
-                        @csrf
-                        <button type="submit" class="btn btn-danger px-4 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);">
-                            <i class="bi bi-box-arrow-right me-2"></i>Yes, Sign Out
-                        </button>
-                    </form>
-                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal" style="font-weight: 600;">
-                        <i class="bi bi-x-circle me-2"></i>Cancel
-                    </button>
-                </div>
+    <x-modal.destructive
+        id="signOutModal"
+        title="Sign Out"
+        description="End your current session"
+        :backdrop="false"
+        :keyboard="false"
+    >
+        <x-slot:icon><i class="bi bi-box-arrow-right me-1"></i></x-slot:icon>
+        <div class="text-center py-3">
+            <div class="mb-3">
+                <i class="bi bi-question-circle-fill text-danger" style="font-size: 2.5rem;"></i>
             </div>
+            <h5 class="fw-bold mb-3">Are you sure you want to sign out?</h5>
+            <p class="text-muted mb-0">You'll need to sign in again to access your account.</p>
         </div>
-    </div>
+
+        <x-slot:footer>
+            <form method="POST" action="{{ route('logout') }}" id="logoutForm" class="d-inline" onsubmit="clearAnnouncementSession()">
+                @csrf
+                <x-modal.actions destructive-text="Yes, Sign Out" />
+            </form>
+        </x-slot:footer>
+    </x-modal.destructive>
     
     {{-- Styles: resources/css/layout/app.css --}}
 

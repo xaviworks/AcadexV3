@@ -194,47 +194,10 @@ export function bindGradeInputEvents() {
     const activityIds = new Set();
     const studentIds = new Set();
 
-    // Create and append modal to body
-    let warningModalElement = document.getElementById('gradeWarningModal');
+    const warningModalElement = document.getElementById('gradeWarningModal');
     if (!warningModalElement) {
-      const modalHtml = `
-                <div class="modal fade" id="gradeWarningModal" tabindex="-1" aria-labelledby="gradeWarningModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-success text-white">
-                                <h5 class="modal-title" id="gradeWarningModalLabel">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>Invalid Grades Detected
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p class="text-muted mb-3">The following grades exceed the new maximum score:</p>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-bordered" id="invalidGradesTable">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Student</th>
-                                                <th>Current Grade</th>
-                                                <th>New Maximum</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-                                <p class="text-danger mt-3 mb-0">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Please adjust these grades before changing the number of items.
-                                </p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-      warningModalElement = document.getElementById('gradeWarningModal');
+      console.warn('gradeWarningModal component is missing from the page.');
+      return;
     }
 
     const warningModal = new bootstrap.Modal(warningModalElement, {

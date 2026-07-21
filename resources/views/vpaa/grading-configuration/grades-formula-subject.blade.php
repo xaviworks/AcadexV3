@@ -209,9 +209,25 @@
                                     @endif
                                 </div>
                                 @if ($hasSubjectFormula)
-                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#removeSubjectFormulaModal">
-                                        <i class="bi bi-trash me-1"></i>Remove Subject Formula
-                                    </button>
+                        <x-modal.destructive
+                            id="removeSubjectFormulaModal"
+                            title="Remove Subject Formula"
+                            :form="$buildRoute('vpaa.gradingConfiguration.subjects.removeCustom', ['subject' => $subject->id])"
+                            method="POST"
+                        >
+                            <x-slot:icon>
+                                <i class="bi bi-trash"></i>
+                            </x-slot:icon>
+
+                            @csrf
+                            @method('DELETE')
+
+                            <p class="mb-0">Removing the custom formula will restore {{ $subjectName }} to {{ $departmentName }}'s baseline. You can always create a new subject formula afterward.</p>
+
+                            <x-slot:footer>
+                                <x-modal.actions destructive-text="Remove Formula" />
+                            </x-slot:footer>
+                        </x-modal.destructive>
                                 @endif
                             </div>
 
@@ -330,61 +346,58 @@
                         @endif
                     </form>
                     @if ($requiresPasswordPrompt)
-                        <div class="modal fade" id="subjectFormulaPasswordModal" tabindex="-1" aria-labelledby="subjectFormulaPasswordModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content border-0 shadow-sm">
-                                    <div class="modal-header bg-success text-white">
-                                        <h5 class="modal-title" id="subjectFormulaPasswordModalLabel"><i class="bi bi-lock-fill me-2"></i>Confirm Sensitive Change</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="alert alert-warning border-0 shadow-sm-sm mb-3 white-space-pre-wrap text-sm">
+                        <x-modal.warning
+                            id="subjectFormulaPasswordModal"
+                            title="Confirm Sensitive Change"
+                            size="medium"
+                        >
+                            <x-slot:icon>
+                                <i class="bi bi-lock-fill"></i>
+                            </x-slot:icon>
+
+                            <div class="alert alert-warning border-0 shadow-sm-sm mb-3 white-space-pre-wrap text-sm">
 Choose Department Formula
 Department formulas replace the old department baselines. Pick one to baseline {{ $subjectName }} and refine a subject-specific override afterward.
 
 Custom subject formula active
 Applying a structure template will replace the current override.
-This subject already has a custom formula. Applying a structure template will replace the current subject override.
-                                        </div>
-                                        <p class="text-muted">{{ $subjectName }} already has recorded grades. Enter your password to continue.</p>
-                                        <div class="mb-3">
-                                            <label for="subjectFormulaPasswordInput" class="form-label fw-semibold">Account Password</label>
-                                            <input type="password" class="form-control" id="subjectFormulaPasswordInput" autocomplete="current-password" placeholder="Enter your password">
-                                            <div class="invalid-feedback d-none" id="subjectFormulaPasswordInlineError"></div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-success" id="subjectFormulaPasswordConfirmBtn">Confirm &amp; Apply</button>
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    </div>
-                                </div>
+This subject already has a custom formula. Applying a structure template will replace the current override.
                             </div>
-                        </div>
+                            <p class="text-muted">{{ $subjectName }} already has recorded grades. Enter your password to continue.</p>
+                            <div class="mb-3">
+                                <label for="subjectFormulaPasswordInput" class="form-label fw-semibold">Account Password</label>
+                                <input type="password" class="form-control" id="subjectFormulaPasswordInput" autocomplete="current-password" placeholder="Enter your password">
+                                <div class="invalid-feedback d-none" id="subjectFormulaPasswordInlineError"></div>
+                            </div>
+
+                            <x-slot:footer>
+                                <x-modal.actions secondary-text="" primary-text="">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-success" id="subjectFormulaPasswordConfirmBtn">Confirm &amp; Apply</button>
+                                </x-modal.actions>
+                            </x-slot:footer>
+                        </x-modal.warning>
                     @endif
                     @if ($hasSubjectFormula)
-                        <div class="modal fade" id="removeSubjectFormulaModal" tabindex="-1" aria-labelledby="removeSubjectFormulaModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header border-0">
-                                        <h5 class="modal-title text-success" id="removeSubjectFormulaModalLabel">Remove Subject Formula</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p class="mb-0">Removing the custom formula will restore {{ $subjectName }} to {{ $departmentName }}’s baseline. You can always create a new subject formula afterward.</p>
-                                    </div>
-                                    <div class="modal-footer border-0 d-flex justify-content-between">
-                                        <form method="POST" action="{{ $buildRoute('vpaa.gradingConfiguration.subjects.removeCustom', ['subject' => $subject->id]) }}" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">
-                                                <i class="bi bi-trash me-1"></i>Remove Formula
-                                            </button>
-                                        </form>
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <x-modal.destructive
+                            id="removeSubjectFormulaModal"
+                            title="Remove Subject Formula"
+                            :form="$buildRoute('vpaa.gradingConfiguration.subjects.removeCustom', ['subject' => $subject->id])"
+                            method="POST"
+                        >
+                            <x-slot:icon>
+                                <i class="bi bi-trash"></i>
+                            </x-slot:icon>
+
+                            @csrf
+                            @method('DELETE')
+
+                            <p class="mb-0">Removing the custom formula will restore {{ $subjectName }} to {{ $departmentName }}'s baseline. You can always create a new subject formula afterward.</p>
+
+                            <x-slot:footer>
+                                <x-modal.actions destructive-text="Remove Formula" />
+                            </x-slot:footer>
+                        </x-modal.destructive>
                     @endif
                 </div>
             </div>

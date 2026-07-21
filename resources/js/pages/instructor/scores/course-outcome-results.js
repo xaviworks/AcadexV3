@@ -560,20 +560,12 @@ function initTargetLevelEditor() {
   targetLevelEditorInitialized = true;
 }
 
-// ==================== CUSTOM PRINT MODAL (No Bootstrap dependency) ====================
+// ==================== PRINT OPTIONS MODAL ====================
 
 /**
- * Open the print options modal using custom CSS-based modal
+ * Open the print options modal.
  */
 function coOpenPrintModal() {
-  const overlay = document.getElementById('coPrintModalOverlay');
-  if (overlay) {
-    overlay.classList.add('show');
-    document.body.style.overflow = 'hidden';
-    return;
-  }
-
-  // Fallback to Bootstrap modal if custom one doesn't exist
   const modalEl = document.getElementById('printOptionsModal');
   if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
@@ -581,17 +573,9 @@ function coOpenPrintModal() {
 }
 
 /**
- * Close the print options modal
+ * Close the print options modal.
  */
 function coClosePrintModal() {
-  const overlay = document.getElementById('coPrintModalOverlay');
-  if (overlay) {
-    overlay.classList.remove('show');
-    document.body.style.overflow = '';
-    return;
-  }
-
-  // Fallback to Bootstrap modal
   const modalEl = document.getElementById('printOptionsModal');
   if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
     const modal = bootstrap.Modal.getInstance(modalEl);
