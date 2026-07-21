@@ -40,7 +40,7 @@ RUN set -eux; \
         libonig5 \
         libpng16-16 \
         libxml2 \
-        libzip4; \
+        libzip5; \
     rm -rf /var/lib/apt/lists/*
 
 # Enable Apache modules and configure Apache for Laravel/Railway at build time.
