@@ -46,6 +46,8 @@ RUN set -eux; \
 # Enable Apache modules and configure Apache for Laravel/Railway at build time.
 RUN set -eux; \
     a2enmod rewrite; \
+    for module in mpm_event mpm_worker mpm_prefork; do a2dismod "$module" 2>/dev/null || true; done; \
+    a2enmod mpm_prefork; \
     printf '%s\n' 'ServerName localhost' >> /etc/apache2/apache2.conf; \
     printf '%s\n' \
         '<IfModule mpm_prefork_module>' \
@@ -55,9 +57,6 @@ RUN set -eux; \
         '    MaxRequestWorkers    20' \
         '    MaxConnectionsPerChild 1000' \
         '</IfModule>' > /etc/apache2/mods-available/mpm_prefork.conf; \
-    rm -f /etc/apache2/mods-enabled/mpm_*; \
-    ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load; \
-    ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf; \
     sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf; \
     sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf; \
     printf '%s\n' \
@@ -67,7 +66,8 @@ RUN set -eux; \
         '</Directory>' > /etc/apache2/conf-available/laravel.conf; \
     a2enconf laravel; \
     sed -ri -e 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf; \
-    sed -ri -e 's/:80/:${PORT}/g' /etc/apache2/sites-available/*.conf
+    sed -ri -e 's/:80/:${PORT}/g' /etc/apache2/sites-available/*.conf; \
+    apachectl -t
 
 # PHP performance tuning (OPcache + memory).
 RUN set -eux; \
