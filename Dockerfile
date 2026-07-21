@@ -46,12 +46,7 @@ RUN set -eux; \
 # Enable Apache modules and configure Apache for Laravel/Railway at build time.
 RUN set -eux; \
     a2enmod rewrite; \
-    for module in mpm_event mpm_worker mpm_prefork; do a2dismod "$module" 2>/dev/null || true; done; \
-
-    # Enable the prefork for MPM and configure it for railway.
-    find /etc/apache2/mods-enabled -maxdepth 1 -type l -name 'mpm_*' -delete; \
-    ln -s /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load; \
-    ln -s /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf; \
+    a2dismod mpm_event mpm_worker || true; \
     a2enmod mpm_prefork; \
     printf '%s\n' 'ServerName localhost' >> /etc/apache2/apache2.conf; \
     printf '%s\n' \
