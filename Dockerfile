@@ -46,7 +46,8 @@ RUN set -eux; \
 # Enable Apache modules and configure Apache for Laravel/Railway at build time.
 RUN set -eux; \
     a2enmod rewrite; \
-    a2dismod mpm_event mpm_worker || true; \
+    a2dismod mpm_event || true; \
+    a2dismod mpm_worker || true; \
     a2enmod mpm_prefork; \
     printf '%s\n' 'ServerName localhost' >> /etc/apache2/apache2.conf; \
     printf '%s\n' \

@@ -56,6 +56,9 @@ log "PHP version: $(php -r 'echo PHP_VERSION;')"
 log "Loaded PHP extensions: $(php -m | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g')"
 
 if [ "$ROLE" = "web" ]; then
+    a2dismod mpm_event >/dev/null 2>&1 || true
+    a2dismod mpm_worker >/dev/null 2>&1 || true
+    a2enmod mpm_prefork >/dev/null 2>&1 || true
     log "Apache configuration check..."
     apachectl -t
 fi
