@@ -106,7 +106,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/select-academic-period', function () {
         $periods = \App\Models\AcademicPeriod::where('is_deleted', false)
             ->orderByDesc('academic_year')
-            ->orderByRaw("FIELD(semester, '1st', '2nd', 'Summer')")
+            ->orderByRaw("CASE semester WHEN '1st' THEN 1 WHEN '2nd' THEN 2 WHEN 'Summer' THEN 3 ELSE 4 END")
             ->get();
 
         return view('instructor.select-academic-period', compact('periods'));
