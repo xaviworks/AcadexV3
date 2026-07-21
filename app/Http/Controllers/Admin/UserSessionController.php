@@ -76,6 +76,8 @@ class UserSessionController extends Controller
     {
         Gate::authorize('admin');
 
+        $userNameExpression = $this->userNameExpression();
+
         $sessionsQuery = DB::table('sessions')
             ->leftJoin('users', 'sessions.user_id', '=', 'users.id')
             ->select(
@@ -89,7 +91,7 @@ class UserSessionController extends Controller
                 'sessions.browser',
                 'sessions.platform',
                 'sessions.device_fingerprint',
-                DB::raw('CONCAT(users.first_name, " ", users.last_name) as user_name'),
+                DB::raw("{$userNameExpression} as user_name"),
                 'users.email',
                 'users.role',
                 'users.is_active',
@@ -157,7 +159,7 @@ class UserSessionController extends Controller
         // Get session info before deletion for logging
         $sessionInfo = DB::table('sessions')
             ->leftJoin('users', 'sessions.user_id', '=', 'users.id')
-            ->select('sessions.user_id', DB::raw('CONCAT(users.first_name, " ", users.last_name) as user_name'))
+            ->select('sessions.user_id', DB::raw($this->userNameExpression().' as user_name'))
             ->where('sessions.id', $sessionId)
             ->first();
 
@@ -388,5 +390,14 @@ class UserSessionController extends Controller
         return redirect()
             ->route('admin.sessions')
             ->with('success', "Successfully revoked {$deleted} user session(s). Your session remains active.");
+    }
+
+    private function userNameExpression(): string
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return "users.first_name || ' ' || users.last_name";
+        }
+
+        return "CONCAT(users.first_name, ' ', users.last_name)";
     }
 }

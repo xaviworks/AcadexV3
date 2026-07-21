@@ -149,12 +149,10 @@ class Announcement extends Model
      */
     public function scopeOrderByPriority($query, string $direction = 'desc')
     {
-        // FIELD returns position: urgent=1, high=2, normal=3, low=4
-        // For DESC (urgent first), we want ASC on FIELD
-        // For ASC (low first), we want DESC on FIELD
+        // Smaller ranks are higher priority, so descending priority uses ascending ranks.
         $order = $direction === 'desc' ? 'ASC' : 'DESC';
 
-        return $query->orderByRaw("FIELD(priority, 'urgent', 'high', 'normal', 'low') {$order}");
+        return $query->orderByRaw("CASE priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'normal' THEN 3 WHEN 'low' THEN 4 ELSE 5 END {$order}");
     }
 
     /**

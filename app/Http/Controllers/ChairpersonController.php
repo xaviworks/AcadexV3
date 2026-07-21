@@ -559,7 +559,7 @@ class ChairpersonController extends Controller
 
         $requests = \App\Models\StructureTemplateRequest::where('chairperson_id', Auth::id())
             ->with('reviewer')
-            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
+            ->orderByRaw("CASE status WHEN 'pending' THEN 1 WHEN 'approved' THEN 2 WHEN 'rejected' THEN 3 ELSE 4 END")
             ->orderByDesc('created_at')
             ->get();
 

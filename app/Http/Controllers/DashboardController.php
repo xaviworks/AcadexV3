@@ -269,17 +269,18 @@ class DashboardController extends Controller
     private function getLoginStats($selectedDate)
     {
         $hours = range(0, 23);
+        $hourExpression = $this->datePartExpression('hour');
 
-        $successfulLogins = UserLog::selectRaw('HOUR(created_at) as hour, COUNT(*) as total')
+        $successfulLogins = UserLog::selectRaw("{$hourExpression} as hour, COUNT(*) as total")
             ->where('event_type', 'login')
             ->whereDate('created_at', $selectedDate)
-            ->groupByRaw('HOUR(created_at)')
+            ->groupByRaw($hourExpression)
             ->pluck('total', 'hour');
 
-        $failedLogins = UserLog::selectRaw('HOUR(created_at) as hour, COUNT(*) as total')
+        $failedLogins = UserLog::selectRaw("{$hourExpression} as hour, COUNT(*) as total")
             ->where('event_type', 'failed_login')
             ->whereDate('created_at', $selectedDate)
-            ->groupByRaw('HOUR(created_at)')
+            ->groupByRaw($hourExpression)
             ->pluck('total', 'hour');
 
         $successfulData = array_map(fn ($hour) => $successfulLogins[$hour] ?? 0, $hours);
@@ -295,16 +296,18 @@ class DashboardController extends Controller
 
     private function getMonthlyLoginStats($selectedYear)
     {
-        $monthlySuccessfulLogins = UserLog::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+        $monthExpression = $this->datePartExpression('month');
+
+        $monthlySuccessfulLogins = UserLog::selectRaw("{$monthExpression} as month, COUNT(*) as total")
             ->where('event_type', 'login')
             ->whereYear('created_at', $selectedYear)
-            ->groupByRaw('MONTH(created_at)')
+            ->groupByRaw($monthExpression)
             ->pluck('total', 'month');
 
-        $monthlyFailedLogins = UserLog::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+        $monthlyFailedLogins = UserLog::selectRaw("{$monthExpression} as month, COUNT(*) as total")
             ->where('event_type', 'failed_login')
             ->whereYear('created_at', $selectedYear)
-            ->groupByRaw('MONTH(created_at)')
+            ->groupByRaw($monthExpression)
             ->pluck('total', 'month');
 
         $monthlySuccessfulData = array_map(fn ($month) => $monthlySuccessfulLogins[$month] ?? 0, range(1, 12));
@@ -314,6 +317,21 @@ class DashboardController extends Controller
             'monthlySuccessfulData' => $monthlySuccessfulData,
             'monthlyFailedData' => $monthlyFailedData,
         ];
+    }
+
+    private function datePartExpression(string $part): string
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return match ($part) {
+                'hour' => "CAST(strftime('%H', created_at) AS INTEGER)",
+                'month' => "CAST(strftime('%m', created_at) AS INTEGER)",
+            };
+        }
+
+        return match ($part) {
+            'hour' => 'HOUR(created_at)',
+            'month' => 'MONTH(created_at)',
+        };
     }
 
     private function deanDashboard()
