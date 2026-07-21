@@ -51,35 +51,8 @@
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
 
-    {{-- Styles: resources/css/layout/app.css --}}
-
-    <!-- Tutorial System Styles (Instructor, Admin, VPAA, Dean, Chairperson, and GE Coordinator users) -->
-    @auth
-        @if(Auth::user()->role === 0 || Auth::user()->role === 3 || Auth::user()->role === 5 || Auth::user()->role === 2 || Auth::user()->role === 1 || Auth::user()->role === 4)
-            <link rel="stylesheet" href="{{ asset('css/admin-tutorial.css') }}">
-        @endif
-    @endauth
-
     <!-- Additional Page Styles -->
     @stack('styles')
-
-    <!-- Tutorial System Scripts (Instructor, Admin, VPAA, Dean, Chairperson, and GE Coordinator users) -->
-    @auth
-        @if(Auth::user()->role === 0)
-            <script src="{{ asset('js/instructor-tutorial.js') }}?v={{ filemtime(public_path('js/instructor-tutorial.js')) }}" defer></script>
-        @elseif(Auth::user()->role === 3)
-            <script src="{{ asset('js/admin-tutorial.js') }}" defer></script>
-        @elseif(Auth::user()->role === 5)
-            <script src="{{ asset('js/vpaa-tutorial.js') }}?v={{ filemtime(public_path('js/vpaa-tutorial.js')) }}" defer></script>
-        @elseif(Auth::user()->role === 2)
-            <script src="{{ asset('js/dean-tutorial.js') }}" defer></script>
-        @elseif(Auth::user()->role === 1)
-            <script src="{{ asset('js/chairperson-tutorial.js') }}" defer></script>
-        @elseif(Auth::user()->role === 4)
-            <script src="{{ asset('js/gecoordinator-tutorial.js') }}" defer></script>
-            
-        @endif
-    @endauth
 
     <!-- Preload critical resources -->
     <link rel="preload" as="image" href="{{ asset('logo.jpg') }}">
