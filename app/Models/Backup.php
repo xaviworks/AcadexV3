@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $type
  * @property string $filename
  * @property string $path
+ * @property string $disk
+ * @property string|null $checksum
+ * @property bool $encrypted
  * @property int $size
  * @property array|null $tables
  * @property string $status
@@ -34,7 +37,10 @@ class Backup extends Model
         'type',
         'filename',
         'path',
+        'disk',
         'size',
+        'checksum',
+        'encrypted',
         'tables',
         'status',
         'notes',
@@ -46,6 +52,7 @@ class Backup extends Model
     protected $casts = [
         'tables' => 'array',
         'size' => 'integer',
+        'encrypted' => 'boolean',
         'completed_at' => 'datetime',
     ];
 
@@ -138,7 +145,8 @@ class Backup extends Model
      */
     public function fileExists(): bool
     {
-        return file_exists(storage_path($this->path));
+        return \Illuminate\Support\Facades\Storage::disk($this->disk ?: config('backup.disk'))->exists($this->path)
+            || ($this->disk === 'local' && str_starts_with($this->path, 'app/') && file_exists(storage_path($this->path)));
     }
 
     /**
@@ -146,6 +154,10 @@ class Backup extends Model
      */
     public function getFullPath(): string
     {
-        return storage_path($this->path);
+        if ($this->disk === 'local' && str_starts_with($this->path, 'app/')) {
+            return storage_path($this->path);
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk($this->disk ?: config('backup.disk'))->path($this->path);
     }
 }

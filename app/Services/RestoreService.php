@@ -38,9 +38,7 @@ class RestoreService
      */
     public function restoreFromBackup(Backup $backup, array $options = []): array
     {
-        $fullPath = $backup->getFullPath();
-
-        if (! file_exists($fullPath)) {
+        if (! $backup->fileExists()) {
             throw new \RuntimeException('Backup file not found');
         }
 
@@ -52,9 +50,9 @@ class RestoreService
             'started_at' => now()->toIso8601String(),
         ];
 
+        $temporaryZip = app(BackupService::class)->materializeZip($backup);
         $zip = new ZipArchive;
-
-        if ($zip->open($fullPath) !== true) {
+        if ($zip->open($temporaryZip) !== true) {
             throw new \RuntimeException('Could not open backup archive');
         }
 
@@ -63,7 +61,10 @@ class RestoreService
         try {
             // Read manifest
             $manifestContent = $zip->getFromName('manifest.json');
-            $manifest = $manifestContent ? json_decode($manifestContent, true) : null;
+            $manifest = $manifestContent ? json_decode($manifestContent, true, 512, JSON_THROW_ON_ERROR) : null;
+            if (! is_array($manifest) || ($manifest['format_version'] ?? null) !== 2) {
+                throw new \RuntimeException('Unsupported or missing backup manifest.');
+            }
 
             // Get tables to restore (in correct order)
             $tablesToRestore = $this->getOrderedTables($backup->tables ?? []);
@@ -86,6 +87,9 @@ class RestoreService
 
             foreach ($tablesToRestore as $table) {
                 try {
+                    if (! Schema::hasTable($table)) {
+                        throw new \RuntimeException("Table '{$table}' does not exist in the current database.");
+                    }
                     $dataContent = $zip->getFromName("data/{$table}.json");
 
                     if (! $dataContent) {
@@ -94,7 +98,11 @@ class RestoreService
                         continue;
                     }
 
-                    $data = json_decode($dataContent, true);
+                    $expectedHash = $manifest['tables'][$table]['data_sha256'] ?? null;
+                    if ($expectedHash && ! hash_equals($expectedHash, hash('sha256', $dataContent))) {
+                        throw new \RuntimeException("Integrity check failed for table '{$table}'.");
+                    }
+                    $data = json_decode($dataContent, true, 512, JSON_THROW_ON_ERROR);
 
                     if (! is_array($data)) {
                         $results['errors'][] = "Invalid data format for table: {$table}";
@@ -127,6 +135,7 @@ class RestoreService
                 } catch (\Throwable $e) {
                     $results['errors'][] = "Error restoring {$table}: ".$e->getMessage();
                     Log::error("Error restoring table: {$table}", ['error' => $e->getMessage()]);
+                    throw $e;
                 }
             }
 
@@ -160,7 +169,6 @@ class RestoreService
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
             $results['success'] = false;
             $results['errors'][] = $e->getMessage();
@@ -172,7 +180,12 @@ class RestoreService
 
             throw $e;
         } finally {
+            // Never leave the connection with constraint checks disabled.
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
             $zip->close();
+            if (file_exists($temporaryZip)) {
+                unlink($temporaryZip);
+            }
         }
 
         return $results;
@@ -207,9 +220,7 @@ class RestoreService
      */
     public function dryRunRestore(Backup $backup, array $options = []): array
     {
-        $fullPath = $backup->getFullPath();
-
-        if (! file_exists($fullPath)) {
+        if (! $backup->fileExists()) {
             throw new \RuntimeException('Backup file not found');
         }
 
@@ -224,6 +235,7 @@ class RestoreService
             'warnings' => [],
         ];
 
+        $fullPath = app(BackupService::class)->materializeZip($backup);
         $zip = new ZipArchive;
 
         if ($zip->open($fullPath) !== true) {
@@ -256,6 +268,9 @@ class RestoreService
 
         } finally {
             $zip->close();
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
         }
 
         return $preview;
