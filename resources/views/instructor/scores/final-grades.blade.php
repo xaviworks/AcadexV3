@@ -154,14 +154,16 @@
     @endif
 </div>
 
-{{-- Custom Print Options Modal (No Bootstrap dependency) --}}
-<div class="print-modal-overlay" id="fgPrintModalOverlay">
-    <div class="print-modal-container">
-        <div class="print-modal-header">
-            <h5><i class="bi bi-printer"></i>Print Options</h5>
-            <button type="button" class="print-modal-close" onclick="fgClosePrintModal();">&times;</button>
-        </div>
-        <div class="print-modal-body">
+<x-modal.information
+    id="fgPrintOptionsModal"
+    title="Print Options"
+    size="large"
+    :scrollable="true"
+>
+    <x-slot:icon>
+        <i class="bi bi-printer"></i>
+    </x-slot:icon>
+
             <div class="print-options-grid">
                 <div class="print-option-card">
                     <div class="print-option-card-header">
@@ -215,49 +217,32 @@
                     <small>Make sure your printer is set to Letter paper size for best results.</small>
                 </div>
             </div>
-        </div>
-        <div class="print-modal-footer">
-            <button type="button" class="print-modal-cancel-btn" onclick="fgClosePrintModal();">
-                <i class="bi bi-x-circle"></i>Cancel
-            </button>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
+    </x-slot:footer>
+</x-modal.information>
 
-{{-- View Notes Modal (Read-Only for Instructors) --}}
-<div class="modal fade" id="viewNotesModal" tabindex="-1" aria-labelledby="viewNotesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="viewNotesModalLabel">
-                    <i class="bi bi-sticky me-2"></i>
-                    Chairperson/Coordinator Notes
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Student Name:</label>
-                    <p class="text-muted" id="viewStudentNameDisplay"></p>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Notes/Remarks:</label>
-                    <div class="border rounded p-3 bg-light" id="viewNotesContent" style="min-height: 100px; white-space: pre-wrap;"></div>
-                </div>
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Note:</strong> These notes are added by your chairperson or GE coordinator. You cannot edit them.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>
-                    Close
-                </button>
-            </div>
-        </div>
+<x-modal.information id="viewNotesModal" title="Chairperson/Coordinator Notes" size="large">
+    <x-slot:icon><i class="bi bi-sticky me-1"></i></x-slot:icon>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Student Name:</label>
+        <p class="text-muted" id="viewStudentNameDisplay"></p>
     </div>
-</div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Notes/Remarks:</label>
+        <div class="border rounded p-3 bg-light" id="viewNotesContent" style="min-height: 100px; white-space: pre-wrap;"></div>
+    </div>
+    <div class="alert alert-info mb-0">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Note:</strong> These notes are added by your chairperson or GE coordinator. You cannot edit them.
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions primary-text="" secondary-text="Close" />
+    </x-slot:footer>
+</x-modal.information>
 @endsection
 
 {{-- Styles: resources/css/instructor/subject-cards.css --}}

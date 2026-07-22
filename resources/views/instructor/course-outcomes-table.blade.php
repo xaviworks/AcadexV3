@@ -312,158 +312,129 @@
 
 {{-- Add Course Outcome Modal --}}
 @if(Auth::user()->isChairperson())
-<div class="modal fade" id="addCourseOutcomeModal" tabindex="-1" aria-labelledby="addCourseOutcomeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" action="{{ route($routePrefix . '.course_outcomes.store') }}">
-            @csrf
-            <div class="modal-content shadow border-0 rounded-3">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="addCourseOutcomeModalLabel">
-                        <i class="bi bi-plus-circle me-2"></i>Add Course Outcome
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">CO Code <span class="text-danger">*</span></label>
-                                <input type="text" name="co_code" id="co_code" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Identifier <span class="text-danger">*</span></label>
-                                <input type="text" name="co_identifier" id="co_identifier" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3 mt-n2">
-                        <small class="text-muted d-flex align-items-center gap-1">
-                            <i class="bi bi-lock-fill"></i>
-                            CO Code and Identifier are auto-assigned and cannot be edited.
-                        </small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
-                        <textarea name="description" class="form-control" rows="4" placeholder="Enter the course outcome description..." required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Target % <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="number" name="target_percentage" class="form-control" min="0" max="100" step="1" value="75" required>
-                            <span class="input-group-text">%</span>
-                        </div>
-                    </div>
-                    <input type="hidden" name="subject_id" value="{{ $selectedSubject->id ?? request('subject_id') }}">
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-plus-circle me-2"></i>Add Outcome
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
+<x-modal.form
+    id="addCourseOutcomeModal"
+    title="Add Course Outcome"
+    form="{{ route($routePrefix . '.course_outcomes.store') }}"
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-plus-circle me-1"></i></x-slot:icon>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">CO Code <span class="text-danger">*</span></label>
+                <input type="text" name="co_code" id="co_code" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
             </div>
-        </form>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Identifier <span class="text-danger">*</span></label>
+                <input type="text" name="co_identifier" id="co_identifier" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
+            </div>
+        </div>
     </div>
-</div>
+    <div class="mb-3 mt-n2">
+        <small class="text-muted d-flex align-items-center gap-1">
+            <i class="bi bi-lock-fill"></i>
+            CO Code and Identifier are auto-assigned and cannot be edited.
+        </small>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+        <textarea name="description" class="form-control" rows="4" placeholder="Enter the course outcome description..." required></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Target % <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <input type="number" name="target_percentage" class="form-control" min="0" max="100" step="1" value="75" required>
+            <span class="input-group-text">%</span>
+        </div>
+    </div>
+    <input type="hidden" name="subject_id" value="{{ $selectedSubject->id ?? request('subject_id') }}">
+
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Add Outcome
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 @endif
 
-{{-- Edit Course Outcome Modal --}}
-<div class="modal fade" id="editCourseOutcomeModal" tabindex="-1" aria-labelledby="editCourseOutcomeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" action="" id="editForm">
-            @csrf
-            @method('PUT')
-            <div class="modal-content shadow border-0 rounded-3">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="editCourseOutcomeModalLabel">
-                        <i class="bi bi-pencil-square me-2"></i>Edit Course Outcome
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">CO Code <span class="text-danger">*</span></label>
-                                <input type="text" name="co_code" id="edit_co_code" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Identifier <span class="text-danger">*</span></label>
-                                <input type="text" name="co_identifier" id="edit_co_identifier" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3 mt-n2">
-                        <small class="text-muted d-flex align-items-center gap-1">
-                            <i class="bi bi-lock-fill"></i>
-                            CO Code and Identifier are auto-assigned and cannot be edited.
-                        </small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
-                        <textarea name="description" id="edit_description" class="form-control" rows="4" placeholder="Enter the course outcome description..." required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Target % <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="number" name="target_percentage" id="edit_target_percentage" class="form-control" min="0" max="100" step="1" required>
-                            <span class="input-group-text">%</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle me-2"></i>Update Outcome
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
+<x-modal.form
+    id="editCourseOutcomeModal"
+    title="Edit Course Outcome"
+    form=""
+    form-id="editForm"
+    variant="default"
+>
+    @csrf
+    @method('PUT')
+    <x-slot:icon><i class="bi bi-pencil-square me-1"></i></x-slot:icon>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">CO Code <span class="text-danger">*</span></label>
+                <input type="text" name="co_code" id="edit_co_code" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
             </div>
-        </form>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Identifier <span class="text-danger">*</span></label>
+                <input type="text" name="co_identifier" id="edit_co_identifier" class="form-control bg-light text-muted" readonly aria-readonly="true" required>
+            </div>
+        </div>
     </div>
-</div>
+    <div class="mb-3 mt-n2">
+        <small class="text-muted d-flex align-items-center gap-1">
+            <i class="bi bi-lock-fill"></i>
+            CO Code and Identifier are auto-assigned and cannot be edited.
+        </small>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+        <textarea name="description" id="edit_description" class="form-control" rows="4" placeholder="Enter the course outcome description..." required></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Target % <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <input type="number" name="target_percentage" id="edit_target_percentage" class="form-control" min="0" max="100" step="1" required>
+            <span class="input-group-text">%</span>
+        </div>
+    </div>
 
-{{-- Delete Confirmation Modal --}}
-<div class="modal fade" id="deleteCourseOutcomeModal" tabindex="-1" aria-labelledby="deleteCourseOutcomeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" action="" id="deleteForm">
-            @csrf
-            @method('DELETE')
-            <div class="modal-content shadow border-0 rounded-3">
-                <div class="modal-header bg-danger text-white border-0">
-                    <h5 class="modal-title" id="deleteCourseOutcomeModalLabel">
-                        <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4 text-center">
-                    <div class="mb-3">
-                        <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
-                    </div>
-                    <h6 class="mb-3">Are you sure you want to delete this course outcome?</h6>
-                    <div class="alert alert-warning border-0">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-info-circle text-warning me-2"></i>
-                            <div>
-                                <strong>Course Outcome:</strong> <span id="delete_co_code" class="fw-bold text-danger"></span><br>
-                                <small class="text-muted">This action cannot be undone and will remove all associated activities and scores.</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-0">
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash me-2"></i>Delete Permanently
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle me-2"></i>Update Outcome
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.destructive id="deleteCourseOutcomeModal" title="Confirm Deletion" form="" form-id="deleteForm" body-class="text-center">
+    @csrf
+    @method('DELETE')
+    <x-slot:icon><i class="bi bi-exclamation-triangle me-1"></i></x-slot:icon>
+    <div class="mb-3">
+        <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
     </div>
-</div>
+    <h6 class="mb-3">Are you sure you want to delete this course outcome?</h6>
+    <div class="alert alert-warning border-0 text-start">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle text-warning me-2"></i>
+            <div>
+                <strong>Course Outcome:</strong> <span id="delete_co_code" class="fw-bold text-danger"></span><br>
+                <small class="text-muted">This action cannot be undone and will remove all associated activities and scores.</small>
+            </div>
+        </div>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions destructive-text="Delete Permanently" />
+    </x-slot:footer>
+</x-modal.destructive>
 @endsection
 
 @push('scripts')

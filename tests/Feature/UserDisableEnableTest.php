@@ -11,6 +11,18 @@ class UserDisableEnableTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_admin_users_page_renders()
+    {
+        $admin = User::factory()->create(['role' => 3]);
+        User::factory()->create(['is_active' => true]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users'))
+            ->assertOk()
+            ->assertSee('Users')
+            ->assertSee('chooseDisableModal');
+    }
+
     public function test_admin_can_disable_and_enable_user()
     {
         // Create admin and normal user

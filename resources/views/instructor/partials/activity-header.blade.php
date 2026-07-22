@@ -198,38 +198,36 @@
     </div>
 @endif
 
-<!-- Add Activity Modal -->
-<div class="modal fade" id="addActivityModal" tabindex="-1" aria-labelledby="addActivityModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <form method="POST" action="{{ route('instructor.activities.store') }}">
-            @csrf
-            <input type="hidden" name="subject_id" value="{{ $subject->id }}">
-            <input type="hidden" name="term" value="{{ $term }}">
-            <input type="hidden" name="return_to" value="grades">
-            {{-- When adding an activity from the Manage Grades quick-add modal, we should only create a single activity by default --}}
-            <input type="hidden" name="create_single" value="1">
+@php
+    $fallbackTypes = collect($activityTypes ?? [])
+        ->map(fn ($type) => mb_strtolower($type))
+        ->unique()
+        ->values();
 
-            @php
-                $fallbackTypes = collect($activityTypes ?? [])
-                    ->map(fn ($type) => mb_strtolower($type))
-                    ->unique()
-                    ->values();
+    if ($fallbackTypes->isEmpty()) {
+        $fallbackTypes = collect(['quiz', 'ocr', 'exam']);
+    }
+@endphp
 
-                if ($fallbackTypes->isEmpty()) {
-                    $fallbackTypes = collect(['quiz', 'ocr', 'exam']);
-                }
-            @endphp
+<x-modal.form
+    id="addActivityModal"
+    title="Create New Activity"
+    size="large"
+    :form="route('instructor.activities.store')"
+    body-class="p-4"
+>
+    <x-slot:icon>
+        <i class="bi bi-plus-circle"></i>
+    </x-slot:icon>
 
-            <div class="modal-content border-0 shadow-lg overflow-hidden">
-                <div class="modal-header bg-success border-0 pb-0">
-                    <h5 class="modal-title fw-bold text-white" id="addActivityModalLabel">
-                        <i class="bi bi-plus-circle me-2"></i>Create New Activity
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+    @csrf
+    <input type="hidden" name="subject_id" value="{{ $subject->id }}">
+    <input type="hidden" name="term" value="{{ $term }}">
+    <input type="hidden" name="return_to" value="grades">
+    {{-- When adding an activity from the Manage Grades quick-add modal, we should only create a single activity by default --}}
+    <input type="hidden" name="create_single" value="1">
 
-                <div class="modal-body p-4">
-                    <div class="row g-3">
+    <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
                                 <i class="bi bi-book me-1"></i>Subject
@@ -342,16 +340,14 @@
                                 <i class="bi bi-info-circle me-1"></i>Link to a course outcome for attainment tracking.
                             </small>
                         </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer border-0 bg-light">
-                    <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;" data-component-save>
-                        <i class="bi bi-check-circle me-1"></i>Save Activity
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
     </div>
-</div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;" data-component-save>
+                <i class="bi bi-check-circle me-1"></i>Save Activity
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>

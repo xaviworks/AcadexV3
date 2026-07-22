@@ -1,30 +1,19 @@
 <!-- System Announcements Modal Component (Blocks Interaction) -->
-<div x-data="announcementPopup()" x-init="fetchAnnouncements()" @keydown.escape.window="handleEscape()">
-    <!-- Backdrop Overlay - Blocks interaction with page -->
-    <div 
-        x-show="currentAnnouncement"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        class="announcement-backdrop"
-        style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 9998; backdrop-filter: blur(2px);">
-    </div>
-    
-    <!-- Compact Top-Middle Announcement -->
-    <div 
-        x-show="currentAnnouncement"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 transform translate(-50%, -10px)"
-        x-transition:enter-end="opacity-100 transform translate(-50%, 0)"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 transform translate(-50%, 0)"
-        x-transition:leave-end="opacity-0 transform translate(-50%, -10px)"
-        class="position-fixed announcement-modal"
-        style="top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 600px;">
-        
+<div
+    x-data="announcementPopup()"
+    x-init="fetchAnnouncements(); initializeModal($refs.announcementModal)"
+    x-effect="syncModal($refs.announcementModal)"
+    @keydown.escape.window="handleEscape()"
+>
+    <x-modal.information
+        id="announcementPopupModal"
+        title="System Announcement"
+        size="medium"
+        backdrop="static"
+        :keyboard="false"
+        :closeable="false"
+        x-ref="announcementModal"
+    >
         <template x-if="currentAnnouncement">
             <div 
                 class="alert shadow-lg border-0 rounded-4 mb-0"
@@ -34,8 +23,7 @@
                     'alert-warning': currentAnnouncement.type === 'warning',
                     'alert-danger': currentAnnouncement.type === 'danger'
                 }"
-                role="alertdialog"
-                aria-modal="true"
+                role="alert"
                 aria-labelledby="announcement-title">
                 
                 <!-- Compact Header -->
@@ -86,42 +74,22 @@
                 </div>
             </div>
         </template>
-    </div>
+    </x-modal.information>
 </div>
 
 <style>
-/* Compact top-middle announcement with backdrop */
-.announcement-backdrop {
-    pointer-events: auto;
-}
-
-.announcement-modal {
-    pointer-events: auto;
-}
-
-.announcement-modal .alert {
+.announcement-modal .alert,
+#announcementPopupModal .alert {
     padding: 1rem;
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
-    .announcement-modal {
-        width: 95% !important;
-        top: 70px !important;
-    }
-}
-
 @media (max-width: 576px) {
-    .announcement-modal {
-        width: 95% !important;
-        top: 60px !important;
-    }
-    
-    .announcement-modal .alert {
+    #announcementPopupModal .alert {
         padding: 0.85rem;
     }
     
-    .announcement-modal .alert-heading {
+    #announcementPopupModal .alert-heading {
         font-size: 1rem;
     }
 }
@@ -137,9 +105,35 @@ function announcementPopup() {
         announcements: [],
         currentIndex: 0,
         polling: false,
+        modalInstance: null,
 
         get currentAnnouncement() {
             return this.announcements[this.currentIndex] || null;
+        },
+
+        initializeModal(element) {
+            if (!element || !window.bootstrap?.Modal) return;
+
+            this.modalInstance = window.bootstrap.Modal.getOrCreateInstance(element, {
+                backdrop: 'static',
+                keyboard: false,
+            });
+        },
+
+        syncModal(element) {
+            if (!element || !window.bootstrap?.Modal) return;
+
+            if (!this.modalInstance) {
+                this.initializeModal(element);
+            }
+
+            if (!this.modalInstance) return;
+
+            if (this.currentAnnouncement) {
+                this.modalInstance.show();
+            } else {
+                this.modalInstance.hide();
+            }
         },
 
         /* ── Bootstrap: first fetch + start polling ── */

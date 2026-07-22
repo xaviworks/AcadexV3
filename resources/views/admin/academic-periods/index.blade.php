@@ -61,27 +61,20 @@
     </div>
 </div>
 
-{{-- Confirmation Modal --}}
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="confirmModalLabel">Confirm Action</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are you sure you want to generate a new academic period based on the latest one?
-            </div>
-            <div class="modal-footer">
-                <form method="POST" action="{{ route('admin.academicPeriods.generate') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-success">Yes, Generate</button>
-                </form>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
+<x-modal.confirmation
+    id="confirmModal"
+    title="Confirm Action"
+    variant="success"
+>
+    <p class="mb-0">Are you sure you want to generate a new academic period based on the latest one?</p>
+
+    <x-slot:footer>
+        <form method="POST" action="{{ route('admin.academicPeriods.generate') }}">
+            @csrf
+            <x-modal.actions primary-text="Yes, Generate" primary-variant="success" />
+        </form>
+    </x-slot:footer>
+</x-modal.confirmation>
 
 {{-- JS --}}
 <script>

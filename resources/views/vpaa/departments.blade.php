@@ -84,69 +84,56 @@
         @endforeach
     </div>
 
-    <!-- Add Department Modal -->
-    <div class="modal fade" id="addDepartmentModal" tabindex="-1" aria-labelledby="addDepartmentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addDepartmentModalLabel">Add New Department</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('vpaa.departments.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="department_code" class="form-label">Department Code</label>
-                            <input type="text" class="form-control" id="department_code" name="department_code" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="department_description" class="form-label">Description</label>
-                            <input type="text" class="form-control" id="department_description" name="department_description" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Department</button>
-                    </div>
-                </form>
-            </div>
+    <x-modal.form
+        id="addDepartmentModal"
+        title="Add New Department"
+        size="medium"
+        form="{{ route('vpaa.departments.store') }}"
+    >
+        @csrf
+        <div class="mb-3">
+            <label for="department_code" class="form-label">Department Code</label>
+            <input type="text" class="form-control" id="department_code" name="department_code" required>
         </div>
-    </div>
+        <div class="mb-3">
+            <label for="department_description" class="form-label">Description</label>
+            <input type="text" class="form-control" id="department_description" name="department_description" required>
+        </div>
+
+        <x-slot:footer>
+            <x-modal.actions primary-text="Save Department" />
+        </x-slot:footer>
+    </x-modal.form>
 
     <!-- Edit Department Modals -->
     @foreach($departments as $department)
-        <div class="modal fade" id="editDepartmentModal{{ $department->id }}" tabindex="-1" aria-labelledby="editDepartmentModalLabel{{ $department->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-semibold" id="editDepartmentModalLabel{{ $department->id }}">
-                            <i class="bi bi-pencil-square me-2"></i>Edit Department
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{{ route('vpaa.departments.update', $department->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="edit_department_code_{{ $department->id }}" class="form-label">Department Code <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="edit_department_code_{{ $department->id }}" name="department_code" value="{{ $department->department_code }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="edit_department_description_{{ $department->id }}" class="form-label">Department Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="edit_department_description_{{ $department->id }}" name="department_description" value="{{ $department->department_description }}" required>
-                            </div>
-                        </div>
-                        <div class="modal-footer border-0">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i> Save Changes
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        <x-modal.form
+            id="editDepartmentModal{{ $department->id }}"
+            title="Edit Department"
+            size="medium"
+            form="{{ route('vpaa.departments.update', $department->id) }}"
+            variant="default"
+        >
+            @csrf
+            @method('PUT')
+            <x-slot:icon><i class="bi bi-pencil-square me-1"></i></x-slot:icon>
+            <div class="mb-3">
+                <label for="edit_department_code_{{ $department->id }}" class="form-label">Department Code <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="edit_department_code_{{ $department->id }}" name="department_code" value="{{ $department->department_code }}" required>
             </div>
-        </div>
+            <div class="mb-3">
+                <label for="edit_department_description_{{ $department->id }}" class="form-label">Department Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="edit_department_description_{{ $department->id }}" name="department_description" value="{{ $department->department_description }}" required>
+            </div>
+
+            <x-slot:footer>
+                <x-modal.actions>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Save Changes
+                    </button>
+                </x-modal.actions>
+            </x-slot:footer>
+        </x-modal.form>
     @endforeach
 </div>
 

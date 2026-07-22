@@ -256,36 +256,26 @@
     </div>
 </div>
 
-{{-- Rollback Modal --}}
-<div class="modal fade" id="rollbackModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form action="{{ route('admin.disaster-recovery.activity.rollback', $log) }}" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title text-warning">
-                        <i class="fas fa-undo me-2"></i>Confirm Rollback
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        This will revert <strong>{{ class_basename($log->auditable_type) }}</strong> to its previous state.
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Confirm Password</label>
-                        <input type="password" name="password" class="form-control" placeholder="Enter password" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">Rollback</button>
-                </div>
-            </form>
-        </div>
+<x-modal.warning
+    id="rollbackModal"
+    title="Confirm Rollback"
+    form="{{ route('admin.disaster-recovery.activity.rollback', $log) }}"
+>
+    @csrf
+    <x-slot:icon><i class="fas fa-undo me-1"></i></x-slot:icon>
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        This will revert <strong>{{ class_basename($log->auditable_type) }}</strong> to its previous state.
     </div>
-</div>
+    <div class="mb-3">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions primary-text="Rollback" primary-variant="warning" />
+    </x-slot:footer>
+</x-modal.warning>
 
 @push('scripts')
 <script>

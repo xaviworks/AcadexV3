@@ -308,50 +308,40 @@
     </div>
 </div>
 
-<!-- Confirm Modal -->
-<div class="modal fade" id="confirmModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" 
-              action="{{ route('instructor.students.import.confirm') }}" 
-              class="modal-content"
-              id="confirmForm">
-            @csrf
-            <input type="hidden" name="list_name" value="{{ $listName }}">
-            <input type="hidden" name="selected_student_ids" id="selectedStudentIds">
+<x-modal.form
+    id="confirmModal"
+    title="Confirm Import"
+    size="medium"
+    :form="route('instructor.students.import.confirm')"
+    form-id="confirmForm"
+>
+    <x-slot:icon>
+        <i class="bi bi-file-earmark-check"></i>
+    </x-slot:icon>
 
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title">
-                    <i class="bi bi-file-earmark-check text-success me-2"></i>
-                    Confirm Import
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+    @csrf
+    <input type="hidden" name="list_name" value="{{ $listName }}">
+    <input type="hidden" name="selected_student_ids" id="selectedStudentIds">
 
-            <div class="modal-body">
-                <div class="mb-0">
-                    <label class="form-label">Target Subject</label>
-                    <p class="form-control-plaintext fw-semibold" id="confirmSubjectLabel">-</p>
-                    <p class="small text-muted mt-1" id="confirmStudentCount">-</p>
-                    <input type="hidden" name="subject_id" id="confirmSubjectId" value="">
-                </div>
-                <div class="mt-3">
-                    <label class="form-label small">Selected Students</label>
-                    <div id="confirmSelectedList" class="list-group list-group-flush small" style="max-height: 180px; overflow:auto;">
-                        <div class="list-group-item px-0 text-muted">No students selected</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer border-0 pt-0">
-                <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
-                    <i class="bi bi-check2-all"></i>
-                    <span>Confirm Import</span>
-                </button>
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </form>
+    <div class="mb-0">
+        <label class="form-label">Target Subject</label>
+        <p class="form-control-plaintext fw-semibold" id="confirmSubjectLabel">-</p>
+        <p class="small text-muted mt-1" id="confirmStudentCount">-</p>
+        <input type="hidden" name="subject_id" id="confirmSubjectId" value="">
     </div>
-</div>
+    <div class="mt-3">
+        <label class="form-label small">Selected Students</label>
+        <div id="confirmSelectedList" class="list-group list-group-flush small" style="max-height: 180px; overflow:auto;">
+            <div class="list-group-item px-0 text-muted">No students selected</div>
+        </div>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions primary-text="Confirm Import" primary-variant="success">
+            <x-slot:default></x-slot:default>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 @endsection
 
 @push('scripts')

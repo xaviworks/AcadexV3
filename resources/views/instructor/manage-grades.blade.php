@@ -100,6 +100,50 @@
         });
     </script>
 @endif
+
+<x-modal.warning id="unsavedChangesModal" title="Unsaved Changes">
+    <x-slot:icon>
+        <i class="bi bi-exclamation-triangle-fill"></i>
+    </x-slot:icon>
+
+    <p class="mb-3">You have unsaved changes that will be lost if you continue.</p>
+    <p class="mb-0 text-muted">Are you sure you want to leave without saving?</p>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-warning" id="confirmLeaveBtn">Leave Without Saving</button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.warning>
+
+<x-modal.warning id="gradeWarningModal" title="Invalid Grades Detected" :backdrop="false">
+    <x-slot:icon>
+        <i class="bi bi-exclamation-triangle-fill"></i>
+    </x-slot:icon>
+
+    <p class="text-muted mb-3">The following grades exceed the new maximum score:</p>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="invalidGradesTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Student</th>
+                    <th>Current Grade</th>
+                    <th>New Maximum</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <p class="text-danger mt-3 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        Please adjust these grades before changing the number of items.
+    </p>
+
+    <x-slot:footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </x-slot:footer>
+</x-modal.warning>
 @endsection
 
 {{-- Styles: resources/css/instructor/common.css, resources/css/instructor/subject-cards.css --}}

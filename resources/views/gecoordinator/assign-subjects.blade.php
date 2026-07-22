@@ -226,99 +226,90 @@
     </div>
 </div>
 
-<!-- Confirm Bulk Assign Modal -->
-<div class="modal fade" id="confirmBulkAssignModal" tabindex="-1" aria-labelledby="confirmBulkAssignModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" style="z-index: 1060;">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow-lg">
-            <div class="modal-header border-0 pb-2">
-                <h5 class="modal-title d-flex align-items-center" id="confirmBulkAssignModalLabel">
-                    <i class="bi bi-file-earmark-check text-primary me-2 fs-4"></i>
-                    <span>Confirm Assign</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-0">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-1">Target Course</label>
-                    <div class="fw-semibold" id="assignTargetSubject">Loading...</div>
+<x-modal.confirmation
+    id="confirmBulkAssignModal"
+    title="Confirm Assign"
+    variant="success"
+    backdrop="static"
+    :keyboard="false"
+    style="z-index: 1060;"
+>
+    <x-slot:icon>
+        <i class="bi bi-file-earmark-check"></i>
+    </x-slot:icon>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold text-muted small mb-1">Target Course</label>
+        <div class="fw-semibold" id="assignTargetSubject">Loading...</div>
+    </div>
+    <div class="mb-3">
+        <div id="assignSelectionCount" class="text-muted small"></div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold text-muted small mb-2">Selected Instructors</label>
+        <div id="assignList" class="border rounded p-3" style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa;">
+            <!-- Instructors will be listed here -->
+        </div>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success" id="confirmBulkAssignBtn">
+                <i class="bi bi-check-circle me-1"></i> Confirm Assign
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.confirmation>
+
+<x-modal.information
+    id="viewInstructorsModal"
+    title="Assigned Instructors"
+    size="medium"
+>
+    <x-slot:icon>
+        <i class="bi bi-people-fill"></i>
+    </x-slot:icon>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold text-muted small mb-1">Course</label>
+        <div class="fw-semibold" id="viewSubjectName">Loading...</div>
+    </div>
+    <div class="mb-3">
+        <div id="viewInstructorCount" class="text-muted small"></div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold text-muted small mb-2">Instructors</label>
+        <div id="viewInstructorList" class="border rounded p-3" style="max-height: 300px; overflow-y: auto; background-color: #f8f9fa;">
+            <div class="text-center text-muted py-3">
+                <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-                
-                <div class="mb-3">
-                    <div id="assignSelectionCount" class="text-muted small"></div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-2">Selected Instructors</label>
-                    <div id="assignList" class="border rounded p-3" style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa;">
-                        <!-- Instructors will be listed here -->
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-success" id="confirmBulkAssignBtn">
-                    <i class="bi bi-check-circle me-1"></i> Confirm Assign
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <div class="mt-2 small">Loading instructors...</div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- View Assigned Instructors Modal (Read-Only) -->
-<div class="modal fade" id="viewInstructorsModal" tabindex="-1" aria-labelledby="viewInstructorsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow-lg">
-            <div class="modal-header border-0 pb-2">
-                <h5 class="modal-title d-flex align-items-center" id="viewInstructorsModalLabel">
-                    <i class="bi bi-people-fill text-success me-2 fs-4"></i>
-                    <span>Assigned Instructors</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-0">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-1">Course</label>
-                    <div class="fw-semibold" id="viewSubjectName">Loading...</div>
-                </div>
-                
-                <div class="mb-3">
-                    <div id="viewInstructorCount" class="text-muted small"></div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-2">Instructors</label>
-                    <div id="viewInstructorList" class="border rounded p-3" style="max-height: 300px; overflow-y: auto; background-color: #f8f9fa;">
-                        <div class="text-center text-muted py-3">
-                            <div class="spinner-border spinner-border-sm" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <div class="mt-2 small">Loading instructors...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </x-slot:footer>
+</x-modal.information>
 
-{{-- Instructor List Modal - Split Pane Design --}}
-<div class="modal fade" id="instructorListModal" tabindex="-1" aria-labelledby="instructorListModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow">
-            <div class="modal-header bg-success text-white d-flex align-items-start">
-                <div class="flex-grow-1 d-flex align-items-center">
-                    <h5 class="modal-title mb-1 d-flex align-items-center" id="instructorListModalLabel">
-                        <i class="bi bi-people-fill me-2"></i>
-                        <span id="instructorListModalTitle">Manage Instructors</span>
-                        <span id="instructorListSubjectName" class="ms-2 fw-semibold" style="font-size: 1.1rem;"></span>
-                    </h5>
+<x-modal.success
+    id="instructorListModal"
+    title="Manage Instructors"
+    size="large"
+    body-class="p-0"
+    content-class="overflow-hidden"
+>
+    <x-slot:icon>
+        <i class="bi bi-people-fill"></i>
+    </x-slot:icon>
+
+                <div class="px-3 pt-3 bg-light border-bottom">
+                    <div class="fw-semibold" id="instructorListModalTitle">Manage Instructors</div>
+                    <div id="instructorListSubjectName" class="small text-muted"></div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-0">
                 <!-- Tabs Navigation -->
                 <ul class="nav nav-tabs px-3 pt-3 mb-0 bg-light border-bottom-0" role="tablist" style="margin-bottom: 0 !important;">
                     <li class="nav-item" role="presentation">
@@ -496,102 +487,92 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer bg-light border-top">
+    <x-slot:footer>
                 <div class="text-muted small me-auto">
                     <i class="bi bi-info-circle me-1"></i>Select instructors using checkboxes for bulk operations
                 </div>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-        <!-- Global Toast Container for top-right floating messages -->
-        <div id="globalToastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
-            <!-- Toasts will be dynamically injected here -->
-        </div>
-    </div>
+    </x-slot:footer>
+</x-modal.success>
+
+<!-- Global Toast Container for top-right floating messages -->
+<div id="globalToastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+    <!-- Toasts will be dynamically injected here -->
 </div>
 
-{{-- Confirm Assign Modal --}}
-<div class="modal fade" id="confirmAssignModal" tabindex="-1" aria-labelledby="confirmAssignModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow">
-            <div class="modal-header bg-success text-white d-flex align-items-start">
-                <div>
-                    <h5 class="modal-title mb-1" id="confirmAssignModalLabel">
-                        <i class="bi bi-plus-circle-dotted me-2"></i> Assign Instructor
-                    </h5>
-                    <div class="small text-white-50" id="assignSubjectNameSmall"></div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-1">Assigning instructor to: <span id="assignSubjectName" class="fw-semibold"></span></p>
-                <p class="small text-muted mb-2">Select an instructor to assign for the active academic period.</p>
-                <form id="assignInstructorForm" class="vstack gap-3">
-                    @csrf
-                    <input type="hidden" name="subject_id" id="assign_subject_id">
-                    <div>
-                        <label for="instructor_select" class="form-label">Select Instructor</label>
-                        <select id="instructor_select" name="instructor_id" class="form-select" required>
-                            <option value="">-- Choose Instructor --</option>
-                            @foreach ($instructors as $instructor)
-                                <option value="{{ $instructor->id }}">{{ $instructor->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button type="submit" id="assignSubjectSubmit" class="btn btn-success">
-                            <i class="bi bi-check-lg me-1"></i> Assign
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer bg-light d-none">
-                <!-- Buttons moved inside form -->
-            </div>
+<x-modal.form
+    id="confirmAssignModal"
+    title="Assign Instructor"
+    size="medium"
+    form=""
+    form-id="assignInstructorForm"
+    form-class="vstack gap-3"
+>
+    <x-slot:icon>
+        <i class="bi bi-plus-circle-dotted"></i>
+    </x-slot:icon>
+
+    @csrf
+    <div class="small text-muted" id="assignSubjectNameSmall"></div>
+    <p class="mb-1">Assigning instructor to: <span id="assignSubjectName" class="fw-semibold"></span></p>
+    <p class="small text-muted mb-2">Select an instructor to assign for the active academic period.</p>
+    <input type="hidden" name="subject_id" id="assign_subject_id">
+    <div>
+        <label for="instructor_select" class="form-label">Select Instructor</label>
+        <select id="instructor_select" name="instructor_id" class="form-select" required>
+            <option value="">-- Choose Instructor --</option>
+            @foreach ($instructors as $instructor)
+                <option value="{{ $instructor->id }}">{{ $instructor->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" id="assignSubjectSubmit" class="btn btn-success">
+                <i class="bi bi-check-lg me-1"></i> Assign
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.destructive
+    id="confirmUnassignModal"
+    title="Confirm Unassign"
+    backdrop="static"
+    :keyboard="false"
+    style="z-index: 1060;"
+>
+    <x-slot:icon>
+        <i class="bi bi-file-earmark-x"></i>
+    </x-slot:icon>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold text-muted small mb-1">Target Course</label>
+        <div class="fw-semibold" id="unassignTargetSubject">Loading...</div>
+    </div>
+    <div class="mb-3">
+        <div id="unassignSelectionCount" class="text-muted small"></div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold text-muted small mb-2">Selected Instructors</label>
+        <div id="unassignList" class="border rounded p-3" style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa;">
+            <!-- Instructors will be listed here -->
         </div>
     </div>
-</div>
 
-<!-- Confirm Unassign Modal -->
-<div class="modal fade" id="confirmUnassignModal" tabindex="-1" aria-labelledby="confirmUnassignModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" style="z-index: 1060;">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow-lg">
-            <div class="modal-header border-0 pb-2">
-                <h5 class="modal-title d-flex align-items-center" id="confirmUnassignModalLabel">
-                    <i class="bi bi-file-earmark-x text-danger me-2 fs-4"></i>
-                    <span>Confirm Unassign</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-0">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-1">Target Course</label>
-                    <div class="fw-semibold" id="unassignTargetSubject">Loading...</div>
-                </div>
-                
-                <div class="mb-3">
-                    <div id="unassignSelectionCount" class="text-muted small"></div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-muted small mb-2">Selected Instructors</label>
-                    <div id="unassignList" class="border rounded p-3" style="max-height: 200px; overflow-y: auto; background-color: #f8f9fa;">
-                        <!-- Instructors will be listed here -->
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-danger" id="confirmUnassignBtn">
-                    <i class="bi bi-trash me-1"></i> Confirm Unassign
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="confirmUnassignBtn">
+                <i class="bi bi-trash me-1"></i> Confirm Unassign
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.destructive>
 
+@push('scripts')
 @push('scripts')
 {{-- JavaScript moved to: resources/js/pages/gecoordinator/assign-subjects.js --}}
 <script>
