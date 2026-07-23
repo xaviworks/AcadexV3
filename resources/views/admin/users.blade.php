@@ -49,11 +49,14 @@
     </div>
 
     {{-- Users Table --}}
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table id="usersTable" class="table table-bordered table-hover mb-0">
-                    <thead class="table-success">
+    <x-data-table
+        title="Users"
+        subtitle="Manage account access, roles, status, and security settings"
+        icon="bi-people-fill"
+        table-id="usersTable"
+        :paginated="false"
+    >
+                    <thead>
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
@@ -182,10 +185,7 @@
                             {{-- DataTables will handle empty state --}}
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    </x-data-table>
 </div>
 <x-modal.destructive
     id="chooseDisableModal"

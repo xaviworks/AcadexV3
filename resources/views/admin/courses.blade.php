@@ -26,11 +26,14 @@
         </div>
     @endif
 
-    <div class="card shadow-sm" style="overflow: visible;">
-        <div class="card-body p-0" style="overflow: visible;">
-            <div class="table-responsive">
-                <table id="coursesTable" class="table table-bordered table-hover mb-0">
-                    <thead class="table-success">
+    <x-data-table
+        title="Programs"
+        subtitle="Manage academic programs, departments, and table actions"
+        icon="bi-mortarboard-fill"
+        table-id="coursesTable"
+        :paginated="false"
+    >
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Code</th>
@@ -75,10 +78,7 @@
                         @empty
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    </x-data-table>
 </div>
 
 <x-modal.form id="addCourseModal" title="Add New Program" form="" form-id="addCourseForm">
@@ -276,6 +276,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if ($.fn.DataTable && $('#coursesTable').length && !$.fn.DataTable.isDataTable('#coursesTable')) {
         $('#coursesTable').DataTable({
             order: [[1, 'asc']],
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            pageLength: 10,
             columnDefs: [
                 { orderable: false, targets: -1 }
             ],

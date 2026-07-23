@@ -17,9 +17,12 @@
             message="There are no pending instructor applications at this time."
         />
     @else
-        <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
-            <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light">
+        <x-data-table
+            title="Pending Instructor Applications"
+            subtitle="Approve or reject instructor account requests"
+            icon="bi-person-plus"
+        >
+                <thead>
                     <tr>
                         <th>Applicant Name</th>
                         <th>Email Address</th>
@@ -61,7 +64,6 @@
                         </tr>
                     @endforeach
                 </tbody>
-            </table>
-        </div>
+        </x-data-table>
     @endif
 </div>

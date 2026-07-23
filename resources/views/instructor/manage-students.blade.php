@@ -126,10 +126,12 @@
 
             {{-- Students Table --}}
             @if($students && $students->count())
-                <div class="card shadow-sm">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle mb-0">
-                            <thead class="table-light">
+                <x-data-table
+                    title="Enrolled Students"
+                    subtitle="Review enrollment status and manage student records"
+                    icon="bi-people"
+                >
+                            <thead>
                                 <tr>
                                     <th class="text-center" style="width: 60px;">#</th>
                                     <th>Student Name</th>
@@ -194,8 +196,12 @@
                                     </tr>
                                 @endforeach
                             </tbody>
+<<<<<<< Updated upstream
                         </table>
                     </div>
+=======
+                </x-data-table>
+>>>>>>> Stashed changes
             @elseif(request('subject_id'))
                 <x-empty-state
                     icon="bi-people"

@@ -5,6 +5,7 @@
 /* guest.css removed from global imports - loaded separately in guest.blade.php */
 
 /* Import component styles */
+@import './components/data-table.css';
 @import './components/print-modal.css';
 
 /* Import portal styles */

@@ -1,0 +1,370 @@
+.acadex-table-card {
+  --acadex-table-accent: #198754;
+  --acadex-table-accent-dark: #146c43;
+  --acadex-table-accent-soft: #eaf6ef;
+  background: #ffffff;
+  border: 1px solid #dfe7e2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(21, 72, 47, 0.08);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.acadex-table-card--auto {
+  margin-top: 1rem;
+}
+
+.acadex-table-card--auto > .table-responsive,
+.acadex-table-card--auto > .acadex-table-responsive {
+  border-radius: 0;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.acadex-table-card__header {
+  align-items: center;
+  background: linear-gradient(180deg, var(--acadex-table-accent), var(--acadex-table-accent-dark));
+  color: #ffffff;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+}
+
+.acadex-table-card__header--primary {
+  --acadex-table-accent: #0d6efd;
+  --acadex-table-accent-dark: #0a58ca;
+  --acadex-table-accent-soft: #e9f2ff;
+}
+
+.acadex-table-card__header--warning {
+  --acadex-table-accent: #b7791f;
+  --acadex-table-accent-dark: #8a5a16;
+  --acadex-table-accent-soft: #fff8e8;
+}
+
+.acadex-table-card__title-group {
+  min-width: 0;
+}
+
+.acadex-table-card__title {
+  align-items: center;
+  display: flex;
+  font-size: 1rem;
+  font-weight: 800;
+  gap: 0.55rem;
+  letter-spacing: 0;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.acadex-table-card__title i {
+  font-size: 1.05rem;
+}
+
+.acadex-table-card__subtitle {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  margin: 0.25rem 0 0;
+}
+
+.acadex-table-card__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.acadex-table-card__filters,
+.acadex-table-card__tabs {
+  background: #f8fbf9;
+  border-bottom: 1px solid #dfe7e2;
+  padding: 0.85rem 1rem;
+}
+
+.acadex-table-card__toolbar {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #dfe7e2;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.75rem 1rem;
+}
+
+.acadex-table-card__length {
+  align-items: center;
+  color: #52645b;
+  display: inline-flex;
+  font-size: 0.9rem;
+  font-weight: 600;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.acadex-table-card__length select {
+  border-color: #cfded5;
+  color: #22312a;
+  font-weight: 700;
+  min-width: 5rem;
+}
+
+.acadex-table-card__tabs .nav-tabs {
+  border-bottom: 0;
+  gap: 0.35rem;
+}
+
+.acadex-table-card__tabs .nav-tabs .nav-link {
+  border: 1px solid #d8e5dc;
+  border-radius: 8px;
+  color: #315946;
+  font-weight: 700;
+  padding: 0.55rem 0.85rem;
+}
+
+.acadex-table-card__tabs .nav-tabs .nav-link.active {
+  background: var(--acadex-table-accent-soft);
+  border-color: var(--acadex-table-accent);
+  color: var(--acadex-table-accent-dark);
+}
+
+.acadex-table-responsive {
+  overflow-x: auto;
+  overflow-y: visible;
+  width: 100%;
+}
+
+.acadex-table-responsive[style*='--acadex-table-max-height'] {
+  max-height: var(--acadex-table-max-height);
+  overflow-y: auto;
+}
+
+.acadex-table {
+  color: #22312a;
+  min-width: max-content;
+}
+
+.acadex-table thead th {
+  background: var(--acadex-table-accent-soft);
+  border-bottom: 2px solid var(--acadex-table-accent);
+  color: #174830;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  padding: 0.85rem 1rem;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.acadex-table tbody td {
+  padding: 0.8rem 1rem;
+  vertical-align: middle;
+}
+
+.acadex-table tbody tr:last-child td {
+  border-bottom-width: 0;
+}
+
+.acadex-table.table-hover tbody tr:hover > * {
+  background-color: #f7fbf8;
+}
+
+.acadex-table-card__pagination {
+  align-items: center;
+  background: #ffffff;
+  border-top: 1px solid #dfe7e2;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding: 0.9rem 1rem;
+}
+
+.acadex-table-card__pagination .pagination {
+  margin-bottom: 0;
+}
+
+.acadex-table-card__page-summary {
+  color: #66776e;
+  font-size: 0.875rem;
+}
+
+.acadex-table-card__pager {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.55rem;
+  justify-content: flex-end;
+}
+
+.acadex-table-card__page-indicator {
+  border: 1px solid #d7e5dc;
+  border-radius: 8px;
+  color: #174830;
+  font-size: 0.875rem;
+  font-weight: 800;
+  min-width: 5.5rem;
+  padding: 0.35rem 0.65rem;
+  text-align: center;
+}
+
+.acadex-table-card .dataTables_wrapper {
+  padding: 1rem;
+}
+
+.acadex-table-card .dataTables_wrapper .row:first-child {
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.acadex-table-card .dataTables_wrapper .row:first-child > [class*='col-'] {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.acadex-table-card .dataTables_wrapper .row:first-child > [class*='col-']:first-child {
+  margin-left: auto;
+  order: 2;
+}
+
+.acadex-table-card .dataTables_wrapper .row:first-child > [class*='col-']:last-child {
+  order: 1;
+}
+
+.acadex-table-card .dataTables_wrapper .row:last-child {
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.acadex-table-card .dataTables_wrapper .row:last-child > [class*='col-'] {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.acadex-table-card .dataTables_wrapper .row:last-child > [class*='col-']:first-child {
+  margin-right: auto;
+}
+
+.acadex-table-card .dataTables_length,
+.acadex-table-card .dataTables_filter,
+.acadex-table-card .dataTables_info,
+.acadex-table-card .dataTables_paginate {
+  color: #52645b;
+  font-size: 0.9rem;
+}
+
+.acadex-table-card .dataTables_length,
+.acadex-table-card .dataTables_filter,
+.acadex-table-card .dataTables_paginate {
+  text-align: right;
+}
+
+.acadex-table-card .dataTables_length label {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin: 0;
+}
+
+.acadex-table-card .dataTables_filter input,
+.acadex-table-card .dataTables_length select {
+  border: 1px solid #cfded5;
+  margin-left: 0.4rem;
+  padding: 0.4rem 0.65rem;
+}
+
+.acadex-table-card .dataTables_filter {
+  position: relative;
+}
+
+.acadex-table-card .dataTables_filter label {
+  align-items: center;
+  display: inline-flex;
+  justify-content: flex-end;
+  margin: 0;
+  position: relative;
+}
+
+.acadex-table-card .dataTables_filter label::before {
+  background-image: none !important;
+  content: none !important;
+  display: none !important;
+}
+
+.acadex-table-card .dataTables_filter input {
+  background: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-position: 0.95rem center;
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  border: 1px solid #d9e2dc;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+  min-height: 2.45rem;
+  min-width: 13rem;
+  padding-left: 2.45rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.acadex-table-card .dataTables_filter input::placeholder {
+  color: #0f3d2e;
+  opacity: 0.9;
+}
+
+.acadex-table-card .dataTables_filter input:focus {
+  border-color: var(--acadex-table-accent);
+  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15), 0 6px 18px rgba(15, 23, 42, 0.08);
+  outline: 0;
+}
+
+.acadex-table-card table.dataTable {
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+}
+
+.acadex-table-card .page-link {
+  border-color: #d7e5dc;
+  color: var(--acadex-table-accent-dark);
+}
+
+.acadex-table-card .page-item.active .page-link {
+  background-color: var(--acadex-table-accent);
+  border-color: var(--acadex-table-accent);
+}
+
+@media (min-width: 992px) {
+  .acadex-table {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .acadex-table-card__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .acadex-table-card__actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .acadex-table-card__toolbar,
+  .acadex-table-card__pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .acadex-table thead th,
+  .acadex-table tbody td {
+    padding: 0.7rem 0.8rem;
+  }
+}

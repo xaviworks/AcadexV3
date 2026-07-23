@@ -97,14 +97,13 @@
         </div>
 
         {{-- Existing Activities --}}
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body px-4 py-3">
-                <h2 class="h5 fw-semibold mb-3">Existing Activities</h2>
-
-                @if($activities->count())
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover bg-white mb-0">
-                            <thead class="table-light">
+        @if($activities->count())
+            <x-data-table
+                title="Existing Activities"
+                subtitle="Review saved activities and manage their records"
+                icon="bi-list-task"
+            >
+                            <thead>
                                 <tr>
                                     <th class="text-start">Title</th>
                                     <th class="text-center">Type</th>
@@ -130,18 +129,19 @@
                                     </tr>
                                 @endforeach
                             </tbody>
-                        </table>
-                    </div>
-                @else
+            </x-data-table>
+        @else
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body px-4 py-3">
                     <x-empty-state
                         icon="bi-clipboard-x"
                         title="No Activities Found"
                         message="No activities found for this course."
                         :compact="true"
                     />
-                @endif
+                </div>
             </div>
-        </div>
+        @endif
             @else
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body px-4 py-4">

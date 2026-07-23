@@ -101,23 +101,24 @@
         {{-- Course Outcomes Table --}}
         <div class="row mb-5">
             <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-3">
-                    <div class="card-header-custom card-header-primary">
-                        <i class="bi bi-table me-2"></i>Course Outcomes List
-                    </div>
-                    <div class="card-body p-0 course-outcomes-table-container">
+                <x-data-table
+                    title="Course Outcomes List"
+                    :subtitle="'Course outcomes for ' . ($selectedSubject->subject_code ?? 'this course')"
+                    icon="bi-bullseye"
+                    table-class="course-outcomes-table"
+                    responsive-class="course-outcomes-table-container"
+                    :scroll-y="$cos->count() > 5 ? '32rem' : null"
+                >
                         @if($cos->count() > 0)
-                            <div class="table-responsive course-outcomes-table-scroll">
-                                <table class="table table-hover align-middle mb-0 course-outcomes-table">
-                                    <thead class="table-success">
+                                    <thead>
                                         <tr>
-                                            <th class="border-0 py-3 px-4 fw-semibold">
+                                            <th>
                                                 <i class="bi bi-hash me-2"></i>CO Code
                                             </th>
-                                            <th class="border-0 py-3 fw-semibold">
+                                            <th>
                                                 <i class="bi bi-tag me-2"></i>Identifier
                                             </th>
-                                            <th class="border-0 py-3 fw-semibold">
+                                            <th>
                                                 <i class="bi bi-file-text me-2"></i>Description 
                                                 @if(Auth::user()->isChairperson() || Auth::user()->isGECoordinator())
                                                     <small class="text-muted fw-normal">(Double-click to edit)</small>
@@ -125,14 +126,14 @@
                                                     <small class="text-muted fw-normal">(Read-only for Instructors)</small>
                                                 @endif
                                             </th>
-                                            <th class="border-0 py-3 fw-semibold text-center">
+                                            <th class="text-center">
                                                 <i class="bi bi-calendar-event me-2"></i>Academic Period
                                             </th>
-                                            <th class="border-0 py-3 fw-semibold text-center">
+                                            <th class="text-center">
                                                 <i class="bi bi-percent me-2"></i>Target %
                                             </th>
                                             @if(Auth::user()->isChairperson() || Auth::user()->isGECoordinator())
-                                                <th class="border-0 py-3 fw-semibold text-center">Actions</th>
+                                                <th class="text-center">Actions</th>
                                             @endif
                                         </tr>
                                     </thead>
@@ -206,33 +207,6 @@
                                             </tr>
                                         @endforeach
                                     </tbody>
-                                </table>
-                            </div>
-                            
-                            {{-- Results Counter --}}
-                            @if($cos->count() > 5)
-                                <div class="card-footer bg-light border-0">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="text-muted small">
-                                            Showing 5 of {{ $cos->count() }} course outcomes (scroll to see more)
-                                        </div>
-                                        <div class="text-muted small">
-                                            <i class="bi bi-arrow-down me-1"></i>Scrollable content
-                                        </div>
-                                    </div>
-                                </div>
-                            @else
-                                <div class="card-footer bg-light border-0">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="text-muted small">
-                                            Showing {{ $cos->count() }} of {{ $cos->count() }} course outcomes
-                                        </div>
-                                        <div class="text-muted small">
-                                            <i class="bi bi-check-circle me-1"></i>All items visible
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
                         @else
                             <x-empty-state
                                 icon="bi-mortarboard"
@@ -249,8 +223,7 @@
                                 </x-slot:actions>
                             </x-empty-state>
                         @endif
-                    </div>
-                </div>
+                </x-data-table>
             </div>
         </div>
     @endif

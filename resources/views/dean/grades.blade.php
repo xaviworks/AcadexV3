@@ -127,9 +127,13 @@
     {{-- Step 4: Final Grades --}}
     @else
         @if ($students->count())
-            <div class="bg-white shadow-lg rounded-4 overflow-x-auto mt-4">
-                <table class="table table-bordered align-middle mb-0">
-                    <thead class="table-success">
+            <x-data-table
+                class="mt-4"
+                title="Final Grades"
+                subtitle="Review term grades, final average, and remarks"
+                icon="bi-clipboard-data"
+            >
+                    <thead>
                         <tr>
                             <th>Student Name</th>
                             <th class="text-center">Prelim</th>
@@ -176,8 +180,7 @@
                             </tr>
                         @endforeach
                     </tbody>
-                </table>
-            </div>
+            </x-data-table>
         @else
             <x-empty-state
                 icon="bi-person-x"

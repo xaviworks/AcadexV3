@@ -59,17 +59,19 @@
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
+    <x-data-table
+        title="Students"
+        subtitle="Browse students by department, program, year level, and status"
+        icon="bi-people-fill"
+    >
+                <thead>
                     <tr>
-                        <th scope="col" class="px-4 py-3 fw-semibold">Name</th>
+                        <th scope="col">Name</th>
                         @if($showCourseColumn)
-                            <th scope="col" class="px-4 py-3 fw-semibold">Program</th>
+                            <th scope="col">Program</th>
                         @endif
-                        <th scope="col" class="px-4 py-3 fw-semibold">Year Level</th>
-                        <th scope="col" class="px-4 py-3 fw-semibold text-center">Status</th>
+                        <th scope="col">Year Level</th>
+                        <th scope="col" class="text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -126,9 +128,7 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-    </div>
+    </x-data-table>
 </div>
 {{-- JavaScript: resources/js/pages/vpaa/students.js --}}
 @endsection

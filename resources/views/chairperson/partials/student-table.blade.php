@@ -17,9 +17,13 @@
     $droppedStudentIds = $droppedStudentIds ?? collect();
 @endphp
 
-<div class="table-responsive bg-white shadow-sm rounded-4 p-3">
-    <table class="table table-bordered align-middle mb-0">
-        <thead class="table-light">
+<x-data-table
+    title="Students"
+    subtitle="Review enrollment status by course and year level"
+    icon="bi-people"
+    :hover="true"
+>
+        <thead>
             <tr>
                 <th>Student Name</th>
                 @if($showCourse)
@@ -69,5 +73,4 @@
                 </tr>
             @endforelse
         </tbody>
-    </table>
-</div>
+</x-data-table>

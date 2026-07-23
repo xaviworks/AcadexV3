@@ -70,10 +70,12 @@
     <div class="mt-4">
         @if(request('subject_id'))
             @if($cos && $cos->count())
-                <div class="card shadow-sm">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle mb-0">
-                            <thead class="table-light">
+                <x-data-table
+                    title="Course Outcomes"
+                    subtitle="Review course outcome definitions for the selected subject"
+                    icon="bi-bullseye"
+                >
+                            <thead>
                                 <tr>
                                     <th>CO Code</th>
                                     <th>Identifier</th>
@@ -114,9 +116,7 @@
                                     </tr>
                                 @endforeach
                             </tbody>
-                        </table>
-                    </div>
-                </div>
+                </x-data-table>
             @else
                 <x-empty-state
                     icon="bi-journal-x"

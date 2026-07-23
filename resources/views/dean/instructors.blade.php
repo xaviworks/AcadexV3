@@ -15,9 +15,12 @@
             message="There are no active instructors assigned to your department."
         />
     @else
-        <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
-            <table class="table table-bordered align-middle mb-0">
-                <thead class="table-light">
+        <x-data-table
+            title="Active Instructors"
+            subtitle="View instructor accounts assigned to your department"
+            icon="bi-person-lines-fill"
+        >
+                <thead>
                     <tr>
                         <th>Instructor Name</th>
                         <th>Email Address</th>
@@ -39,8 +42,7 @@
                         </tr>
                     @endforeach
                 </tbody>
-            </table>
-        </div>
+        </x-data-table>
     @endif
 </div>
 @endsection

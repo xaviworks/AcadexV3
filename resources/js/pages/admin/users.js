@@ -737,6 +737,11 @@ function initAdminUsersPage() {
         [1, 'asc'],
         [0, 'asc'],
       ],
+      lengthMenu: [
+        [10, 25, 50, 100],
+        [10, 25, 50, 100],
+      ],
+      pageLength: 10,
       language: {
         search: '_INPUT_',
         searchPlaceholder: 'Search users...',
@@ -744,7 +749,7 @@ function initAdminUsersPage() {
         info: 'Showing _START_ to _END_ of _TOTAL_ users',
         emptyTable: 'No users found',
       },
-      columnDefs: [{ orderable: false, targets: 3 }],
+      columnDefs: [{ orderable: false, targets: -1 }],
     });
   }
 }

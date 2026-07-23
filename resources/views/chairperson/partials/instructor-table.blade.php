@@ -23,9 +23,12 @@
         message="There are no {{ $filterActive ? 'active' : 'inactive' }} instructors found in your department."
     />
 @else
-    <div class="table-responsive bg-white shadow-sm rounded-4 p-3">
-        <table class="table table-bordered align-middle mb-0">
-            <thead class="table-light">
+    <x-data-table
+        :title="$filterActive ? 'Active Instructors' : 'Inactive Instructors'"
+        subtitle="Review instructor account status and available actions"
+        icon="bi-person-lines-fill"
+    >
+            <thead>
                 <tr>
                     <th>Instructor Name</th>
                     <th>Email Address</th>
@@ -110,6 +113,5 @@
                     </tr>
                 @endforeach
             </tbody>
-        </table>
-    </div>
+    </x-data-table>
 @endif

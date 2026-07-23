@@ -19,10 +19,12 @@
 @endphp
 
 @if ($subjects->isNotEmpty())
-    <div class="shadow-lg rounded-4 overflow-hidden border">
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle mb-0">
-            <thead class="table-light">
+    <x-data-table
+        :title="$yearSuffix ? $yearSuffix . ' Subjects' : 'Subject Assignments'"
+        subtitle="Assign instructors and review current teaching loads"
+        icon="bi-journal-bookmark"
+    >
+            <thead>
                 <tr>
                     <th>Course Code</th>
                     <th>Description</th>
@@ -69,9 +71,7 @@
                     </tr>
                 @endforeach
             </tbody>
-        </table>
-        </div>
-    </div>
+    </x-data-table>
 @else
     <x-empty-state
         icon="bi-journal-x"

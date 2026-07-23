@@ -200,10 +200,12 @@
             </div>
 
             @if ($activities->isNotEmpty())
-                <div class="card shadow-sm">
-                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-                        <table class="table table-bordered table-hover align-middle mb-0">
-                            <thead class="table-light" style="position: sticky; top: 0; z-index: 10;">
+                <x-data-table
+                    title="My Activities"
+                    subtitle="Review saved activities and manage their records"
+                    icon="bi-list-task"
+                >
+                            <thead>
                                 <tr>
                                     <th class="text-center" style="width: 60px;">#</th>
                                     <th>Title</th>
@@ -252,9 +254,7 @@
                                     </tr>
                                 @endforeach
                             </tbody>
-                        </table>
-                    </div>
-                </div>
+                </x-data-table>
             @else
                 <div class="card shadow-sm">
                     <div class="card-body py-3">
