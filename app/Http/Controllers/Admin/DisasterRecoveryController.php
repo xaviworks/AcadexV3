@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class DisasterRecoveryController extends Controller
 {
@@ -100,7 +101,7 @@ class DisasterRecoveryController extends Controller
     /**
      * Download backup file.
      */
-    public function download(Backup $backup): StreamedResponse
+    public function download(Backup $backup): Response
     {
         Gate::authorize('admin');
 
@@ -108,10 +109,11 @@ class DisasterRecoveryController extends Controller
             abort(404, 'Backup file not found');
         }
 
-        return response()->streamDownload(function () use ($backup) {
-            readfile($backup->getFullPath());
-        }, $backup->filename, [
-            'Content-Type' => 'application/zip',
+        $contents = Storage::disk($backup->disk ?: config('backup.disk'))->get($backup->path);
+
+        return response($contents, 200, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="'.$backup->filename.'"',
         ]);
     }
 
