@@ -45,9 +45,7 @@ function restoreButton(button) {
 
 function closeModal(form) {
   const modalId = form.dataset.closeModal;
-  const modalEl = modalId
-    ? document.getElementById(modalId.replace(/^#/, ''))
-    : form.closest('.modal');
+  const modalEl = modalId ? document.getElementById(modalId.replace(/^#/, '')) : form.closest('.modal');
 
   if (modalEl && window.bootstrap?.Modal) {
     window.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
@@ -263,15 +261,19 @@ function initAjaxActions() {
   if (document.documentElement.dataset.ajaxActionsBound === 'true') return;
   document.documentElement.dataset.ajaxActionsBound = 'true';
 
-  document.addEventListener('submit', (event) => {
-    const form = event.target.closest('form.ajax-action-form');
-    if (!form) return;
+  document.addEventListener(
+    'submit',
+    (event) => {
+      const form = event.target.closest('form.ajax-action-form');
+      if (!form) return;
 
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    document.body.classList.add('loaded');
-    submitForm(form, event.submitter);
-  }, true);
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      document.body.classList.add('loaded');
+      submitForm(form, event.submitter);
+    },
+    true
+  );
 
   document.addEventListener('click', async (event) => {
     const link = event.target.closest('[data-ajax-refresh-target]');
