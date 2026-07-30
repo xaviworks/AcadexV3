@@ -9,6 +9,8 @@
     title="Confirm Unassign"
     form="{{ route('chairperson.toggleAssignedSubject') }}"
     form-id="unassignForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#yearTabsContent" data-close-modal="confirmUnassignModal" data-loading-text="Unassigning..."'
 >
     @csrf
     <x-slot:icon><i class="bi bi-exclamation-triangle-fill me-1"></i></x-slot:icon>
@@ -28,6 +30,8 @@
     size="medium"
     form="{{ route('chairperson.storeAssignedSubject') }}"
     form-id="assignForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#yearTabsContent" data-close-modal="confirmAssignModal" data-loading-text="Assigning..." data-reset-on-success="true"'
 >
     @csrf
     <x-slot:icon><i class="bi bi-check-circle-fill me-1"></i></x-slot:icon>

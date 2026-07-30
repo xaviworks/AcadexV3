@@ -78,6 +78,7 @@
         </div>
     </div>
 
+    <div id="course-outcomes-section">
     {{-- No Data Available Section --}}
     @if(!$cos || $cos->count() == 0)
         <div class="row mb-5">
@@ -254,6 +255,7 @@
             </div>
         </div>
     @endif
+    </div>
 
     {{-- Information Cards Section --}}
     <div class="row g-4">
@@ -316,6 +318,9 @@
     id="addCourseOutcomeModal"
     title="Add Course Outcome"
     form="{{ route($routePrefix . '.course_outcomes.store') }}"
+    form-id="addCourseOutcomeForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#course-outcomes-section" data-close-modal="addCourseOutcomeModal" data-loading-text="Adding..." data-reset-on-success="true"'
 >
     @csrf
     <x-slot:icon><i class="bi bi-plus-circle me-1"></i></x-slot:icon>
@@ -367,6 +372,8 @@
     title="Edit Course Outcome"
     form=""
     form-id="editForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#course-outcomes-section" data-close-modal="editCourseOutcomeModal" data-loading-text="Updating..."'
     variant="default"
 >
     @csrf
@@ -413,7 +420,15 @@
     </x-slot:footer>
 </x-modal.form>
 
-<x-modal.destructive id="deleteCourseOutcomeModal" title="Confirm Deletion" form="" form-id="deleteForm" body-class="text-center">
+<x-modal.destructive
+    id="deleteCourseOutcomeModal"
+    title="Confirm Deletion"
+    form=""
+    form-id="deleteForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#course-outcomes-section" data-close-modal="deleteCourseOutcomeModal" data-loading-text="Deleting..."'
+    body-class="text-center"
+>
     @csrf
     @method('DELETE')
     <x-slot:icon><i class="bi bi-exclamation-triangle me-1"></i></x-slot:icon>

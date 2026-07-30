@@ -112,6 +112,14 @@ class HelpGuideController extends Controller
             }
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Help guide created successfully.',
+                'data' => $helpGuide->load('attachments'),
+            ]);
+        }
+
         return redirect()
             ->route('admin.help-guides.index')
             ->with('success', 'Help guide created successfully.');
@@ -220,6 +228,14 @@ class HelpGuideController extends Controller
             }
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Help guide updated successfully.',
+                'data' => $helpGuide->fresh()->load('attachments'),
+            ]);
+        }
+
         return redirect()
             ->route('admin.help-guides.index')
             ->with('success', 'Help guide updated successfully.');
@@ -228,7 +244,7 @@ class HelpGuideController extends Controller
     /**
      * Remove the specified help guide.
      */
-    public function destroy(HelpGuide $helpGuide)
+    public function destroy(Request $request, HelpGuide $helpGuide)
     {
         Gate::authorize('admin');
 
@@ -242,6 +258,13 @@ class HelpGuideController extends Controller
 
         // The cascade delete will handle removing attachment records
         $helpGuide->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Help guide deleted successfully.',
+            ]);
+        }
 
         return redirect()
             ->route('admin.help-guides.index')
@@ -303,6 +326,7 @@ class HelpGuideController extends Controller
         return response()->json([
             'success' => true,
             'is_active' => $helpGuide->is_active,
+            'message' => 'Help guide visibility updated.',
         ]);
     }
 

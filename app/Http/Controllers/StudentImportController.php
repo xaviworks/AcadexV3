@@ -190,6 +190,14 @@ class StudentImportController extends Controller
             ->whereIn('id', $selectedIds)
             ->update(['is_confirmed' => true]);
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Selected students successfully imported to the selected subject.',
+                'redirect_url' => route('instructor.students.index', ['tab' => 'import']),
+            ]);
+        }
+
         return redirect()->route('instructor.students.index', ['tab' => 'import'])->with('status', 'Selected students successfully imported to the selected subject.');
     }
 

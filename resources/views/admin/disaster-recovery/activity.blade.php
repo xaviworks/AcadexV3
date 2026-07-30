@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" id="disaster-recovery-activity-section">
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -134,7 +134,14 @@
     @endif
 </div>
 
-<x-modal.warning id="rollbackModal" title="Rollback Change" form="" form-id="rollbackForm">
+<x-modal.warning
+    id="rollbackModal"
+    title="Rollback Change"
+    form=""
+    form-id="rollbackForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#disaster-recovery-activity-section" data-close-modal="rollbackModal" data-loading-text="Rolling back..."'
+>
     @csrf
     <x-slot:icon><i class="fas fa-undo me-1"></i></x-slot:icon>
     <p>Are you sure you want to revert this change to the previous state?</p>

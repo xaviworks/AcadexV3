@@ -430,7 +430,7 @@ function executeAddCourse(password) {
             if (ok && data.success) {
                 passwordConfirmModal.hide();
                 notify.success(data.message || 'Program added successfully.');
-                setTimeout(() => location.reload(), 1000);
+                window.ajaxActions?.refreshTarget('#coursesTable').catch(() => {});
             } else {
                 showPasswordError(data.message || 'Failed to add program.');
             }
@@ -534,9 +534,6 @@ function executeDeleteCourse(password) {
                     }
                 }
 
-                if ($('#coursesTable tbody tr').length === 0) {
-                    setTimeout(() => location.reload(), 1000);
-                }
             } else {
                 showPasswordError(data.message || 'Failed to delete program.');
             }

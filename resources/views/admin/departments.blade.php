@@ -423,7 +423,7 @@ function executeAddDepartment(password) {
         if (ok && data.success) {
             passwordConfirmModal.hide();
             notify.success(data.message || 'Department added successfully.');
-            setTimeout(() => location.reload(), 1000);
+            window.ajaxActions?.refreshTarget('#departmentsTable').catch(() => {});
         } else {
             showPasswordError(data.message || 'Failed to add department.');
         }
@@ -506,10 +506,6 @@ function executeDeleteDepartment(password) {
                 row.remove();
             }
             
-            // Refresh DataTable if no rows left
-            if ($('#departmentsTable tbody tr').length === 0) {
-                setTimeout(() => location.reload(), 1000);
-            }
         } else {
             showPasswordError(data.message || 'Failed to delete department.');
         }

@@ -873,7 +873,7 @@ export function initAssignSubjectsPage() {
                 refreshSubjectInstructorCount(sid);
                 notifySubjectUpdate(sid);
               } else {
-                window.location.reload();
+                notifySubjectUpdate('');
               }
             }, 800);
           } else {

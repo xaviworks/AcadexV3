@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" id="disaster-recovery-section">
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -182,7 +182,7 @@
                     <h6 class="mb-0 fw-bold"><i class="fas fa-clock text-info me-2"></i>Automatic Backup Schedule</h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.disaster-recovery.schedule') }}" method="POST">
+                    <form action="{{ route('admin.disaster-recovery.schedule') }}" method="POST" class="ajax-action-form" data-refresh-target="#disaster-recovery-section" data-loading-text="Saving...">
                         @csrf
                         <div class="row g-2 mb-2">
                             <div class="col-7">
@@ -208,7 +208,7 @@
                         <small><i class="fas fa-info-circle me-1"></i> Keeps last 10 backups automatically.</small>
                     </div>
                     
-                    <form id="runManualBackupForm" action="{{ route('admin.disaster-recovery.run-now') }}" method="POST">
+                    <form id="runManualBackupForm" action="{{ route('admin.disaster-recovery.run-now') }}" method="POST" class="ajax-action-form" data-refresh-target="#disaster-recovery-section" data-loading-text="Running...">
                         @csrf
                         <button type="button" onclick="confirmRunNow()" class="btn btn-success btn-sm w-100">
                             <i class="fas fa-play me-1"></i> Run Manual Backup Now
@@ -265,6 +265,8 @@
     title="Create Backup"
     size="medium"
     form="{{ route('admin.disaster-recovery.backup.create') }}"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#disaster-recovery-section" data-close-modal="backupModal" data-loading-text="Creating..." data-reset-on-success="true"'
 >
     @csrf
     <x-slot:icon><i class="fas fa-plus-circle me-1"></i></x-slot:icon>
@@ -387,7 +389,7 @@
 @endif
 
 async function showRestoreModal(id, date) {
-    const { value: formValues } = await Swal.fire({
+    await Swal.fire({
         title: '<span class="text-dark fw-bold">Restore System Backup</span>',
         html: `
             <div class="text-start mt-2">
@@ -472,7 +474,9 @@ async function showRestoreModal(id, date) {
             confirmCheck.addEventListener('change', validate);
             passwordInput.addEventListener('input', validate);
         },
-        preConfirm: () => {
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading(),
+        preConfirm: async () => {
             const safety = document.getElementById('swal-safety').checked;
             const confirm = document.getElementById('swal-confirm').checked;
             const password = document.getElementById('swal-password').value;
@@ -481,42 +485,49 @@ async function showRestoreModal(id, date) {
                 return false;
             }
 
-            return { safety, confirm, password };
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/disaster-recovery/backup/${id}/restore`;
+            form.className = 'ajax-action-form';
+            form.dataset.refreshTarget = '#disaster-recovery-section';
+            form.dataset.loadingText = 'Restoring...';
+
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = document.querySelector('meta[name="csrf-token"]').content;
+            form.appendChild(csrf);
+
+            const safetyInput = document.createElement('input');
+            safetyInput.type = 'hidden';
+            safetyInput.name = 'create_safety_backup';
+            safetyInput.value = safety ? '1' : '0';
+            form.appendChild(safetyInput);
+
+            const confirmInput = document.createElement('input');
+            confirmInput.type = 'hidden';
+            confirmInput.name = 'confirm_restore';
+            confirmInput.value = '1';
+            form.appendChild(confirmInput);
+
+            const passInput = document.createElement('input');
+            passInput.type = 'hidden';
+            passInput.name = 'password';
+            passInput.value = password;
+            form.appendChild(passInput);
+
+            document.body.appendChild(form);
+            const payload = await window.ajaxActions?.submitForm(form);
+            form.remove();
+
+            if (!payload) {
+                Swal.showValidationMessage('Restore failed. Please check the notification and try again.');
+                return false;
+            }
+
+            return payload;
         }
     });
-
-    if (formValues) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/disaster-recovery/backup/${id}/restore`;
-        
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = document.querySelector('meta[name="csrf-token"]').content;
-        form.appendChild(csrf);
-
-        const safetyInput = document.createElement('input');
-        safetyInput.type = 'hidden';
-        safetyInput.name = 'create_safety_backup';
-        safetyInput.value = formValues.safety ? '1' : '0';
-        form.appendChild(safetyInput);
-
-        const confirmInput = document.createElement('input');
-        confirmInput.type = 'hidden';
-        confirmInput.name = 'confirm_restore';
-        confirmInput.value = '1';
-        form.appendChild(confirmInput);
-
-        const passInput = document.createElement('input');
-        passInput.type = 'hidden';
-        passInput.name = 'password';
-        passInput.value = formValues.password;
-        form.appendChild(passInput);
-
-        document.body.appendChild(form);
-        form.submit();
-    }
 }
 
 function confirmRunNow() {
@@ -530,7 +541,12 @@ function confirmRunNow() {
         confirmButtonText: 'Yes, Run Backup'
     }).then((result) => {
         if (result.isConfirmed) {
-            document.getElementById('runManualBackupForm').submit();
+            const form = document.getElementById('runManualBackupForm');
+            if (form && window.ajaxActions?.submitForm) {
+                window.ajaxActions.submitForm(form);
+            } else {
+                window.notify?.error('Manual backup handler is unavailable. Please try again.');
+            }
         }
     });
 }
@@ -545,17 +561,20 @@ function showDeleteModal(id) {
         showCancelButton: true,
         confirmButtonColor: '#dc3545',
         confirmButtonText: 'Delete',
-        preConfirm: (password) => {
+        showLoaderOnConfirm: true,
+        allowOutsideClick: () => !Swal.isLoading(),
+        preConfirm: async (password) => {
             if (!password) {
                 Swal.showValidationMessage('Password is required');
+                return false;
             }
-            return password;
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
+
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = `/admin/disaster-recovery/backup/${id}`;
+            form.className = 'ajax-action-form';
+            form.dataset.refreshTarget = '#disaster-recovery-section';
+            form.dataset.loadingText = 'Deleting...';
             
             const csrf = document.createElement('input');
             csrf.type = 'hidden';
@@ -576,7 +595,15 @@ function showDeleteModal(id) {
             form.appendChild(passInput);
 
             document.body.appendChild(form);
-            form.submit();
+            const payload = await window.ajaxActions?.submitForm(form);
+            form.remove();
+
+            if (!payload) {
+                Swal.showValidationMessage('Delete failed. Please check the notification and try again.');
+                return false;
+            }
+
+            return payload;
         }
     });
 }

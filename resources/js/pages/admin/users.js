@@ -48,18 +48,22 @@ window.enableUser = async function (userId, userName) {
     headers: {
       'Content-Type': 'application/json',
       'X-CSRF-TOKEN': token,
+      Accept: 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
     },
   })
-    .then((response) => response.json())
-    .then((data) => {
+    .then(async (response) => {
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) {
+        throw new Error(data.message || 'Failed to re-enable user');
+      }
+      return data;
+    })
+    .then(async (data) => {
       loading.stop('enableUser');
-      if (data.success) {
-        // Store message in sessionStorage to show after reload
-        sessionStorage.setItem('userActionMessage', data.message);
-        sessionStorage.setItem('userActionType', 'success');
-        location.reload();
-      } else {
-        notify.error(data.message || 'Failed to re-enable user');
+      notify.success(data.message || 'User re-enabled successfully.');
+      if (window.ajaxActions?.refreshTarget) {
+        await window.ajaxActions.refreshTarget('#users-table-container');
       }
     })
     .catch((err) => {
@@ -270,7 +274,14 @@ window.checkPassword = function (password) {
  */
 window.submitUserForm = function () {
   const form = document.getElementById('user-form');
-  if (form) form.submit();
+  if (!form) return;
+
+  if (window.ajaxActions?.submitForm) {
+    window.ajaxActions.submitForm(form);
+    return;
+  }
+
+  window.notify?.error('User action handler is unavailable. Please try again.');
 };
 
 /**
@@ -442,10 +453,10 @@ function initAdminUsersPage() {
 
           if (parsed && parsed.success) {
             modal.close();
-            // Store message in sessionStorage to show after reload
-            sessionStorage.setItem('userActionMessage', parsed.message);
-            sessionStorage.setItem('userActionType', 'success');
-            location.reload();
+            notify.success(parsed.message || 'User disabled successfully.');
+            if (window.ajaxActions?.refreshTarget) {
+              await window.ajaxActions.refreshTarget('#users-table-container');
+            }
             return;
           }
 
@@ -601,9 +612,21 @@ function initAdminUsersPage() {
       const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
       const explicitAction = this.getAttribute('action');
       const confirmEndpoint = explicitAction && explicitAction !== '#' ? explicitAction : window.confirmUserCreationUrl;
+      const passwordInput = this.querySelector('input[name="confirm_password"]');
+      const submitBtn = this.querySelector('button[type="submit"]');
+
+      if (submitBtn) {
+        submitBtn.dataset.defaultText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming...';
+      }
 
       if (!confirmEndpoint) {
         notify.error('Unable to verify password endpoint. Please refresh and try again.');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = submitBtn.dataset.defaultText || 'Confirm';
+        }
         return;
       }
 
@@ -730,9 +753,22 @@ function initAdminUsersPage() {
     });
   });
 
-  // Initialize DataTables
+  initUsersDataTable();
+}
+
+function initUsersDataTable(root = document) {
+  const table = root.querySelector ? root.querySelector('#usersTable') : document.getElementById('usersTable');
+  if (!table || typeof $ === 'undefined' || !$.fn.DataTable) {
+    return;
+  }
+
+  if ($.fn.DataTable.isDataTable(table)) {
+    return;
+  }
+
   if (typeof $ !== 'undefined' && $.fn.DataTable) {
     $('#usersTable').DataTable({
+      stateSave: true,
       order: [
         [1, 'asc'],
         [0, 'asc'],
@@ -750,26 +786,13 @@ function initAdminUsersPage() {
 }
 
 // Initialize on DOM ready
+document.addEventListener('ajax-actions:refreshed', (event) => {
+  initUsersDataTable(event.detail?.root || document);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!isAdminUsersPage()) {
     return;
-  }
-
-  // Check for stored messages from page reload
-  const storedMessage = sessionStorage.getItem('userActionMessage');
-  const messageType = sessionStorage.getItem('userActionType');
-
-  if (storedMessage) {
-    // Display the message
-    if (messageType === 'success') {
-      notify.success(storedMessage);
-    } else if (messageType === 'error') {
-      notify.error(storedMessage);
-    }
-
-    // Clear the stored message
-    sessionStorage.removeItem('userActionMessage');
-    sessionStorage.removeItem('userActionType');
   }
 
   // Initialize the rest of the page

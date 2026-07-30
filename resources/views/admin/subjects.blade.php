@@ -620,7 +620,7 @@ function executeAddSubject(password) {
             if (ok && data.success) {
                 subjectPasswordConfirmModal.hide();
                 notify.success(data.message || 'Subject added successfully.');
-                setTimeout(() => location.reload(), 1000);
+                window.ajaxActions?.refreshTarget('#subjectsTable').catch(() => {});
             } else {
                 showSubjectPasswordError(data.message || 'Failed to add subject.');
             }
@@ -732,9 +732,6 @@ function executeDeleteSubject(password) {
                     }
                 }
 
-                if ($('#subjectsTable tbody tr').length === 0) {
-                    setTimeout(() => location.reload(), 1000);
-                }
             } else {
                 showSubjectPasswordError(data.message || 'Failed to delete subject.');
             }

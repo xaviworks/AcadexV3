@@ -304,16 +304,16 @@ export function initImportStudentsPage() {
   const uploadForm = document.getElementById('uploadForm');
   if (uploadForm) {
     uploadForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-
       const fileInput = document.getElementById('file');
       if (!fileInput?.files.length) {
+        e.preventDefault();
         showAlert('Please select an Excel file to upload', 'warning');
         return;
       }
 
       const file = fileInput.files[0];
       if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        e.preventDefault();
         showAlert('Please select a valid Excel file (.xlsx or .xls)', 'warning');
         return;
       }
@@ -327,9 +327,6 @@ export function initImportStudentsPage() {
                     <span>Uploading...</span>
                 `;
       }
-
-      // Submit the form
-      this.submit();
     });
   }
 
@@ -426,22 +423,7 @@ export function initImportStudentsPage() {
         selectedStudentIds.value = selected.join(',');
       }
 
-      // Hide the modal and remove backdrop before submitting
-      const modalEl = document.getElementById('confirmModal');
-      if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const bsModal = bootstrap.Modal.getInstance(modalEl);
-        if (bsModal) {
-          bsModal.hide();
-        }
-      }
-      // Remove any remaining backdrop elements
-      document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
-      document.body.classList.remove('modal-open');
-      document.body.style.removeProperty('overflow');
-      document.body.style.removeProperty('padding-right');
-
-      // Submit the form
-      this.submit();
+      window.ajaxActions?.submitForm(this, e.submitter);
     });
   }
 

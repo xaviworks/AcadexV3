@@ -1167,7 +1167,20 @@ function refreshData() {
   const style = document.createElement('style');
   style.textContent = `.spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
   document.head.appendChild(style);
-  setTimeout(() => window.location.reload(), 1000);
+  const refreshPromise = window.ajaxActions?.refreshTarget
+    ? window.ajaxActions.refreshTarget('#print-area')
+    : Promise.reject(new Error('Section refresh is unavailable.'));
+
+  refreshPromise
+    .catch(() => {
+      if (window.notify?.error) {
+        window.notify.error('Unable to refresh the results section.');
+      }
+    })
+    .finally(() => {
+      refreshButton.innerHTML = originalHTML;
+      refreshButton.disabled = false;
+    });
 }
 
 export function initCourseOutcomeResultsPage() {

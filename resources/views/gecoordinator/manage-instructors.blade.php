@@ -36,6 +36,7 @@
         $geRequestsCount = \App\Models\GESubjectRequest::where('status', 'pending')->count();
     @endphp
 
+    <div id="ge-instructors-section">
     {{-- Tabs --}}
     <ul class="nav nav-tabs mb-0" id="instructorTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
         <li class="nav-item" role="presentation">
@@ -350,7 +351,14 @@
 </div>
 
 {{-- Modals --}}
-<x-modal.destructive id="confirmDeactivateModal" title="Confirm Account Deactivation" form="" form-id="deactivateForm">
+<x-modal.destructive
+    id="confirmDeactivateModal"
+    title="Confirm Account Deactivation"
+    form=""
+    form-id="deactivateForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmDeactivateModal" data-loading-text="Deactivating..."'
+>
     @csrf
     <p>Are you sure you want to deactivate <strong id="instructorName"></strong>'s account?</p>
     <p class="text-muted small mb-0">
@@ -363,7 +371,14 @@
     </x-slot:footer>
 </x-modal.destructive>
 
-<x-modal.warning id="confirmRemoveGEAccessModal" title="Remove GE Teaching Access" form="" form-id="removeGEAccessForm">
+<x-modal.warning
+    id="confirmRemoveGEAccessModal"
+    title="Remove GE Teaching Access"
+    form=""
+    form-id="removeGEAccessForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmRemoveGEAccessModal" data-loading-text="Removing..."'
+>
     @csrf
     <p>Are you sure you want to remove GE teaching access for <strong id="removeGEAccessName"></strong>?</p>
     <p class="text-muted small mb-0">
@@ -376,7 +391,14 @@
     </x-slot:footer>
 </x-modal.warning>
 
-<x-modal.success id="confirmApproveModal" title="Confirm Approval" form="" form-id="approveForm">
+<x-modal.success
+    id="confirmApproveModal"
+    title="Confirm Approval"
+    form=""
+    form-id="approveForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmApproveModal" data-loading-text="Approving..."'
+>
     @csrf
     Are you sure you want to approve <strong id="approveName"></strong>'s account?
 
@@ -385,7 +407,14 @@
     </x-slot:footer>
 </x-modal.success>
 
-<x-modal.destructive id="confirmRejectModal" title="Confirm Rejection" form="" form-id="rejectForm">
+<x-modal.destructive
+    id="confirmRejectModal"
+    title="Confirm Rejection"
+    form=""
+    form-id="rejectForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmRejectModal" data-loading-text="Rejecting..."'
+>
     @csrf
     Are you sure you want to reject <strong id="rejectName"></strong>'s account?
 
@@ -394,7 +423,14 @@
     </x-slot:footer>
 </x-modal.destructive>
 
-<x-modal.success id="confirmActivateModal" title="Confirm Activation" form="" form-id="activateForm">
+<x-modal.success
+    id="confirmActivateModal"
+    title="Confirm Activation"
+    form=""
+    form-id="activateForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmActivateModal" data-loading-text="Activating..."'
+>
     @csrf
     Are you sure you want to activate <strong id="activateName"></strong>'s account?
 
@@ -403,7 +439,14 @@
     </x-slot:footer>
 </x-modal.success>
 
-<x-modal.success id="approveGERequestModal" title="Approve GE Course Request" form="" form-id="approveGERequestForm">
+<x-modal.success
+    id="approveGERequestModal"
+    title="Approve GE Course Request"
+    form=""
+    form-id="approveGERequestForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="approveGERequestModal" data-loading-text="Approving..."'
+>
     @csrf
     Are you sure you want to approve the GE Course request for <strong id="approveGERequestName"></strong>?
     <p class="text-muted small mt-2 mb-0">
@@ -416,7 +459,14 @@
     </x-slot:footer>
 </x-modal.success>
 
-<x-modal.destructive id="rejectGERequestModal" title="Reject GE Course Request" form="" form-id="rejectGERequestForm">
+<x-modal.destructive
+    id="rejectGERequestModal"
+    title="Reject GE Course Request"
+    form=""
+    form-id="rejectGERequestForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="rejectGERequestModal" data-loading-text="Rejecting..."'
+>
     @csrf
     Are you sure you want to reject the GE course request for <strong id="rejectGERequestName"></strong>?
     <p class="text-muted small mt-2 mb-0">

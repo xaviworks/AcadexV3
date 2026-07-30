@@ -334,7 +334,15 @@ class VPAAController extends Controller
         ]);
 
         try {
-            Department::create($validated);
+            $department = Department::create($validated);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Department created successfully.',
+                    'data' => $department,
+                ]);
+            }
 
             return redirect()->route('vpaa.departments')
                 ->with('status', 'Department created successfully.');
@@ -362,6 +370,14 @@ class VPAAController extends Controller
             $department = Department::findOrFail($id);
             $department->update($validated);
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Department updated successfully.',
+                    'data' => $department,
+                ]);
+            }
+
             return redirect()->route('vpaa.departments')
                 ->with('status', 'Department updated successfully.');
         } catch (\Exception $e) {
@@ -387,11 +403,25 @@ class VPAAController extends Controller
             $hasStudents = $department->students()->exists();
 
             if ($hasUsers || $hasStudents) {
+                if (request()->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot delete department with associated users or students.',
+                    ], 422);
+                }
+
                 return redirect()->back()
                     ->with('error', 'Cannot delete department with associated users or students.');
             }
 
             $department->update(['is_deleted' => true]);
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Department deleted successfully.',
+                ]);
+            }
 
             return redirect()->route('vpaa.departments')
                 ->with('status', 'Department deleted successfully.');
