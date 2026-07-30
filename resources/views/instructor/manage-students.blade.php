@@ -171,7 +171,7 @@
                                                 <i class="bi bi-pencil-square"></i> Edit
                                             </button>
                                             @if($student->pivot->is_deleted)
-                                                <form method="POST" action="{{ route('instructor.students.reenroll', $student->id) }}" class="d-inline">
+                                                <form method="POST" action="{{ route('instructor.students.reenroll', $student->id) }}" class="d-inline ajax-action-form" data-refresh-target="#studentTabsContent" data-loading-text="Re-enrolling...">
                                                     @csrf
                                                     @method('PATCH')
                                                     <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
@@ -538,6 +538,8 @@
     :title="$enrollStudentModalTitle"
     size="large"
     :form="route('instructor.students.store')"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#studentTabsContent" data-close-modal="enrollStudentModal" data-loading-text="Enrolling..." data-reset-on-success="true"'
     :centered="false"
 >
     <x-slot:icon>
@@ -582,7 +584,8 @@
     size="large"
     form="#"
     form-id="manageStudentForm"
-    form-attributes='onsubmit="return ensureManageFormActionSet(this)"'
+    form-class="ajax-action-form"
+    form-attributes='onsubmit="return ensureManageFormActionSet(this)" data-refresh-target="#studentTabsContent" data-close-modal="manageStudentModal" data-loading-text="Saving..."'
     :centered="false"
 >
     <x-slot:icon>
@@ -626,7 +629,8 @@
     title="Confirm Drop"
     form=""
     form-id="dropStudentForm"
-    form-attributes='onsubmit="return ensureDropFormActionSet(this)"'
+    form-class="ajax-action-form"
+    form-attributes='onsubmit="return ensureDropFormActionSet(this)" data-refresh-target="#studentTabsContent" data-close-modal="confirmDropModal" data-loading-text="Dropping..."'
 >
     <x-slot:icon>
         <i class="bi bi-exclamation-triangle-fill"></i>
@@ -657,6 +661,8 @@
     size="medium"
     :form="route('instructor.students.import.confirm')"
     form-id="confirmForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#studentTabsContent" data-close-modal="confirmModal" data-loading-text="Importing..."'
 >
     <x-slot:icon>
         <i class="bi bi-file-earmark-check"></i>

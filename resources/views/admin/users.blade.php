@@ -49,7 +49,7 @@
     </div>
 
     {{-- Users Table --}}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm" id="users-table-container">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table id="usersTable" class="table table-bordered table-hover mb-0">
@@ -194,6 +194,8 @@
     size="large"
     form=""
     form-id="chooseDisableForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#users-table-container" data-close-modal="chooseDisableModal" data-loading-text="Disabling..."'
     form-action-expression="'/admin/users/' + $store.modals.data.userId + '/disable'"
     close-action="modal.close()"
     x-data
@@ -319,7 +321,15 @@
     </x-slot:footer>
 </x-modal.destructive>
 
-<x-modal.form id="courseModal" title="Add New User" form="{{ route('admin.storeVerifiedUser') }}" form-id="user-form" scrollable>
+<x-modal.form
+    id="courseModal"
+    title="Add New User"
+    form="{{ route('admin.storeVerifiedUser') }}"
+    form-id="user-form"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#users-table-container" data-close-modal="courseModal" data-loading-text="Creating..."'
+    scrollable
+>
     @csrf
     <div class="row g-3">
                         <div class="col-md-6">
@@ -478,6 +488,8 @@
     size="medium"
     form="{{ route('admin.sessions.reset2fa') }}"
     form-id="reset-2fa-user-form"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#users-table-container" data-close-modal="reset2FAUserModal" data-loading-text="Resetting..."'
 >
     @csrf
     <x-slot:icon><i class="fas fa-shield-halved me-1"></i></x-slot:icon>

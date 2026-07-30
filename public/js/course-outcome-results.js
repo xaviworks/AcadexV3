@@ -1001,10 +1001,16 @@ function refreshData() {
         `;
         document.head.appendChild(style);
         
-        // Reload the page after a short delay
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+        const refreshPromise = window.ajaxActions?.refreshTarget
+            ? window.ajaxActions.refreshTarget('#print-area')
+            : Promise.reject(new Error('Section refresh is unavailable.'));
+
+        refreshPromise
+            .catch(() => window.notify?.error?.('Unable to refresh the results section.'))
+            .finally(() => {
+                refreshButton.innerHTML = originalHTML;
+                refreshButton.disabled = false;
+            });
     }
 }
 

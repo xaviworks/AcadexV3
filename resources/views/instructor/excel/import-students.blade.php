@@ -3,7 +3,7 @@
 {{-- Styles: resources/css/instructor/common.css --}}
 
 @section('content')
-<div class="container-fluid py-4" style="background-color: var(--theme-green-light);">
+<div class="container-fluid py-4" id="student-import-section" style="background-color: var(--theme-green-light);">
     <!-- Alert Container -->
     <div id="alertContainer"></div>
 
@@ -314,6 +314,8 @@
     size="medium"
     :form="route('instructor.students.import.confirm')"
     form-id="confirmForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#student-import-section" data-close-modal="confirmModal" data-loading-text="Importing..."'
 >
     <x-slot:icon>
         <i class="bi bi-file-earmark-check"></i>

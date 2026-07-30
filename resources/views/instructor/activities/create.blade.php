@@ -503,6 +503,8 @@
       title="Delete Activity"
       :form="''"
       form-id="deleteActivityForm"
+      form-class="ajax-action-form"
+      form-attributes='data-refresh-target="#activityTabsContent" data-close-modal="confirmDeleteModal" data-loading-text="Deleting..."'
       size="medium"
     >
       <x-slot:icon>

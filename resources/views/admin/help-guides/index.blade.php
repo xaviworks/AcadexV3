@@ -40,7 +40,7 @@
     </div>
 
     {{-- Guides Table --}}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm" id="help-guides-table-section">
         <div class="card-body p-0">
             @if($guides->isEmpty())
                 {{-- Empty State --}}
@@ -166,7 +166,14 @@
     <p class="text-muted small mb-0">This action cannot be undone. Any attached files will also be deleted.</p>
 
     <x-slot:footer>
-        <form id="deleteForm" method="POST" class="d-inline">
+        <form
+            id="deleteForm"
+            method="POST"
+            class="d-inline ajax-action-form"
+            data-refresh-target="#help-guides-table-section"
+            data-close-modal="deleteModal"
+            data-loading-text="Deleting..."
+        >
             @csrf
             @method('DELETE')
             <x-modal.actions destructive-text="Delete Guide" />
@@ -179,6 +186,8 @@
     title="Create Help Guide"
     form="{{ route('admin.help-guides.store') }}"
     form-id="createGuideForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#help-guides-table-section" data-close-modal="createGuideModal" data-loading-text="Creating..." data-reset-on-success="true"'
     enctype="multipart/form-data"
     :no-page-loader="true"
     scrollable
@@ -277,6 +286,8 @@
     title="Edit Help Guide"
     form=""
     form-id="editGuideForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#help-guides-table-section" data-close-modal="editGuideModal" data-loading-text="Updating..."'
     enctype="multipart/form-data"
     :no-page-loader="true"
     variant="default"

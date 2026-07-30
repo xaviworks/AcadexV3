@@ -65,13 +65,20 @@
     document.addEventListener('submit', function(e) {
         const form = e.target;
         if (form && !form.hasAttribute('target')) {
-            if (form.hasAttribute('data-no-page-loader')) {
+            if (form.hasAttribute('data-no-page-loader') || form.classList.contains('ajax-action-form')) {
                 return;
             }
 
-            isNavigating = true;
-            pageLoadStart = Date.now();
-            document.body.classList.remove('loaded');
+            setTimeout(function() {
+                if (e.defaultPrevented) {
+                    document.body.classList.add('loaded');
+                    return;
+                }
+
+                isNavigating = true;
+                pageLoadStart = Date.now();
+                document.body.classList.remove('loaded');
+            }, 0);
         }
     });
     

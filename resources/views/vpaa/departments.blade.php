@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-4" id="vpaa-departments-section">
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -89,6 +89,8 @@
         title="Add New Department"
         size="medium"
         form="{{ route('vpaa.departments.store') }}"
+        form-class="ajax-action-form"
+        form-attributes='data-refresh-target="#vpaa-departments-section" data-close-modal="addDepartmentModal" data-loading-text="Saving..." data-reset-on-success="true"'
     >
         @csrf
         <div class="mb-3">
@@ -113,6 +115,8 @@
             size="medium"
             form="{{ route('vpaa.departments.update', $department->id) }}"
             variant="default"
+            form-class="ajax-action-form"
+            form-attributes='data-refresh-target="#vpaa-departments-section" data-close-modal="editDepartmentModal{{ $department->id }}" data-loading-text="Saving..."'
         >
             @csrf
             @method('PUT')

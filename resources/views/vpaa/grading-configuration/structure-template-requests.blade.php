@@ -52,6 +52,7 @@
         </div>
     </div>
 
+    <div id="structure-template-requests-section">
     @if ($requests->isEmpty())
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
@@ -170,6 +171,7 @@
             </table>
         </div>
     @endif
+    </div>
 </div>
 
 <!-- View Request Modal -->
@@ -184,7 +186,14 @@
     </x-slot:footer>
 </x-modal.information>
 
-<x-modal.success id="approveModal" title="Approve Template Request" form="" form-id="approveForm">
+<x-modal.success
+    id="approveModal"
+    title="Approve Template Request"
+    form=""
+    form-id="approveForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#structure-template-requests-section" data-close-modal="approveModal" data-loading-text="Approving..."'
+>
     @csrf
     <x-slot:icon><i class="bi bi-check-circle-fill me-1"></i></x-slot:icon>
     <div class="alert alert-success border-0 shadow-sm mb-3">
@@ -209,7 +218,14 @@
     </x-slot:footer>
 </x-modal.success>
 
-<x-modal.destructive id="rejectModal" title="Reject Template Request" form="" form-id="rejectForm">
+<x-modal.destructive
+    id="rejectModal"
+    title="Reject Template Request"
+    form=""
+    form-id="rejectForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#structure-template-requests-section" data-close-modal="rejectModal" data-loading-text="Rejecting..."'
+>
     @csrf
     <x-slot:icon><i class="bi bi-x-circle-fill me-1"></i></x-slot:icon>
     <div class="alert alert-danger border-0 shadow-sm mb-3">

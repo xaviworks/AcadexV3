@@ -114,7 +114,7 @@ class ChairpersonController extends Controller
         return redirect()->back()->with('status', 'Instructor account submitted for approval.');
     }
 
-    public function deactivateInstructor($id)
+    public function deactivateInstructor(Request $request, $id)
     {
         if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
             abort(403);
@@ -137,10 +137,19 @@ class ChairpersonController extends Controller
             'is_active' => false,
         ]);
 
-        return redirect()->back()->with('success', 'Instructor deactivated successfully.');
+        $message = 'Instructor deactivated successfully.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
-    public function activateInstructor($id)
+    public function activateInstructor(Request $request, $id)
     {
         if (! (Auth::user()->role === 1 || Auth::user()->role === 4)) {
             abort(403);
@@ -172,10 +181,19 @@ class ChairpersonController extends Controller
         // Notify the instructor that their account has been activated (Email + System)
         NotificationService::notifyInstructorApproved($instructor, Auth::user());
 
-        return redirect()->back()->with('success', 'Instructor activated successfully.');
+        $message = 'Instructor activated successfully.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
-    public function requestGEAssignment($id)
+    public function requestGEAssignment(Request $request, $id)
     {
         if (! Auth::user()->isChairperson()) {
             abort(403);
@@ -194,6 +212,13 @@ class ChairpersonController extends Controller
             ->first();
 
         if ($existingRequest) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'There is already a pending GE assignment request for this instructor.',
+                ], 422);
+            }
+
             return redirect()->back()->with('error', 'There is already a pending GE assignment request for this instructor.');
         }
 
@@ -207,7 +232,16 @@ class ChairpersonController extends Controller
         // Notify GE Coordinator(s) about the new request (System only)
         NotificationService::notifyGERequestSubmitted($geRequest);
 
-        return redirect()->back()->with('success', 'GE assignment request submitted successfully. The GE Coordinator will review your request.');
+        $message = 'GE assignment request submitted successfully. The GE Coordinator will review your request.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
     // ============================
@@ -281,7 +315,16 @@ class ChairpersonController extends Controller
         $periodLabel = $academicPeriod ? "{$academicPeriod->semester} Semester {$academicPeriod->academic_year}" : null;
         NotificationService::notifyCourseAssigned($instructor, $subject, $periodLabel);
 
-        return redirect()->route('chairperson.assign-subjects')->with('success', 'Subject assigned successfully.');
+        $message = 'Subject assigned successfully.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return redirect()->route('chairperson.assign-subjects')->with('success', $message);
     }
 
     public function toggleAssignedSubject(Request $request)
@@ -308,6 +351,13 @@ class ChairpersonController extends Controller
         }
         $enrolledStudents = $subject->students()->count();
         if ($enrolledStudents > 0 && ! $request->instructor_id) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot unassign subject as it has enrolled students.',
+                ], 422);
+            }
+
             return redirect()->route('chairperson.assign-subjects')->with('error', 'Cannot unassign subject as it has enrolled students.');
         }
 
@@ -349,7 +399,16 @@ class ChairpersonController extends Controller
             // Notify instructor about new subject assignment (Email + System)
             NotificationService::notifyCourseAssigned($instructor, $subject, $periodLabel);
 
-            return redirect()->route('chairperson.assign-subjects')->with('success', 'Instructor assigned successfully.');
+            $message = 'Instructor assigned successfully.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                ]);
+            }
+
+            return redirect()->route('chairperson.assign-subjects')->with('success', $message);
         } else {
             // Notify previous instructor about removal (Email + System)
             if ($previousInstructorId) {
@@ -364,7 +423,16 @@ class ChairpersonController extends Controller
                 'updated_by' => Auth::id(),
             ]);
 
-            return redirect()->route('chairperson.assign-subjects')->with('success', 'Instructor unassigned successfully.');
+            $message = 'Instructor unassigned successfully.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                ]);
+            }
+
+            return redirect()->route('chairperson.assign-subjects')->with('success', $message);
         }
     }
 

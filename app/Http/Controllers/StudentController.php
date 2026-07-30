@@ -138,6 +138,14 @@ class StudentController extends Controller
             $this->getOrCreateDefaultActivities($subject->id, $term);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Student enrolled successfully with default activities.',
+                'data' => $student,
+            ]);
+        }
+
         return redirect()->route('instructor.students.index', ['subject_id' => $subject->id])->with('success', 'Student enrolled successfully with default activities.');
     }
 
@@ -188,6 +196,13 @@ class StudentController extends Controller
         $finalGrade->updated_by = Auth::id();
         $finalGrade->save();
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Student dropped from subject.',
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Student dropped from subject.');
     }
 
@@ -231,6 +246,13 @@ class StudentController extends Controller
                 'updated_by' => Auth::id(),
             ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Student re-enrolled successfully.',
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Student re-enrolled successfully.');
     }
 
@@ -254,6 +276,14 @@ class StudentController extends Controller
             'year_level' => $request->year_level,
             'updated_by' => Auth::id(),
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Student details updated successfully.',
+                'data' => $student,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Student details updated successfully.');
     }

@@ -158,7 +158,7 @@ class GECoordinatorController extends Controller
         return redirect()->back()->with('status', 'Instructor account submitted for approval.');
     }
 
-    public function deactivateInstructor($id)
+    public function deactivateInstructor(Request $request, $id)
     {
         if (! Auth::user()->isGECoordinator()) {
             abort(403);
@@ -195,10 +195,17 @@ class GECoordinatorController extends Controller
             ->where('status', 'approved')
             ->update(['status' => 'revoked']);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
         return redirect()->back()->with('success', $message);
     }
 
-    public function activateInstructor($id)
+    public function activateInstructor(Request $request, $id)
     {
         if (! Auth::user()->isGECoordinator()) {
             abort(403);
@@ -225,6 +232,13 @@ class GECoordinatorController extends Controller
             // For non-GE department instructors, GE Coordinator cannot activate their account
             // They can only restore GE access if the instructor is already active
             if (! $instructor->is_active) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot activate instructors from other departments. Please contact the department chairperson to activate this instructor first.',
+                    ], 403);
+                }
+
                 return redirect()->back()->with('error', 'Cannot activate instructors from other departments. Please contact the department chairperson to activate this instructor first.');
             }
 
@@ -233,6 +247,13 @@ class GECoordinatorController extends Controller
                 'can_teach_ge' => true,
             ]);
             $message = 'GE teaching access restored successfully.';
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
         }
 
         return redirect()->back()->with('success', $message);
@@ -616,25 +637,25 @@ class GECoordinatorController extends Controller
     // GE Assignment Request Management
     // ============================
 
-    public function approveGERequest($id)
+    public function approveGERequest(Request $request, $id)
     {
         if (! Auth::user()->isGECoordinator()) {
             abort(403);
         }
 
-        $request = \App\Models\GESubjectRequest::where('id', $id)
+        $geRequest = \App\Models\GESubjectRequest::where('id', $id)
             ->where('status', 'pending')
             ->firstOrFail();
 
         // Update the request status
-        $request->update([
+        $geRequest->update([
             'status' => 'approved',
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);
 
         // Get the instructor without changing their department
-        $instructor = User::find($request->instructor_id);
+        $instructor = User::find($geRequest->instructor_id);
 
         if ($instructor) {
             // Instead of changing the department, we can add a flag or role
@@ -644,31 +665,49 @@ class GECoordinatorController extends Controller
         }
 
         // Notify the requesting chairperson (Email + System)
-        NotificationService::notifyGERequestApproved($request, Auth::user());
+        NotificationService::notifyGERequestApproved($geRequest, Auth::user());
 
-        return redirect()->back()->with('status', 'GE assignment request approved successfully. The instructor can now teach GE subjects.');
+        $message = 'GE assignment request approved successfully. The instructor can now teach GE subjects.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return redirect()->back()->with('status', $message);
     }
 
-    public function rejectGERequest($id)
+    public function rejectGERequest(Request $request, $id)
     {
         if (! Auth::user()->isGECoordinator()) {
             abort(403);
         }
 
-        $request = \App\Models\GESubjectRequest::where('id', $id)
+        $geRequest = \App\Models\GESubjectRequest::where('id', $id)
             ->where('status', 'pending')
             ->firstOrFail();
 
         // Update the request status
-        $request->update([
+        $geRequest->update([
             'status' => 'rejected',
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);
 
         // Notify the requesting chairperson (Email + System)
-        NotificationService::notifyGERequestRejected($request, Auth::user());
+        NotificationService::notifyGERequestRejected($geRequest, Auth::user());
 
-        return redirect()->back()->with('status', 'GE assignment request rejected successfully.');
+        $message = 'GE assignment request rejected successfully.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return redirect()->back()->with('status', $message);
     }
 }

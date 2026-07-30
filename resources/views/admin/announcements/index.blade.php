@@ -29,7 +29,11 @@
     <div class="tab-content" id="announcementTabContent">
         {{-- Announcements Tab --}}
         <div class="tab-pane fade show active" id="announcements-pane" role="tabpanel" aria-labelledby="announcements-tab">
-            <div class="card">
+            <div
+                class="card"
+                id="announcements-table-section"
+                data-ajax-pagination-target="#announcements-table-section"
+            >
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover" style="min-width: 1400px;">
@@ -201,7 +205,14 @@
 </div>
 
 <!-- Delete Form (hidden) -->
-<form id="deleteForm" method="POST" style="display: none;">
+<form
+    id="deleteForm"
+    method="POST"
+    class="ajax-action-form"
+    data-refresh-target="#announcements-table-section"
+    data-loading-text="Deleting..."
+    style="display: none;"
+>
     @csrf
     @method('DELETE')
 </form>
@@ -211,6 +222,8 @@
     title="Create New Announcement"
     form="{{ route('admin.announcements.store') }}"
     form-id="createAnnouncementForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#announcements-table-section" data-close-modal="createAnnouncementModal" data-loading-text="Creating..." data-reset-on-success="true"'
     scrollable
 >
     @csrf
@@ -230,6 +243,8 @@
     title="Edit Announcement"
     form=""
     form-id="editAnnouncementForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#announcements-table-section" data-close-modal="editAnnouncementModal" data-loading-text="Updating..."'
     scrollable
     variant="default"
 >
@@ -297,11 +312,15 @@ function toggleActive(id) {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const btn = document.getElementById(`status-${id}`);
-                    btn.className = `btn btn-sm btn-${data.is_active ? 'success' : 'secondary'}`;
-                    btn.textContent = data.is_active ? 'Active' : 'Inactive';
+                    window.ajaxActions?.refreshTarget('#announcements-table-section').catch(() => {
+                        const btn = document.getElementById(`status-${id}`);
+                        if (btn) {
+                            btn.className = `btn btn-sm btn-${data.is_active ? 'success' : 'secondary'}`;
+                            btn.textContent = data.is_active ? 'Active' : 'Inactive';
+                        }
+                    });
                     if (typeof Alpine !== 'undefined' && Alpine.store('notifications')) {
-                        Alpine.store('notifications').success('Status updated successfully!');
+                        Alpine.store('notifications').success(data.message || 'Status updated successfully!');
                     }
                 }
             })
@@ -333,7 +352,13 @@ function deleteAnnouncement(id) {
             
             const form = document.getElementById('deleteForm');
             form.action = `/admin/announcements/${id}`;
-            form.submit();
+            if (window.ajaxActions?.submitForm) {
+                window.ajaxActions.submitForm(form);
+            } else if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            } else {
+                window.notify?.error('Delete handler is unavailable. Please try again.');
+            }
         }
     });
 }

@@ -104,7 +104,15 @@ class AnnouncementController extends Controller
             $validated['target_roles'] = array_map('intval', $validated['target_roles']);
         }
 
-        Announcement::create($validated);
+        $announcement = Announcement::create($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Announcement created successfully.',
+                'data' => $announcement,
+            ]);
+        }
 
         return redirect()->route('admin.announcements.index')
             ->with('success', 'Announcement created successfully.');
@@ -152,6 +160,14 @@ class AnnouncementController extends Controller
 
         $announcement->update($validated);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Announcement updated successfully.',
+                'data' => $announcement->fresh(),
+            ]);
+        }
+
         return redirect()->route('admin.announcements.index')
             ->with('success', 'Announcement updated successfully.');
     }
@@ -159,11 +175,18 @@ class AnnouncementController extends Controller
     /**
      * Admin: Delete announcement
      */
-    public function destroy(Announcement $announcement)
+    public function destroy(Request $request, Announcement $announcement)
     {
         Gate::authorize('admin');
 
         $announcement->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Announcement deleted successfully.',
+            ]);
+        }
 
         return redirect()->route('admin.announcements.index')
             ->with('success', 'Announcement deleted successfully.');
@@ -181,6 +204,7 @@ class AnnouncementController extends Controller
         return response()->json([
             'success' => true,
             'is_active' => $announcement->is_active,
+            'message' => 'Status updated successfully.',
         ]);
     }
 }

@@ -517,7 +517,7 @@ class ActivityController extends Controller
     }
 
     // 🗑 Soft Delete Activity
-    public function delete($id)
+    public function delete(Request $request, $id)
     {
         Gate::authorize('instructor');
 
@@ -529,6 +529,13 @@ class ActivityController extends Controller
             'is_deleted' => true,
             'updated_by' => Auth::id(),
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Activity deleted successfully.',
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Activity deleted successfully.');
     }

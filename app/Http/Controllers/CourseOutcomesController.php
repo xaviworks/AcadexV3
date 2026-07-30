@@ -163,12 +163,26 @@ class CourseOutcomesController extends Controller
         // Get the academic period from the subject
         $subject = Subject::find($validated['subject_id']);
         if (! $subject || ! $subject->academic_period_id) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Subject not found or no academic period assigned.',
+                ], 422);
+            }
+
             return redirect()->back()->with('error', 'Subject not found or no academic period assigned.');
         }
 
         // Check if subject already has 6 course outcomes (maximum limit)
         $existingCOCount = $subject->courseOutcomes()->count();
         if ($existingCOCount >= 6) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Maximum limit reached! This subject already has 6 course outcomes, which is the maximum allowed. Please delete an existing CO before adding a new one.',
+                ], 422);
+            }
+
             return redirect()->back()
                 ->with('error', 'Maximum limit reached! This subject already has 6 course outcomes, which is the maximum allowed. Please delete an existing CO before adding a new one.');
         }
@@ -195,10 +209,18 @@ class CourseOutcomesController extends Controller
         $validated['created_by'] = $request->user()->id;
         $validated['updated_by'] = $request->user()->id;
 
-        CourseOutcomes::create($validated);
+        $courseOutcome = CourseOutcomes::create($validated);
 
         // Determine route prefix based on user role
         $routePrefix = Auth::user()->role === 1 ? 'chairperson' : (Auth::user()->role === 4 ? 'gecoordinator' : 'instructor');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Course Outcome created successfully.',
+                'data' => $courseOutcome,
+            ]);
+        }
 
         // Redirect to the same page with subject_id for a full refresh
         return redirect()->route($routePrefix.'.course_outcomes.index', ['subject_id' => $validated['subject_id']])
@@ -269,6 +291,14 @@ class CourseOutcomesController extends Controller
         // Determine route prefix based on user role
         $routePrefix = Auth::user()->role === 1 ? 'chairperson' : (Auth::user()->role === 4 ? 'gecoordinator' : 'instructor');
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Course Outcome updated successfully.',
+                'data' => $courseOutcome->fresh(),
+            ]);
+        }
+
         return redirect()->route($routePrefix.'.course_outcomes.index', ['subject_id' => $courseOutcome->subject_id])
             ->with('success', 'Course Outcome updated successfully.');
     }
@@ -302,6 +332,13 @@ class CourseOutcomesController extends Controller
 
         // Determine route prefix based on user role
         $routePrefix = Auth::user()->role === 1 ? 'chairperson' : (Auth::user()->role === 4 ? 'gecoordinator' : 'instructor');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Course Outcome deleted.',
+            ]);
+        }
 
         return redirect()->route($routePrefix.'.course_outcomes.index', ['subject_id' => $courseOutcome->subject_id])
             ->with('success', 'Course Outcome deleted.');

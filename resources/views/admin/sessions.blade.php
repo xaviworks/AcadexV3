@@ -389,6 +389,8 @@
     title="Revoke Session"
     form="{{ route('admin.sessions.revoke') }}"
     form-id="revoke-form"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#sessionTabContent" data-close-modal="revokeModal" data-loading-text="Revoking..."'
 >
     @csrf
     <input type="hidden" name="session_id" id="revoke-session-id">
@@ -414,6 +416,8 @@
     title="Revoke All Sessions"
     form="{{ route('admin.sessions.revokeAll') }}"
     form-id="revoke-all-form"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#sessionTabContent" data-close-modal="revokeAllModal" data-loading-text="Revoking..."'
     :backdrop="false"
     :keyboard="false"
 >
