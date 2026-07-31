@@ -751,6 +751,9 @@ function initAdminUsersPage() {
       },
       columnDefs: [{ orderable: false, targets: -1 }],
     });
+
+    const usersTableElement = document.getElementById('usersTable');
+    window.AcadexDataTable?.moveDataTablesControlsToHeader(usersTableElement);
   }
 }
 

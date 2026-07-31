@@ -107,6 +107,7 @@
                     icon="bi-bullseye"
                     table-class="course-outcomes-table"
                     responsive-class="course-outcomes-table-container"
+                    :toolbar-in-header="true"
                     :scroll-y="$cos->count() > 5 ? '32rem' : null"
                 >
                         @if($cos->count() > 0)

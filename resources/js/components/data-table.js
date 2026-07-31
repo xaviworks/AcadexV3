@@ -200,6 +200,35 @@ export function initializeDataTables() {
   document.querySelectorAll('[data-acadex-table-card="true"]').forEach(initializeTableCard);
 }
 
+export function moveDataTablesControlsToHeader(tableOrSelector) {
+  const table =
+    typeof tableOrSelector === 'string' ? document.querySelector(tableOrSelector) : tableOrSelector;
+
+  if (!table?.id) {
+    return false;
+  }
+
+  const card = table.closest('.acadex-table-card');
+  const headerControls = card?.querySelector('[data-acadex-datatables-header-controls]');
+  const filter = document.getElementById(`${table.id}_filter`);
+  const length = document.getElementById(`${table.id}_length`);
+
+  if (!card || !headerControls || !filter || !length) {
+    return false;
+  }
+
+  headerControls.append(filter, length);
+  card.dataset.acadexDatatablesControlsInHeader = 'true';
+
+  return true;
+}
+
+window.AcadexDataTable = {
+  ...(window.AcadexDataTable || {}),
+  initializeDataTables,
+  moveDataTablesControlsToHeader,
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   initializeDataTables();
   window.setTimeout(autoEnhanceLegacyTables, 0);

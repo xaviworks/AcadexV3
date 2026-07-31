@@ -74,6 +74,7 @@
                     title="Course Outcomes"
                     subtitle="Review course outcome definitions for the selected subject"
                     icon="bi-bullseye"
+                    :toolbar-in-header="true"
                 >
                             <thead>
                                 <tr>

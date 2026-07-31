@@ -168,27 +168,37 @@ export function initSelectCurriculumSubjectsPage(options = {}) {
 
           // Same table structure for both roles
           const table = `
-            <h5 class="mt-4 text-success fw-semibold">
-                <i class="bi bi-calendar3 me-2"></i>${currentSemester} Semester
-            </h5>
-            <table class="table table-bordered table-striped align-middle">
-                <thead class="table-success">
-                    <tr>
-                        <th style="width: 80px;" class="text-center">
-                            <div class="d-flex align-items-center justify-content-center m-0">
-                                <input type="checkbox" class="form-check-input m-0 select-all-btn" data-selected="false" style="width: 20px; height: 20px; cursor: pointer; border: 2px solid #198754;" title="Select/Unselect All">
-                            </div>
-                        </th>
-                        <th style="width: 180px;">Course Code</th>
-                        <th>Description</th>
-                        <th style="width: 80px;" class="text-center">Year</th>
-                        <th style="width: 100px;" class="text-center">Semester</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
+            <section class="acadex-table-card import-courses-table-card" data-acadex-table-card="false">
+                <div class="acadex-table-card__header acadex-table-card__header--success">
+                    <div class="acadex-table-card__title-group">
+                        <h2 class="acadex-table-card__title">
+                            <i class="bi bi-calendar3" aria-hidden="true"></i>
+                            <span>${currentSemester} Semester</span>
+                        </h2>
+                        <p class="acadex-table-card__subtitle">Select courses to import from this curriculum</p>
+                    </div>
+                </div>
+                <div class="acadex-table-responsive">
+                    <table class="table table-bordered table-striped align-middle acadex-table mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;" class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center m-0">
+                                        <input type="checkbox" class="form-check-input m-0 select-all-btn" data-selected="false" style="width: 20px; height: 20px; cursor: pointer; border: 2px solid #198754;" title="Select/Unselect All">
+                                    </div>
+                                </th>
+                                <th style="width: 180px;">Course Code</th>
+                                <th>Description</th>
+                                <th style="width: 80px;" class="text-center">Year</th>
+                                <th style="width: 100px;" class="text-center">Semester</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
           `;
 
           if (subjectsTableBody) {

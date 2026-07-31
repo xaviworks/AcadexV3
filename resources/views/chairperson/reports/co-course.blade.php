@@ -19,18 +19,20 @@
     ]" />
 
     {{-- CO Results Table --}}
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-4">
-            @if(empty($subjectCOs))
-                <x-empty-state
-                    :compact="true"
-                    icon="bi-journal-x"
-                    title="No Courses Found"
-                    message="No Courses found for this course in the selected academic period."
-                />
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+    @if(empty($subjectCOs))
+        <x-empty-state
+            :compact="true"
+            icon="bi-journal-x"
+            title="No Courses Found"
+            message="No Courses found for this course in the selected academic period."
+        />
+    @else
+        <x-data-table
+            title="Course Outcomes Summary"
+            :subtitle="'Performance by subject for ' . ($course->course_code ?? 'selected course')"
+            icon="bi-book"
+            :toolbar-in-header="true"
+        >
                         <thead>
                             <tr class="table-light border-bottom border-2">
                                 <th style="width: 35%;" class="ps-3">
@@ -86,37 +88,34 @@
                                 </tr>
                             @endforeach
                         </tbody>
-                    </table>
-                </div>
+        </x-data-table>
 
-                {{-- Legend --}}
-                <div class="mt-4 p-3 bg-light rounded-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h6 class="fw-bold mb-2">
-                                <i class="bi bi-info-circle text-primary me-2"></i>Performance Legend
-                            </h6>
-                            <div class="d-flex gap-3">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-success text-white px-2 py-1 me-2">>= target</span>
-                                    <small class="text-muted">On Track</small>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-danger text-white px-2 py-1 me-2">&lt; target</span>
-                                    <small class="text-muted">Needs Improvement</small>
-                                </div>
-                            </div>
+        {{-- Legend --}}
+        <div class="mt-4 p-3 bg-light rounded-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-info-circle text-primary me-2"></i>Performance Legend
+                    </h6>
+                    <div class="d-flex gap-3">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success text-white px-2 py-1 me-2">>= target</span>
+                            <small class="text-muted">On Track</small>
                         </div>
-                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                            <small class="text-muted">
-                                <i class="bi bi-calculator me-1"></i>
-                                Showing {{ count($subjectCOs) }} subject{{ count($subjectCOs) != 1 ? 's' : '' }} with Course Outcome data
-                            </small>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-danger text-white px-2 py-1 me-2">&lt; target</span>
+                            <small class="text-muted">Needs Improvement</small>
                         </div>
                     </div>
                 </div>
-            @endif
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <small class="text-muted">
+                        <i class="bi bi-calculator me-1"></i>
+                        Showing {{ count($subjectCOs) }} subject{{ count($subjectCOs) != 1 ? 's' : '' }} with Course Outcome data
+                    </small>
+                </div>
+            </div>
         </div>
-    </div>
+    @endif
 </div>
 @endsection

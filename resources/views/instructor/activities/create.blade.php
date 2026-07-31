@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-4 manage-activities-page">
 
   @if (session('error'))
     <script>document.addEventListener('DOMContentLoaded', () => window.notify?.error(@json(session('error'))));</script>
@@ -153,10 +153,51 @@
         }
         #activityTabsContent {
             background: transparent !important;
-            padding-top: 1.5rem;
+            padding-top: 1rem;
         }
         #activityTabsContent .tab-pane {
             background: transparent !important;
+        }
+        .manage-activities-page .acadex-table-card {
+            margin: 0 0 1rem;
+        }
+        .manage-activities-page .acadex-table-card .card-body {
+            padding: 1rem 1.25rem;
+        }
+        .manage-activities-page #formula .acadex-table-card {
+            margin-top: 0;
+        }
+        .manage-activities-page #formula .formula-info-card {
+            margin-bottom: 0.75rem;
+        }
+        .manage-activities-page #formula .formula-info-card .acadex-table-card__header {
+            padding: 0.85rem 1.1rem;
+        }
+        .manage-activities-page #formula .formula-info-card .card-body {
+            padding: 0.9rem 1.1rem;
+        }
+        .manage-activities-page #formula .formula-info-summary {
+            align-items: center;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-bottom: 0.75rem !important;
+        }
+        .manage-activities-page #formula .formula-info-summary__metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+        .manage-activities-page #formula .formula-info-structure {
+            margin-bottom: 0.75rem !important;
+        }
+        .manage-activities-page #formula .formula-info-card hr {
+            margin: 0.85rem 0 !important;
+        }
+        .manage-activities-page #formula .formula-info-card .table-responsive {
+            margin-top: 0.5rem;
         }
     </style>
 
@@ -204,15 +245,16 @@
                     title="My Activities"
                     subtitle="Review saved activities and manage their records"
                     icon="bi-list-task"
+                    :toolbar-in-header="true"
                 >
                             <thead>
                                 <tr>
-                                    <th class="text-center" style="width: 60px;">#</th>
-                                    <th>Title</th>
-                                    <th>Component</th>
-                                    <th class="text-center">Period</th>
-                                    <th class="text-center">Items</th>
-                                    <th class="text-center">Actions</th>
+                                    <th class="text-center fw-bold" style="width: 60px;">#</th>
+                                    <th class="fw-bold">Title</th>
+                                    <th class="fw-bold">Component</th>
+                                    <th class="text-center fw-bold">Period</th>
+                                    <th class="text-center fw-bold">Items</th>
+                                    <th class="text-center fw-bold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -282,36 +324,38 @@
 
         {{-- Tab 2: Formula Alignment --}}
         <div class="tab-pane fade" id="alignment" role="tabpanel" aria-labelledby="alignment-tab">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <p class="text-muted mb-0">Track assessment distribution across all periods</p>
-                @if ($selectedSubject)
-                    <form method="POST" action="{{ route('instructor.activities.realign') }}" class="d-inline">
-                        @csrf
-                        <input type="hidden" name="subject_id" value="{{ $selectedSubject->id }}">
-                        @if ($selectedTerm)
-                            <input type="hidden" name="term" value="{{ $selectedTerm }}">
-                        @endif
-                        <button 
-                            type="submit" 
-                            class="btn btn-success"
-                            title="Auto-adjust activities to match formula"
-                        >
-                            <i class="bi bi-arrow-repeat me-1"></i>Realign Activities
-                        </button>
-                    </form>
-                @endif
-            </div>
+            <x-data-table
+                title="Formula Alignment"
+                subtitle="Track assessment distribution across all periods"
+                icon="bi-diagram-3"
+                :toolbar-in-header="true"
+            >
+                <x-slot:actions>
+                    @if ($selectedSubject)
+                        <form method="POST" action="{{ route('instructor.activities.realign') }}" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="subject_id" value="{{ $selectedSubject->id }}">
+                            @if ($selectedTerm)
+                                <input type="hidden" name="term" value="{{ $selectedTerm }}">
+                            @endif
+                            <button
+                                type="submit"
+                                class="btn btn-light btn-sm fw-semibold text-success"
+                                title="Auto-adjust activities to match formula"
+                            >
+                                <i class="bi bi-arrow-repeat me-1"></i>Realign Activities
+                            </button>
+                        </form>
+                    @endif
+                </x-slot:actions>
 
-            <div class="card shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-bordered align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Component</th>
-                                <th class="text-center">Weight</th>
-                                <th class="text-center">Max/Period</th>
+                                <th class="fw-bold">Component</th>
+                                <th class="text-center fw-bold">Weight</th>
+                                <th class="text-center fw-bold">Max/Period</th>
                                 @foreach ($termLabels as $key => $label)
-                                    <th class="text-center">{{ $label }}</th>
+                                    <th class="text-center fw-bold">{{ $label }}</th>
                                 @endforeach
                             </tr>
                         </thead>
@@ -392,19 +436,28 @@
                                 @endforeach
                             @endforeach
                         </tbody>
-                    </table>
-                </div>
-            </div>
+            </x-data-table>
         </div>
 
         {{-- Tab 3: Formula Info --}}
         <div class="tab-pane fade" id="formula" role="tabpanel" aria-labelledby="formula-tab">
             @if ($meta)
-                <div class="card shadow-sm">
+                <section class="acadex-table-card formula-info-card">
+                    <div class="acadex-table-card__header acadex-table-card__header--success">
+                        <div class="acadex-table-card__title-group">
+                            <h2 class="acadex-table-card__title">
+                                <i class="bi bi-calculator" aria-hidden="true"></i>
+                                <span>Formula Info</span>
+                            </h2>
+                            <p class="acadex-table-card__subtitle">{{ $meta['label'] ?? 'Institution Baseline Formula' }}</p>
+                        </div>
+                    </div>
                     <div class="card-body">
-                        <h6 class="fw-bold mb-3" style="color: #198754;">{{ $meta['label'] ?? 'Institution Baseline Formula' }}</h6>
-                        
-                        <div class="d-flex flex-wrap gap-2 mb-3">
+                        <div class="formula-info-summary">
+                            <span class="badge bg-success formula-info-structure" style="color: white; font-weight: 500; padding: 0.5rem 1rem;">
+                                <i class="bi bi-diagram-3 me-1"></i>{{ $structureDefinition['label'] ?? 'Lecture Only' }}
+                            </span>
+                            <div class="formula-info-summary__metrics">
                             <span class="badge bg-light text-dark border px-3 py-2">
                                 <i class="bi bi-plus-circle me-1"></i>Base {{ number_format($formulaSettings['base_score'] ?? 0, 0) }}
                             </span>
@@ -414,12 +467,9 @@
                             <span class="badge bg-light text-dark border px-3 py-2">
                                 <i class="bi bi-check-circle me-1"></i>Passing {{ number_format($meta['passing_grade'] ?? ($formulaSettings['passing_grade'] ?? 0), 0) }}
                             </span>
+                            </div>
                         </div>
 
-                        <div class="badge bg-success mb-3" style="color: white; font-weight: 500; padding: 0.5rem 1rem;">
-                            <i class="bi bi-diagram-3 me-1"></i>{{ $structureDefinition['label'] ?? 'Lecture Only' }}
-                        </div>
-                        
                         @if (! empty($meta['scope']))
                             <div class="mb-3">
                                 <small class="text-muted">
@@ -445,9 +495,9 @@
                                 <table class="table table-sm table-bordered mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Component</th>
-                                            <th class="text-center">Weight</th>
-                                            <th class="text-center">Max</th>
+                                            <th class="fw-bold">Component</th>
+                                            <th class="text-center fw-bold">Weight</th>
+                                            <th class="text-center fw-bold">Max</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -483,9 +533,18 @@
                             </div>
                         @endif
                     </div>
-                </div>
+                </section>
             @else
-                <div class="card shadow-sm">
+                <section class="acadex-table-card formula-info-card">
+                    <div class="acadex-table-card__header acadex-table-card__header--success">
+                        <div class="acadex-table-card__title-group">
+                            <h2 class="acadex-table-card__title">
+                                <i class="bi bi-calculator" aria-hidden="true"></i>
+                                <span>Formula Info</span>
+                            </h2>
+                            <p class="acadex-table-card__subtitle">Review the active grading formula details</p>
+                        </div>
+                    </div>
                     <div class="card-body py-3">
                         <x-empty-state
                             icon="bi-calculator"
@@ -494,7 +553,7 @@
                             :compact="true"
                         />
                     </div>
-                </div>
+                </section>
             @endif
         </div>
     </div>

@@ -55,6 +55,7 @@
         icon="bi-people-fill"
         table-id="usersTable"
         :paginated="false"
+        :data-tables-controls-in-header="true"
     >
                     <thead>
                         <tr>

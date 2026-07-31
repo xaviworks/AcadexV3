@@ -10,6 +10,8 @@
     'bordered' => true,
     'hover' => true,
     'paginated' => true,
+    'toolbarInHeader' => false,
+    'dataTablesControlsInHeader' => false,
     'scrollY' => null,
 ])
 
@@ -29,7 +31,7 @@
     'class' => 'acadex-table-card',
     'data-acadex-table-card' => $paginated ? 'true' : 'false',
 ]) }}>
-    @if($title || $subtitle || isset($actions))
+    @if($title || $subtitle || isset($actions) || $dataTablesControlsInHeader)
         <div class="acadex-table-card__header acadex-table-card__header--{{ $variant }}">
             <div class="acadex-table-card__title-group">
                 @if($title)
@@ -44,11 +46,30 @@
                 @endif
             </div>
 
-            @isset($actions)
+            @if(isset($actions) || ($paginated && $toolbarInHeader) || $dataTablesControlsInHeader)
                 <div class="acadex-table-card__actions">
-                    {{ $actions }}
+                    @isset($actions)
+                        {{ $actions }}
+                    @endisset
+
+                    @if($paginated && $toolbarInHeader)
+                        <label class="acadex-table-card__length acadex-table-card__length--header">
+                            <span>Show</span>
+                            <select class="form-select form-select-sm" data-acadex-page-size aria-label="Rows per page">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <span>entries</span>
+                        </label>
+                    @endif
+
+                    @if($dataTablesControlsInHeader)
+                        <div class="acadex-table-card__datatable-controls" data-acadex-datatables-header-controls></div>
+                    @endif
                 </div>
-            @endisset
+            @endif
         </div>
     @endif
 
@@ -58,7 +79,7 @@
         </div>
     @endisset
 
-    @if($paginated)
+    @if($paginated && ! $toolbarInHeader)
         <div class="acadex-table-card__toolbar" data-acadex-table-toolbar>
             <label class="acadex-table-card__length">
                 <span>Show</span>

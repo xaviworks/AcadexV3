@@ -23,6 +23,7 @@
         :title="$yearSuffix ? $yearSuffix . ' Subjects' : 'Subject Assignments'"
         subtitle="Assign instructors and review current teaching loads"
         icon="bi-journal-bookmark"
+        :toolbar-in-header="true"
     >
             <thead>
                 <tr>
