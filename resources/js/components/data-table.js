@@ -84,7 +84,10 @@ function initializeTableCard(card) {
       row.hidden = index < startIndex || index >= endIndex;
     });
 
-    setEmptyRowVisibility(rows.filter((row) => !dataRows.includes(row)), totalRows === 0);
+    setEmptyRowVisibility(
+      rows.filter((row) => !dataRows.includes(row)),
+      totalRows === 0
+    );
 
     previousButton.disabled = state.page <= 1;
     nextButton.disabled = state.page >= totalPages;
@@ -201,8 +204,7 @@ export function initializeDataTables() {
 }
 
 export function moveDataTablesControlsToHeader(tableOrSelector) {
-  const table =
-    typeof tableOrSelector === 'string' ? document.querySelector(tableOrSelector) : tableOrSelector;
+  const table = typeof tableOrSelector === 'string' ? document.querySelector(tableOrSelector) : tableOrSelector;
 
   if (!table?.id) {
     return false;
