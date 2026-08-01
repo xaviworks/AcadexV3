@@ -78,7 +78,7 @@ class LoginRequest extends FormRequest
         }
 
         if (! $user || ! Hash::check($this->input('password'), $user->password)) {
-            event(new Failed('web', $user, $this->only('email', 'password')));
+            event(new Failed('web', $user, $this->only('email')));
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
