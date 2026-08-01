@@ -16,3 +16,10 @@ function initAdminSubjectsPage() {
 
 // Export for global access
 window.initAdminSubjectsPage = initAdminSubjectsPage;
+
+// Auto-initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof $ !== 'undefined' && $('#subjectsTable').length) {
+    initAdminSubjectsPage();
+  }
+});

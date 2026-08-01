@@ -1580,6 +1580,7 @@
         },
         {
             "name": "laravel/framework",
+<<<<<<< Updated upstream
             "version": "v12.64.0",
             "source": {
                 "type": "git",
@@ -1590,6 +1591,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/727a8ea2949c23ca8b5316b86a00984b6017b7a0",
                 "reference": "727a8ea2949c23ca8b5316b86a00984b6017b7a0",
+=======
+            "version": "v12.44.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/framework.git",
+                "reference": "592bbf1c036042958332eb98e3e8131b29102f33"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/592bbf1c036042958332eb98e3e8131b29102f33",
+                "reference": "592bbf1c036042958332eb98e3e8131b29102f33",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -1798,7 +1811,11 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
+<<<<<<< Updated upstream
             "time": "2026-07-14T14:25:37+00:00"
+=======
+            "time": "2025-12-23T15:29:43+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "laravel/prompts",
@@ -7938,13 +7955,13 @@
             "version": "v3.16.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/fruitcake/laravel-debugbar.git",
-                "reference": "e85c0a8464da67e5b4a53a42796d46a43fc06c9a"
+                "url": "https://github.com/barryvdh/laravel-debugbar.git",
+                "reference": "c91e57ea113edd6526f5b8cd6b1c6ee02c67b28e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fruitcake/laravel-debugbar/zipball/e85c0a8464da67e5b4a53a42796d46a43fc06c9a",
-                "reference": "e85c0a8464da67e5b4a53a42796d46a43fc06c9a",
+                "url": "https://api.github.com/repos/barryvdh/laravel-debugbar/zipball/c91e57ea113edd6526f5b8cd6b1c6ee02c67b28e",
+                "reference": "c91e57ea113edd6526f5b8cd6b1c6ee02c67b28e",
                 "shasum": ""
             },
             "require": {
@@ -8003,8 +8020,8 @@
                 "webprofiler"
             ],
             "support": {
-                "issues": "https://github.com/fruitcake/laravel-debugbar/issues",
-                "source": "https://github.com/fruitcake/laravel-debugbar/tree/v3.16.5"
+                "issues": "https://github.com/barryvdh/laravel-debugbar/issues",
+                "source": "https://github.com/barryvdh/laravel-debugbar/tree/v3.16.3"
             },
             "funding": [
                 {
@@ -9438,6 +9455,7 @@
         },
         {
             "name": "phpunit/phpunit",
+<<<<<<< Updated upstream
             "version": "11.5.53",
             "source": {
                 "type": "git",
@@ -9448,6 +9466,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a997a653a82845f1240d73ee73a8a4e97e4b0607",
                 "reference": "a997a653a82845f1240d73ee73a8a4e97e4b0607",
+=======
+            "version": "11.5.46",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/phpunit.git",
+                "reference": "75dfe79a2aa30085b7132bb84377c24062193f33"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/75dfe79a2aa30085b7132bb84377c24062193f33",
+                "reference": "75dfe79a2aa30085b7132bb84377c24062193f33",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -9520,7 +9550,11 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
+<<<<<<< Updated upstream
                 "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.53"
+=======
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/11.5.46"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -9544,7 +9578,11 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< Updated upstream
             "time": "2026-02-10T12:28:25+00:00"
+=======
+            "time": "2025-12-06T08:01:15+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "sebastian/cli-parser",
@@ -10720,8 +10758,12 @@
         "php": "^8.2"
     },
     "platform-dev": {},
+<<<<<<< Updated upstream
     "platform-overrides": {
         "php": "8.2.32"
     },
     "plugin-api-version": "2.6.0"
+=======
+    "plugin-api-version": "2.9.0"
+>>>>>>> Stashed changes
 }

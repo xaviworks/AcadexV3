@@ -210,27 +210,43 @@ class GECoordinatorController extends Controller
         if (! Auth::user()->isGECoordinator()) {
             abort(403);
         }
+<<<<<<< Updated upstream
 
+=======
+        
+>>>>>>> Stashed changes
         // Find the instructor
         $instructor = User::where('id', $id)
             ->where('role', 0)
             ->firstOrFail();
+<<<<<<< Updated upstream
 
         // Get GE department to check if instructor belongs to it
         $geDepartment = Department::where('department_code', 'GE')->first();
 
+=======
+        
+        // Get GE department to check if instructor belongs to it
+        $geDepartment = Department::where('department_code', 'GE')->first();
+        
+>>>>>>> Stashed changes
         // Only GE department instructors can be fully activated by GE Coordinator
         // For instructors from other departments, GE Coordinator cannot activate their account
         if ($instructor->department_id === $geDepartment?->id) {
             // Full activation for GE department instructors
             $instructor->update([
                 'can_teach_ge' => true,
+<<<<<<< Updated upstream
                 'is_active' => true,
+=======
+                'is_active' => true
+>>>>>>> Stashed changes
             ]);
             $message = 'Instructor activated successfully.';
         } else {
             // For non-GE department instructors, GE Coordinator cannot activate their account
             // They can only restore GE access if the instructor is already active
+<<<<<<< Updated upstream
             if (! $instructor->is_active) {
                 if ($request->expectsJson()) {
                     return response()->json([
@@ -256,6 +272,19 @@ class GECoordinatorController extends Controller
             ]);
         }
 
+=======
+            if (!$instructor->is_active) {
+                return redirect()->back()->with('error', 'Cannot activate instructors from other departments. Please contact the department chairperson to activate this instructor first.');
+            }
+            
+            // Restore GE teaching capability only
+            $instructor->update([
+                'can_teach_ge' => true
+            ]);
+            $message = 'GE teaching access restored successfully.';
+        }
+        
+>>>>>>> Stashed changes
         return redirect()->back()->with('success', $message);
     }
 

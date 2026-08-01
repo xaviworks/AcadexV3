@@ -29,11 +29,15 @@
     <div class="tab-content" id="announcementTabContent">
         {{-- Announcements Tab --}}
         <div class="tab-pane fade show active" id="announcements-pane" role="tabpanel" aria-labelledby="announcements-tab">
+<<<<<<< Updated upstream
             <div
                 class="card"
                 id="announcements-table-section"
                 data-ajax-pagination-target="#announcements-table-section"
             >
+=======
+            <div class="card">
+>>>>>>> Stashed changes
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover" style="min-width: 1400px;">

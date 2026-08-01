@@ -95,6 +95,14 @@ class AnnouncementController extends Controller
         ]);
 
         $validated['created_by'] = Auth::id();
+        
+        // If target_roles is not in request or is empty, set to null (meaning "All Users")
+        if (!isset($validated['target_roles']) || empty($validated['target_roles'])) {
+            $validated['target_roles'] = null;
+        } else {
+            // Ensure target_roles are integers, not strings
+            $validated['target_roles'] = array_map('intval', $validated['target_roles']);
+        }
 
         // If target_roles is not in request or is empty, set to null (meaning "All Users")
         if (! isset($validated['target_roles']) || empty($validated['target_roles'])) {
@@ -149,6 +157,14 @@ class AnnouncementController extends Controller
             'is_dismissible' => 'boolean',
             'show_once' => 'boolean',
         ]);
+        
+        // If target_roles is not in request or is empty, set to null (meaning "All Users")
+        if (!isset($validated['target_roles']) || empty($validated['target_roles'])) {
+            $validated['target_roles'] = null;
+        } else {
+            // Ensure target_roles are integers, not strings
+            $validated['target_roles'] = array_map('intval', $validated['target_roles']);
+        }
 
         // If target_roles is not in request or is empty, set to null (meaning "All Users")
         if (! isset($validated['target_roles']) || empty($validated['target_roles'])) {

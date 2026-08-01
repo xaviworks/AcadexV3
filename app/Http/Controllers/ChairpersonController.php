@@ -130,7 +130,11 @@ class ChairpersonController extends Controller
         }
         $query->where('department_id', '!=', $geDepartment->id);
         $instructor = $query->firstOrFail();
+<<<<<<< Updated upstream
 
+=======
+        
+>>>>>>> Stashed changes
         // When chairperson deactivates, only remove active status.
         // Preserve can_teach_ge so it can be restored when reactivated.
         $instructor->update([
@@ -165,19 +169,31 @@ class ChairpersonController extends Controller
         }
         $query->where('department_id', '!=', $geDepartment->id);
         $instructor = $query->firstOrFail();
+<<<<<<< Updated upstream
 
+=======
+        
+>>>>>>> Stashed changes
         // Check if the instructor had a previously approved GE request (to restore GE access)
         $hadApprovedGERequest = \App\Models\GESubjectRequest::where('instructor_id', $instructor->id)
             ->where('status', 'approved')
             ->exists();
+<<<<<<< Updated upstream
 
+=======
+        
+>>>>>>> Stashed changes
         // Restore is_active and also restore can_teach_ge if they had approved GE access
         $updateData = ['is_active' => true];
         if ($hadApprovedGERequest) {
             $updateData['can_teach_ge'] = true;
         }
         $instructor->update($updateData);
+<<<<<<< Updated upstream
 
+=======
+        
+>>>>>>> Stashed changes
         // Notify the instructor that their account has been activated (Email + System)
         NotificationService::notifyInstructorApproved($instructor, Auth::user());
 
