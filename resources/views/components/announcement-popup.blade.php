@@ -161,7 +161,6 @@ function announcementPopup() {
                 }
 
                 if (!response.ok) return;
-<<<<<<< Updated upstream
 
                 const text = await response.text();
 
@@ -171,16 +170,10 @@ function announcementPopup() {
 
                 const data = JSON.parse(text);
 
-=======
-                
-                const data = await response.json();
-                
->>>>>>> Stashed changes
                 if (data.length === 0) {
                     this.announcements = [];
                     return;
                 }
-<<<<<<< Updated upstream
 
                 // Get dismissed announcements from session storage
                 let dismissedInSession = JSON.parse(sessionStorage.getItem('dismissedAnnouncements') || '[]')
@@ -190,23 +183,11 @@ function announcementPopup() {
                 const validAnnouncementIds = data.map(ann => parseInt(ann.id, 10));
 
                 // Auto-cleanup: remove stale dismissed IDs
-=======
-                
-                // Get dismissed announcements from session storage
-                let dismissedInSession = JSON.parse(sessionStorage.getItem('dismissedAnnouncements') || '[]')
-                    .map(id => parseInt(id, 10));
-                
-                // Get all valid announcement IDs from server response
-                const validAnnouncementIds = data.map(ann => parseInt(ann.id, 10));
-                
-                // Auto-cleanup: if there are dismissed IDs that don't exist anymore, remove them
->>>>>>> Stashed changes
                 const hasStaleIds = dismissedInSession.some(id => !validAnnouncementIds.includes(id));
                 if (hasStaleIds) {
                     dismissedInSession = dismissedInSession.filter(id => validAnnouncementIds.includes(id));
                     sessionStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissedInSession));
                 }
-<<<<<<< Updated upstream
 
                 // Filter: Remove only announcements dismissed in this session
                 const filtered = data.filter(ann => {
@@ -226,14 +207,6 @@ function announcementPopup() {
                     }
                 }
 
-=======
-                
-                // Filter: Remove only announcements dismissed in this session
-                this.announcements = data.filter(ann => {
-                    return !dismissedInSession.includes(parseInt(ann.id, 10));
-                });
-                
->>>>>>> Stashed changes
             } catch (error) {
                 // Silently fail
             }
@@ -263,30 +236,15 @@ function announcementPopup() {
             if (!this.currentAnnouncement) return;
 
             const announcementId = this.currentAnnouncement.id;
-<<<<<<< Updated upstream
 
             // Save to session storage to prevent re-showing during CURRENT session
-=======
-            const showOnce = this.currentAnnouncement.show_once;
-            
-            // Only save to session storage to prevent re-showing during CURRENT session
-            // This is just for UX - prevents popup from appearing on every page navigation
->>>>>>> Stashed changes
             const dismissedInSession = JSON.parse(sessionStorage.getItem('dismissedAnnouncements') || '[]');
             if (!dismissedInSession.includes(announcementId)) {
                 dismissedInSession.push(announcementId);
                 sessionStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissedInSession));
             }
-<<<<<<< Updated upstream
 
             // Mark as viewed in backend (for show_once tracking)
-=======
-            
-            // Mark as viewed in backend (for show_once tracking)
-            // The backend will track this in the database
-            // For show_once announcements: won't show again ever
-            // For regular announcements: will show again in next session
->>>>>>> Stashed changes
             try {
                 await fetch(`/announcements/${announcementId}/view`, {
                     method: 'POST',
@@ -327,16 +285,9 @@ function announcementPopup() {
         },
 
         logout() {
-<<<<<<< Updated upstream
             sessionStorage.removeItem('dismissedAnnouncements');
             if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
 
-=======
-            // Clear session storage before logout
-            sessionStorage.removeItem('dismissedAnnouncements');
-            
-            // Create a form and submit POST request to logout
->>>>>>> Stashed changes
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/logout';

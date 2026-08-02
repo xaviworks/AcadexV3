@@ -5,10 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\PasswordResetSuccess;
-<<<<<<< Updated upstream
 use App\Services\Auth\PasswordUpdateService;
-=======
->>>>>>> Stashed changes
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

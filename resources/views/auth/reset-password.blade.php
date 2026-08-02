@@ -36,12 +36,8 @@
                     name="password"
                     required
                     autocomplete="new-password"
-<<<<<<< Updated upstream
                     placeholder="Min. 8 characters"
                     oninput="checkPassword(this.value)"
-=======
-                    placeholder="New password"
->>>>>>> Stashed changes
                 />
                 
                 <!-- Text input (visible) - hidden by default -->
@@ -50,11 +46,7 @@
                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm pr-12 mt-1 w-full border border-gray-300 shadow-sm bg-transparent text-white placeholder-white focus:ring-green-500 focus:border-green-500"
                     type="text"
                     style="display: none; position: absolute; top: 0; left: 0; width: 100%;"
-<<<<<<< Updated upstream
                     placeholder="Min. 8 characters"
-=======
-                    placeholder="New password"
->>>>>>> Stashed changes
                     tabindex="-1"
                 />
                 
@@ -137,7 +129,6 @@
     </form>
 
     <script>
-<<<<<<< Updated upstream
         function checkPassword(password) {
             const checks = {
                 length: password.length >= 8,
@@ -170,8 +161,6 @@
             }
         }
 
-=======
->>>>>>> Stashed changes
         document.addEventListener('DOMContentLoaded', function () {
             // Password visibility toggle
             const toggleBtn = document.getElementById('togglePassword');
@@ -200,19 +189,13 @@
                 
                 passwordInput.addEventListener('input', function() {
                     passwordVisible.value = this.value;
-<<<<<<< Updated upstream
                     checkPassword(this.value);
-=======
->>>>>>> Stashed changes
                     updateToggleVisibility();
                 });
                 
                 passwordVisible.addEventListener('input', function() {
                     passwordInput.value = this.value;
-<<<<<<< Updated upstream
                     checkPassword(this.value);
-=======
->>>>>>> Stashed changes
                     updateToggleVisibility();
                 });
                 
@@ -237,11 +220,8 @@
                         toggleIcon.classList.add('fa-eye-slash');
                     }
                 });
-<<<<<<< Updated upstream
 
                 checkPassword(passwordInput.value);
-=======
->>>>>>> Stashed changes
             }
 
             // Password confirmation visibility toggle
