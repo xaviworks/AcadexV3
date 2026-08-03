@@ -821,18 +821,16 @@
     @endif
 
     @if(isset($incompleteCOs) && is_array($incompleteCOs) && count($incompleteCOs) > 0)
-    <!-- Warning Modal -->
-    <div class="modal fade warning-modal" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title d-flex align-items-center" id="warningModalLabel">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        Missing Student Scores Found
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
+    <x-modal.warning
+        id="warningModal"
+        title="Missing Student Scores Found"
+        size="extra-large"
+        :scrollable="true"
+        class="warning-modal"
+    >
+        <x-slot:icon>
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </x-slot:icon>
                     <div class="alert alert-warning border-0 mb-4">
                         <p class="mb-3">
                             <strong>{{ count($incompleteCOs) }}</strong> Course Outcome(s) have missing student scores. 
@@ -917,21 +915,18 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <div class="d-flex align-items-center justify-content-between w-100">
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            <strong>Tip:</strong> Enter all missing student scores to see complete results.
-                        </small>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-lg me-1"></i>Close
-                        </button>
-                    </div>
-                </div>
+        <x-slot:footer>
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <strong>Tip:</strong> Enter all missing student scores to see complete results.
+                </small>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Close
+                </button>
             </div>
-        </div>
-        </div>
+        </x-slot:footer>
+    </x-modal.warning>
         @endif
 
         <div id="print-area">
@@ -1457,14 +1452,16 @@
         </div> {{-- End of print-area --}}
     </div> {{-- End of main-results-container --}}
 
-{{-- Custom Print Options Modal (No Bootstrap dependency) --}}
-<div class="print-modal-overlay" id="coPrintModalOverlay">
-    <div class="print-modal-container">
-        <div class="print-modal-header">
-            <h5><i class="bi bi-printer"></i>Print Options</h5>
-            <button type="button" class="print-modal-close" onclick="coClosePrintModal();">&times;</button>
-        </div>
-        <div class="print-modal-body">
+<x-modal.information
+    id="printOptionsModal"
+    title="Print Options"
+    size="extra-large"
+    :scrollable="true"
+>
+    <x-slot:icon>
+        <i class="bi bi-printer"></i>
+    </x-slot:icon>
+
             <div class="print-options-grid">
                 <div class="print-option-card">
                     <div class="print-option-card-header">
@@ -1550,14 +1547,12 @@
                     <small>Make sure your printer is set to Letter paper size for best results.</small>
                 </div>
             </div>
-        </div>
-        <div class="print-modal-footer">
-            <button type="button" class="print-modal-cancel-btn" onclick="coClosePrintModal();">
-                <i class="bi bi-x-circle"></i>Cancel
-            </button>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
+    </x-slot:footer>
+</x-modal.information>
 @endsection
 
 @push('scripts')

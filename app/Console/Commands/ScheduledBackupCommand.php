@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class ScheduledBackupCommand extends Command
 {
-    protected $signature = 'backup:run {--type=full : Backup type (full or config)}';
+    protected $signature = 'backup:run {--type=full : Backup type (full or config)} {--keep= : Number of completed backups to retain}';
 
     protected $description = 'Run scheduled automatic backup';
 
@@ -27,6 +27,10 @@ class ScheduledBackupCommand extends Command
             $this->info("Backup completed: {$backup->name}");
             $this->info("Size: {$backup->size_formatted}");
             $this->info('Tables: '.count($backup->tables ?? []));
+
+            $keep = (int) ($this->option('keep') ?: config('backup.retention', 30));
+            $pruned = $backupService->pruneBackups(max(1, $keep));
+            $this->info("Pruned {$pruned} old backup(s).");
 
             Log::info('Scheduled backup completed', [
                 'backup_id' => $backup->id,

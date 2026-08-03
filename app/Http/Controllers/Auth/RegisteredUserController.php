@@ -21,10 +21,20 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        $departments = Department::all();
+        $departments = Department::with(['courses' => function ($query) {
+            $query->where('is_deleted', false);
+        }])->get();
         $geDepartment = Department::where('department_code', 'GE')->first();
+        $coursesByDepartment = $departments->mapWithKeys(function (Department $department) {
+            return [
+                $department->id => $department->courses->map(fn ($course) => [
+                    'id' => $course->id,
+                    'name' => $course->course_description,
+                ])->values(),
+            ];
+        });
 
-        return view('auth.register', compact('departments', 'geDepartment'));
+        return view('auth.register', compact('departments', 'geDepartment', 'coursesByDepartment'));
     }
 
     /**

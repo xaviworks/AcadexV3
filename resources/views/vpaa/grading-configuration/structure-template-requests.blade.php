@@ -52,6 +52,7 @@
         </div>
     </div>
 
+    <div id="structure-template-requests-section">
     @if ($requests->isEmpty())
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
@@ -170,112 +171,82 @@
             </table>
         </div>
     @endif
+    </div>
 </div>
 
 <!-- View Request Modal -->
-<div class="modal fade" id="viewRequestModal" tabindex="-1" aria-labelledby="viewRequestModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white border-0">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-eye-fill icon-xl"></i>
-                    <h5 class="modal-title mb-0" id="viewRequestModalLabel">Template Request Details</h5>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4" id="viewRequestBody">
-                <!-- Content will be populated by JavaScript -->
-            </div>
-            <div class="modal-footer border-0 bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Close
-                </button>
-            </div>
-        </div>
+<x-modal.information id="viewRequestModal" title="Template Request Details" size="large" scrollable>
+    <x-slot:icon><i class="bi bi-eye-fill me-1"></i></x-slot:icon>
+    <div id="viewRequestBody">
+        <!-- Content will be populated by JavaScript -->
     </div>
-</div>
 
-<!-- Approve Modal -->
-<div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow-lg">
-            <form method="POST" id="approveForm">
-                @csrf
-                <div class="modal-header bg-success text-white border-0">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-check-circle-fill icon-xl"></i>
-                        <h5 class="modal-title mb-0" id="approveModalLabel">Approve Template Request</h5>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="alert alert-success border-0 shadow-sm mb-3">
-                        <i class="bi bi-info-circle me-2"></i>
-                        This will create a new structure template that can be used by instructors.
-                    </div>
-                    
-                    <p class="mb-3">Are you sure you want to approve <strong id="approveTemplateName" class="text-success"></strong>?</p>
-                    
-                    <div class="mb-0">
-                        <label for="approveAdminNotes" class="form-label fw-semibold">Notes (Optional)</label>
-                        <textarea class="form-control" id="approveAdminNotes" name="admin_notes" rows="3" placeholder="Add any notes or comments for the chairperson..."></textarea>
-                        <small class="text-muted">These notes will be visible to the chairperson.</small>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light">
-                    <button type="submit" class="btn btn-success px-4">
-                        <i class="bi bi-check-circle me-1"></i>Approve Template
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions primary-text="" secondary-text="Close" />
+    </x-slot:footer>
+</x-modal.information>
 
-<!-- Reject Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow-lg">
-            <form method="POST" id="rejectForm">
-                @csrf
-                <div class="modal-header bg-danger text-white border-0">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-x-circle-fill icon-xl"></i>
-                        <h5 class="modal-title mb-0" id="rejectModalLabel">Reject Template Request</h5>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="alert alert-danger border-0 shadow-sm mb-3">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        The chairperson will be notified that their template request was rejected.
-                    </div>
-                    
-                    <p class="mb-3">Are you sure you want to reject <strong id="rejectTemplateName" class="text-danger"></strong>?</p>
-                    
-                    <div class="mb-0">
-                        <label for="rejectAdminNotes" class="form-label fw-semibold">
-                            Reason for Rejection <span class="text-danger">*</span>
-                        </label>
-                        <textarea class="form-control" id="rejectAdminNotes" name="admin_notes" rows="4" required placeholder="Explain why this template request is being rejected..."></textarea>
-                        <small class="text-muted">This message will be visible to the chairperson.</small>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light">
-                    <button type="submit" class="btn btn-danger px-4">
-                        <i class="bi bi-x-circle me-1"></i>Reject Template
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
+<x-modal.success
+    id="approveModal"
+    title="Approve Template Request"
+    form=""
+    form-id="approveForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#structure-template-requests-section" data-close-modal="approveModal" data-loading-text="Approving..."'
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-check-circle-fill me-1"></i></x-slot:icon>
+    <div class="alert alert-success border-0 shadow-sm mb-3">
+        <i class="bi bi-info-circle me-2"></i>
+        This will create a new structure template that can be used by instructors.
     </div>
-</div>
+
+    <p class="mb-3">Are you sure you want to approve <strong id="approveTemplateName" class="text-success"></strong>?</p>
+
+    <div class="mb-0">
+        <label for="approveAdminNotes" class="form-label fw-semibold">Notes (Optional)</label>
+        <textarea class="form-control" id="approveAdminNotes" name="admin_notes" rows="3" placeholder="Add any notes or comments for the chairperson..."></textarea>
+        <small class="text-muted">These notes will be visible to the chairperson.</small>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="submit" class="btn btn-success px-4">
+                <i class="bi bi-check-circle me-1"></i>Approve Template
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.success>
+
+<x-modal.destructive
+    id="rejectModal"
+    title="Reject Template Request"
+    form=""
+    form-id="rejectForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#structure-template-requests-section" data-close-modal="rejectModal" data-loading-text="Rejecting..."'
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-x-circle-fill me-1"></i></x-slot:icon>
+    <div class="alert alert-danger border-0 shadow-sm mb-3">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        The chairperson will be notified that their template request was rejected.
+    </div>
+
+    <p class="mb-3">Are you sure you want to reject <strong id="rejectTemplateName" class="text-danger"></strong>?</p>
+
+    <div class="mb-0">
+        <label for="rejectAdminNotes" class="form-label fw-semibold">
+            Reason for Rejection <span class="text-danger">*</span>
+        </label>
+        <textarea class="form-control" id="rejectAdminNotes" name="admin_notes" rows="4" required placeholder="Explain why this template request is being rejected..."></textarea>
+        <small class="text-muted">This message will be visible to the chairperson.</small>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions destructive-text="Reject Template" />
+    </x-slot:footer>
+</x-modal.destructive>
 @endsection
 
 {{-- JavaScript moved to: resources/js/pages/vpaa/grading-configuration/template-requests.js --}}

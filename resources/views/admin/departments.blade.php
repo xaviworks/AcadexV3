@@ -74,166 +74,134 @@
     </div>
 </div>
 
-{{-- Add Department Modal --}}
-<div class="modal fade" id="addDepartmentModal" tabindex="-1" aria-labelledby="addDepartmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="addDepartmentModalLabel">
-                    <i class="bi bi-building-add me-2"></i>Add New Department
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addDepartmentForm">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Department Code <span class="text-danger">*</span></label>
-                        <input type="text" name="department_code" id="addDepartmentCode" class="form-control" 
-                               placeholder="e.g. CITE" required maxlength="50">
-                        <div class="invalid-feedback" id="addDepartmentCodeError"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Department Description <span class="text-danger">*</span></label>
-                        <input type="text" name="department_description" id="addDepartmentDescription" class="form-control" 
-                               placeholder="e.g. College of Information Technology Education" required maxlength="255">
-                        <div class="invalid-feedback" id="addDepartmentDescriptionError"></div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-success" onclick="confirmAddDepartment()">
-                        <i class="bi bi-plus-lg me-1"></i>Add Department
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<x-modal.form id="addDepartmentModal" title="Add New Department" size="medium" form="" form-id="addDepartmentForm">
+    @csrf
+    <x-slot:icon><i class="bi bi-building-add me-1"></i></x-slot:icon>
 
-{{-- Edit Department Modal --}}
-<div class="modal fade" id="editDepartmentModal" tabindex="-1" aria-labelledby="editDepartmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="editDepartmentModalLabel">
-                    <i class="bi bi-pencil-square me-2"></i>Edit Department
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editDepartmentForm">
-                @csrf
-                @method('PUT')
-                <input type="hidden" id="editDepartmentId" name="department_id">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Department Code <span class="text-danger">*</span></label>
-                        <input type="text" name="department_code" id="editDepartmentCode" class="form-control" 
-                               required maxlength="50">
-                        <div class="invalid-feedback" id="editDepartmentCodeError"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Department Description <span class="text-danger">*</span></label>
-                        <input type="text" name="department_description" id="editDepartmentDescription" class="form-control" 
-                               required maxlength="255">
-                        <div class="invalid-feedback" id="editDepartmentDescriptionError"></div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-primary" onclick="confirmEditDepartment()">
-                        <i class="bi bi-check-lg me-1"></i>Save Changes
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    
-                </div>
-            </form>
-        </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Department Code <span class="text-danger">*</span></label>
+        <input type="text" name="department_code" id="addDepartmentCode" class="form-control"
+               placeholder="e.g. CITE" required maxlength="50">
+        <div class="invalid-feedback" id="addDepartmentCodeError"></div>
     </div>
-</div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Department Description <span class="text-danger">*</span></label>
+        <input type="text" name="department_description" id="addDepartmentDescription" class="form-control"
+               placeholder="e.g. College of Information Technology Education" required maxlength="255">
+        <div class="invalid-feedback" id="addDepartmentDescriptionError"></div>
+    </div>
 
-{{-- Delete Department Modal --}}
-<div class="modal fade" id="deleteDepartmentModal" tabindex="-1" aria-labelledby="deleteDepartmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteDepartmentModalLabel">
-                    <i class="bi bi-trash me-2"></i>Delete Department
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="deleteDepartmentId">
-                <div class="text-center mb-3">
-                    <div class="text-danger mb-3">
-                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
-                    </div>
-                    <h5 class="mb-2">Are you sure?</h5>
-                    <p class="text-muted mb-0">
-                        You are about to delete the department: <strong id="deleteDepartmentName" class="text-danger"></strong>
-                    </p>
-                    <p class="text-muted small mt-2">
-                        This action cannot be undone. All associated data may be affected.
-                    </p>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-danger" onclick="confirmDeleteDepartment()">
-                    <i class="bi bi-trash me-1"></i>Delete Department
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-success" onclick="confirmAddDepartment()">
+                <i class="bi bi-plus-lg me-1"></i>Add Department
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
-{{-- Password Confirmation Modal --}}
-<div class="modal fade" id="passwordConfirmModal" tabindex="-1" aria-labelledby="passwordConfirmModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="passwordConfirmModalLabel">
-                    <i class="bi bi-shield-lock me-2"></i>Confirm Your Password
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="cancelPasswordConfirm()"></button>
-            </div>
-            <form id="passwordConfirmForm" data-no-page-loader>
-                @csrf
-                <div class="modal-body">
-                    <p class="text-muted small mb-3">
-                        <i class="bi bi-info-circle me-1"></i>
-                        For security reasons, please re-enter your password to continue.
-                    </p>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="password" name="password" id="confirmPassword" class="form-control" 
-                                   placeholder="Enter your password" required autocomplete="current-password">
-                            <button type="button" class="btn btn-outline-secondary" onclick="toggleConfirmPasswordVisibility()" tabindex="-1">
-                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                            </button>
-                        </div>
-                        <div class="invalid-feedback" id="passwordError"></div>
-                        <div id="passwordErrorAlert" class="alert alert-danger mt-2 py-2 px-3 small d-none">
-                            <i class="bi bi-exclamation-circle me-1"></i>
-                            <span id="passwordErrorMessage"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success" id="confirmPasswordBtn">
-                        <span id="confirmPasswordBtnText">
-                            <i class="bi bi-check-lg me-1"></i>Confirm
-                        </span>
-                        <span id="confirmPasswordBtnLoading" class="d-none">
-                            <span class="spinner-border spinner-border-sm me-1"></span>Verifying...
-                        </span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelPasswordConfirm()">Cancel</button>    
-                </div>
-            </form>
+<x-modal.form id="editDepartmentModal" title="Edit Department" size="medium" form="" form-id="editDepartmentForm" variant="default">
+    @csrf
+    @method('PUT')
+    <x-slot:icon><i class="bi bi-pencil-square me-1"></i></x-slot:icon>
+
+    <input type="hidden" id="editDepartmentId" name="department_id">
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Department Code <span class="text-danger">*</span></label>
+        <input type="text" name="department_code" id="editDepartmentCode" class="form-control"
+               required maxlength="50">
+        <div class="invalid-feedback" id="editDepartmentCodeError"></div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Department Description <span class="text-danger">*</span></label>
+        <input type="text" name="department_description" id="editDepartmentDescription" class="form-control"
+               required maxlength="255">
+        <div class="invalid-feedback" id="editDepartmentDescriptionError"></div>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-primary" onclick="confirmEditDepartment()">
+                <i class="bi bi-check-lg me-1"></i>Save Changes
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.destructive id="deleteDepartmentModal" title="Delete Department">
+    <x-slot:icon><i class="bi bi-trash me-1"></i></x-slot:icon>
+    <input type="hidden" id="deleteDepartmentId">
+    <div class="text-center mb-3">
+        <div class="text-danger mb-3">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+        </div>
+        <h5 class="mb-2">Are you sure?</h5>
+        <p class="text-muted mb-0">
+            You are about to delete the department: <strong id="deleteDepartmentName" class="text-danger"></strong>
+        </p>
+        <p class="text-muted small mt-2">
+            This action cannot be undone. All associated data may be affected.
+        </p>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-danger" onclick="confirmDeleteDepartment()">
+                <i class="bi bi-trash me-1"></i>Delete Department
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.form
+    id="passwordConfirmModal"
+    title="Confirm Your Password"
+    size="small"
+    form=""
+    form-id="passwordConfirmForm"
+    :no-page-loader="true"
+    :backdrop="false"
+    :keyboard="false"
+    close-action="cancelPasswordConfirm()"
+    variant="default"
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-shield-lock me-1"></i></x-slot:icon>
+
+    <p class="text-muted small mb-3">
+        <i class="bi bi-info-circle me-1"></i>
+        For security reasons, please re-enter your password to continue.
+    </p>
+    <div class="mb-0">
+        <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <input type="password" name="password" id="confirmPassword" class="form-control"
+                   placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleConfirmPasswordVisibility()" tabindex="-1">
+                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+            </button>
+        </div>
+        <div class="invalid-feedback" id="passwordError"></div>
+        <div id="passwordErrorAlert" class="alert alert-danger mt-2 py-2 px-3 small d-none">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span id="passwordErrorMessage"></span>
         </div>
     </div>
-</div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelPasswordConfirm()">Cancel</button>
+            <button type="submit" class="btn btn-success" id="confirmPasswordBtn">
+                <span id="confirmPasswordBtnText">
+                    <i class="bi bi-check-lg me-1"></i>Confirm
+                </span>
+                <span id="confirmPasswordBtnLoading" class="d-none">
+                    <span class="spinner-border spinner-border-sm me-1"></span>Verifying...
+                </span>
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
 @push('styles')
 <style>
@@ -455,7 +423,7 @@ function executeAddDepartment(password) {
         if (ok && data.success) {
             passwordConfirmModal.hide();
             notify.success(data.message || 'Department added successfully.');
-            setTimeout(() => location.reload(), 1000);
+            window.ajaxActions?.refreshTarget('#departmentsTable').catch(() => {});
         } else {
             showPasswordError(data.message || 'Failed to add department.');
         }
@@ -538,10 +506,6 @@ function executeDeleteDepartment(password) {
                 row.remove();
             }
             
-            // Refresh DataTable if no rows left
-            if ($('#departmentsTable tbody tr').length === 0) {
-                setTimeout(() => location.reload(), 1000);
-            }
         } else {
             showPasswordError(data.message || 'Failed to delete department.');
         }

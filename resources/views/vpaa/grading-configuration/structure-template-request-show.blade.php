@@ -214,77 +214,53 @@
 </div>
 
 @if ($request->status === 'pending')
-    <!-- Approve Modal -->
-    <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-success text-white border-0">
-                    <h5 class="modal-title" id="approveModalLabel">
-                        <i class="bi bi-check-circle me-2"></i>Approve Formula Request
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="POST" action="{{ route('vpaa.gradingConfiguration.templateRequests.approve', $request) }}">
-                    @csrf
-                    <div class="modal-body">
-                        <p class="mb-3">Are you sure you want to approve this formula request? This will create a new structure formu that can be used by chairpersons and instructors.</p>
-                        
-                        <div class="alert alert-info mb-3">
-                            <strong>Formula Name:</strong> {{ $request->label }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="approve_admin_notes" class="form-label">Admin Notes (Optional)</label>
-                            <textarea class="form-control" id="approve_admin_notes" name="admin_notes" rows="3" placeholder="Add any notes about this approval..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 bg-light">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-check-circle me-1"></i>Approve
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <x-modal.success
+        id="approveModal"
+        title="Approve Formula Request"
+        form="{{ route('vpaa.gradingConfiguration.templateRequests.approve', $request) }}"
+    >
+        @csrf
+        <x-slot:icon><i class="bi bi-check-circle me-1"></i></x-slot:icon>
+        <p class="mb-3">Are you sure you want to approve this formula request? This will create a new structure formu that can be used by chairpersons and instructors.</p>
 
-    <!-- Reject Modal -->
-    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-danger text-white border-0">
-                    <h5 class="modal-title" id="rejectModalLabel">
-                        <i class="bi bi-x-circle me-2"></i>Reject Formula Request
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="POST" action="{{ route('vpaa.gradingConfiguration.templateRequests.reject', $request) }}">
-                    @csrf
-                    <div class="modal-body">
-                        <p class="mb-3">Please provide a reason for rejecting this formula request. This information will be visible to the chairperson who submitted it.</p>
-                        
-                        <div class="alert alert-warning mb-3">
-                            <strong>Formula Name:</strong> {{ $request->label }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="reject_admin_notes" class="form-label">Rejection Reason <span class="text-danger">*</span></label>
-                            <textarea class="form-control @error('admin_notes') is-invalid @enderror" id="reject_admin_notes" name="admin_notes" rows="4" required placeholder="Explain why this request is being rejected..."></textarea>
-                            @error('admin_notes')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 bg-light">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-x-circle me-1"></i>Reject
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
+        <div class="alert alert-info mb-3">
+            <strong>Formula Name:</strong> {{ $request->label }}
         </div>
-    </div>
+
+        <div class="mb-3">
+            <label for="approve_admin_notes" class="form-label">Admin Notes (Optional)</label>
+            <textarea class="form-control" id="approve_admin_notes" name="admin_notes" rows="3" placeholder="Add any notes about this approval..."></textarea>
+        </div>
+
+        <x-slot:footer>
+            <x-modal.actions primary-text="Approve" primary-variant="success" />
+        </x-slot:footer>
+    </x-modal.success>
+
+    <x-modal.destructive
+        id="rejectModal"
+        title="Reject Formula Request"
+        form="{{ route('vpaa.gradingConfiguration.templateRequests.reject', $request) }}"
+    >
+        @csrf
+        <x-slot:icon><i class="bi bi-x-circle me-1"></i></x-slot:icon>
+        <p class="mb-3">Please provide a reason for rejecting this formula request. This information will be visible to the chairperson who submitted it.</p>
+
+        <div class="alert alert-warning mb-3">
+            <strong>Formula Name:</strong> {{ $request->label }}
+        </div>
+
+        <div class="mb-3">
+            <label for="reject_admin_notes" class="form-label">Rejection Reason <span class="text-danger">*</span></label>
+            <textarea class="form-control @error('admin_notes') is-invalid @enderror" id="reject_admin_notes" name="admin_notes" rows="4" required placeholder="Explain why this request is being rejected..."></textarea>
+            @error('admin_notes')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <x-slot:footer>
+            <x-modal.actions destructive-text="Reject" />
+        </x-slot:footer>
+    </x-modal.destructive>
 @endif
 @endsection

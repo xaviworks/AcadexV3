@@ -8,6 +8,7 @@ import intersect from '@alpinejs/intersect';
 import { getDeviceFingerprint } from './fingerprint';
 import './stores'; // Initialize Alpine stores
 import './store-helpers'; // Global helper functions
+import './shared/ajax-actions';
 
 // Import page-specific scripts (auto-initialize on DOMContentLoaded)
 import './pages/index.js';

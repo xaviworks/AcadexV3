@@ -81,176 +81,149 @@
     </div>
 </div>
 
-<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="addCourseModalLabel">
-                    <i class="bi bi-mortarboard-fill me-2"></i>Add New Program
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addCourseForm">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Program Code <span class="text-danger">*</span></label>
-                        <input type="text" name="course_code" id="addCourseCode" class="form-control" placeholder="e.g. BSIT" required maxlength="50">
-                        <div class="invalid-feedback" id="addCourseCodeError"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Program Description <span class="text-danger">*</span></label>
-                        <input type="text" name="course_description" id="addCourseDescription" class="form-control" placeholder="e.g. Bachelor of Science in Information Technology" required maxlength="255">
-                        <div class="invalid-feedback" id="addCourseDescriptionError"></div>
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
-                        <select name="department_id" id="addCourseDepartment" class="form-select" required>
-                            <option value="">Select Department</option>
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}">{{ $department->department_code }} - {{ $department->department_description }}</option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback" id="addCourseDepartmentError"></div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-success" onclick="confirmAddCourse()">
-                        <i class="bi bi-plus-lg me-1"></i>Add Program
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<x-modal.form id="addCourseModal" title="Add New Program" form="" form-id="addCourseForm">
+    @csrf
+    <x-slot:icon><i class="bi bi-mortarboard-fill me-1"></i></x-slot:icon>
 
-<div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="editCourseModalLabel">
-                    <i class="bi bi-pencil-square me-2"></i>Edit Program
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editCourseForm">
-                @csrf
-                @method('PUT')
-                <input type="hidden" id="editCourseId" name="course_id">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Program Code <span class="text-danger">*</span></label>
-                        <input type="text" name="course_code" id="editCourseCode" class="form-control" required maxlength="50">
-                        <div class="invalid-feedback" id="editCourseCodeError"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Program Description <span class="text-danger">*</span></label>
-                        <input type="text" name="course_description" id="editCourseDescription" class="form-control" required maxlength="255">
-                        <div class="invalid-feedback" id="editCourseDescriptionError"></div>
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
-                        <select name="department_id" id="editCourseDepartment" class="form-select" required>
-                            <option value="">Select Department</option>
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}">{{ $department->department_code }} - {{ $department->department_description }}</option>
-                            @endforeach
-                        </select>
-                        <div class="invalid-feedback" id="editCourseDepartmentError"></div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-primary" onclick="confirmEditCourse()">
-                        <i class="bi bi-check-lg me-1"></i>Save Changes
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Program Code <span class="text-danger">*</span></label>
+        <input type="text" name="course_code" id="addCourseCode" class="form-control" placeholder="e.g. BSIT" required maxlength="50">
+        <div class="invalid-feedback" id="addCourseCodeError"></div>
     </div>
-</div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Program Description <span class="text-danger">*</span></label>
+        <input type="text" name="course_description" id="addCourseDescription" class="form-control" placeholder="e.g. Bachelor of Science in Information Technology" required maxlength="255">
+        <div class="invalid-feedback" id="addCourseDescriptionError"></div>
+    </div>
+    <div class="mb-0">
+        <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+        <select name="department_id" id="addCourseDepartment" class="form-select" required>
+            <option value="">Select Department</option>
+            @foreach($departments as $department)
+                <option value="{{ $department->id }}">{{ $department->department_code }} - {{ $department->department_description }}</option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback" id="addCourseDepartmentError"></div>
+    </div>
 
-<div class="modal fade" id="deleteCourseModal" tabindex="-1" aria-labelledby="deleteCourseModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteCourseModalLabel">
-                    <i class="bi bi-trash me-2"></i>Delete Program
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="deleteCourseId">
-                <div class="text-center mb-3">
-                    <div class="text-danger mb-3">
-                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
-                    </div>
-                    <h5 class="mb-2">Are you sure?</h5>
-                    <p class="text-muted mb-0">
-                        You are about to delete the program: <strong id="deleteCourseName" class="text-danger"></strong>
-                    </p>
-                    <p class="text-muted small mt-2">
-                        This action cannot be undone. Associated records must be removed or reassigned first.
-                    </p>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-danger" onclick="confirmDeleteCourse()">
-                    <i class="bi bi-trash me-1"></i>Delete Program
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-success" onclick="confirmAddCourse()">
+                <i class="bi bi-plus-lg me-1"></i>Add Program
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
-<div class="modal fade" id="passwordConfirmModal" tabindex="-1" aria-labelledby="passwordConfirmModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="passwordConfirmModalLabel">
-                    <i class="bi bi-shield-lock me-2"></i>Confirm Your Password
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="cancelPasswordConfirm()"></button>
-            </div>
-            <form id="passwordConfirmForm" data-no-page-loader>
-                @csrf
-                <div class="modal-body">
-                    <p class="text-muted small mb-3">
-                        <i class="bi bi-info-circle me-1"></i>
-                        For security reasons, please re-enter your password to continue.
-                    </p>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="password" name="password" id="confirmPassword" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
-                            <button type="button" class="btn btn-outline-secondary" onclick="toggleConfirmPasswordVisibility()" tabindex="-1">
-                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                            </button>
-                        </div>
-                        <div class="invalid-feedback" id="passwordError"></div>
-                        <div id="passwordErrorAlert" class="alert alert-danger mt-2 py-2 px-3 small d-none">
-                            <i class="bi bi-exclamation-circle me-1"></i>
-                            <span id="passwordErrorMessage"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success" id="confirmPasswordBtn">
-                        <span id="confirmPasswordBtnText">
-                            <i class="bi bi-check-lg me-1"></i>Confirm
-                        </span>
-                        <span id="confirmPasswordBtnLoading" class="d-none">
-                            <span class="spinner-border spinner-border-sm me-1"></span>Verifying...
-                        </span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelPasswordConfirm()">Cancel</button>
-                </div>
-            </form>
+<x-modal.form id="editCourseModal" title="Edit Program" form="" form-id="editCourseForm" variant="default">
+    @csrf
+    @method('PUT')
+    <x-slot:icon><i class="bi bi-pencil-square me-1"></i></x-slot:icon>
+
+    <input type="hidden" id="editCourseId" name="course_id">
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Program Code <span class="text-danger">*</span></label>
+        <input type="text" name="course_code" id="editCourseCode" class="form-control" required maxlength="50">
+        <div class="invalid-feedback" id="editCourseCodeError"></div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Program Description <span class="text-danger">*</span></label>
+        <input type="text" name="course_description" id="editCourseDescription" class="form-control" required maxlength="255">
+        <div class="invalid-feedback" id="editCourseDescriptionError"></div>
+    </div>
+    <div class="mb-0">
+        <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+        <select name="department_id" id="editCourseDepartment" class="form-select" required>
+            <option value="">Select Department</option>
+            @foreach($departments as $department)
+                <option value="{{ $department->id }}">{{ $department->department_code }} - {{ $department->department_description }}</option>
+            @endforeach
+        </select>
+        <div class="invalid-feedback" id="editCourseDepartmentError"></div>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-primary" onclick="confirmEditCourse()">
+                <i class="bi bi-check-lg me-1"></i>Save Changes
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.destructive id="deleteCourseModal" title="Delete Program">
+    <x-slot:icon><i class="bi bi-trash me-1"></i></x-slot:icon>
+    <input type="hidden" id="deleteCourseId">
+    <div class="text-center mb-3">
+        <div class="text-danger mb-3">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+        </div>
+        <h5 class="mb-2">Are you sure?</h5>
+        <p class="text-muted mb-0">
+            You are about to delete the program: <strong id="deleteCourseName" class="text-danger"></strong>
+        </p>
+        <p class="text-muted small mt-2">
+            This action cannot be undone. Associated records must be removed or reassigned first.
+        </p>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="button" class="btn btn-danger" onclick="confirmDeleteCourse()">
+                <i class="bi bi-trash me-1"></i>Delete Program
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.form
+    id="passwordConfirmModal"
+    title="Confirm Your Password"
+    size="small"
+    form=""
+    form-id="passwordConfirmForm"
+    :no-page-loader="true"
+    :backdrop="false"
+    :keyboard="false"
+    close-action="cancelPasswordConfirm()"
+    variant="default"
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-shield-lock me-1"></i></x-slot:icon>
+
+    <p class="text-muted small mb-3">
+        <i class="bi bi-info-circle me-1"></i>
+        For security reasons, please re-enter your password to continue.
+    </p>
+    <div class="mb-0">
+        <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <input type="password" name="password" id="confirmPassword" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleConfirmPasswordVisibility()" tabindex="-1">
+                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+            </button>
+        </div>
+        <div class="invalid-feedback" id="passwordError"></div>
+        <div id="passwordErrorAlert" class="alert alert-danger mt-2 py-2 px-3 small d-none">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span id="passwordErrorMessage"></span>
         </div>
     </div>
-</div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="cancelPasswordConfirm()">Cancel</button>
+            <button type="submit" class="btn btn-success" id="confirmPasswordBtn">
+                <span id="confirmPasswordBtnText">
+                    <i class="bi bi-check-lg me-1"></i>Confirm
+                </span>
+                <span id="confirmPasswordBtnLoading" class="d-none">
+                    <span class="spinner-border spinner-border-sm me-1"></span>Verifying...
+                </span>
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
 @push('styles')
 <style>
@@ -457,7 +430,7 @@ function executeAddCourse(password) {
             if (ok && data.success) {
                 passwordConfirmModal.hide();
                 notify.success(data.message || 'Program added successfully.');
-                setTimeout(() => location.reload(), 1000);
+                window.ajaxActions?.refreshTarget('#coursesTable').catch(() => {});
             } else {
                 showPasswordError(data.message || 'Failed to add program.');
             }
@@ -561,9 +534,6 @@ function executeDeleteCourse(password) {
                     }
                 }
 
-                if ($('#coursesTable tbody tr').length === 0) {
-                    setTimeout(() => location.reload(), 1000);
-                }
             } else {
                 showPasswordError(data.message || 'Failed to delete program.');
             }

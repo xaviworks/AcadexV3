@@ -20,6 +20,7 @@
         $pendingCount = $pendingAccounts->count();
     @endphp
 
+    <div id="chairperson-instructors-section">
     {{-- Tabs --}}
     <ul class="nav nav-tabs mb-0" id="instructorTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
             <li class="nav-item" role="presentation">
@@ -122,6 +123,7 @@
                 ])
             </div>
         </div>
+    </div>
 </div>
 
 {{-- Modals --}}

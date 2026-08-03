@@ -498,63 +498,56 @@
             @endif
         </div>
     </div>
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" id="deleteActivityForm">
-          @csrf
-          @method('DELETE')
-          <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header border-0 pb-0">
-              <h5 class="modal-title fw-bold" id="confirmDeleteModalLabel" style="color: #dc3545;">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Activity
-              </h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-2">
-              <p class="mb-2">You are about to permanently delete:</p>
-              <div class="alert alert-danger-subtle border-0 mb-3" style="background-color: #f8d7da;">
-                <strong id="activityTitlePlaceholder">this activity</strong>
-              </div>
-              <p class="text-muted small mb-0">
-                <i class="bi bi-info-circle me-1"></i>This action cannot be undone.
-              </p>
-            </div>
-            <div class="modal-footer border-0">
-              <button type="submit" class="btn btn-danger shadow-sm">
-                <i class="bi bi-trash me-1"></i>Delete Activity
-              </button>
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-          </div>
-        </form>
+    <x-modal.destructive
+      id="confirmDeleteModal"
+      title="Delete Activity"
+      :form="''"
+      form-id="deleteActivityForm"
+      form-class="ajax-action-form"
+      form-attributes='data-refresh-target="#activityTabsContent" data-close-modal="confirmDeleteModal" data-loading-text="Deleting..."'
+      size="medium"
+    >
+      <x-slot:icon>
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </x-slot:icon>
+
+      @csrf
+      @method('DELETE')
+
+      <p class="mb-2">You are about to permanently delete:</p>
+      <div class="alert alert-danger-subtle border-0 mb-3" style="background-color: #f8d7da;">
+        <strong id="activityTitlePlaceholder">this activity</strong>
       </div>
-    </div>
+      <p class="text-muted small mb-0">
+        <i class="bi bi-info-circle me-1"></i>This action cannot be undone.
+      </p>
+
+      <x-slot:footer>
+        <x-modal.actions destructive-text="Delete Activity" />
+      </x-slot:footer>
+    </x-modal.destructive>
 
     <!-- Create Activity Modal -->
         @php
             $selectedComponentTerm = $selectedTerm && isset($componentOptionsByTerm[$selectedTerm]) ? $selectedTerm : null;
             $selectedComponentOptions = $selectedComponentTerm ? ($componentOptionsByTerm[$selectedComponentTerm] ?? []) : [];
         @endphp
-    <div class="modal fade" id="createActivityModal" tabindex="-1" aria-labelledby="createActivityModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-                <form
-                    method="POST"
-                    action="{{ route('instructor.activities.store') }}"
-                    class="modal-content border-0 shadow-lg needs-validation"
-                    novalidate
-                    data-component-options-by-term='@json($componentOptionsByTerm ?? [])'
-                    data-component-options-subject-id="{{ optional($selectedSubject)->id }}"
-                >
+    <x-modal.form
+      id="createActivityModal"
+      title="Create New Activity"
+      size="large"
+      :form="route('instructor.activities.store')"
+      form-class="needs-validation"
+      :novalidate="true"
+      form-attributes="data-component-options-by-term='@json($componentOptionsByTerm ?? [])' data-component-options-subject-id='{{ optional($selectedSubject)->id }}'"
+      body-class="p-4"
+    >
+          <x-slot:icon>
+            <i class="bi bi-plus-circle"></i>
+          </x-slot:icon>
+
           @csrf
           <input type="hidden" name="create_single" value="1">
-          <div class="modal-header bg-success border-0 pb-0">
-            <h5 class="modal-title fw-bold text-white" id="createActivityModalLabel">
-              <i class="bi bi-plus-circle me-2"></i>Create New Activity
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body p-4">
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold small text-uppercase" style="color: #198754; letter-spacing: 0.5px;">
@@ -677,16 +670,15 @@
                 </small>
               </div>
             </div>
-          </div>
-          <div class="modal-footer border-0 bg-light">
-                        <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;" data-component-save>
-              <i class="bi bi-check-circle me-1"></i>Save Activity
-            </button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>            
-          </div>
-        </form>
-      </div>
-    </div>
+          <x-slot:footer>
+            <x-modal.actions secondary-text="" primary-text="">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success shadow-sm" style="font-weight: 500;" data-component-save>
+                <i class="bi bi-check-circle me-1"></i>Save Activity
+              </button>
+            </x-modal.actions>
+          </x-slot:footer>
+    </x-modal.form>
   @endif
 </div>
 @endsection

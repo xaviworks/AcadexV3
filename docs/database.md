@@ -134,7 +134,7 @@ acadex seed
 ### Run Specific Seeder
 
 ```bash
-php artisan db:seed --class=UserSeeder
+php artisan tinker
 php artisan db:seed --class=ProgramSeeder
 ```
 
@@ -292,4 +292,3 @@ php artisan cache:clear
 ```
 
 ---
-

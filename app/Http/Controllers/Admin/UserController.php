@@ -116,7 +116,17 @@ class UserController extends Controller
         // Send security notification to admins about new user creation
         \App\Listeners\NotifyUserCreated::handle($newUser, Auth::user());
 
-        return redirect()->route('admin.users')->with('success', 'User created successfully.');
+        $message = 'User created successfully.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $newUser,
+            ]);
+        }
+
+        return redirect()->route('admin.users')->with('success', $message);
     }
 
     public function disable(Request $request, User $user)
@@ -201,25 +211,37 @@ class UserController extends Controller
                 $disabledAt = $carbonUntil->year >= 9999 ? 'indefinite' : $carbonUntil->toISOString();
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'disabled_until' => $disabledAt,
-            ]);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'disabled_until' => $disabledAt,
+                ]);
+            }
+
+            return redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Disable user failed: '.$e->getMessage(), ['exception' => $e]);
             // If disabled_until column is missing, provide actionable advice
             if (! Schema::hasColumn('users', 'disabled_until')) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The disabled_until column is missing in the users table. Please run the latest migrations.',
+                    ], 500);
+                }
+
+                return redirect()->back()->with('error', 'The disabled_until column is missing in the users table. Please run the latest migrations.');
+            }
+
+            if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'The disabled_until column is missing in the users table. Please run the latest migrations.',
+                    'message' => 'Failed to disable user. Please try again.',
                 ], 500);
             }
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to disable user. Please try again.',
-            ], 500);
+            return redirect()->back()->with('error', 'Failed to disable user. Please try again.');
         }
     }
 
@@ -234,17 +256,27 @@ class UserController extends Controller
             }
             $user->save();
 
-            return response()->json([
-                'success' => true,
-                'message' => "Account for {$user->first_name} {$user->last_name} has been re-enabled.",
-            ]);
+            $message = "Account for {$user->first_name} {$user->last_name} has been re-enabled.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                ]);
+            }
+
+            return redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Enable user failed: '.$e->getMessage(), ['exception' => $e]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to enable user. Please try again.',
-            ], 500);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to enable user. Please try again.',
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Failed to enable user. Please try again.');
         }
     }
 }

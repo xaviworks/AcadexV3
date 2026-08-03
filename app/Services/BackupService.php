@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\AuditLog;
 use App\Models\Backup;
 use App\Models\User;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use ZipArchive;
 
@@ -17,7 +18,19 @@ class BackupService
     /**
      * Directory where backups are stored (relative to storage/).
      */
-    protected string $backupDir = 'app/backups';
+    protected string $backupDir;
+
+    protected string $disk;
+
+    public function __construct()
+    {
+        $this->backupDir = trim(config('backup.path', 'backups'), '/');
+        $this->disk = config('backup.disk', 'local');
+
+        if (app()->environment('production') && config('backup.require_remote_in_production', true) && $this->disk === 'local') {
+            throw new \LogicException('BACKUP_DISK must be configured to an off-server filesystem in production.');
+        }
+    }
 
     /**
      * Tables that should always be backed up.
@@ -61,7 +74,7 @@ class BackupService
         }, $tables);
 
         // Filter out Laravel system tables
-        $exclude = ['migrations', 'password_reset_tokens', 'personal_access_tokens', 'failed_jobs', 'jobs', 'job_batches', 'cache', 'cache_locks'];
+        $exclude = ['migrations', 'password_reset_tokens', 'personal_access_tokens', 'failed_jobs', 'jobs', 'job_batches', 'cache', 'cache_locks', 'backups', 'audit_logs'];
 
         return array_values(array_diff($tables, $exclude));
     }
@@ -140,19 +153,20 @@ class BackupService
     protected function createBackup(?User $user, string $type, array $tables, string $name, ?string $notes): Backup
     {
         $timestamp = now()->format('Y-m-d_H-i-s');
-        $filename = Str::slug($name).'_'.$timestamp.'.zip';
+        $filename = Str::slug($name).'_'.$timestamp.'.zip.enc';
         $relativePath = $this->backupDir.'/'.$filename;
-        $fullPath = storage_path($relativePath);
+        $disk = Storage::disk($this->disk);
+        $temporaryZip = tempnam(sys_get_temp_dir(), 'acadex-backup-');
 
         // Ensure backup directory exists
-        $this->ensureBackupDirectory();
-
         // Create backup record
         $backup = Backup::create([
             'name' => $name,
             'type' => $type,
             'filename' => $filename,
             'path' => $relativePath,
+            'disk' => $this->disk,
+            'encrypted' => true,
             'tables' => $tables,
             'status' => Backup::STATUS_PENDING,
             'notes' => $notes,
@@ -161,12 +175,22 @@ class BackupService
 
         try {
             // Create the backup
-            $this->performBackup($backup, $tables, $fullPath);
+            $this->performBackup($backup, $tables, $temporaryZip);
+            $plaintext = file_get_contents($temporaryZip);
+            if ($plaintext === false) {
+                throw new \RuntimeException('Could not read backup archive.');
+            }
+            $encrypted = Crypt::encryptString($plaintext);
+            if (! $disk->put($relativePath, $encrypted)) {
+                throw new \RuntimeException('Could not store backup on configured disk.');
+            }
+            $checksum = hash('sha256', $encrypted);
 
             // Update backup record
             $backup->update([
                 'status' => Backup::STATUS_COMPLETED,
-                'size' => filesize($fullPath),
+                'size' => strlen($encrypted),
+                'checksum' => $checksum,
                 'completed_at' => now(),
             ]);
 
@@ -205,11 +229,15 @@ class BackupService
             ]);
 
             // Clean up partial file if exists
-            if (file_exists($fullPath)) {
-                unlink($fullPath);
+            if ($disk->exists($relativePath)) {
+                $disk->delete($relativePath);
             }
 
             throw $e;
+        } finally {
+            if (is_string($temporaryZip) && file_exists($temporaryZip)) {
+                unlink($temporaryZip);
+            }
         }
 
         return $backup->fresh();
@@ -231,6 +259,7 @@ class BackupService
                 'created_at' => now()->toIso8601String(),
                 'backup_id' => $backup->id,
                 'type' => $backup->type,
+                'format_version' => 2,
                 'tables' => [],
                 'app_version' => config('app.version', '1.0.0'),
                 'laravel_version' => app()->version(),
@@ -243,22 +272,25 @@ class BackupService
 
                 // Export table data as JSON
                 $data = DB::table($table)->get()->toArray();
-                $jsonData = json_encode($data, JSON_PRETTY_PRINT);
-
-                $zip->addFromString("data/{$table}.json", $jsonData);
+                $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
 
                 // Export table schema
                 $schema = $this->getTableSchema($table);
-                $zip->addFromString("schema/{$table}.json", json_encode($schema, JSON_PRETTY_PRINT));
+                $schemaData = json_encode($schema, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+
+                $zip->addFromString("data/{$table}.json", $jsonData);
+                $zip->addFromString("schema/{$table}.json", $schemaData);
 
                 $manifest['tables'][$table] = [
                     'row_count' => count($data),
+                    'data_sha256' => hash('sha256', $jsonData),
+                    'schema_sha256' => hash('sha256', $schemaData),
                     'exported_at' => now()->toIso8601String(),
                 ];
             }
 
             // Add manifest
-            $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT));
+            $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR));
 
         } finally {
             $zip->close();
@@ -287,10 +319,14 @@ class BackupService
      */
     public function deleteBackup(Backup $backup): bool
     {
-        $fullPath = $backup->getFullPath();
-
-        if (file_exists($fullPath)) {
-            unlink($fullPath);
+        $disk = Storage::disk($backup->disk ?: $this->disk);
+        if ($disk->exists($backup->path)) {
+            $disk->delete($backup->path);
+        } elseif ($backup->disk === 'local' && str_starts_with($backup->path, 'app/')) {
+            $legacyPath = storage_path($backup->path);
+            if (file_exists($legacyPath)) {
+                unlink($legacyPath);
+            }
         }
 
         $backup->delete();
@@ -305,12 +341,11 @@ class BackupService
      */
     public function previewBackup(Backup $backup): array
     {
-        $fullPath = $backup->getFullPath();
-
-        if (! file_exists($fullPath)) {
+        if (! $backup->fileExists()) {
             throw new \RuntimeException('Backup file not found');
         }
 
+        $fullPath = $this->materializeZip($backup);
         $zip = new ZipArchive;
 
         if ($zip->open($fullPath) !== true) {
@@ -341,21 +376,12 @@ class BackupService
 
         } finally {
             $zip->close();
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
         }
 
         return $preview;
-    }
-
-    /**
-     * Ensure backup directory exists.
-     */
-    protected function ensureBackupDirectory(): void
-    {
-        $path = storage_path($this->backupDir);
-
-        if (! File::isDirectory($path)) {
-            File::makeDirectory($path, 0755, true);
-        }
     }
 
     /**
@@ -363,9 +389,9 @@ class BackupService
      */
     public function getStorageInfo(): array
     {
-        $path = storage_path($this->backupDir);
+        $disk = Storage::disk($this->disk);
 
-        if (! File::isDirectory($path)) {
+        if (! $disk->directoryExists($this->backupDir)) {
             return [
                 'total_size' => 0,
                 'total_size_formatted' => '0 bytes',
@@ -374,10 +400,10 @@ class BackupService
         }
 
         $totalSize = 0;
-        $files = File::files($path);
+        $files = $disk->files($this->backupDir);
 
         foreach ($files as $file) {
-            $totalSize += $file->getSize();
+            $totalSize += $disk->size($file);
         }
 
         return [
@@ -422,5 +448,37 @@ class BackupService
         }
 
         return $count;
+    }
+
+    /** Return the encrypted artifact after verifying its stored checksum. */
+    public function getVerifiedContents(Backup $backup): string
+    {
+        $disk = Storage::disk($backup->disk ?: $this->disk);
+        $contents = $disk->exists($backup->path)
+            ? $disk->get($backup->path)
+            : (str_starts_with($backup->path, 'app/') ? file_get_contents(storage_path($backup->path)) : false);
+        if ($contents === false) {
+            throw new \RuntimeException('Backup file not found.');
+        }
+        if ($backup->checksum && ! hash_equals($backup->checksum, hash('sha256', $contents))) {
+            throw new \RuntimeException('Backup integrity check failed: checksum mismatch.');
+        }
+
+        return $contents;
+    }
+
+    /** Decrypt a verified backup into a temporary ZIP file. */
+    public function materializeZip(Backup $backup): string
+    {
+        $contents = $this->getVerifiedContents($backup);
+        try {
+            $zipContents = $backup->encrypted ? Crypt::decryptString($contents) : $contents;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Backup decryption failed. The encryption key may be incorrect.', 0, $e);
+        }
+        $path = tempnam(sys_get_temp_dir(), 'acadex-restore-');
+        file_put_contents($path, $zipContents);
+
+        return $path;
     }
 }

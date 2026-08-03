@@ -62,6 +62,13 @@ class StructureTemplateRequestController extends Controller
         Gate::authorize('manage-grading-configuration');
 
         if ($templateRequest->status !== 'pending') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending requests can be approved.',
+                ], 422);
+            }
+
             return redirect()
                 ->back()
                 ->withErrors(['error' => 'Only pending requests can be approved.']);
@@ -137,11 +144,27 @@ class StructureTemplateRequestController extends Controller
 
             DB::commit();
 
+            $message = "Structure template '{$templateRequest->label}' approved and added to the catalog.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                ]);
+            }
+
             return redirect()
                 ->route('vpaa.gradingConfiguration.templateRequests.index')
-                ->with('success', "Structure template '{$templateRequest->label}' approved and added to the catalog.");
+                ->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to approve template request: '.$e->getMessage(),
+                ], 500);
+            }
 
             return redirect()
                 ->back()
@@ -154,6 +177,13 @@ class StructureTemplateRequestController extends Controller
         Gate::authorize('manage-grading-configuration');
 
         if ($templateRequest->status !== 'pending') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending requests can be rejected.',
+                ], 422);
+            }
+
             return redirect()
                 ->back()
                 ->withErrors(['error' => 'Only pending requests can be rejected.']);
@@ -169,8 +199,17 @@ class StructureTemplateRequestController extends Controller
         $templateRequest->reviewed_at = now();
         $templateRequest->save();
 
+        $message = "Structure template request from {$templateRequest->chairperson->first_name} {$templateRequest->chairperson->last_name} has been rejected.";
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
         return redirect()
             ->route('vpaa.gradingConfiguration.templateRequests.index')
-            ->with('success', "Structure template request from {$templateRequest->chairperson->first_name} {$templateRequest->chairperson->last_name} has been rejected.");
+            ->with('success', $message);
     }
 }

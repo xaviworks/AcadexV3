@@ -5,6 +5,7 @@ namespace App\Http;
 use App\Http\Middleware\EnsureAcademicPeriodSet;
 use App\Http\Middleware\EnsureUserIsVPAA;
 use App\Http\Middleware\NoCacheHeaders;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -15,6 +16,7 @@ class Kernel extends HttpKernel
      * Runs during every request to your application.
      */
     protected $middleware = [
+        SecurityHeaders::class,
         NoCacheHeaders::class, // Applies no-cache headers to all responses
     ];
 

@@ -165,6 +165,7 @@
 {{-- JavaScript --}}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const coursesByDepartment = @json($coursesByDepartment ?? []);
         const emailInput = document.getElementById('email');
         const emailWarning = document.getElementById('email-warning');
 
@@ -199,22 +200,18 @@
                 courseSelect.innerHTML = '<option value="1" selected>General Education</option>';
                 courseWrapper.classList.add('hidden');
             } else {
-                // For other departments, fetch courses normally
-                courseSelect.innerHTML = '<option value="">Loading...</option>';
-                fetch(`/api/department/${deptId}/courses`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.length === 1) {
-                            courseSelect.innerHTML = `<option value="${data[0].id}" selected>${data[0].name}</option>`;
-                            courseWrapper.classList.add('hidden');
-                        } else {
-                            courseSelect.innerHTML = '<option value="">-- Choose Program --</option>';
-                            data.forEach(course => {
-                                courseSelect.innerHTML += `<option value="${course.id}">${course.name}</option>`;
-                            });
-                            courseWrapper.classList.remove('hidden');
-                        }
+                const data = coursesByDepartment[deptId] || [];
+
+                if (data.length === 1) {
+                    courseSelect.innerHTML = `<option value="${data[0].id}" selected>${data[0].name}</option>`;
+                    courseWrapper.classList.add('hidden');
+                } else {
+                    courseSelect.innerHTML = '<option value="">-- Choose Program --</option>';
+                    data.forEach(course => {
+                        courseSelect.innerHTML += `<option value="${course.id}">${course.name}</option>`;
                     });
+                    courseWrapper.classList.remove('hidden');
+                }
             }
         });
         

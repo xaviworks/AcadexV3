@@ -164,16 +164,15 @@
 
 {{-- Generate Course Outcomes Modal --}}
 @if($isChairpersonOrGE)
-<div class="modal fade" id="generateCOModal" tabindex="-1" aria-labelledby="generateCOModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem;">
-            <div class="modal-header border-0 bg-success" style="border-radius: 1rem 1rem 0 0;">
-                <h5 class="modal-title text-white fw-bold" id="generateCOModalLabel">
-                    <i class="bi bi-magic me-2"></i>Generate Course Outcomes
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
+<x-modal.form
+    id="generateCOModal"
+    title="Generate Course Outcomes"
+    size="large"
+    :backdrop="true"
+    :keyboard="true"
+    scrollable
+>
+    <x-slot:icon><i class="bi bi-magic me-1"></i></x-slot:icon>
                 {{-- Display validation errors --}}
                 @if($errors->any())
                     <div class="alert alert-danger border-0 mb-3" style="background: rgba(220, 53, 69, 0.1);">
@@ -367,16 +366,16 @@
                         </div>
                     </div>
                 </form>
-            </div>
-            <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 1rem 1rem;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success fw-semibold px-4" onclick="submitGenerateForm()" id="generateSubmitBtn">
-                    Generate Course Outcomes
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success fw-semibold px-4" onclick="submitGenerateForm()" id="generateSubmitBtn">
+                Generate Course Outcomes
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 @endif
 
 @endsection

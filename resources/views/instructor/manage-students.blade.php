@@ -171,7 +171,7 @@
                                                 <i class="bi bi-pencil-square"></i> Edit
                                             </button>
                                             @if($student->pivot->is_deleted)
-                                                <form method="POST" action="{{ route('instructor.students.reenroll', $student->id) }}" class="d-inline">
+                                                <form method="POST" action="{{ route('instructor.students.reenroll', $student->id) }}" class="d-inline ajax-action-form" data-refresh-target="#studentTabsContent" data-loading-text="Re-enrolling...">
                                                     @csrf
                                                     @method('PATCH')
                                                     <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
@@ -196,7 +196,6 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
             @elseif(request('subject_id'))
                 <x-empty-state
                     icon="bi-people"
@@ -525,28 +524,32 @@
     </div>
 </div>
 
-{{-- Enroll Student Modal --}}
-<div class="modal fade" id="enrollStudentModal" tabindex="-1" aria-labelledby="enrollStudentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" action="{{ route('instructor.students.store') }}">
-            @csrf
-            <div class="modal-content shadow-sm border-0 rounded-3">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="enrollStudentModalLabel">
-                         Enroll student to 
-                        @if(request('subject_id'))
-                            @php
-                                $selectedSubject = $subjects->firstWhere('id', request('subject_id'));
-                            @endphp
-                            {{ $selectedSubject ? $selectedSubject->subject_code . ' - ' . $selectedSubject->subject_description : '' }}
-                        @endif
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
-                    <input type="hidden" name="course_id" value="{{ Auth::user()->course_id }}">
-                    <div class="row g-3">
+@php
+    $selectedSubjectForEnroll = request('subject_id') ? $subjects->firstWhere('id', request('subject_id')) : null;
+    $enrollStudentModalTitle = 'Enroll student';
+
+    if ($selectedSubjectForEnroll) {
+        $enrollStudentModalTitle .= ' to ' . $selectedSubjectForEnroll->subject_code . ' - ' . $selectedSubjectForEnroll->subject_description;
+    }
+@endphp
+
+<x-modal.form
+    id="enrollStudentModal"
+    :title="$enrollStudentModalTitle"
+    size="large"
+    :form="route('instructor.students.store')"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#studentTabsContent" data-close-modal="enrollStudentModal" data-loading-text="Enrolling..." data-reset-on-success="true"'
+    :centered="false"
+>
+    <x-slot:icon>
+        <i class="bi bi-person-plus"></i>
+    </x-slot:icon>
+
+    @csrf
+    <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
+    <input type="hidden" name="course_id" value="{{ Auth::user()->course_id }}">
+    <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">First Name <span class="text-danger">*</span></label>
                             <input type="text" name="first_name" class="form-control" required>
@@ -568,31 +571,31 @@
                             <label class="form-label">Course</label>
                             <input type="text" class="form-control bg-light" value="{{ Auth::user()->course->course_code }} - {{ Auth::user()->course->course_description }}" readonly>
                         </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">+ Confirm Enroll</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
     </div>
-</div>
 
-{{-- Manage Student Modal --}}
-<div class="modal fade" id="manageStudentModal" tabindex="-1" aria-labelledby="manageStudentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" id="manageStudentForm" action="#" onsubmit="return ensureManageFormActionSet(this)">
-            @csrf
-            @method('PUT')
-            <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
-            <div class="modal-content shadow-sm border-0 rounded-3">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="manageStudentModalLabel">👤 Manage Student</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
+    <x-slot:footer>
+        <x-modal.actions primary-text="Confirm Enroll" primary-variant="success" />
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.form
+    id="manageStudentModal"
+    title="Manage Student"
+    size="large"
+    form="#"
+    form-id="manageStudentForm"
+    form-class="ajax-action-form"
+    form-attributes='onsubmit="return ensureManageFormActionSet(this)" data-refresh-target="#studentTabsContent" data-close-modal="manageStudentModal" data-loading-text="Saving..."'
+    :centered="false"
+>
+    <x-slot:icon>
+        <i class="bi bi-person-gear"></i>
+    </x-slot:icon>
+
+    @csrf
+    @method('PUT')
+    <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
+    <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">First Name <span class="text-danger">*</span></label>
                             <input type="text" name="first_name" id="manage_first_name" class="form-control" required>
@@ -616,88 +619,76 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
+    <x-slot:footer>
+        <x-modal.actions primary-text="Save Changes" primary-variant="success" />
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.destructive
+    id="confirmDropModal"
+    title="Confirm Drop"
+    form=""
+    form-id="dropStudentForm"
+    form-class="ajax-action-form"
+    form-attributes='onsubmit="return ensureDropFormActionSet(this)" data-refresh-target="#studentTabsContent" data-close-modal="confirmDropModal" data-loading-text="Dropping..."'
+>
+    <x-slot:icon>
+        <i class="bi bi-exclamation-triangle-fill"></i>
+    </x-slot:icon>
+
+    @csrf
+    @method('DELETE')
+    <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
+
+    <p>Are you sure you want to drop <strong id="studentNamePlaceholder">this student</strong> from the subject?</p>
+    <p class="text-danger mb-2">This action cannot be undone.</p>
+    <div class="mb-3">
+        <label class="form-label">Type "drop" to confirm</label>
+        <input type="text" class="form-control" id="dropConfirmation" required>
     </div>
-</div>
 
-{{-- Drop Confirmation Modal --}}
-<div class="modal fade" id="confirmDropModal" tabindex="-1" aria-labelledby="confirmDropModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" id="dropStudentForm" action="" onsubmit="return ensureDropFormActionSet(this)">
-            @csrf
-            @method('DELETE')
-            <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="confirmDropModalLabel">⚠ Confirm Drop</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to drop <strong id="studentNamePlaceholder">this student</strong> from the subject?</p>
-                    <p class="text-danger mb-2">This action cannot be undone.</p>
-                    <div class="mb-3">
-                        <label class="form-label">Type "drop" to confirm</label>
-                        <input type="text" class="form-control" id="dropConfirmation" required>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-danger" id="confirmDropBtn" disabled>Drop Student</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger" id="confirmDropBtn" disabled>Drop Student</button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.form
+    id="confirmModal"
+    title="Confirm Import"
+    size="medium"
+    :form="route('instructor.students.import.confirm')"
+    form-id="confirmForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#studentTabsContent" data-close-modal="confirmModal" data-loading-text="Importing..."'
+>
+    <x-slot:icon>
+        <i class="bi bi-file-earmark-check"></i>
+    </x-slot:icon>
+
+    @csrf
+    <input type="hidden" name="list_name" value="{{ $listName }}">
+    <input type="hidden" name="selected_student_ids" id="selectedStudentIds">
+
+    <div class="mb-0">
+        <label class="form-label">Target Subject</label>
+        <p class="form-control-plaintext fw-semibold" id="confirmSubjectLabel">-</p>
+        <p class="small text-muted mt-1" id="confirmStudentCount">-</p>
+        <input type="hidden" name="subject_id" id="confirmSubjectId" value="">
     </div>
-</div>
-
-{{-- Import Confirm Modal --}}
-<div class="modal fade" id="confirmModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" 
-              action="{{ route('instructor.students.import.confirm') }}" 
-              class="modal-content"
-              id="confirmForm">
-            @csrf
-            <input type="hidden" name="list_name" value="{{ $listName }}">
-            <input type="hidden" name="selected_student_ids" id="selectedStudentIds">
-
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title">
-                    <i class="bi bi-file-earmark-check text-success me-2"></i>
-                    Confirm Import
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-                <div class="mb-0">
-                    <label class="form-label">Target Subject</label>
-                    <p class="form-control-plaintext fw-semibold" id="confirmSubjectLabel">-</p>
-                    <p class="small text-muted mt-1" id="confirmStudentCount">-</p>
-                    <input type="hidden" name="subject_id" id="confirmSubjectId" value="">
-                </div>
-                <div class="mt-3">
-                    <label class="form-label small">Selected Students</label>
-                    <div id="confirmSelectedList" class="list-group list-group-flush small" style="max-height: 180px; overflow:auto;">
-                        <div class="list-group-item px-0 text-muted">No students selected</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer border-0 pt-0">
-                <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
-                    <i class="bi bi-check2-all"></i>
-                    <span>Confirm Import</span>
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </form>
+    <div class="mt-3">
+        <label class="form-label small">Selected Students</label>
+        <div id="confirmSelectedList" class="list-group list-group-flush small" style="max-height: 180px; overflow:auto;">
+            <div class="list-group-item px-0 text-muted">No students selected</div>
+        </div>
     </div>
-</div>
+
+    <x-slot:footer>
+        <x-modal.actions primary-text="Confirm Import" primary-variant="success" />
+    </x-slot:footer>
+</x-modal.form>
 
 {{-- Toast Message --}}
 @if(session('success'))

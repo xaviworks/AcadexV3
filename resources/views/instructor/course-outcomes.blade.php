@@ -138,38 +138,32 @@
 
 {{-- Add Course Outcome Modal --}}
 @if(Auth::user()->isChairperson())
-<div class="modal fade" id="addCourseOutcomeModal" tabindex="-1" aria-labelledby="addCourseOutcomeModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" action="{{ route($routePrefix . '.course_outcomes.store') }}">
-            @csrf
-            <div class="modal-content shadow-sm border-0 rounded-3">
-                <div class="modal-header bg-success">
-                    <h5 class="modal-title" id="addCourseOutcomeModalLabel">➕ Add Course Outcome</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">CO Code <span class="text-danger">*</span></label>
-                        <input type="text" name="co_code" id="co_code" class="form-control" readonly style="background-color: #f8f9fa;" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Identifier <span class="text-danger">*</span></label>
-                        <input type="text" name="co_identifier" id="co_identifier" class="form-control" readonly style="background-color: #f8f9fa;" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description <span class="text-danger">*</span></label>
-                        <textarea name="description" class="form-control" rows="3" required></textarea>
-                    </div>
-                    <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">Add Outcome</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
+<x-modal.form
+    id="addCourseOutcomeModal"
+    title="Add Course Outcome"
+    size="medium"
+    form="{{ route($routePrefix . '.course_outcomes.store') }}"
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-plus-circle me-1"></i></x-slot:icon>
+    <div class="mb-3">
+        <label class="form-label">CO Code <span class="text-danger">*</span></label>
+        <input type="text" name="co_code" id="co_code" class="form-control" readonly style="background-color: #f8f9fa;" required>
     </div>
-</div>
+    <div class="mb-3">
+        <label class="form-label">Identifier <span class="text-danger">*</span></label>
+        <input type="text" name="co_identifier" id="co_identifier" class="form-control" readonly style="background-color: #f8f9fa;" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description <span class="text-danger">*</span></label>
+        <textarea name="description" class="form-control" rows="3" required></textarea>
+    </div>
+    <input type="hidden" name="subject_id" value="{{ request('subject_id') }}">
+
+    <x-slot:footer>
+        <x-modal.actions primary-text="Add Outcome" primary-variant="success" />
+    </x-slot:footer>
+</x-modal.form>
 @endif
 @endsection
 

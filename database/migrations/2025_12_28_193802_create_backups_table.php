@@ -17,7 +17,10 @@ return new class extends Migration
             $table->string('type')->default('full'); // full, selective, config
             $table->string('filename');
             $table->string('path');
+            $table->string('disk')->default('local');
             $table->unsignedBigInteger('size')->default(0); // bytes
+            $table->string('checksum', 64)->nullable();
+            $table->boolean('encrypted')->default(false);
             $table->json('tables')->nullable(); // which tables were backed up
             $table->string('status')->default('pending'); // pending, completed, failed
             $table->text('notes')->nullable();

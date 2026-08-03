@@ -36,6 +36,7 @@
         $geRequestsCount = \App\Models\GESubjectRequest::where('status', 'pending')->count();
     @endphp
 
+    <div id="ge-instructors-section">
     {{-- Tabs --}}
     <ul class="nav nav-tabs mb-0" id="instructorTabs" role="tablist" style="background: transparent; border-bottom: 2px solid #dee2e6;">
         <li class="nav-item" role="presentation">
@@ -350,171 +351,131 @@
 </div>
 
 {{-- Modals --}}
-<div class="modal fade" id="confirmDeactivateModal" tabindex="-1" aria-labelledby="confirmDeactivateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form id="deactivateForm" method="POST">
-            @csrf
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="confirmDeactivateModalLabel">Confirm Account Deactivation</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to deactivate <strong id="instructorName"></strong>'s account?</p>
-                    <p class="text-muted small mb-0">
-                        <i class="bi bi-info-circle me-1"></i>
-                        This will completely deactivate the instructor's account and revoke all GE teaching access.
-                    </p>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-danger">Deactivate</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+<x-modal.destructive
+    id="confirmDeactivateModal"
+    title="Confirm Account Deactivation"
+    form=""
+    form-id="deactivateForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmDeactivateModal" data-loading-text="Deactivating..."'
+>
+    @csrf
+    <p>Are you sure you want to deactivate <strong id="instructorName"></strong>'s account?</p>
+    <p class="text-muted small mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        This will completely deactivate the instructor's account and revoke all GE teaching access.
+    </p>
 
-{{-- Remove GE Access Modal (for non-GE department instructors) --}}
-<div class="modal fade" id="confirmRemoveGEAccessModal" tabindex="-1" aria-labelledby="confirmRemoveGEAccessModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form id="removeGEAccessForm" method="POST">
-            @csrf
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title" id="confirmRemoveGEAccessModalLabel">Remove GE Teaching Access</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to remove GE teaching access for <strong id="removeGEAccessName"></strong>?</p>
-                    <p class="text-muted small mb-0">
-                        <i class="bi bi-info-circle me-1"></i>
-                        This will only revoke their ability to teach GE courses. Their account will remain active under their department.
-                    </p>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-warning">Remove GE Access</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions destructive-text="Deactivate" />
+    </x-slot:footer>
+</x-modal.destructive>
 
-<div class="modal fade" id="confirmApproveModal" tabindex="-1" aria-labelledby="confirmApproveModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" id="approveForm">
-            @csrf
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="confirmApproveModalLabel">Confirm Approval</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to approve <strong id="approveName"></strong>'s account?
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">Approve</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+<x-modal.warning
+    id="confirmRemoveGEAccessModal"
+    title="Remove GE Teaching Access"
+    form=""
+    form-id="removeGEAccessForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmRemoveGEAccessModal" data-loading-text="Removing..."'
+>
+    @csrf
+    <p>Are you sure you want to remove GE teaching access for <strong id="removeGEAccessName"></strong>?</p>
+    <p class="text-muted small mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        This will only revoke their ability to teach GE courses. Their account will remain active under their department.
+    </p>
 
-<div class="modal fade" id="confirmRejectModal" tabindex="-1" aria-labelledby="confirmRejectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" id="rejectForm">
-            @csrf
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="confirmRejectModalLabel">Confirm Rejection</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to reject <strong id="rejectName"></strong>'s account?
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-danger">Reject</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions primary-text="Remove GE Access" primary-variant="warning" />
+    </x-slot:footer>
+</x-modal.warning>
 
-<div class="modal fade" id="confirmActivateModal" tabindex="-1" aria-labelledby="confirmActivateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" id="activateForm">
-            @csrf
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="confirmActivateModalLabel">Confirm Activation</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to activate <strong id="activateName"></strong>'s account?
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">Activate</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+<x-modal.success
+    id="confirmApproveModal"
+    title="Confirm Approval"
+    form=""
+    form-id="approveForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmApproveModal" data-loading-text="Approving..."'
+>
+    @csrf
+    Are you sure you want to approve <strong id="approveName"></strong>'s account?
 
-{{-- Approve GE Course Request Modal --}}
-<div class="modal fade" id="approveGERequestModal" tabindex="-1" aria-labelledby="approveGERequestModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" id="approveGERequestForm">
-            @csrf
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="approveGERequestModalLabel">Approve GE Course Request</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to approve the GE Course request for <strong id="approveGERequestName"></strong>?
-                    <p class="text-muted small mt-2">
-                        <i class="bi bi-info-circle me-1"></i>
-                        This will allow the instructor to be assigned to GE courses.
-                    </p>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">Approve Request</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions primary-text="Approve" primary-variant="success" />
+    </x-slot:footer>
+</x-modal.success>
 
-{{-- Reject GE Course Request Modal --}}
-<div class="modal fade" id="rejectGERequestModal" tabindex="-1" aria-labelledby="rejectGERequestModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form method="POST" id="rejectGERequestForm">
-            @csrf
-            <div class="modal-content rounded-4 shadow">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="rejectGERequestModalLabel">Reject GE Course Request</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to reject the GE course request for <strong id="rejectGERequestName"></strong>?
-                    <p class="text-muted small mt-2">
-                        <i class="bi bi-info-circle me-1"></i>
-                        This will deny the instructor from being assigned to GE courses.
-                    </p>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-danger">Reject Request</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+<x-modal.destructive
+    id="confirmRejectModal"
+    title="Confirm Rejection"
+    form=""
+    form-id="rejectForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmRejectModal" data-loading-text="Rejecting..."'
+>
+    @csrf
+    Are you sure you want to reject <strong id="rejectName"></strong>'s account?
 
-{{-- JavaScript is loaded via resources/js/pages/gecoordinator/manage-instructors.js --}}
+    <x-slot:footer>
+        <x-modal.actions destructive-text="Reject" />
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.success
+    id="confirmActivateModal"
+    title="Confirm Activation"
+    form=""
+    form-id="activateForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="confirmActivateModal" data-loading-text="Activating..."'
+>
+    @csrf
+    Are you sure you want to activate <strong id="activateName"></strong>'s account?
+
+    <x-slot:footer>
+        <x-modal.actions primary-text="Activate" primary-variant="success" />
+    </x-slot:footer>
+</x-modal.success>
+
+<x-modal.success
+    id="approveGERequestModal"
+    title="Approve GE Course Request"
+    form=""
+    form-id="approveGERequestForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="approveGERequestModal" data-loading-text="Approving..."'
+>
+    @csrf
+    Are you sure you want to approve the GE Course request for <strong id="approveGERequestName"></strong>?
+    <p class="text-muted small mt-2 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        This will allow the instructor to be assigned to GE courses.
+    </p>
+
+    <x-slot:footer>
+        <x-modal.actions primary-text="Approve Request" primary-variant="success" />
+    </x-slot:footer>
+</x-modal.success>
+
+<x-modal.destructive
+    id="rejectGERequestModal"
+    title="Reject GE Course Request"
+    form=""
+    form-id="rejectGERequestForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#ge-instructors-section" data-close-modal="rejectGERequestModal" data-loading-text="Rejecting..."'
+>
+    @csrf
+    Are you sure you want to reject the GE course request for <strong id="rejectGERequestName"></strong>?
+    <p class="text-muted small mt-2 mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        This will deny the instructor from being assigned to GE courses.
+    </p>
+
+    <x-slot:footer>
+        <x-modal.actions destructive-text="Reject Request" />
+    </x-slot:footer>
+</x-modal.destructive>
 @endsection

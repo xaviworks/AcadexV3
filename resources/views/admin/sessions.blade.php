@@ -384,71 +384,63 @@
     </div>
 </div>
 
-{{-- Revoke Single Session Modal --}}
-<div class="modal fade" id="revokeModal" tabindex="-1" aria-labelledby="revokeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="revokeModalLabel">Revoke Session</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="revoke-form" action="{{ route('admin.sessions.revoke') }}" method="POST">
-                @csrf
-                <input type="hidden" name="session_id" id="revoke-session-id">
-                <div class="modal-body">
-                    <p>You are about to revoke the session for <strong id="revoke-user-name"></strong>.</p>
-                    <p class="text-danger mb-3">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        This will immediately log out the user from their current session.
-                    </p>
-                    <div class="mt-3">
-                        <label class="form-label fw-bold">Confirm Your Password</label>
-                        <input type="password" name="password" id="revoke-password" class="form-control" required 
-                               placeholder="Enter your admin password" autofocus>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger">Revoke Session</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>                
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<x-modal.destructive
+    id="revokeModal"
+    title="Revoke Session"
+    form="{{ route('admin.sessions.revoke') }}"
+    form-id="revoke-form"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#sessionTabContent" data-close-modal="revokeModal" data-loading-text="Revoking..."'
+>
+    @csrf
+    <input type="hidden" name="session_id" id="revoke-session-id">
 
-{{-- Revoke All Sessions Modal --}}
-<div class="modal fade" id="revokeAllModal" tabindex="-1" aria-labelledby="revokeAllModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="revokeAllModalLabel">Revoke All Sessions</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="revoke-all-form" action="{{ route('admin.sessions.revokeAll') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <p class="fw-bold text-danger">
-                        <i class="fas fa-exclamation-circle me-1"></i>
-                        WARNING: This is a critical action!
-                    </p>
-                    <p>You are about to revoke <strong>ALL active user sessions</strong> in the system, except your current session.</p>
-                    <p class="text-muted">
-                        This will immediately log out all users from all their devices. Only use this in emergency situations.
-                    </p>
-                    <div class="mt-3">
-                        <label class="form-label fw-bold">Confirm Your Password</label>
-                        <input type="password" name="password" class="form-control" required 
-                               placeholder="Enter your admin password">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger">Revoke All Sessions</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
+    <p>You are about to revoke the session for <strong id="revoke-user-name"></strong>.</p>
+    <p class="text-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-1"></i>
+        This will immediately log out the user from their current session.
+    </p>
+    <div class="mt-3">
+        <label class="form-label fw-bold">Confirm Your Password</label>
+        <input type="password" name="password" id="revoke-password" class="form-control" required
+               placeholder="Enter your admin password" autofocus>
     </div>
-</div>
+
+    <x-slot:footer>
+        <x-modal.actions destructive-text="Revoke Session" />
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.destructive
+    id="revokeAllModal"
+    title="Revoke All Sessions"
+    form="{{ route('admin.sessions.revokeAll') }}"
+    form-id="revoke-all-form"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#sessionTabContent" data-close-modal="revokeAllModal" data-loading-text="Revoking..."'
+    :backdrop="false"
+    :keyboard="false"
+>
+    @csrf
+
+    <p class="fw-bold text-danger">
+        <i class="fas fa-exclamation-circle me-1"></i>
+        WARNING: This is a critical action!
+    </p>
+    <p>You are about to revoke <strong>ALL active user sessions</strong> in the system, except your current session.</p>
+    <p class="text-muted">
+        This will immediately log out all users from all their devices. Only use this in emergency situations.
+    </p>
+    <div class="mt-3">
+        <label class="form-label fw-bold">Confirm Your Password</label>
+        <input type="password" name="password" class="form-control" required
+               placeholder="Enter your admin password">
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions destructive-text="Revoke All Sessions" />
+    </x-slot:footer>
+</x-modal.destructive>
 
 @push('scripts')
     {{-- Modal handlers are in: resources/js/pages/admin/sessions.js --}}

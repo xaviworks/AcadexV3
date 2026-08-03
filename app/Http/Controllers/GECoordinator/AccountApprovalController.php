@@ -8,8 +8,9 @@ use App\Models\Department;
 use App\Models\UnverifiedUser;
 use App\Models\User;
 use App\Services\NotificationService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -40,7 +41,7 @@ class AccountApprovalController extends Controller
     /**
      * Approve a pending GE instructor and migrate their data to the main users table.
      */
-    public function approve(int $id): RedirectResponse
+    public function approve(Request $request, int $id): RedirectResponse|JsonResponse
     {
         if (! Auth::user()->isGECoordinator()) {
             abort(403);
@@ -50,6 +51,13 @@ class AccountApprovalController extends Controller
         $geDepartment = Department::where('department_code', 'GE')->first();
 
         if (! $geDepartment) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'GE Department not found.',
+                ], 404);
+            }
+
             return back()->withErrors(['error' => 'GE Department not found.']);
         }
 
@@ -59,6 +67,13 @@ class AccountApprovalController extends Controller
             ->first();
 
         if (! $pending) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pending account not found or already processed.',
+                ], 404);
+            }
+
             return back()->withErrors(['error' => 'Pending account not found or already processed.']);
         }
 
@@ -85,8 +100,25 @@ class AccountApprovalController extends Controller
             // Notify the instructor that their account was approved (Email + System)
             NotificationService::notifyInstructorApproved($newUser, Auth::user());
 
-            return back()->with('success', 'GE Instructor account has been approved successfully.');
+            $message = 'GE Instructor account has been approved successfully.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => $newUser,
+                ]);
+            }
+
+            return back()->with('success', $message);
         } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to approve account: '.$e->getMessage(),
+                ], 500);
+            }
+
             return back()->withErrors(['error' => 'Failed to approve account: '.$e->getMessage()]);
         }
     }
@@ -94,7 +126,7 @@ class AccountApprovalController extends Controller
     /**
      * Reject and delete a pending GE instructor account request.
      */
-    public function reject(int $id): RedirectResponse
+    public function reject(Request $request, int $id): RedirectResponse|JsonResponse
     {
         if (! Auth::user()->isGECoordinator()) {
             abort(403);
@@ -104,6 +136,13 @@ class AccountApprovalController extends Controller
         $geDepartment = Department::where('department_code', 'GE')->first();
 
         if (! $geDepartment) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'GE Department not found.',
+                ], 404);
+            }
+
             return back()->withErrors(['error' => 'GE Department not found.']);
         }
 
@@ -112,6 +151,13 @@ class AccountApprovalController extends Controller
             ->first();
 
         if (! $pending) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pending account not found or already processed.',
+                ], 404);
+            }
+
             return back()->withErrors(['error' => 'Pending account not found or already processed.']);
         }
 
@@ -124,6 +170,15 @@ class AccountApprovalController extends Controller
 
         $pending->delete();
 
-        return back()->with('success', 'GE Instructor account request has been rejected and removed.');
+        $message = 'GE Instructor account request has been rejected and removed.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

@@ -49,7 +49,7 @@
     </div>
 
     {{-- Users Table --}}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm" id="users-table-container">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table id="usersTable" class="table table-bordered table-hover mb-0">
@@ -187,146 +187,151 @@
         </div>
     </div>
 </div>
-    {{-- Disable Choose Modal (one instance) --}}
-    <div x-data x-show="$store.modals.active === 'chooseDisableModal'" x-cloak x-transition.opacity class="modal fade" :class="{ 'show d-block': $store.modals.active === 'chooseDisableModal' }" tabindex="-1" style="z-index: 1050;" @click.self="modal.close()">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header disable-modal-header text-white">
-                    <div>
-                        <h5 class="modal-title mb-1">
-                            <i class="bi bi-person-slash me-2"></i>Disable User Account
-                        </h5>
-                        <small class="opacity-75">Temporarily restrict account access</small>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" @click="modal.close()" aria-label="Close"></button>
+<x-modal.destructive
+    id="chooseDisableModal"
+    title="Disable User Account"
+    description="Temporarily restrict account access"
+    size="large"
+    form=""
+    form-id="chooseDisableForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#users-table-container" data-close-modal="chooseDisableModal" data-loading-text="Disabling..."'
+    form-action-expression="'/admin/users/' + $store.modals.data.userId + '/disable'"
+    close-action="modal.close()"
+    x-data
+    x-show="$store.modals.active === 'chooseDisableModal'"
+    x-cloak
+    x-transition.opacity
+    ::class="{ 'show d-block': $store.modals.active === 'chooseDisableModal' }"
+    style="z-index: 1050;"
+    @click.self="modal.close()"
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-person-slash me-1"></i></x-slot:icon>
+
+    <div class="disable-modal-body">
+        <div class="disable-modal-intro">
+            <div class="d-flex align-items-start gap-3">
+                <div class="text-danger icon-xl">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
                 </div>
-                <form id="chooseDisableForm" method="POST" :action="`/admin/users/${$store.modals.data.userId}/disable`">
-                    @csrf
-                    <div class="modal-body disable-modal-body">
-                        <div class="disable-modal-intro">
-                            <div class="d-flex align-items-start gap-3">
-                                <div class="text-danger icon-xl">
-                                    <i class="bi bi-exclamation-triangle-fill"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-1 fw-bold">Disabling: <span x-text="$store.modals.data.userName" class="text-primary"></span></h6>
-                                    <p class="mb-0 small text-muted">
-                                        This will prevent the user from logging in or accessing the system for the selected duration. 
-                                        All active sessions will be terminated immediately.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                <div>
+                    <h6 class="mb-1 fw-bold">Disabling: <span x-text="$store.modals.data.userName" class="text-primary"></span></h6>
+                    <p class="mb-0 small text-muted">
+                        This will prevent the user from logging in or accessing the system for the selected duration.
+                        All active sessions will be terminated immediately.
+                    </p>
+                </div>
+            </div>
+        </div>
 
-                        <div class="mb-2">
-                            <label class="form-label fw-semibold text-dark mb-3">
-                                <i class="bi bi-clock-history me-2"></i>Choose Duration
-                            </label>
-                        </div>
+        <div class="mb-2">
+            <label class="form-label fw-semibold text-dark mb-3">
+                <i class="bi bi-clock-history me-2"></i>Choose Duration
+            </label>
+        </div>
 
-                        <div class="d-flex gap-3 disable-options-row flex-wrap">
-                            <div class="flex-fill">
-                                <div class="disable-option-card active" data-value="1_week" role="button" tabindex="0">
-                                    <span class="check-mark"><i class="bi bi-check-lg"></i></span>
-                                    <div class="icon bg-primary bg-opacity-10 text-primary">
-                                        <i class="bi bi-calendar-week-fill"></i>
-                                    </div>
-                                    <div class="meta">
-                                        <div class="fw-semibold">1 Week</div>
-                                        <small>Disable for 7 days</small>
-                                    </div>
-                                    <input type="radio" class="d-none" name="duration_option" value="1_week" checked>
-                                </div>
-                            </div>
-
-                            <div class="flex-fill">
-                                <div class="disable-option-card" data-value="1_month" role="button" tabindex="0">
-                                    <span class="check-mark"><i class="bi bi-check-lg"></i></span>
-                                    <div class="icon bg-info bg-opacity-10 text-info">
-                                        <i class="bi bi-calendar-month-fill"></i>
-                                    </div>
-                                    <div class="meta">
-                                        <div class="fw-semibold">1 Month</div>
-                                        <small>Disable for ~30 days</small>
-                                    </div>
-                                    <input type="radio" class="d-none" name="duration_option" value="1_month">
-                                </div>
-                            </div>
-
-                            <div class="flex-fill">
-                                <div class="disable-option-card" data-value="indefinite" role="button" tabindex="0">
-                                    <span class="check-mark"><i class="bi bi-check-lg"></i></span>
-                                    <div class="icon bg-danger bg-opacity-10 text-danger">
-                                        <i class="bi bi-slash-circle-fill"></i>
-                                    </div>
-                                    <div class="meta">
-                                        <div class="fw-semibold">Indefinite</div>
-                                        <small>Until manually re-enabled</small>
-                                    </div>
-                                    <input type="radio" class="d-none" name="duration_option" value="indefinite">
-                                </div>
-                            </div>
-
-                            <div class="flex-fill">
-                                <div class="disable-option-card" data-value="custom" role="button" tabindex="0">
-                                    <span class="check-mark"><i class="bi bi-check-lg"></i></span>
-                                    <div class="icon bg-warning bg-opacity-10 text-warning">
-                                        <i class="bi bi-clock-fill"></i>
-                                    </div>
-                                    <div class="meta">
-                                        <div class="fw-semibold">Custom</div>
-                                        <small>Pick exact date &amp; time</small>
-                                    </div>
-                                    <input type="radio" class="d-none" name="duration_option" value="custom">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="customDatetimeWrapper" class="custom-datetime-wrapper">
-                            <div class="bg-white p-3 rounded-3 border">
-                                <label for="customDisableDatetime" class="form-label fw-semibold small mb-2">
-                                    <i class="bi bi-calendar-event me-1"></i>Select Re-enable Date & Time
-                                </label>
-                                <input 
-                                    type="datetime-local" 
-                                    id="customDisableDatetime" 
-                                    name="custom_disable_datetime" 
-                                    class="form-control" 
-                                    min="{{ now()->addMinutes(5)->format('Y-m-d\TH:i') }}"
-                                >
-                                <small class="text-muted d-block mt-2">
-                                    <i class="bi bi-info-circle me-1"></i>Account will be automatically re-enabled at this time
-                                </small>
-                            </div>
-                        </div>
+        <div class="d-flex gap-3 disable-options-row flex-wrap">
+            <div class="flex-fill">
+                <div class="disable-option-card active" data-value="1_week" role="button" tabindex="0">
+                    <span class="check-mark"><i class="bi bi-check-lg"></i></span>
+                    <div class="icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-calendar-week-fill"></i>
                     </div>
-                    <div class="modal-footer disable-modal-footer">
-                        <input type="hidden" name="duration" id="chooseDisableDuration" value="1_week">
-                        <button type="submit" class="btn btn-danger px-4" id="disableAccountSubmitBtn">
-                            <i class="bi bi-person-slash me-2"></i>Disable Account
-                        </button>
-                        <button type="button" class="btn btn-secondary px-4" @click="modal.close()">
-                            <i class="bi bi-x-lg me-2"></i>Cancel
-                        </button>
+                    <div class="meta">
+                        <div class="fw-semibold">1 Week</div>
+                        <small>Disable for 7 days</small>
                     </div>
-                </form>
+                    <input type="radio" class="d-none" name="duration_option" value="1_week" checked>
+                </div>
+            </div>
+
+            <div class="flex-fill">
+                <div class="disable-option-card" data-value="1_month" role="button" tabindex="0">
+                    <span class="check-mark"><i class="bi bi-check-lg"></i></span>
+                    <div class="icon bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-calendar-month-fill"></i>
+                    </div>
+                    <div class="meta">
+                        <div class="fw-semibold">1 Month</div>
+                        <small>Disable for ~30 days</small>
+                    </div>
+                    <input type="radio" class="d-none" name="duration_option" value="1_month">
+                </div>
+            </div>
+
+            <div class="flex-fill">
+                <div class="disable-option-card" data-value="indefinite" role="button" tabindex="0">
+                    <span class="check-mark"><i class="bi bi-check-lg"></i></span>
+                    <div class="icon bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-slash-circle-fill"></i>
+                    </div>
+                    <div class="meta">
+                        <div class="fw-semibold">Indefinite</div>
+                        <small>Until manually re-enabled</small>
+                    </div>
+                    <input type="radio" class="d-none" name="duration_option" value="indefinite">
+                </div>
+            </div>
+
+            <div class="flex-fill">
+                <div class="disable-option-card" data-value="custom" role="button" tabindex="0">
+                    <span class="check-mark"><i class="bi bi-check-lg"></i></span>
+                    <div class="icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-clock-fill"></i>
+                    </div>
+                    <div class="meta">
+                        <div class="fw-semibold">Custom</div>
+                        <small>Pick exact date &amp; time</small>
+                    </div>
+                    <input type="radio" class="d-none" name="duration_option" value="custom">
+                </div>
+            </div>
+        </div>
+
+        <div id="customDatetimeWrapper" class="custom-datetime-wrapper">
+            <div class="bg-white p-3 rounded-3 border">
+                <label for="customDisableDatetime" class="form-label fw-semibold small mb-2">
+                    <i class="bi bi-calendar-event me-1"></i>Select Re-enable Date & Time
+                </label>
+                <input
+                    type="datetime-local"
+                    id="customDisableDatetime"
+                    name="custom_disable_datetime"
+                    class="form-control"
+                    min="{{ now()->addMinutes(5)->format('Y-m-d\TH:i') }}"
+                >
+                <small class="text-muted d-block mt-2">
+                    <i class="bi bi-info-circle me-1"></i>Account will be automatically re-enabled at this time
+                </small>
             </div>
         </div>
     </div>
 
-    {{-- Add User Modal --}}
-<div class="modal fade" id="courseModal" tabindex="-1" aria-labelledby="courseModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="courseModalLabel">Add New User</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="user-form" action="{{ route('admin.storeVerifiedUser') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    {{-- Name Section --}}
-                    <div class="row g-3">
+    <x-slot:footer>
+        <input type="hidden" name="duration" id="chooseDisableDuration" value="1_week">
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-secondary px-4" @click="modal.close()">
+                <i class="bi bi-x-lg me-2"></i>Cancel
+            </button>
+            <button type="submit" class="btn btn-danger px-4" id="disableAccountSubmitBtn">
+                <i class="bi bi-person-slash me-2"></i>Disable Account
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.form
+    id="courseModal"
+    title="Add New User"
+    form="{{ route('admin.storeVerifiedUser') }}"
+    form-id="user-form"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#users-table-container" data-close-modal="courseModal" data-loading-text="Creating..."'
+    scrollable
+>
+    @csrf
+    <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">First Name</label>
                             <input type="text" name="first_name" class="form-control" placeholder="Juan" required>
@@ -446,82 +451,74 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="openConfirmModal()">Add User</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="button" class="btn btn-success" onclick="openConfirmModal()">Add User</button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
-{{-- Confirmation Modal --}}
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="confirmModalLabel">Confirm Your Password</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="confirm-form" action="{{ route('admin.confirmUserCreationWithPassword') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <p>To make sure this is you, you will need to re-enter your password for safety purposes.</p>
-                    <div class="mt-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="confirm_password" class="form-control" required 
-                               placeholder="Re-enter your password">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Confirm</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
-                </div>
-            </form>
-        </div>
+<x-modal.form
+    id="confirmModal"
+    title="Confirm Your Password"
+    size="medium"
+    form="{{ route('admin.confirmUserCreationWithPassword') }}"
+    form-id="confirm-form"
+>
+    @csrf
+    <p>To make sure this is you, you will need to re-enter your password for safety purposes.</p>
+    <div class="mt-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="confirm_password" class="form-control" required
+               placeholder="Re-enter your password">
     </div>
-</div>
 
-{{-- Reset 2FA Modal --}}
-<div class="modal fade" id="reset2FAUserModal" tabindex="-1" aria-labelledby="reset2FAUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="reset2FAUserModalLabel">
-                    <i class="fas fa-shield-halved me-2"></i>Reset Two-Factor Authentication
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="reset-2fa-user-form" action="{{ route('admin.sessions.reset2fa') }}" method="POST">
-                @csrf
-                <input type="hidden" name="user_id" id="reset-2fa-user-user-id">
-                <div class="modal-body">
-                    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
-                        <i class="fas fa-exclamation-triangle mt-1"></i>
-                        <div>
-                            <strong>Warning:</strong> You are about to reset 2FA for <strong id="reset-2fa-user-user-name"></strong>.
-                        </div>
-                    </div>
-                    <p class="text-muted mb-3">
-                        <i class="fas fa-info-circle me-1"></i>
-                        This will remove their two-factor authentication settings. The user will need to set up 2FA again if they want to re-enable it.
-                    </p>
-                    <div class="mt-3">
-                        <label class="form-label fw-bold">Confirm Your Password</label>
-                        <input type="password" name="password" id="reset-2fa-user-password" class="form-control" required 
-                               placeholder="Enter your admin password" autofocus>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-shield-halved me-1"></i>Reset 2FA
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
+    <x-slot:footer>
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+            <button type="submit" class="btn btn-success">Confirm</button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.warning
+    id="reset2FAUserModal"
+    title="Reset Two-Factor Authentication"
+    size="medium"
+    form="{{ route('admin.sessions.reset2fa') }}"
+    form-id="reset-2fa-user-form"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#users-table-container" data-close-modal="reset2FAUserModal" data-loading-text="Resetting..."'
+>
+    @csrf
+    <x-slot:icon><i class="fas fa-shield-halved me-1"></i></x-slot:icon>
+    <input type="hidden" name="user_id" id="reset-2fa-user-user-id">
+    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
+        <i class="fas fa-exclamation-triangle mt-1"></i>
+        <div>
+            <strong>Warning:</strong> You are about to reset 2FA for <strong id="reset-2fa-user-user-name"></strong>.
         </div>
     </div>
-</div>
+    <p class="text-muted mb-3">
+        <i class="fas fa-info-circle me-1"></i>
+        This will remove their two-factor authentication settings. The user will need to set up 2FA again if they want to re-enable it.
+    </p>
+    <div class="mt-3">
+        <label class="form-label fw-bold">Confirm Your Password</label>
+        <input type="password" name="password" id="reset-2fa-user-password" class="form-control" required
+               placeholder="Enter your admin password" autofocus>
+    </div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-warning">
+                <i class="fas fa-shield-halved me-1"></i>Reset 2FA
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.warning>
 
 {{-- DataTables initialization is handled by resources/js/pages/admin/users.js --}}
 @endsection

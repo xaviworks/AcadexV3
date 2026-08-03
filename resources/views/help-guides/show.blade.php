@@ -122,22 +122,19 @@
         </div>
     </div>
 
-    {{-- Full PDF Viewer Modal --}}
-    <div class="modal fade" id="pdfViewerModal" tabindex="-1" aria-hidden="true" x-ref="pdfModal">
-        <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content">
-                <div class="modal-header py-1 px-3 bg-dark border-0" style="min-height: auto;">
-                    <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-0 bg-secondary">
-                    <iframe :src="currentPdfUrl" 
-                            class="w-100 h-100 border-0"
-                            style="min-height: calc(100vh - 40px);"
-                            x-show="currentPdfUrl"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-modal.information
+        id="pdfViewerModal"
+        title="PDF Viewer"
+        size="fullscreen"
+        header-class="py-1 px-3 bg-dark text-white border-0"
+        body-class="p-0 bg-secondary"
+        x-ref="pdfModal"
+    >
+        <iframe :src="currentPdfUrl"
+                class="w-100 h-100 border-0"
+                style="min-height: calc(100vh - 40px);"
+                x-show="currentPdfUrl"></iframe>
+    </x-modal.information>
 </div>
 @endsection
 

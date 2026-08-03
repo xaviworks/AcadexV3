@@ -680,312 +680,304 @@
     </div>
 </div>
 
-<div class="modal fade" id="create-formula-modal" tabindex="-1" aria-labelledby="create-formula-modal-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <form id="create-formula-form" method="POST" action="{{ route('vpaa.gradingConfiguration.formulas.store', $preservedQuery) }}">
-                @csrf
-                <input type="hidden" name="scope_level" value="global">
-                <input type="hidden" name="base_score" value="60">
-                <input type="hidden" name="scale_multiplier" value="40">
-                <input type="hidden" name="passing_grade" value="75">
-                <input type="hidden" id="create-formula-structure-type" name="structure_type" value="">
-                <input type="hidden" id="create-formula-structure-config" name="structure_config" value="">
-                
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-semibold text-success" id="create-formula-modal-label">
-                        <i class="bi bi-shield-exclamation me-2"></i>Create Institution Fallback Formula
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info mb-3">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <small><strong>What are Institution Fallback Formulas?</strong> These formulas are the emergency safety net used only when no subject, course, or department formula matches. Unlike structure templates, these are fully customizable formulas that you define.</small>
-                    </div>
+<x-modal.form
+    id="create-formula-modal"
+    title="Create Institution Fallback Formula"
+    size="large"
+    :form="route('vpaa.gradingConfiguration.formulas.store', $preservedQuery)"
+    form-id="create-formula-form"
+>
+    <x-slot:icon>
+        <i class="bi bi-shield-exclamation"></i>
+    </x-slot:icon>
 
-                    <div class="mb-3">
-                        <label for="create-formula-label" class="form-label fw-semibold">Formula Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="create-formula-label" name="label" placeholder="e.g., Institution Baseline Formula" value="{{ $oldGlobalFormulaInputs['label'] }}" required>
-                        <small class="text-muted">Choose a descriptive name that indicates the formula's purpose</small>
-                    </div>
+    @csrf
+    <input type="hidden" name="scope_level" value="global">
+    <input type="hidden" name="base_score" value="60">
+    <input type="hidden" name="scale_multiplier" value="40">
+    <input type="hidden" name="passing_grade" value="75">
+    <input type="hidden" id="create-formula-structure-type" name="structure_type" value="">
+    <input type="hidden" id="create-formula-structure-config" name="structure_config" value="">
 
-                    <div class="mb-3">
-                        <label for="create-formula-template" class="form-label fw-semibold">Base Structure Template <span class="text-danger">*</span></label>
-                        <select class="form-select" id="create-formula-template" name="template_key" required>
-                            <option value="">Select a structure template to start</option>
-                            @foreach($structureTemplates as $template)
-                                <option value="{{ $template['key'] }}" 
-                                        data-structure-type="{{ $template['key'] }}"
-                                        data-structure="{{ json_encode($template['structure'] ?? []) }}"
-                                        data-weights="{{ json_encode($template['weights'] ?? []) }}"
-                                        {{ $oldGlobalFormulaInputs['template_key'] === $template['key'] ? 'selected' : '' }}>
-                                    {{ $template['label'] }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <small class="text-muted">Choose a pre-defined structure template as your starting point. You can edit weights after creation.</small>
-                    </div>
+    <div class="alert alert-info mb-3">
+        <i class="bi bi-info-circle me-2"></i>
+        <small><strong>What are Institution Fallback Formulas?</strong> These formulas are the emergency safety net used only when no subject, course, or department formula matches. Unlike structure templates, these are fully customizable formulas that you define.</small>
+    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Scope</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="scope_type" id="create-formula-scope-global" value="global" checked>
-                            <label class="form-check-label" for="create-formula-scope-global">
-                                <strong>Institution Fallback Formula</strong>
-                                <div class="text-muted small">Used only as fallback when no subject, course, or department baseline is available</div>
-                            </label>
-                        </div>
-                    </div>
+    <div class="mb-3">
+        <label for="create-formula-label" class="form-label fw-semibold">Formula Name <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="create-formula-label" name="label" placeholder="e.g., Institution Baseline Formula" value="{{ $oldGlobalFormulaInputs['label'] }}" required>
+        <small class="text-muted">Choose a descriptive name that indicates the formula's purpose</small>
+    </div>
 
-                    <div class="mb-3">
-                        <label for="create-formula-context" class="form-label fw-semibold">Context (Optional)</label>
-                        <select class="form-select" id="create-formula-context" name="context_type">
-                            <option value="" {{ $oldGlobalFormulaInputs['context_type'] ? '' : 'selected' }}>No specific context (Applies to all periods)</option>
-                            <option value="semester" {{ $oldGlobalFormulaInputs['context_type'] === 'semester' ? 'selected' : '' }}>Semester-specific</option>
-                            <option value="academic_year" {{ $oldGlobalFormulaInputs['context_type'] === 'academic_year' ? 'selected' : '' }}>Academic Year-specific</option>
-                        </select>
-                        <small class="text-muted">Leave blank to make this formula available for all academic periods</small>
-                    </div>
+    <div class="mb-3">
+        <label for="create-formula-template" class="form-label fw-semibold">Base Structure Template <span class="text-danger">*</span></label>
+        <select class="form-select" id="create-formula-template" name="template_key" required>
+            <option value="">Select a structure template to start</option>
+            @foreach($structureTemplates as $template)
+                <option value="{{ $template['key'] }}"
+                        data-structure-type="{{ $template['key'] }}"
+                        data-structure="{{ json_encode($template['structure'] ?? []) }}"
+                        data-weights="{{ json_encode($template['weights'] ?? []) }}"
+                        {{ $oldGlobalFormulaInputs['template_key'] === $template['key'] ? 'selected' : '' }}>
+                    {{ $template['label'] }}
+                </option>
+            @endforeach
+        </select>
+        <small class="text-muted">Choose a pre-defined structure template as your starting point. You can edit weights after creation.</small>
+    </div>
 
-                    <div id="create-formula-context-semester" class="mb-3 d-none">
-                        <label for="create-formula-semester" class="form-label fw-semibold">Semester</label>
-                        <select class="form-select" id="create-formula-semester" name="semester">
-                            <option value="">Select Semester</option>
-                            <option value="1" {{ $oldGlobalFormulaInputs['semester'] === '1' ? 'selected' : '' }}>1st Semester</option>
-                            <option value="2" {{ $oldGlobalFormulaInputs['semester'] === '2' ? 'selected' : '' }}>2nd Semester</option>
-                            <option value="3" {{ $oldGlobalFormulaInputs['semester'] === '3' ? 'selected' : '' }}>Summer</option>
-                        </select>
-                    </div>
-
-                    <div id="create-formula-context-year" class="mb-3 d-none">
-                        <label for="create-formula-year" class="form-label fw-semibold">Academic Year</label>
-                        <input type="text" class="form-control" id="create-formula-year" name="academic_year" placeholder="e.g., 2025-2026" value="{{ $oldGlobalFormulaInputs['academic_year'] }}">
-                    </div>
-
-                    <hr class="my-3">
-
-                    <div class="mb-3">
-                        <label for="create-formula-password" class="form-label fw-semibold text-danger">Confirm Password <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control {{ $globalFormulaPasswordError ? 'is-invalid' : '' }}" id="create-formula-password" name="password" autocomplete="current-password" placeholder="Enter your password to confirm" required>
-                        @if($globalFormulaPasswordError)
-                            <div class="invalid-feedback">{{ $globalFormulaPasswordError }}</div>
-                        @endif
-                        <small class="text-muted">Enter your account password to authorize this action</small>
-                    </div>
-
-                    <div id="create-formula-error" class="text-danger small d-none" role="alert"></div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="submit" class="btn btn-success" id="create-formula-submit">
-                        <i class="bi bi-check-circle me-1"></i>Create Formula
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Scope</label>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="scope_type" id="create-formula-scope-global" value="global" checked>
+            <label class="form-check-label" for="create-formula-scope-global">
+                <strong>Institution Fallback Formula</strong>
+                <div class="text-muted small">Used only as fallback when no subject, course, or department baseline is available</div>
+            </label>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="delete-global-formula-modal" tabindex="-1" aria-labelledby="delete-global-formula-modal-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <form id="delete-global-formula-form" method="POST">
-                @csrf
-                @method('DELETE')
-                <div class="modal-header border-0 pb-0 bg-danger-subtle">
-                    <h5 class="modal-title fw-semibold text-danger" id="delete-global-formula-modal-label">
-                        <i class="bi bi-exclamation-triangle me-2"></i>Delete Institution Fallback Formula
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-danger mb-3">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Warning:</strong> This will permanently delete this institution fallback formula and may affect departments missing baselines.
-                    </div>
+    <div class="mb-3">
+        <label for="create-formula-context" class="form-label fw-semibold">Context (Optional)</label>
+        <select class="form-select" id="create-formula-context" name="context_type">
+            <option value="" {{ $oldGlobalFormulaInputs['context_type'] ? '' : 'selected' }}>No specific context (Applies to all periods)</option>
+            <option value="semester" {{ $oldGlobalFormulaInputs['context_type'] === 'semester' ? 'selected' : '' }}>Semester-specific</option>
+            <option value="academic_year" {{ $oldGlobalFormulaInputs['context_type'] === 'academic_year' ? 'selected' : '' }}>Academic Year-specific</option>
+        </select>
+        <small class="text-muted">Leave blank to make this formula available for all academic periods</small>
+    </div>
 
-                    <p class="mb-3">Are you sure you want to delete this institution fallback formula?</p>
-                    <div class="p-3 bg-light rounded-3 mb-3">
-                        <strong id="delete-global-formula-name">Formula Name</strong>
-                    </div>
+    <div id="create-formula-context-semester" class="mb-3 d-none">
+        <label for="create-formula-semester" class="form-label fw-semibold">Semester</label>
+        <select class="form-select" id="create-formula-semester" name="semester">
+            <option value="">Select Semester</option>
+            <option value="1" {{ $oldGlobalFormulaInputs['semester'] === '1' ? 'selected' : '' }}>1st Semester</option>
+            <option value="2" {{ $oldGlobalFormulaInputs['semester'] === '2' ? 'selected' : '' }}>2nd Semester</option>
+            <option value="3" {{ $oldGlobalFormulaInputs['semester'] === '3' ? 'selected' : '' }}>Summer</option>
+        </select>
+    </div>
 
-                    <hr class="my-3">
+    <div id="create-formula-context-year" class="mb-3 d-none">
+        <label for="create-formula-year" class="form-label fw-semibold">Academic Year</label>
+        <input type="text" class="form-control" id="create-formula-year" name="academic_year" placeholder="e.g., 2025-2026" value="{{ $oldGlobalFormulaInputs['academic_year'] }}">
+    </div>
 
-                    <div class="mb-3">
-                        <label for="delete-global-formula-password" class="form-label fw-semibold text-danger">Confirm Password <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control" id="delete-global-formula-password" name="password" autocomplete="current-password" placeholder="Enter your password to confirm" required>
-                        <small class="text-muted">Enter your account password to authorize this deletion</small>
-                    </div>
+    <hr class="my-3">
 
-                    <div id="delete-global-formula-error" class="text-danger small d-none" role="alert"></div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="submit" class="btn btn-danger" id="delete-global-formula-submit">
-                        <i class="bi bi-trash me-1"></i>Delete Fallback Formula
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
+    <div class="mb-3">
+        <label for="create-formula-password" class="form-label fw-semibold text-danger">Confirm Password <span class="text-danger">*</span></label>
+        <input type="password" class="form-control {{ $globalFormulaPasswordError ? 'is-invalid' : '' }}" id="create-formula-password" name="password" autocomplete="current-password" placeholder="Enter your password to confirm" required>
+        @if($globalFormulaPasswordError)
+            <div class="invalid-feedback">{{ $globalFormulaPasswordError }}</div>
+        @endif
+        <small class="text-muted">Enter your account password to authorize this action</small>
+    </div>
+
+    <div id="create-formula-error" class="text-danger small d-none" role="alert"></div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success" id="create-formula-submit">
+                <i class="bi bi-check-circle me-1"></i>Create Formula
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.destructive
+    id="delete-global-formula-modal"
+    title="Delete Institution Fallback Formula"
+    form=""
+    form-id="delete-global-formula-form"
+>
+    <x-slot:icon>
+        <i class="bi bi-exclamation-triangle"></i>
+    </x-slot:icon>
+
+    @csrf
+    @method('DELETE')
+
+    <div class="alert alert-danger mb-3">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Warning:</strong> This will permanently delete this institution fallback formula and may affect departments missing baselines.
+    </div>
+
+    <p class="mb-3">Are you sure you want to delete this institution fallback formula?</p>
+    <div class="p-3 bg-light rounded-3 mb-3">
+        <strong id="delete-global-formula-name">Formula Name</strong>
+    </div>
+
+    <hr class="my-3">
+
+    <div class="mb-3">
+        <label for="delete-global-formula-password" class="form-label fw-semibold text-danger">Confirm Password <span class="text-danger">*</span></label>
+        <input type="password" class="form-control" id="delete-global-formula-password" name="password" autocomplete="current-password" placeholder="Enter your password to confirm" required>
+        <small class="text-muted">Enter your account password to authorize this deletion</small>
+    </div>
+
+    <div id="delete-global-formula-error" class="text-danger small d-none" role="alert"></div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger" id="delete-global-formula-submit">
+                <i class="bi bi-trash me-1"></i>Delete Fallback Formula
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.destructive
+    id="delete-structure-template-modal"
+    title="Delete Structure Template"
+    form=""
+    form-id="delete-structure-template-form"
+    form-attributes='data-action="{{ route('vpaa.gradingConfiguration.structureTemplates.destroy', array_merge(['template' => 'TEMPLATE_ID'], $preservedQuery)) }}"'
+>
+    <x-slot:icon>
+        <i class="bi bi-exclamation-octagon"></i>
+    </x-slot:icon>
+
+    @csrf
+    @method('DELETE')
+
+    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
+        <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+        <div>
+            <strong id="delete-template-name" class="d-block mb-1"></strong>
+            <span class="small d-block">Existing formulas keep their saved structure. This only removes the reusable template.</span>
         </div>
     </div>
-</div>
+    <div class="mb-3">
+        <label for="delete-template-password" class="form-label fw-semibold text-danger">Account Password <span class="text-danger">*</span></label>
+        <input type="password" class="form-control" id="delete-template-password" name="password" autocomplete="current-password" placeholder="Enter your password">
+        <div class="invalid-feedback" id="delete-template-error"></div>
+    </div>
 
-    <div class="modal fade" id="delete-structure-template-modal" tabindex="-1" aria-labelledby="delete-structure-template-modal-label" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <form
-                    id="delete-structure-template-form"
-                    method="POST"
-                    data-action="{{ route('vpaa.gradingConfiguration.structureTemplates.destroy', array_merge(['template' => 'TEMPLATE_ID'], $preservedQuery)) }}"
-                >
-                    @csrf
-                    @method('DELETE')
-                    <div class="modal-header border-0 pb-0 bg-danger-subtle">
-                        <h5 class="modal-title fw-semibold text-danger" id="delete-structure-template-modal-label">
-                            <i class="bi bi-exclamation-octagon me-2"></i>Delete Structure Template
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
-                            <i class="bi bi-exclamation-triangle-fill mt-1"></i>
-                            <div>
-                                <strong id="delete-template-name" class="d-block mb-1"></strong>
-                                <span class="small d-block">Existing formulas keep their saved structure. This only removes the reusable template.</span>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="delete-template-password" class="form-label fw-semibold text-danger">Account Password <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="delete-template-password" name="password" autocomplete="current-password" placeholder="Enter your password">
-                            <div class="invalid-feedback" id="delete-template-error"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="submit" class="btn btn-danger" id="delete-template-confirm">
-                            <i class="bi bi-trash me-1"></i>Delete Template
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger" id="delete-template-confirm">
+                <i class="bi bi-trash me-1"></i>Delete Template
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.form
+    id="create-template-modal"
+    title="Create Structure Template"
+    size="extra-large"
+    :scrollable="true"
+    :form="route('vpaa.gradingConfiguration.structureTemplates.store', $preservedQuery)"
+    form-id="create-template-form"
+    form-attributes='data-store-action="{{ route('vpaa.gradingConfiguration.structureTemplates.store', $preservedQuery) }}" data-update-action="{{ route('vpaa.gradingConfiguration.structureTemplates.update', array_merge(['template' => 'TEMPLATE_ID'], $preservedQuery)) }}" data-initial-mode="{{ $templateModalMode }}"'
+    body-class="p-4"
+>
+    <x-slot:icon>
+        <i class="bi bi-diagram-3"></i>
+    </x-slot:icon>
+
+    @csrf
+    <input type="hidden" id="template-method-field" name="_method" value="PUT" disabled>
+    <input type="hidden" id="template-id-field" name="template_id" value="{{ $templateModalEditId }}">
+    <span id="create-template-modal-label" class="visually-hidden">Create Structure Template</span>
+
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle me-2"></i>
+        <div>
+            <strong>What are Structure Templates?</strong>
+            <p class="mb-2 mt-1 small">Structure templates are reusable grading structures that define how different assessment types contribute to the final grade.</p>
+            <p class="mb-0 small"><strong>Tip:</strong> You can create complex structures like "Lecture + Laboratory" by adding main components (e.g., Lecture 60%, Laboratory 40%) and then clicking "Sub-Component" to add nested assessments (quizzes, exams, OCR) within each.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="template-label" class="form-label fw-semibold">Template Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="template-label" name="template_label" placeholder="e.g., Lecture + Clinical" required>
+                <small class="text-muted">Choose a descriptive name for this grading structure</small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="template-key" class="form-label fw-semibold">Template Key <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="template-key" name="template_key" placeholder="e.g., lecture_clinical" pattern="[a-z_]+" required>
+                <small class="text-muted">Unique identifier (lowercase, underscores only)</small>
             </div>
         </div>
     </div>
 
-<div class="modal fade" id="create-template-modal" tabindex="-1" aria-labelledby="create-template-modal-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <form
-                id="create-template-form"
-                method="POST"
-                action="{{ route('vpaa.gradingConfiguration.structureTemplates.store', $preservedQuery) }}"
-                data-store-action="{{ route('vpaa.gradingConfiguration.structureTemplates.store', $preservedQuery) }}"
-                data-update-action="{{ route('vpaa.gradingConfiguration.structureTemplates.update', array_merge(['template' => 'TEMPLATE_ID'], $preservedQuery)) }}"
-                data-initial-mode="{{ $templateModalMode }}"
-            >
-                @csrf
-                <input type="hidden" id="template-method-field" name="_method" value="PUT" disabled>
-                <input type="hidden" id="template-id-field" name="template_id" value="{{ $templateModalEditId }}">
-                <div class="modal-header border-0 pb-0 bg-primary-subtle">
-                    <h5 class="modal-title fw-semibold text-primary" id="create-template-modal-label">
-                        <i class="bi bi-diagram-3 me-2"></i>Create Structure Template
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="alert alert-info mb-4">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <div>
-                            <strong>What are Structure Templates?</strong>
-                            <p class="mb-2 mt-1 small">Structure templates are reusable grading structures that define how different assessment types contribute to the final grade.</p>
-                            <p class="mb-0 small"><strong>Tip:</strong> You can create complex structures like "Lecture + Laboratory" by adding main components (e.g., Lecture 60%, Laboratory 40%) and then clicking "Sub-Component" to add nested assessments (quizzes, exams, OCR) within each.</p>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="template-label" class="form-label fw-semibold">Template Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="template-label" name="template_label" placeholder="e.g., Lecture + Clinical" required>
-                                <small class="text-muted">Choose a descriptive name for this grading structure</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="template-key" class="form-label fw-semibold">Template Key <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="template-key" name="template_key" placeholder="e.g., lecture_clinical" pattern="[a-z_]+" required>
-                                <small class="text-muted">Unique identifier (lowercase, underscores only)</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="template-description" class="form-label fw-semibold">Description</label>
-                        <textarea class="form-control" id="template-description" name="template_description" rows="2" placeholder="Describe when this structure should be used..."></textarea>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <label class="form-label fw-semibold mb-0">Grade Components</label>
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-component-btn">
-                                <i class="bi bi-plus-circle me-1"></i>Add Component
-                            </button>
-                        </div>
-                        <p class="text-muted small mb-3">Define the assessment types and their weights. Total must equal 100%.</p>
-                    </div>
-
-                    <div id="components-container" class="mb-4">
-                        <!-- Components will be added here dynamically -->
-                    </div>
-
-                    <div class="alert alert-warning mb-4 d-none-important" id="weight-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <small>Total weight must equal <strong>100%</strong>. Current total: <span id="total-weight">0</span>%</small>
-                    </div>
-
-                    <input type="hidden" id="template-password-hidden" name="password">
-                    <div id="template-error" class="text-danger small d-none" role="alert"></div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-primary" id="create-template-submit">
-                        <i class="bi bi-check-circle me-1"></i>Create Template
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
+    <div class="mb-4">
+        <label for="template-description" class="form-label fw-semibold">Description</label>
+        <textarea class="form-control" id="template-description" name="template_description" rows="2" placeholder="Describe when this structure should be used..."></textarea>
     </div>
-</div>
 
-<div class="modal fade" id="template-password-modal" tabindex="-1" aria-labelledby="template-password-modal-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-0 pb-0 bg-primary-subtle">
-                <h5 class="modal-title fw-semibold text-primary" id="template-password-modal-label">
-                    <i class="bi bi-shield-lock me-2"></i>Confirm Template Creation
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <p class="text-muted small mb-3">Enter your account password to confirm creating this structure template.</p>
-                <div class="mb-3">
-                    <label for="template-password-input" class="form-label fw-semibold text-primary">Account Password <span class="text-danger">*</span></label>
-                    <input type="password" class="form-control" id="template-password-input" autocomplete="current-password" placeholder="Enter your password">
-                    <div class="invalid-feedback">Password is required.</div>
-                </div>
-                <div id="template-password-modal-error" class="text-danger small d-none" role="alert" aria-live="assertive"></div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-primary" id="template-password-confirm">
-                    <i class="bi bi-check-circle me-1"></i>Confirm and Create
-                </button>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
+    <hr class="my-4">
+
+    <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <label class="form-label fw-semibold mb-0">Grade Components</label>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="add-component-btn">
+                <i class="bi bi-plus-circle me-1"></i>Add Component
+            </button>
         </div>
+        <p class="text-muted small mb-3">Define the assessment types and their weights. Total must equal 100%.</p>
     </div>
-</div>
+
+    <div id="components-container" class="mb-4">
+        <!-- Components will be added here dynamically -->
+    </div>
+
+    <div class="alert alert-warning mb-4 d-none-important" id="weight-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <small>Total weight must equal <strong>100%</strong>. Current total: <span id="total-weight">0</span>%</small>
+    </div>
+
+    <input type="hidden" id="template-password-hidden" name="password">
+    <div id="template-error" class="text-danger small d-none" role="alert"></div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="create-template-submit">
+                <i class="bi bi-check-circle me-1"></i>Create Template
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
+
+<x-modal.information
+    id="template-password-modal"
+    title="Confirm Template Creation"
+    size="medium"
+>
+    <x-slot:icon>
+        <i class="bi bi-shield-lock"></i>
+    </x-slot:icon>
+
+    <span id="template-password-modal-label" class="visually-hidden">Confirm Template Creation</span>
+    <p class="text-muted small mb-3">Enter your account password to confirm creating this structure template.</p>
+    <div class="mb-3">
+        <label for="template-password-input" class="form-label fw-semibold text-primary">Account Password <span class="text-danger">*</span></label>
+        <input type="password" class="form-control" id="template-password-input" autocomplete="current-password" placeholder="Enter your password">
+        <div class="invalid-feedback">Password is required.</div>
+    </div>
+    <div id="template-password-modal-error" class="text-danger small d-none" role="alert" aria-live="assertive"></div>
+
+    <x-slot:footer>
+        <x-modal.actions secondary-text="" primary-text="">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="template-password-confirm">
+                <i class="bi bi-check-circle me-1"></i>Confirm and Create
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.information>
+@endsection
 @endsection
 
 @push('scripts')

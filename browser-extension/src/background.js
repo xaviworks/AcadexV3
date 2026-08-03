@@ -2,7 +2,7 @@
 chrome.runtime.onInstalled.addListener(function() {
   console.log('ACADEX Password Manager installed');
   
-  // Default accounts from UserSeeder
+  // Default accounts created by the initial-accounts CLI command
   const defaultAccounts = [
     {
       username: 'admin',
@@ -68,4 +68,4 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     });
     return true; // Required for async sendResponse
   }
-}); 
+});

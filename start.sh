@@ -93,24 +93,11 @@ if [ "${RUN_MIGRATIONS:-}" = "true" ] || { [ -z "${RUN_MIGRATIONS:-}" ] && [ "$R
     run_as_app php artisan migrate --force
     log "Database migrations completed."
 
-    # Only seed if the database is empty (first deploy).
-    # Use a direct PHP script to avoid booting PsySH/tinker during startup.
-    if ! USER_COUNT=$(run_as_app php -r "
-require '/app/vendor/autoload.php';
-\$app = require '/app/bootstrap/app.php';
-\$app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-echo \App\Models\User::count();
-" ); then
-        fatal 1 "Unable to query the users table; refusing to guess whether seeders should run"
-    fi
+    log "Seeding safe reference data..."
+    run_as_app php artisan db:seed --class=ReferenceDataSeeder --force
+    log "Reference data seeders completed."
 
-    if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
-        log "No users found; running seeders for the first deployment..."
-        run_as_app php artisan db:seed --force
-        log "Database seeders completed."
-    else
-        log "Database already seeded ($USER_COUNT users); skipping seeders."
-    fi
+    log "Privileged account seeding is never run automatically. Use an explicit CLI operation when required."
 else
     log "Skipping migrations for role '${ROLE}'."
 fi

@@ -40,7 +40,7 @@
     </div>
 
     {{-- Guides Table --}}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm" id="help-guides-table-section">
         <div class="card-body p-0">
             @if($guides->isEmpty())
                 {{-- Empty State --}}
@@ -156,43 +156,40 @@
     </div>
 </div>
 
-{{-- Delete Confirmation Modal --}}
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Delete Help Guide</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the help guide "<strong id="deleteGuideTitle"></strong>"?</p>
-                <p class="text-muted small mb-0">This action cannot be undone. Any attached files will also be deleted.</p>
-            </div>
-            <div class="modal-footer bg-light">
-                <form id="deleteForm" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash me-1"></i> Delete Guide
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<x-modal.destructive id="deleteModal" title="Delete Help Guide">
+    <x-slot:icon><i class="bi bi-exclamation-triangle me-1"></i></x-slot:icon>
+    <p>Are you sure you want to delete the help guide "<strong id="deleteGuideTitle"></strong>"?</p>
+    <p class="text-muted small mb-0">This action cannot be undone. Any attached files will also be deleted.</p>
 
-{{-- Create Guide Modal --}}
-<div class="modal fade" id="createGuideModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Create Help Guide</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="createGuideForm" action="{{ route('chairperson.help-guides.store') }}" method="POST" enctype="multipart/form-data" data-no-page-loader>
-                @csrf
-                <div class="modal-body">
+    <x-slot:footer>
+        <form
+            id="deleteForm"
+            method="POST"
+            class="d-inline ajax-action-form"
+            data-refresh-target="#help-guides-table-section"
+            data-close-modal="deleteModal"
+            data-loading-text="Deleting..."
+        >
+            @csrf
+            @method('DELETE')
+            <x-modal.actions destructive-text="Delete Guide" />
+        </form>
+    </x-slot:footer>
+</x-modal.destructive>
+
+<x-modal.form
+    id="createGuideModal"
+    title="Create Help Guide"
+    form="{{ route('chairperson.help-guides.store') }}"
+    form-id="createGuideForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#help-guides-table-section" data-close-modal="createGuideModal" data-loading-text="Creating..." data-reset-on-success="true"'
+    enctype="multipart/form-data"
+    :no-page-loader="true"
+    scrollable
+>
+    @csrf
+    <x-slot:icon><i class="bi bi-plus-circle me-1"></i></x-slot:icon>
                     {{-- Title --}}
                     <div class="mb-3">
                         <label for="create_title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
@@ -271,30 +268,30 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-lg me-1"></i> Create Guide
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-lg me-1"></i> Create Guide
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 
-{{-- Edit Guide Modal --}}
-<div class="modal fade" id="editGuideModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Help Guide</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editGuideForm" method="POST" enctype="multipart/form-data" data-no-page-loader>
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
+<x-modal.form
+    id="editGuideModal"
+    title="Edit Help Guide"
+    form=""
+    form-id="editGuideForm"
+    form-class="ajax-action-form"
+    form-attributes='data-refresh-target="#help-guides-table-section" data-close-modal="editGuideModal" data-loading-text="Updating..."'
+    enctype="multipart/form-data"
+    :no-page-loader="true"
+    variant="default"
+    scrollable
+>
+    @csrf
+    @method('PUT')
+    <x-slot:icon><i class="bi bi-pencil-square me-1"></i></x-slot:icon>
                     {{-- Title --}}
                     <div class="mb-3">
                         <label for="edit_title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
@@ -382,17 +379,14 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-lg me-1"></i> Update Guide
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+    <x-slot:footer>
+        <x-modal.actions>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-1"></i> Update Guide
+            </button>
+        </x-modal.actions>
+    </x-slot:footer>
+</x-modal.form>
 @endsection
 
 @push('styles')

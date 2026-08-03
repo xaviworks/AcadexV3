@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class DisasterRecoveryController extends Controller
 {
@@ -78,6 +79,13 @@ class DisasterRecoveryController extends Controller
         ]);
 
         if (! Hash::check($request->password, Auth::user()->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Incorrect password. Please try again.',
+                ], 422);
+            }
+
             return back()->with('error', 'Incorrect password. Please try again.');
         }
 
@@ -90,9 +98,24 @@ class DisasterRecoveryController extends Controller
                 default => $this->backupService->createFullBackup($user, $request->notes),
             };
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Backup created successfully! ({$backup->size_formatted})",
+                    'data' => $backup,
+                ]);
+            }
+
             return back()->with('success', "Backup created successfully! ({$backup->size_formatted})");
 
         } catch (\Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Backup failed: '.$e->getMessage(),
+                ], 500);
+            }
+
             return back()->with('error', 'Backup failed: '.$e->getMessage());
         }
     }
@@ -100,7 +123,7 @@ class DisasterRecoveryController extends Controller
     /**
      * Download backup file.
      */
-    public function download(Backup $backup): StreamedResponse
+    public function download(Backup $backup): Response
     {
         Gate::authorize('admin');
 
@@ -108,10 +131,11 @@ class DisasterRecoveryController extends Controller
             abort(404, 'Backup file not found');
         }
 
-        return response()->streamDownload(function () use ($backup) {
-            readfile($backup->getFullPath());
-        }, $backup->filename, [
-            'Content-Type' => 'application/zip',
+        $contents = Storage::disk($backup->disk ?: config('backup.disk'))->get($backup->path);
+
+        return response($contents, 200, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="'.$backup->filename.'"',
         ]);
     }
 
@@ -127,10 +151,24 @@ class DisasterRecoveryController extends Controller
         ]);
 
         if (! Hash::check($request->password, Auth::user()->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Incorrect password. Please try again.',
+                ], 422);
+            }
+
             return back()->with('error', 'Incorrect password. Please try again.');
         }
 
         $this->backupService->deleteBackup($backup);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Backup deleted successfully.',
+            ]);
+        }
 
         return back()->with('success', 'Backup deleted successfully.');
     }
@@ -148,6 +186,13 @@ class DisasterRecoveryController extends Controller
         ]);
 
         if (! Hash::check($request->password, Auth::user()->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Incorrect password. Please try again.',
+                ], 422);
+            }
+
             return back()->with('error', 'Incorrect password. Please try again.');
         }
 
@@ -167,9 +212,24 @@ class DisasterRecoveryController extends Controller
             $tablesRestored = count($results['tables_restored'] ?? []);
             $totalRows = array_sum($results['tables_restored'] ?? []);
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Restore completed! {$tablesRestored} tables, {$totalRows} records restored.",
+                    'data' => $results,
+                ]);
+            }
+
             return back()->with('success', "Restore completed! {$tablesRestored} tables, {$totalRows} records restored.");
 
         } catch (\Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Restore failed: '.$e->getMessage(),
+                ], 500);
+            }
+
             return back()->with('error', 'Restore failed: '.$e->getMessage());
         }
     }
@@ -243,18 +303,46 @@ class DisasterRecoveryController extends Controller
         ]);
 
         if (! Hash::check($request->password, Auth::user()->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Incorrect password. Please try again.',
+                ], 422);
+            }
+
             return back()->with('error', 'Incorrect password. Please try again.');
         }
 
         if (! $auditLog->old_values) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot rollback: no previous data available.',
+                ], 422);
+            }
+
             return back()->with('error', 'Cannot rollback: no previous data available.');
         }
 
         try {
             $this->restoreService->rollbackToAuditLog($auditLog);
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Change rolled back successfully.',
+                ]);
+            }
+
             return back()->with('success', 'Change rolled back successfully.');
         } catch (\Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Rollback failed: '.$e->getMessage(),
+                ], 500);
+            }
+
             return back()->with('error', 'Rollback failed: '.$e->getMessage());
         }
     }
@@ -279,13 +367,20 @@ class DisasterRecoveryController extends Controller
             ])]
         );
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Backup schedule updated successfully.',
+            ]);
+        }
+
         return back()->with('success', 'Backup schedule updated successfully.');
     }
 
     /**
      * Run manual backup now (for testing schedule).
      */
-    public function runNow()
+    public function runNow(Request $request)
     {
         Gate::authorize('admin');
 
@@ -295,9 +390,24 @@ class DisasterRecoveryController extends Controller
                 'Manual backup triggered via dashboard'
             );
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Manual backup completed! ({$backup->size_formatted})",
+                    'data' => $backup,
+                ]);
+            }
+
             return back()->with('success', "Manual backup completed! ({$backup->size_formatted})");
 
         } catch (\Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Backup failed: '.$e->getMessage(),
+                ], 500);
+            }
+
             return back()->with('error', 'Backup failed: '.$e->getMessage());
         }
     }

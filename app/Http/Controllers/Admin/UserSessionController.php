@@ -142,6 +142,16 @@ class UserSessionController extends Controller
 
         // Verify admin password
         if (! Hash::check($request->input('password'), Auth::user()->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The provided password is incorrect.',
+                    'errors' => [
+                        'password' => ['The provided password is incorrect.'],
+                    ],
+                ], 422);
+            }
+
             return back()
                 ->withErrors(['password' => 'The provided password is incorrect.'])
                 ->withInput();
@@ -151,6 +161,16 @@ class UserSessionController extends Controller
 
         // Prevent admin from revoking their own session
         if ($sessionId === session()->getId()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot revoke your own active session.',
+                    'errors' => [
+                        'session_id' => ['You cannot revoke your own active session.'],
+                    ],
+                ], 422);
+            }
+
             return back()
                 ->withErrors(['session_id' => 'You cannot revoke your own active session.'])
                 ->withInput();
@@ -164,6 +184,16 @@ class UserSessionController extends Controller
             ->first();
 
         if (! $sessionInfo) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Session not found or already terminated.',
+                    'errors' => [
+                        'session_id' => ['Session not found or already terminated.'],
+                    ],
+                ], 422);
+            }
+
             return back()
                 ->withErrors(['session_id' => 'Session not found or already terminated.'])
                 ->withInput();
@@ -196,9 +226,18 @@ class UserSessionController extends Controller
             'updated_at' => now(),
         ]);
 
+        $message = "Session for {$sessionInfo->user_name} has been revoked successfully.";
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
         return redirect()
             ->route('admin.sessions')
-            ->with('success', "Session for {$sessionInfo->user_name} has been revoked successfully.");
+            ->with('success', $message);
     }
 
     public function revokeUserSessions(Request $request)
@@ -212,6 +251,16 @@ class UserSessionController extends Controller
 
         // Verify admin password
         if (! Hash::check($request->input('password'), Auth::user()->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The provided password is incorrect.',
+                    'errors' => [
+                        'password' => ['The provided password is incorrect.'],
+                    ],
+                ], 422);
+            }
+
             return back()
                 ->withErrors(['password' => 'The provided password is incorrect.'])
                 ->withInput();
@@ -221,6 +270,16 @@ class UserSessionController extends Controller
 
         // Prevent admin from revoking their own sessions
         if ($userId === Auth::id()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot revoke your own sessions.',
+                    'errors' => [
+                        'user_id' => ['You cannot revoke your own sessions.'],
+                    ],
+                ], 422);
+            }
+
             return back()
                 ->withErrors(['user_id' => 'You cannot revoke your own sessions.'])
                 ->withInput();
@@ -262,9 +321,28 @@ class UserSessionController extends Controller
                 'updated_at' => now(),
             ]);
 
+            $message = "All {$deleted} session(s) for {$user->full_name} have been revoked successfully.";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                ]);
+            }
+
             return redirect()
                 ->route('admin.sessions')
-                ->with('success', "All {$deleted} session(s) for {$user->full_name} have been revoked successfully.");
+                ->with('success', $message);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active sessions found for this user.',
+                'errors' => [
+                    'user_id' => ['No active sessions found for this user.'],
+                ],
+            ], 422);
         }
 
         return back()
@@ -283,6 +361,16 @@ class UserSessionController extends Controller
 
         // Verify admin password
         if (! Hash::check($request->input('password'), Auth::user()->password)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The provided password is incorrect.',
+                    'errors' => [
+                        'password' => ['The provided password is incorrect.'],
+                    ],
+                ], 422);
+            }
+
             return back()
                 ->withErrors(['password' => 'The provided password is incorrect.'])
                 ->withInput();
@@ -292,6 +380,16 @@ class UserSessionController extends Controller
 
         // Prevent admin from resetting their own 2FA
         if ($userId === Auth::id()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot reset your own 2FA. Please use your profile settings.',
+                    'errors' => [
+                        'user_id' => ['You cannot reset your own 2FA. Please use your profile settings.'],
+                    ],
+                ], 422);
+            }
+
             return back()
                 ->withErrors(['user_id' => 'You cannot reset your own 2FA. Please use your profile settings.'])
                 ->withInput();
@@ -302,6 +400,13 @@ class UserSessionController extends Controller
 
         // Check if user has 2FA enabled
         if (! $user->two_factor_secret) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "{$user->full_name} does not have two-factor authentication enabled.",
+                ]);
+            }
+
             return back()
                 ->with('info', "{$user->full_name} does not have two-factor authentication enabled.");
         }
@@ -329,9 +434,18 @@ class UserSessionController extends Controller
             'updated_at' => now(),
         ]);
 
+        $message = "Two-factor authentication has been reset for {$user->full_name}. They will need to set it up again if needed.";
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
         return redirect()
             ->route('admin.sessions')
-            ->with('success', "Two-factor authentication has been reset for {$user->full_name}. They will need to set it up again if needed.");
+            ->with('success', $message);
     }
 
     public function revokeAllSessions(Request $request)
@@ -387,9 +501,18 @@ class UserSessionController extends Controller
             'updated_at' => now(),
         ]);
 
+        $message = "Successfully revoked {$deleted} user session(s). Your session remains active.";
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
         return redirect()
             ->route('admin.sessions')
-            ->with('success', "Successfully revoked {$deleted} user session(s). Your session remains active.");
+            ->with('success', $message);
     }
 
     private function userNameExpression(): string
