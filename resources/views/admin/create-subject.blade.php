@@ -2,7 +2,11 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Create Subject</h1>
+    <x-admin.page-header
+        title="Create Course"
+        subtitle="Add a new academic course or subject"
+        icon="bi bi-book-fill"
+    />
 
     <form method="POST" action="{{ route('admin.storeSubject') }}" class="space-y-4">
         @csrf

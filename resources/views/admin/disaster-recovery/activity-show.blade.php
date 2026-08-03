@@ -2,24 +2,20 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <div class="mb-1">
-                <a href="{{ route('admin.disaster-recovery.activity') }}" class="text-decoration-none text-muted small">
-                    <i class="fas fa-arrow-left me-1"></i> Back to Activity Log
-                </a>
-            </div>
-            <h1 class="h4 text-dark fw-bold mb-0">
-                </i>Activity Details
-            </h1>
-        </div>
+    <x-admin.page-header
+        title="Activity Details"
+        subtitle="Review the selected audit event"
+        icon="bi bi-info-circle-fill"
+    >
+        <a href="{{ route('admin.disaster-recovery.activity') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Activity Log
+        </a>
         @if($log->event !== 'created' && $log->old_values)
             <button type="button" class="btn btn-warning text-white" onclick="showRollbackModal()">
                 <i class="fas fa-undo me-1"></i> Rollback
             </button>
         @endif
-    </div>
+    </x-admin.page-header>
 
     @php
         $colors = ['created' => 'success', 'updated' => 'warning', 'deleted' => 'danger', 'restored' => 'info'];

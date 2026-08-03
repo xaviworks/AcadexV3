@@ -62,7 +62,7 @@
                         </span>
                     </div>
                 </form>
-            @elseif($activePeriod && !in_array($user->role, [3, 5])) <!-- Exclude Admin, VPAA from badge mode -->
+            @elseif($activePeriod && $user->role !== 5) <!-- Exclude VPAA from badge mode -->
                 @php
                     $semesterLabel = '';
                     $academicYear = $activePeriod->academic_year;
@@ -88,42 +88,7 @@
                     Academic Year {{ $academicYear }} - {{ $semesterLabel }}
                 </span>
             @else
-                @php
-                    $currentPageLabel = 'Dashboard';
-                    $pageLabelRoutes = [
-                        'admin.users' => 'Users',
-                        'admin.sessions*' => 'Sessions & Activity',
-                        'admin.disaster-recovery.*' => 'Disaster Recovery',
-                        'admin.announcements.*' => 'Announcements',
-                        'admin.departments' => 'Departments',
-                        'admin.courses' => 'Programs',
-                        'admin.subjects' => 'Courses',
-                        'admin.academicPeriods' => 'Academic Periods',
-                        'admin.help-guides.*' => 'Manage Help Guides',
-                        'vpaa.departments' => 'Departments',
-                        'vpaa.instructors*' => 'Instructors',
-                        'vpaa.students' => 'Students',
-                        'vpaa.reports.attainment*' => 'Attainment Report',
-                        'vpaa.reports.co-program*' => 'By Program',
-                        'vpaa.reports.co-course*' => 'By Course',
-                        'vpaa.reports.co-student*' => 'By Student',
-                        'vpaa.gradingConfiguration.templateRequests.*' => 'Formula Requests',
-                        'vpaa.gradingConfiguration.*' => 'Grade Formulas',
-                    ];
-
-                    foreach ($pageLabelRoutes as $routePattern => $label) {
-                        if (request()->routeIs($routePattern)) {
-                            $currentPageLabel = $label;
-                            break;
-                        }
-                    }
-
-                    $currentSchoolYear = optional($activePeriod)->academic_year;
-                    $currentPageBadgeText = $currentSchoolYear
-                        ? $currentPageLabel . ' | Academic Year: ' . $currentSchoolYear
-                        : $currentPageLabel;
-                @endphp
-                <span class="badge bg-success bg-opacity-25 px-3 py-2 rounded-pill" style="white-space: nowrap; font-size: 0.8125rem; font-weight: 500; line-height: 1; height: 32px; display: inline-flex; align-items: center; min-width: 290px; justify-content: center; letter-spacing: -0.01em;">{{ $currentPageBadgeText }}</span>
+                <span class="badge bg-success bg-opacity-25 px-3 py-2 rounded-pill" style="white-space: nowrap; font-size: 0.8125rem; font-weight: 500; line-height: 1; height: 32px; display: inline-flex; align-items: center; min-width: 290px; justify-content: center; letter-spacing: -0.01em;">Dashboard</span>
             @endif
         </h1>    
     </div>

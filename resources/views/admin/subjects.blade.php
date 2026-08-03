@@ -2,15 +2,15 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-book-fill text-success me-2"></i>Courses</h1>
-            <p class="text-muted mb-0">Manage academic courses (subjects)</p>
-        </div>
+    <x-admin.page-header
+        title="Courses"
+        subtitle="Manage academic courses (subjects)"
+        icon="bi bi-book-fill"
+    >
         <button class="btn btn-success" onclick="openAddSubjectModal()">
             <i class="bi bi-plus-lg me-1"></i> Add Course
         </button>
-    </div>
+    </x-admin.page-header>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">

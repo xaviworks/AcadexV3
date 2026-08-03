@@ -2,12 +2,15 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">System Announcements</h2>
+    <x-admin.page-header
+        title="System Announcements"
+        subtitle="Create announcements and manage reusable message templates"
+        icon="bi bi-megaphone-fill"
+    >
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
             <i class="fas fa-plus"></i> Create Announcement
         </button>
-    </div>
+    </x-admin.page-header>
 
     {{-- Tab Navigation --}}
     <ul class="nav nav-tabs mb-4" id="announcementTabs" role="tablist">

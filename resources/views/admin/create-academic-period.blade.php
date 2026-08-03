@@ -2,7 +2,11 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto py-8">
-    <h1 class="text-2xl font-bold mb-6">Create Academic Period</h1>
+    <x-admin.page-header
+        title="Create Academic Period"
+        subtitle="Add a new school year and semester"
+        icon="bi bi-calendar-event-fill"
+    />
 
     <form method="POST" action="{{ route('admin.storeAcademicPeriod') }}" class="space-y-6">
         @csrf

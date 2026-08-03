@@ -2,16 +2,15 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-pencil-fill text-success me-2"></i>Edit Help Guide</h1>
-            <p class="text-muted mb-0">Update help guide details</p>
-        </div>
+    <x-admin.page-header
+        title="Edit Help Guide"
+        subtitle="Update help guide details"
+        icon="bi bi-pencil-fill"
+    >
         <a href="{{ route('admin.help-guides.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back to List
         </a>
-    </div>
+    </x-admin.page-header>
 
     {{-- Validation Errors --}}
     @if($errors->any())

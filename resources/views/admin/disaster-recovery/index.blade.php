@@ -2,12 +2,11 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h4 text-dark fw-bold mb-0"><i class="bi bi-shield-fill-check text-success me-2"></i>Disaster Recovery</h1>
-            <p class="text-muted small mb-0">Manage system backups and restore points</p>
-        </div>
+    <x-admin.page-header
+        title="Disaster Recovery"
+        subtitle="Manage system backups and restore points"
+        icon="bi bi-shield-fill-check"
+    >
         <div class="d-flex gap-2">
             <a href="{{ route('admin.disaster-recovery.activity') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-history me-1"></i> Activity Log
@@ -16,7 +15,7 @@
                 <i class="fas fa-plus me-1"></i> Create Backup
             </button>
         </div>
-    </div>
+    </x-admin.page-header>
 
 
 

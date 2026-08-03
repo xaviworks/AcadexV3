@@ -4,11 +4,13 @@
 {{-- Styles and JavaScript are loaded from resources/css/admin/users.css and resources/js/pages/admin/users.js --}}
 
 <div class="container-fluid py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h4 text-dark fw-bold mb-0"><i class="fas fa-users text-success me-2"></i>Users</h1>
+    <x-admin.page-header
+        title="Users"
+        subtitle="Manage account access, roles, status, and security settings"
+        icon="bi bi-people-fill"
+    >
         <button class="btn btn-success" onclick="openModal()">+ Add User</button>
-    </div>
+    </x-admin.page-header>
 
     {{-- Error/Info Messages --}}
     @if(session('success'))

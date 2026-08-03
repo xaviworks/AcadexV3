@@ -7,15 +7,15 @@
 @endpush
 
 <div class="container py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h4 text-dark fw-bold mb-0">
-            <i class="fas fa-shield-alt text-success"></i> Session & Activity Monitor
-        </h1>
+    <x-admin.page-header
+        title="Session & Activity Monitor"
+        subtitle="Review active sessions, audit activity, and account security actions"
+        icon="bi bi-shield-lock-fill"
+    >
         <button class="btn btn-danger btn-sm" onclick="confirmRevokeAll()">
             <i class="fas fa-users-slash me-2"></i>Revoke All Sessions
         </button>
-    </div>
+    </x-admin.page-header>
 
     {{-- Tab Navigation --}}
     <ul class="nav nav-tabs mb-4" id="sessionTabs" role="tablist">

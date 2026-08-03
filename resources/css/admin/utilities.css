@@ -1,5 +1,70 @@
 /* Admin Portal Utility Classes */
 
+.admin-page-header {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.admin-page-header .admin-page-header__title-group {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.admin-page-header h1.admin-page-header__title .admin-page-header__icon {
+  align-items: center;
+  color: #198754 !important;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 1.35rem !important;
+  justify-content: center;
+  line-height: 1;
+}
+
+.admin-page-header h1.admin-page-header__title {
+  align-items: center;
+  color: #111827 !important;
+  display: flex !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  gap: 0.5rem;
+  letter-spacing: 0 !important;
+  line-height: 1.35rem !important;
+  margin: 0 !important;
+}
+
+.admin-page-header__subtitle {
+  color: #52645b;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  margin: 0.2rem 0 0;
+}
+
+.admin-page-header__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 767.98px) {
+  .admin-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-page-header__actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
 /* ===========================
    BACKGROUND GRADIENTS
    =========================== */

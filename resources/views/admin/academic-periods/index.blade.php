@@ -26,11 +26,13 @@
 @endif
 
 <div class="container py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h4 text-dark fw-bold mb-0"><i class="bi bi-calendar-event-fill text-success me-2"></i>Academic Periods</h1>
+    <x-admin.page-header
+        title="Academic Periods"
+        subtitle="Manage school years and semester records"
+        icon="bi bi-calendar-event-fill"
+    >
         <button class="btn btn-success" onclick="showGenerateModal()">+ Generate New</button>
-    </div>
+    </x-admin.page-header>
 
     {{-- Periods Table --}}
     <div class="card shadow-sm">

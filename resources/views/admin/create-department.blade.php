@@ -2,7 +2,12 @@
 
 @section('content')
 <div class="max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">Create Department</h1>
+    <x-admin.page-header
+        title="Create Department"
+        subtitle="Add a new academic department"
+        icon="bi bi-building-fill"
+    />
+
     <form method="POST" action="{{ route('admin.storeDepartment') }}" class="space-y-4">
         @csrf
 

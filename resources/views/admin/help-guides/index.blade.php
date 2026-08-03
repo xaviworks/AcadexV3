@@ -2,16 +2,15 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-question-circle-fill text-success me-2"></i>Manage Guides</h1>
-            <p class="text-muted mb-0">Create and manage help guides for different user roles</p>
-        </div>
+    <x-admin.page-header
+        title="Manage Guides"
+        subtitle="Create and manage help guides for different user roles"
+        icon="bi bi-question-circle-fill"
+    >
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createGuideModal">
             <i class="bi bi-plus-lg me-1"></i> Create Guide
         </button>
-    </div>
+    </x-admin.page-header>
 
     {{-- Success/Error Messages via Bootbox --}}
     @if(session('success'))

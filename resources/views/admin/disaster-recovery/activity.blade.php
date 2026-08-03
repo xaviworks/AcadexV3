@@ -2,18 +2,15 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <div class="mb-1">
-                <a href="{{ route('admin.disaster-recovery.index') }}" class="text-decoration-none text-muted small">
-                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
-                </a>
-            </div>
-            <h1 class="h4 text-dark fw-bold mb-0">Activity Log</h1>
-            <p class="text-muted small mb-0">Track all changes made in the system</p>
-        </div>
-    </div>
+    <x-admin.page-header
+        title="Activity Log"
+        subtitle="Track all changes made in the system"
+        icon="bi bi-clock-history"
+    >
+        <a href="{{ route('admin.disaster-recovery.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </x-admin.page-header>
 
     {{-- Alerts --}}
     @if(session('success'))

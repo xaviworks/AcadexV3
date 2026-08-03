@@ -2,16 +2,15 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 text-dark fw-bold mb-0"><i class="bi bi-building-fill text-success me-2"></i>Departments</h1>
-            <p class="text-muted mb-0">Manage academic departments</p>
-        </div>
+    <x-admin.page-header
+        title="Departments"
+        subtitle="Manage academic departments"
+        icon="bi bi-building-fill"
+    >
         <button class="btn btn-success" onclick="openAddDepartmentModal()">
             <i class="bi bi-plus-lg me-1"></i> Add Department
         </button>
-    </div>
+    </x-admin.page-header>
 
     {{-- Success/Error Messages --}}
     @if(session('success'))
