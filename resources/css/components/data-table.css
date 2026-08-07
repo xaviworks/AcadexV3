@@ -23,7 +23,7 @@
 
 .acadex-table-card__header {
   align-items: center;
-  background: var(--acadex-table-accent);
+  background: linear-gradient(180deg, var(--acadex-table-accent), var(--acadex-table-accent-dark));
   color: #ffffff;
   display: flex;
   gap: 1rem;
@@ -77,14 +77,6 @@
   justify-content: flex-end;
 }
 
-.acadex-table-card__datatable-controls {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: flex-end;
-}
-
 .acadex-table-card__filters,
 .acadex-table-card__tabs {
   background: #f8fbf9;
@@ -116,15 +108,6 @@
   color: #22312a;
   font-weight: 700;
   min-width: 5rem;
-}
-
-.acadex-table-card__length--header {
-  color: #ffffff;
-}
-
-.acadex-table-card__length--header select {
-  background-color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.75);
 }
 
 .acadex-table-card__tabs .nav-tabs {
@@ -167,7 +150,7 @@
   border-bottom: 2px solid var(--acadex-table-accent);
   color: #174830;
   font-size: 0.78rem;
-  font-weight: 900 !important;
+  font-weight: 800;
   letter-spacing: 0;
   padding: 0.85rem 1rem;
   text-transform: uppercase;
@@ -288,58 +271,11 @@
   margin: 0;
 }
 
-.acadex-table-card__datatable-controls .dataTables_filter,
-.acadex-table-card__datatable-controls .dataTables_length {
-  color: #ffffff;
-  margin: 0;
-}
-
-.acadex-table-card__datatable-controls .dataTables_filter label,
-.acadex-table-card__datatable-controls .dataTables_length label {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.5rem;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.acadex-table-card__datatable-controls .dataTables_length select {
-  background-color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.75);
-  border-radius: 6px;
-  box-shadow: none;
-  flex: 0 0 auto;
-  height: 2.25rem;
-  margin: 0;
-  min-height: 2.25rem;
-  min-width: 5rem;
-  padding: 0.35rem 2rem 0.35rem 0.7rem;
-  width: 5rem;
-}
-
-.acadex-table-card[data-acadex-datatables-controls-in-header='true'] .dataTables_wrapper > .row:first-child {
-  display: none;
-}
-
 .acadex-table-card .dataTables_filter input,
 .acadex-table-card .dataTables_length select {
   border: 1px solid #cfded5;
   margin-left: 0.4rem;
   padding: 0.4rem 0.65rem;
-}
-
-.acadex-table-card .acadex-table-card__datatable-controls .dataTables_filter,
-.acadex-table-card .acadex-table-card__datatable-controls .dataTables_length {
-  color: #ffffff;
-  margin: 0;
-}
-
-.acadex-table-card .acadex-table-card__datatable-controls .dataTables_length select {
-  border-color: rgba(255, 255, 255, 0.75);
-  margin: 0;
-  min-width: 5rem;
-  padding: 0.35rem 2rem 0.35rem 0.7rem;
-  width: 5rem;
 }
 
 .acadex-table-card .dataTables_filter {
@@ -359,6 +295,7 @@
   content: none !important;
   display: none !important;
 }
+
 
 .acadex-table-card .dataTables_filter input {
   background: #ffffff;
@@ -385,9 +322,7 @@
 
 .acadex-table-card .dataTables_filter input:focus {
   border-color: var(--acadex-table-accent);
-  box-shadow:
-    0 0 0 0.2rem rgba(25, 135, 84, 0.15),
-    0 6px 18px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15), 0 6px 18px rgba(15, 23, 42, 0.08);
   outline: 0;
 }
 
@@ -419,11 +354,6 @@
   }
 
   .acadex-table-card__actions {
-    justify-content: flex-start;
-    width: 100%;
-  }
-
-  .acadex-table-card__datatable-controls {
     justify-content: flex-start;
     width: 100%;
   }

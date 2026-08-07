@@ -12,6 +12,32 @@ function initManageInstructorsPage() {
     return;
   }
 
+  if (
+    typeof $ !== 'undefined' &&
+    $.fn.DataTable &&
+    document.getElementById('activeInstructorsTable') &&
+    !$.fn.DataTable.isDataTable('#activeInstructorsTable')
+  ) {
+    $('#activeInstructorsTable').DataTable({
+      order: [[0, 'asc']],
+      lengthMenu: [
+        [10, 25, 50, 100],
+        [10, 25, 50, 100],
+      ],
+      pageLength: 10,
+      language: {
+        search: '_INPUT_',
+        searchPlaceholder: 'Search instructors...',
+        lengthMenu: 'Show _MENU_ entries',
+        info: 'Showing _START_ to _END_ of _TOTAL_ instructors',
+        emptyTable: 'No active instructors found',
+      },
+      columnDefs: [{ orderable: false, targets: -1 }],
+    });
+
+    window.AcadexDataTable?.moveDataTablesControlsToHeader(document.getElementById('activeInstructorsTable'));
+  }
+
   const approveModal = document.getElementById('confirmApproveModal');
   const rejectModal = document.getElementById('confirmRejectModal');
   const deactivateModal = document.getElementById('confirmDeactivateModal');

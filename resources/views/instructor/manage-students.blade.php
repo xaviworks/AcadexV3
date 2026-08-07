@@ -197,10 +197,7 @@
                                 @endforeach
                             </tbody>
 <<<<<<< Updated upstream
-                        </table>
-                    </div>
-=======
-                </x-data-table>
+                        </x-data-table>
 >>>>>>> Stashed changes
             @elseif(request('subject_id'))
                 <x-empty-state

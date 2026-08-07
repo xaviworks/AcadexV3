@@ -27,6 +27,9 @@
         :title="$filterActive ? 'Active Instructors' : 'Inactive Instructors'"
         subtitle="Review instructor account status and available actions"
         icon="bi-person-lines-fill"
+        :table-id="$filterActive ? 'activeInstructorsTable' : null"
+        :paginated="! $filterActive"
+        :data-tables-controls-in-header="$filterActive"
     >
             <thead>
                 <tr>
